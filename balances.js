@@ -58,8 +58,14 @@
         placeholderTable();
         document.getElementById('addr').innerHTML = 'Start by entering your public address';
 		
-		// url parameter ?addr=
+		// url parameter ?addr=0x...
 		let addr = getParameterByName('addr');
+		if(! addr)
+		{
+			let hash = window.location.hash;  // url parameter /#0x...
+			if(hash)
+				addr = hash.slice(1);
+		}
 		if(addr)
 		{
 			addr = getAddress(addr);

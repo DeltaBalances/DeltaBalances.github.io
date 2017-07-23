@@ -185,6 +185,16 @@
             address = document.getElementById('address').value;
 
         address = address.trim();
+		
+		//check if etherscan url
+		if(address.indexOf('etherscan.io/address/') !== -1)
+		{
+			let parts = address.split('/');
+			let lastSegment = parts.pop() || parts.pop();  // handle potential trailing slash
+			if(lastSegment)
+				address = lastSegment;
+		}
+		
         address = address.replace(/[^0-9a-z]/gi, '');
         if (address) {
             console.log('checking addr ' + address);

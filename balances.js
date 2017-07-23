@@ -57,6 +57,14 @@
 		});
         placeholderTable();
         document.getElementById('addr').innerHTML = 'Start by entering your public address';
+		
+		// url parameter ?addr=
+		let addr = getParameterByName('addr');
+		addr = getAddress(addr);
+		if(addr)
+		{
+			$('#address').val(addr);
+		}
 
     });
 
@@ -64,6 +72,18 @@
 	{
         let result = Object.values(balances);
 		makeTable(result, false);
+	}
+	
+	
+	function getParameterByName(name, url) 
+	{
+		if (!url) url = window.location.href;
+		name = name.replace(/[\[\]]/g, "\\$&");
+		var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+			results = regex.exec(url);
+		if (!results) return null;
+		if (!results[2]) return '';
+		return decodeURIComponent(results[2].replace(/\+/g, " "));
 	}
 	
 	// hide zero blance checkbox

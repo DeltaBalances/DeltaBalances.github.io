@@ -321,12 +321,15 @@
             remember = localStorage.getItem('member') && true;
             if (remember) {
                 let addr = localStorage.getItem("address");
-                addr = getAddress(addr);
-                if (addr) {
-                    publicAddr = addr;
-                    document.getElementById('address').value = addr;
-                }
-                $('#remember').prop('checked', true);
+				if(addr)
+				{
+					addr = getAddress(addr);
+					if (addr) {
+						publicAddr = addr;
+						document.getElementById('address').value = addr;
+					}
+				}
+				$('#remember').prop('checked', true);
             }
 
         } else {

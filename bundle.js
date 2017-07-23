@@ -267,7 +267,7 @@ module.exports = {
   ethAddrPrivateKey: '',
   ordersOnchain: false,
   apiServer: '',
-  apiServers: [ 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com']
+  apiServers: [ 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'],
   userCookie: 'EtherDeltaBalance',
   eventsCacheCookie: 'EtherDeltaBalance_eventsCache',
   deadOrdersCacheCookie: 'EtherDeltaBalance_deadOrdersCache',

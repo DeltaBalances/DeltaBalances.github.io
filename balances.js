@@ -60,10 +60,13 @@
 		
 		// url parameter ?addr=
 		let addr = getParameterByName('addr');
-		addr = getAddress(addr);
 		if(addr)
 		{
-			$('#address').val(addr);
+			addr = getAddress(addr);
+			if(addr)
+			{
+				$('#address').val(addr);
+			}
 		}
 
     });

@@ -14,41 +14,44 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
-		<div style = "width:100%;">
-		<span id="headd" >Balances on Etherdelta <span>
+		<div id="wrapper">
 			<div>
-				<br>
-				<input type="text" id="address" placeholder="Public ethereum address: 0x... (length 42)" required pattern="[a-zA-Z0-9]+"> 
-				<br>
-					<div id="errortext" class="txt" ></div>
-				<br>
-				<div><button id="refreshButton" type="button"  onclick="myClick()" >Get my balances</button> </div>
-				<br>
-				<div id="loading" class = "txt"></div><br>
-			
+			<span id="headd" >Balances on Etherdelta <span>
+				<div>
+					<br>
+					<input type="text" id="address" placeholder="Public ethereum address: 0x... (length 42)" required pattern="[a-zA-Z0-9]+"> 
+					<br>
+						<div id="errortext" class="txt" ></div>
+					<br>
+					<div><button id="refreshButton" type="button"  onclick="myClick()" >Get my balances</button> </div>
+					<br>
+					<div id="loading" class = "txt"></div><br>
+				
+				</div>
+				
+				
 			</div>
-			
-			
+			<div >
+				<div class="check" ><label><input type="checkbox" onclick="checkZero()" id="zero" checked>Hide zero balances     </label> </div>
+				<div class="check" ><label><input type="checkbox" onclick="checkDecimal()" id="decimals">Show more decimals     </label> </div>
+				<div class="check" ><label><input type="checkbox"  onclick="checkRemember()" id="remember" >Remember me     </label> </div>
+			</div>
+			<br>
+			<div id="addr" ></div>
+			<br>
+			<div>
+				<table class="tablesorter" id="resultTable">
+				<thead></thead>
+				<tbody></tbody>
+				</table>
+			</div>
+			<br>
+			<br>
+			<p id = "contract"> </p>
+			<div>Select contract:</div>
+			<div id="selectDiv">  </div>
+			<br>
+			<p>This website is unaffiliated with <a target="_blank" href="https://etherdelta.github.io/">EtherDelta</a>, this is just a community tool to make life  a bit easier.</p>
 		</div>
-		<div >
-			<label><input type="checkbox" class ="check" onclick="checkZero()" id="zero" checked>Hide zero balances     </label>
-			<label><input type="checkbox" class ="check" onclick="checkDecimal()" id="decimals">Show more decimals     </label>
-			<label><input type="checkbox" class ="check" onclick="checkRemember()" id="remember" >Remember me     </label>
-		</div>
-		<br>
-		<div id="addr" ></div>
-		<br>
-		<div>
-			<table class="tablesorter" id="resultTable">
-			<thead></thead>
-			<tbody></tbody>
-			</table>
-		</div>
-		<br>
-		<br>
-		<p id = "contract"> </p>
-		<div id="selectDiv">Select contract:  </div>
-		<br>
-		<p>This website is unaffiliated with <a target="_blank" href="https://etherdelta.github.io/">EtherDelta</a>, this is just a community tool to make life  a bit easier.</p>
 	</body>
 </html>

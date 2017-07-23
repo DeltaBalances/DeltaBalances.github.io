@@ -7,6 +7,29 @@ html {
 
 }
 
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0 auto;
+}
+
+#wrapper {
+	width: 50%;
+	margin: 0 auto;
+}
+
+@media only screen and (max-width: 720px) {
+    #wrapper {
+        width:70%;
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    #wrapper {
+        width:95%;
+    }
+}
+
 #headd {
 	font-size: 30px; 
 	font-weight: bold;
@@ -29,27 +52,44 @@ input { font-size: 18px; }
 }
 
 #refreshButton {
-	width:20%; 
+	width: 100%; 
 	height:10%;
 }
 
 #address {
-	width:50%;
+	width:100%;
 }
 
 #address .error{
 	background: #FF3232;
 }
 
-#addr {
-	width: 50%;
+.check {
+	width: 33%;
+	float: left;
 	margin: 0 auto;
+}
+
+#addr {
+	width: 100%;
+	
 	text-align: center;
 	border-radius: 5px 5px 5px 5px; 
 	background: linear-gradient(#333 0%,#444 100%);
 	color: #FFF; font-weight: bold;
 	height: 40px;
 	line-height: 40px;
+	overflow: hidden;
+}
+
+#selectContract {
+	width: 100%;
+	margin: 0 auto;
+}
+
+#contractDiv {
+	width: 100%;
+	margin: 0 auto;
 }
 
 #addr a {
@@ -63,7 +103,7 @@ table {
   color: #333;
   font-family: Helvetica, Arial, sans-serif;
   font-size: 18px;
-  width: 50%;
+  width: 100%;
   margin: 0 auto;
   /* Table reset stuff */
   border-collapse: collapse; border-spacing: 0; 

@@ -1,4 +1,7 @@
 {
+	var initiated = false;
+	var autoStart = false;
+	
     let tableLoaded = false;
     let columns;
 
@@ -11,6 +14,8 @@
     let decimals = false;
     let remember = false;
     let lastResult = undefined;
+	let running = false;
+
 
     let balances = { // init with placeholder data
         ETH: {
@@ -40,7 +45,11 @@
 
 
 		// borrow some ED code for compatibility
-        bundle.EtherDelta.startEtherDelta(0);
+        bundle.EtherDelta.startEtherDelta(() => {
+			initiated = true;
+			if(autoStart)
+				myClick();
+		});
         config = bundle.EtherDelta.config;
 		
 		
@@ -72,6 +81,9 @@
 			if(addr)
 			{
 				$('#address').val(addr);
+				autoStart = true;
+				// auto start loading
+				myClick();
 			}
 		}
 
@@ -125,7 +137,15 @@
 
     // get balances button
     function myClick() {
+		if(!initiated)
+		{
+			autoStart = true;
+			return;
+		}
+		if(running)
+			return;
 		
+		running = true;
         document.getElementById('errortext').innerHTML = "";
 
         $('#refreshButton').prop('disabled', true);
@@ -140,7 +160,8 @@
 		
         if (publicAddr) {
 
-			
+			let directUrl = 'https://DeltaBalances.github.io/#' + publicAddr;
+			$('#direct').html('Direct link: <a href="'  + directUrl + '">' + directUrl + '</a>');
 			
 			$('#resultTable tbody').empty();
 			
@@ -173,6 +194,7 @@
             console.log('invalid input');
             $('#refreshButton').prop('disabled', false);
             $("#address").prop("disabled", false);
+			running = false;
         }
     }
 
@@ -258,6 +280,7 @@
 		makeTable(result, hideZero);
 		document.getElementById('contract').innerHTML ='The above data was retrieved from contract: <a target="_blank" href="'+ bundle.EtherDelta.addressLink(config.contractEtherDeltaAddr) + '">' + config.contractEtherDeltaAddr + '</a>';
 		document.getElementById('loading').innerHTML = "Successfully retrieved all balances";
+		running = false;
 		
     }
 

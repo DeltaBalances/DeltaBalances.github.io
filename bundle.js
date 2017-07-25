@@ -667,12 +667,13 @@ EtherDelta.prototype.initContracts = function initContracts(callback) {
           '0x0000000000000000000000000000000000000000',
           (errLoadContract, contractToken) => {
             this.contractToken = contractToken;
-            // select token and base
+            
+			callback();
        
       });
   });
 };
-EtherDelta.prototype.startEtherDelta = function startEtherDelta() {
+EtherDelta.prototype.startEtherDelta = function startEtherDelta(callback) {
   console.log('Beginning init', new Date());
   this.loadWeb3(() => {
     console.log('Web3 done', new Date());
@@ -683,6 +684,7 @@ EtherDelta.prototype.startEtherDelta = function startEtherDelta() {
         this.refreshLoop();
       });
 	  */
+	  callback();
     });
   });
 };

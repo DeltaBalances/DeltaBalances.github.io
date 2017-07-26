@@ -731,12 +731,25 @@ function getTransactions()
 		let contractAddr = config.contractEtherDeltaAddr.toLowerCase();
 	
 		let txs = transResult;
+		let outputTransactions = [];
 		
 		let itxs = inTransResult; //withdraws
-		let withdrawHashes = itxs.map((itx) => { return itx.hash.toLowerCase();});
-		
+		let withdrawHashes = [];
+		//withdraws
+		for(var i = 0; i < itxs.length; i++)
+		{
+			let tx = itxs[i];
+			if(tx.from.toLowerCase() === contractAddr)
+			{	
+				let val = bundle.utility.weiToEth(Number(tx.value));
+				let trans = createOutputTransaction('Withdraw', 'ETH', val, tx.hash, tx.timeStamp);
+				outputTransactions.push(trans);
+				withdrawHashes.push(tx.hash.toLowerCase());
+			}
+		}
+	
 		let tokens = [];
-		let outputTransactions = [];
+		
 		
 		for(var i =0; i < txs.length; i++)
 		{
@@ -754,7 +767,7 @@ function getTransactions()
 						outputTransactions.push(trans);
 					}
 				}
-				else if(val == 0) 
+				else if(val == 0 && txto == contractAddr) 
 				{
 					if($.inArray(tx.hash, withdrawHashes) < 0) // exclude withdraws
 					{
@@ -764,14 +777,7 @@ function getTransactions()
 			}
 		}
 		
-		//withdraws
-		for(var i = 0; i < itxs.length; i++)
-		{
-			let tx = itxs[i];
-			let val = bundle.utility.weiToEth(Number(tx.value));
-			let trans = createOutputTransaction('Withdraw', 'ETH', val, tx.hash, tx.timeStamp);
-			outputTransactions.push(trans);
-		}
+		
 		
 		for(var l = 0; l < tokens.length; l++)
 		{

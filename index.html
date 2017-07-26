@@ -25,9 +25,10 @@
 					<br>
 						<div id="errortext" class="txt" ></div>
 					<br>
-					<div><button id="refreshButton" type="button"  onclick="myClick()" >Get my balances</button> </div>
+					<div><button id="refreshButton" type="button"  onclick="myClick()" >Get my balances & transactions</button> </div>
 					<br>
-					<div id="loading" class = "txt"></div><br>
+					<div id="loading" class="txt"></div>
+					<img id= 'loadingIndicator' src="loading.gif" alt="loading indicator" >
 					<div id="loadingTx" class = "txt"></div><br>
 				</div>
 				
@@ -42,7 +43,16 @@
 			<div id="addr" ></div>
 			<br>
 			<div>
+				<p>Balances:</p>
 				<table class="tablesorter" id="resultTable">
+				<thead></thead>
+				<tbody></tbody>
+				</table>
+			</div>
+			<br>
+			<div>
+				<p>Deposits and Withdrawals (last 15 in the last 3 days): </p>
+				<table class="tablesorter" id="transactionsTable">
 				<thead></thead>
 				<tbody></tbody>
 				</table>
@@ -56,9 +66,7 @@
 			<br>
 			<p>This website is unaffiliated with <a target="_blank" href="https://etherdelta.github.io/">EtherDelta</a>, this is just a community tool to make life  a bit easier.</p>
 			<br>
-			<div id = "transactions">
-				
-			</div>
+
 		</div>
 	</body>
 </html>

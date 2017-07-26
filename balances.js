@@ -2,7 +2,8 @@
 	var initiated = false;
 	var autoStart = false;
 	
-    let tableLoaded = false;
+    let table1Loaded = false;
+	let table2Loaded = false;
     let columns;
 	
 	let blocktime = 17;
@@ -16,12 +17,18 @@
     let decimals = false;
     let remember = false;
     let lastResult = undefined;
+	let lastResult2 = undefined;
+	
+	let trigger_1 = false;
+	let trigger_2 = false;
 	let running = false;
 
+	let blocknum = -1;
 	let startblock = 0;
 	let endblock = 99999999
-	let showTransactions = false;
-
+	let showTransactions = true;
+	let maxtransoutput = 15;
+	
     let balances = { // init with placeholder data
         ETH: {
             'Name': 'ETH',
@@ -33,8 +40,22 @@
             'Total': '0.000'
         },
     }
+	
+	let transactionsPlaceholder = [
+		{
+			'Type': 'Placeholder',
+			'Name': 'ETH',
+			'Value': '0.000',
+			'Value(8)': '0.00000000',
+			'Hash': '0x00..',
+			'Date': toDateTimeNow(),
+			'TimeStamp': 0,
+		}
+	];
+		
 
     $(document).ready(function() {	
+	
 		// register enter press 
         $('#address').keypress(function(e) {
             if (e.keyCode == 13) {
@@ -46,12 +67,21 @@
 			}
         });
 		
-
-
-
+		$('#loadingIndicator').hide();
 		// borrow some ED code for compatibility
         bundle.EtherDelta.startEtherDelta(() => 
 		{	
+			if(!autoStart)
+			{
+				bundle.utility.blockNumber(bundle.EtherDelta.web3, (err, num) => 
+				{
+					if(num)
+					{
+						blocknum = num;
+						startblock = num - 16000; // roughly 3 days back;
+					}
+				});
+			}
 			//hacky import of etherdelta config
 			if(module.exports)
 			{
@@ -106,6 +136,8 @@
 	{
         let result = Object.values(balances);
 		makeTable(result, false);
+		let result2 = transactionsPlaceholder;
+		makeTable2(result2);
 	}
 	
 	
@@ -122,7 +154,7 @@
 	
 	// hide zero blance checkbox
     function checkZero() {
-        hideZero = $('#zero').prop('checked')
+        hideZero = $('#zero').prop('checked');
         if (lastResult) {
             $('#resultTable tbody').empty();
             finished();
@@ -131,21 +163,28 @@
 
 	// remember me checkbox
     function checkRemember() {
-        remember = $('#remember').prop('checked')
+        remember = $('#remember').prop('checked');
         setStorage();
     }
 
+	let changedDecimals = false;
 	// more decimals checbox
     function checkDecimal() {
-        decimals = $('#decimals').prop('checked')
+		changedDecimals = true;
+        decimals = $('#decimals').prop('checked');
 		$('#resultTable tbody').empty();
         $('#resultTable thead').empty();
-        tableLoaded = false;
+		
+		$('#transactionsTable tbody').empty();
+        $('#transactionsTable thead').empty();
+        
         if (lastResult) {
-           makeTable(lastResult, hideZero, true);
+           makeTable(lastResult, hideZero);
+		   makeTable2(lastResult2.slice(0,maxtransoutput));
         } else {
 			placeholderTable();
 		}
+		changedDecimals = false;
     }
 
     // get balances button
@@ -157,6 +196,10 @@
 		}
 		if(running)
 			return;
+		
+		trigger_1 = false;
+		trigger_2 = false;
+		$('#loadingIndicator').show();
 		
 		running = true;
         document.getElementById('errortext').innerHTML = "";
@@ -175,15 +218,27 @@
 		{	
 			if(showTransactions)
 			{
-				bundle.utility.blockNumber(bundle.EtherDelta.web3, (err, num) => 
+				document.getElementById('loadingTx').innerHTML = "Retrieving transactions ..";
+				$('#transactionsTable tbody').empty();
+				if(blocknum >= 0)
 				{
-					if(!err & num)
-					{
-						endblock = num;
-						startblock = num - 16000; // roughly 3 days back;
-					}
+					console.log('blocknum re-used');
+					endblock = 99999999;
 					getTransactions();
-				});
+				}
+				else 
+				{
+					console.log("try blocknum v2");
+					bundle.utility.blockNumber(bundle.EtherDelta.web3, (err, num) => 
+					{
+						if(num)
+						{
+							endblock = num;
+							startblock = num - 16000; // roughly 3 days back;
+						}
+						getTransactions();
+					});
+				}
 			}
 			
 			
@@ -199,6 +254,7 @@
 			// request all balances
             document.getElementById('loading').innerHTML = "Retrieving balances...";
 			
+			document.getElementById('loading').innerHTML = "Retrieving Wallet & EtherDelta balances..";
             for (let i = 0; i < config.tokens.length; i++) 
 			{
                 let token = bundle.EtherDelta.config.tokens[i];
@@ -222,6 +278,7 @@
             console.log('invalid input');
             $('#refreshButton').prop('disabled', false);
             $("#address").prop("disabled", false);
+			$('#loadingIndicator').hide();
 			running = false;
         }
     }
@@ -288,7 +345,7 @@
       
 		// show progress
         if (loadedED < count || loadedW < count) {
-            document.getElementById('loading').innerHTML = "Retrieving balances: Wallet (" + loadedW + '/' + count + ')  EtherDelta (' + loadedED + '/' + count + ')';
+            //document.getElementById('loading').innerHTML = "Retrieving balances: Wallet (" + loadedW + '/' + count + ')  EtherDelta (' + loadedED + '/' + count + ')';
             return;
         }
         document.getElementById('loading').innerHTML = "";
@@ -309,12 +366,15 @@
 		makeTable(result, hideZero);
 		document.getElementById('contract').innerHTML ='The above data was retrieved from contract: <a target="_blank" href="'+ bundle.EtherDelta.addressLink(config.contractEtherDeltaAddr) + '">' + config.contractEtherDeltaAddr + '</a>';
 		document.getElementById('loading').innerHTML = "Successfully retrieved all balances";
-		running = false;
+		
 		
     }
 
-	function makeTable(result, hideZeros, loaded)
+	function makeTable(result, hideZeros)
 	{
+		let loaded = table1Loaded;
+		if(changedDecimals)
+			loaded = false;
 		// optionally filter zero balances
         if (hideZeros) {
 
@@ -327,16 +387,24 @@
                     return x['Total'] !== filt;
                 }
             });
-            buildHtmlTable('#resultTable', filtered);
+            buildHtmlTable('#resultTable', filtered, loaded, 'balances');
         } else {
-            buildHtmlTable('#resultTable', result);
+            buildHtmlTable('#resultTable', result, loaded, 'balances');
         }
-		if(loaded)
-			tableLoaded = true;
-		// final callback to sort table
         trigger();
 	}
 
+	function makeTable2(result)
+	{
+		let loaded = table2Loaded;
+		if(changedDecimals)
+			loaded = false;
+        buildHtmlTable('#transactionsTable', result, loaded, 'transactions');
+        
+        trigger2();
+	}
+	
+	
     function getEthBalance(address, callback) {
         let url = `https://api.etherscan.io/api?module=account&action=balance&address=${  address   }&tag=latest`;
 
@@ -454,45 +522,73 @@
 
 
     // final callback to sort table
-    function trigger() {
-        var maxCol = $('table thead th').length - 1;
-
-        if (tableLoaded) // reload existing table
+    function trigger() 
+	{
+        if (table1Loaded) // reload existing table
         {
-
-            $("table").trigger("updateAll", [true, () => {}]);
-			$("table thead th").data("sorter", true);
+            $("#resultTable").trigger("updateAll", [true, () => {}]);
+			$("#resultTable thead th").data("sorter", true);
 			//$("table").trigger("sorton", [[0,0]]);
             
-        } else {
-			
-            $("table thead th").data("sorter", true);
-
-            $("table").tablesorter({
+        } else 
+		{
+            $("#resultTable thead th").data("sorter", true);
+            $("#resultTable").tablesorter({
                 sortList: [[0, 0]]
             });
 
-            tableLoaded = true;
+            table1Loaded = true;
         }
-        $("#address").prop("disabled", false);
-        $('#refreshButton').prop('disabled', false);
-        tableLoaded = true;
+		trigger_1 = true;
+		
+        if(trigger_1 && trigger_2)
+		{
+			$("#address").prop("disabled", false);
+			$('#refreshButton').prop('disabled', false);
+			$('#loadingIndicator').hide();
+			running = false;
+		}
+        table1Loaded = true;
+    }
+
+    // final callback to sort table
+    function trigger2() 
+	{
+        if (table2Loaded) // reload existing table
+        {
+            $("#transactionsTable").trigger("updateAll", [true, () => {}]);
+			$("#transactionsTable thead th").data("sorter", true);
+			//$("table").trigger("sorton", [[0,0]]);
+            
+        } else 
+		{
+            $("#transactionsTable thead th").data("sorter", true);
+            $("#transactionsTable").tablesorter({
+                sortList: [[4, 1]]
+            });
+
+            table2Loaded = true;
+        }
+		trigger_2 = true;
+		if(trigger_1 && trigger_2)
+		{
+			$("#address").prop("disabled", false);
+			$('#refreshButton').prop('disabled', false);
+			$('#loadingIndicator').hide();
+			running = false;
+		}
+        table2Loaded = true;
     }
 
 
-
-
     // Builds the HTML Table out of myList.
-    function buildHtmlTable(selector, myList) {
-        let body = $('table tbody');
-        if (!tableLoaded) {
-            columns = addAllColumnHeaders(myList, selector);
-        }
-
-        for (var i = 0; i < myList.length; i++) {
-
+	function buildHtmlTable(selector, myList, loaded, type) {
+        let body = $(selector +' tbody');
+        columns = addAllColumnHeaders(myList, selector, loaded, type);
+        
+        for (var i = 0; i < myList.length; i++) 
+		{
             let row$ = $('<tr/>');
-
 
             //if($.inArray(name, deltaNames) >= 0)
             {
@@ -501,35 +597,68 @@
                     if (cellValue == null) cellValue = "";
                     row$.append($('<td/>').html(cellValue));
                 }
-                body.append(row$);
             }
+			body.append(row$);
         }
     }
 
-	let normalHeaders = ['Name', 'Wallet', 'EtherDelta', 'Total'];
-	let decimalHeaders = ['Name', 'Wallet(8)', 'EtherDelta(8)', 'Total(8)'];
+	let normalHeaders = ['Name', 'Wallet', 'EtherDelta', 'Total', 'Value','Type', 'Hash', 'Date'];
+	let decimalHeaders = ['Name', 'Wallet(8)', 'EtherDelta(8)', 'Total(8)', 'Value(8)' ,'Type', 'Hash', 'Date'];
     // Adds a header row to the table and returns the set of columns.
     // Need to do union of keys from all records as some records may not contain
     // all records.
-    function addAllColumnHeaders(myList, selector) {
+    function addAllColumnHeaders(myList, selector, loaded, type) 
+	{
         let columnSet = [];
-        let header1 = $('table thead');
+		
+		if(!loaded)
+			$(selector + ' thead').empty();
+		
+        let header1 = $(selector + ' thead');
         let headerTr$ = $('<tr/>');
 
-        for (var i = 0; i < myList.length; i++) {
+		if(!loaded)
+		{
+			header1.empty();
+		}
+		
+        for (var i = 0; i < myList.length; i++) 
+		{
             let rowHash = myList[i];
-            for (var key in rowHash) {
-                if ($.inArray(key, columnSet) == -1 && ( (decimals && $.inArray(key, decimalHeaders) >= 0 ) || (!decimals && $.inArray(key, normalHeaders) >= 0 ) )) {
-                    columnSet.push(key);
+            for (var key in rowHash) 
+			{
+                if (type === 'balances') 
+				{
+					if($.inArray(key, columnSet) == -1 && ( (decimals && $.inArray(key, decimalHeaders) >= 0 ) || (!decimals && $.inArray(key, normalHeaders) >= 0 ) )) 
+					{
+						columnSet.push(key);
+						headerTr$.append($('<th/>').html(key));
+					}
+                }else if(type === 'transactions')
+				{
+					if($.inArray(key, columnSet) == -1 && ( (decimals && $.inArray(key, decimalHeaders) >= 0 ) || (!decimals && $.inArray(key, normalHeaders) >= 0 ) )) 
+					{
+						columnSet.push(key);
+						headerTr$.append($('<th/>').html(key));
+					}
+				}					
+				else if($.inArray(key, columnSet) == -1)
+				{
+					columnSet.push(key);
                     headerTr$.append($('<th/>').html(key));
-                }
+				}
             }
         }
-        header1.append(headerTr$);
-        $(selector).append(header1);
+		if(!loaded)
+		{
+			header1.append(headerTr$);
+			$(selector).append(header1);
+		}
         return columnSet;
     }
 	
+	
+	// contract selector
 	function createSelect()
 	{
 		var div = document.getElementById("selectDiv");
@@ -540,7 +669,6 @@
 		//Create and append select list
 		var selectList = document.createElement("select");
 		selectList.id = "contractSelect";
-		div.appendChild(selectList);
 
 		//Create and append the options
 		for (var i = 0; i < array.length; i++) {
@@ -549,6 +677,7 @@
 			option.text = array[i];
 			selectList.appendChild(option);
 		}
+		div.appendChild(selectList);
 		selectList.selectedIndex = 0;
 		
 	}
@@ -597,51 +726,45 @@ function getTransactions()
 	
 		let txs = transResult;
 		
-		// non error transactions
-		txs = txs.filter((tx)=> { return tx.isError === '0'});
+		let itxs = inTransResult; //withdraws
+		let withdrawHashes = itxs.map((itx) => { return itx.hash.toLowerCase();});
 		
-		let itxs = inTransResult;
-		// internal withdraws
-		let ethWithdrawInt = itxs.filter((itx)=> {return (itx.from.toLowerCase() === contractAddr);});
-		let eWhashes = ethWithdrawInt.map((ew) => { return ew.hash.toLowerCase();});
-		
-		// deposit
-		let to = txs.filter((tx)=> {return (tx.to.toLowerCase() === config.contractEtherDeltaAddr.toLowerCase());});
-		let ethDeposit = to.filter((tx)=> {return Number(tx.value) > 0; });
-		
-		// zero value
-		let zero = txs.filter((tx)=> {return Number(tx.value) == 0; });
-		let tokens = zero.filter((tz) => { return $.inArray( tz.hash, eWhashes ) < 0 ;});
-		
+		let tokens = [];
 		let outputTransactions = [];
 		
-		
-		for(var i = 0; i < ethWithdrawInt.length; i++)
+		for(var i =0; i < txs.length; i++)
 		{
-			let tx = ethWithdrawInt[i];
-			let val = bundle.utility.weiToEth(Number(tx.value));
-			outputTransactions.push({
-				'Value': val.toFixed(3),
-				'Value(8)': val.toFixed(8),
-				'Name': 'ETH',
-				'Hash': tx.hash,
-				'Type': 'Withdraw',
-				'Date': toDateTime(tx.timeStamp),	
-				})
+			let tx = txs[i];
+			if(tx.isError === '0')
+			{
+				let val = Number(tx.value);
+				let txto = tx.to.toLowerCase();
+				if(val > 0 )
+				{
+					if(txto === contractAddr) // deposit eth
+					{
+						let val2 = bundle.utility.weiToEth(val);
+						let trans = createOutputTransaction('Deposit', 'ETH', val2, tx.hash, tx.timeStamp);
+						outputTransactions.push(trans);
+					}
+				}
+				else if(val == 0) 
+				{
+					if($.inArray(tx.hash, withdrawHashes) < 0) // exclude withdraws
+					{
+						tokens.push(tx); //withdraw, deposit & trade, & cancel
+					}
+				}
+			}
 		}
 		
-		for(var j = 0; j < ethDeposit.length; j++)
+		//withdraws
+		for(var i = 0; i < itxs.length; i++)
 		{
-			let tx = ethDeposit[j];
+			let tx = itxs[i];
 			let val = bundle.utility.weiToEth(Number(tx.value));
-			outputTransactions.push({
-				'Value': val.toFixed(3),
-				'Value(8)': val.toFixed(8),
-				'Name': 'ETH',
-				'Hash': tx.hash,
-				'Type': 'Deposit',
-				'Date': toDateTime(tx.timeStamp),	
-				})
+			let trans = createOutputTransaction('Withdraw', 'ETH', val, tx.hash, tx.timeStamp);
+			outputTransactions.push(trans);
 		}
 		
 		for(var l = 0; l < tokens.length; l++)
@@ -654,41 +777,52 @@ function getTransactions()
 				{
 					let dvsr = bundle.EtherDelta.getDivisor(token.addr);
 					let val = bundle.utility.weiToEth(unpacked.params[1].value, dvsr);
-					
-					let trans = {
-						'Value': val.toFixed(3),
-						'Value(8)': val.toFixed(8),
-						'Name': token.name,
-						'Hash': tokens[l].hash,
-						'Date': toDateTime(tokens[l].timeStamp),
-					};
-												
+					let type = '';
 					if(unpacked.name === 'depositToken')
 					{
-						trans.Type = 'Withdraw';
+						type = 'Withdraw';
 					}
 					else
 					{
-						trans.Type = 'Deposit';
-					}			
+						type = 'Deposit';
+					}
+					let trans = createOutputTransaction(type, token.name, val, tokens[l].hash, tokens[l].timeStamp);		
 					outputTransactions.push(trans);
 				}	
 			}
 		} 
+		
+		for(var k = 0; k < outputTransactions.length; k++)
+		{
+			let tx = outputTransactions[k];
+			tx.Hash = '<a href="https://etherscan.io/tx/' + tx.Hash + '">'+ tx.Hash.substring(0,8)  + '...</a><br>';
+		}
+		
+		// sort by timestamp descending
+		outputTransactions.sort((a,b) => {Number(b.val) - Number(a.val);});
 		done();
 					
-					
+		
+		function createOutputTransaction(type, name, val, hash, timeStamp)
+		{
+			return {
+				'Type': type,
+				'Name': name,
+				'Value': val.toFixed(3),
+				'Value(8)': val.toFixed(8),
+				'Hash': hash,
+				'Date': toDateTime(timeStamp),
+				'TimeStamp': timeStamp,
+			};
+		}
+		
 		function done()
 		{
-				// put table 
-			for(var k = 0; k < outputTransactions.length; k++)
-			{
-				let tx = outputTransactions[k];
-				document.getElementById('transactions').innerHTML += 
-				 tx.Type + ' ' + tx.Value + ' ' + tx.Name + ' <a href="https://etherscan.io/tx/' + tx.Hash + '">'+ tx.Hash + '</a><br>';
-			}
-			
 			document.getElementById('loadingTx').innerHTML = "Transactions retrieved";
+			let txs = Object.values(outputTransactions);
+			lastResult2 = txs;
+			
+			makeTable2(txs.slice(0,maxtransoutput));
 		}
 	}
 }
@@ -697,9 +831,16 @@ function getTransactions()
 	
 	function toDateTime(secs)
 	{
-		var t = new Date(1970, 0, 1); // Epoch
-		t.setSeconds(secs);
-		return t;
+		var utcSeconds = secs;
+		var d = new Date(0);
+		d.setUTCSeconds(utcSeconds);
+		return d.toLocaleString('en-En',{month: "long", day: "numeric", hour: 'numeric', minute: 'numeric'});
+	}
+	
+	function toDateTimeNow()
+	{
+		var t = new Date();
+		return t.toLocaleString('en-En',{month: "long", day: "numeric", hour: 'numeric', minute: 'numeric'});
 	}
 
 	

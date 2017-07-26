@@ -20,7 +20,7 @@
 
 	let startblock = 0;
 	let endblock = 99999999
-	let transactions = false;
+	let showTransactions = false;
 
     let balances = { // init with placeholder data
         ETH: {
@@ -173,18 +173,17 @@
 		
         if (publicAddr) 
 		{	
-			if(transactions)
+			if(showTransactions)
 			{
 				bundle.utility.blockNumber(bundle.EtherDelta.web3, (err, num) => 
 				{
 					if(!err & num)
 					{
 						endblock = num;
-						startblock = num - 36000; // roughly 1 week back;
+						startblock = num - 16000; // roughly 3 days back;
 					}
 					getTransactions();
 				});
-				//getTransactions();
 			}
 			
 			
@@ -200,7 +199,8 @@
 			// request all balances
             document.getElementById('loading').innerHTML = "Retrieving balances...";
 			
-            for (let i = 0; i < config.tokens.length; i++) {
+            for (let i = 0; i < config.tokens.length; i++) 
+			{
                 let token = bundle.EtherDelta.config.tokens[i];
                 balances[token.name] = {
                     Name: '<a target="_blank" href="https://etherdelta.github.io/#' + token.name + '-ETH">' + token.name + '</a>',
@@ -560,179 +560,140 @@
 	
 function getTransactions()
 {
-	document.getElementById('loadingTx').innerHTML = "Retrieving transactions (1/2)";
+	
+	let transLoaded = 0;
+	let transResult = undefined;
+	let inTransResult = undefined;
+	
+	document.getElementById('loadingTx').innerHTML = "Retrieving transactions (0/2)";
 	$.getJSON('http://api.etherscan.io/api?module=account&action=txlist&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc', (result) => {
-		if(result && result.status == '1' && result.result)
-		{
-			
-			document.getElementById('loadingTx').innerHTML = "Retrieving transactions (2/2)";
-			$.getJSON('http://api.etherscan.io/api?module=account&action=txlistinternal&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc', (result2) => {
-				
-				if(result2 && result2.status == '1' && result2.result)
-				{
-					document.getElementById('loadingTx').innerHTML = "Processing deposits & withdrawals..";
-					console.log('got internal transactions');
-				
-					let myAddr = publicAddr.toLowerCase();
-					let contractAddr = config.contractEtherDeltaAddr.toLowerCase();
-				
-					let txs = result.result;
-					// non error transactions
-					txs = txs.filter((tx)=> { return tx.isError === '0'});
-					
-					
-					let itxs = result2.result;
-					// internal withdraws
-					let ethWithdrawInt = itxs.filter((itx)=> {return (itx.from.toLowerCase() === contractAddr);});
-					let eWhashes = ethWithdrawInt.map((ew) => { return ew.hash.toLowerCase();});
-					
-					
-					
-					//eth withdraw
-					//let fromEth = zero.filter((tx) => { return $.inArray( tx.hash.toLowerCase(), eWhashes ) >= 0});
-										
-					
-					// deposit
-					let to = txs.filter((tx)=> {return (tx.to.toLowerCase() === config.contractEtherDeltaAddr.toLowerCase());});
-					let ethDeposit = to.filter((tx)=> {return Number(tx.value) > 0; });
-					
-					// zero value
-					let zero = txs.filter((tx)=> {return Number(tx.value) == 0; });
-					let tokens = zero.filter((tz) => { return $.inArray( tz.hash, eWhashes ) < 0 ;});
-					
-					let tokenLoad = 0;
-					let tokenCount = tokens.length;
-					
-					
-					let transactions = [];
-					
-					
-					for(var i = 0; i < ethWithdrawInt.length; i++)
-					{
-						let tx = ethWithdrawInt[i];
-						let val = bundle.utility.weiToEth(Number(tx.value));
-						transactions.push({
-							'Value': val.toFixed(3),
-							'Value(8)': val.toFixed(8),
-							'Name': 'ETH',
-							'Hash': tx.hash,
-							'Type': 'Withdraw',
-							'Date': toDateTime(tx.timeStamp),	
-							})
-					}
-					
-					for(var j = 0; j < ethDeposit.length; j++)
-					{
-						let tx = ethDeposit[j];
-						let val = bundle.utility.weiToEth(Number(tx.value));
-						transactions.push({
-							'Value': val.toFixed(3),
-							'Value(8)': val.toFixed(8),
-							'Name': 'ETH',
-							'Hash': tx.hash,
-							'Type': 'Deposit',
-							'Date': toDateTime(tx.timeStamp),	
-							})
-					}
-					
-					document.getElementById('loadingTx').innerHTML = "Processing token transactions(" + tokenLoad + '/' + tokenCount + ')';
-					for(var l = 0; l < tokens.length; l++)
-					{
-						bundle.utility.txReceipt(bundle.EtherDelta.web3, tokens[l].hash, processToken, l);
-					} 
-					
-					
-					function processToken(err, res, index)
-					{
-						if(!err && res && res)
-						{
-							let receipt = res;
-							if(receipt.logs && receipt.logs.length == 2) // check 2 )
-							{
-								let log = receipt.logs[1];
-								let data = log.data;
-								
-								let unpacked = bundle.utility.processReceipt(bundle.EtherDelta.web3, bundle.EtherDelta.contractEtherDelta, '', data);
-								if(unpacked && unpacked.length == 4)
-								{
-									//[0] token
-									//[1] usr
-									//[2] amount
-									//[3] balance
-									
-									
-									let token = bundle.EtherDelta.getToken(unpacked[0]);
-									if(token && token.addr)
-									{
-										let dvsr = bundle.EtherDelta.getDivisor(token.addr);
-										let val = bundle.utility.weiToEth(unpacked[2], dvsr);
-										
-										let trans = {
-											'Value': val.toFixed(3),
-											'Value(8)': val.toFixed(8),
-											'Name': token.name,
-											'Hash': receipt.transactionHash,
-											'Date': toDateTime(tokens[index].timeStamp),
-										};
-																	
-										if(log.topics[0].toLowerCase() == '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567')
-										{
-											//withdraw
-											trans.Type = 'Withdraw';
-											
-										}
-										else if(log.topics[0].toLowerCase() == '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7')
-										{
-											//deposit
-											trans.Type = 'Deposit';
-										}
-										else
-										{
-											trans.Type = '??'; 
-										}
-									
-										transactions.push(trans);
-									}		
-								}	
-
-							}
-							
-						}
-						
-						tokenLoad++;
-						done();
-					}
-					
-					function done()
-					{
-						document.getElementById('loadingTx').innerHTML = "Processing token transactions(" + tokenLoad + '/' + tokenCount + ')';
-						if(tokenLoad >=  tokenCount)
-						{
-							// put table 
-							for(var k = 0; k < transactions.length; k++)
-							{
-								let tx = transactions[k];
-								document.getElementById('transactions').innerHTML += 
-								 tx.Type + ' ' + tx.Value + ' ' + tx.Name + ' <a href="https://etherscan.io/tx/' + tx.Hash + '">'+ tx.Hash + '</a><br>';
-							}
-							
-							document.getElementById('loadingTx').innerHTML = "Transactions retrieved";
-						}
-					}
-				}
-				
-			}); 
-			
-			
-			
-			
-			//withdraw  match tozero and internal
-			//tokens remaining
-			
-			// array []  .blocknumber, .timestamp, .hash, .transactionIndex?, .from, .to, .value, .gas, .input, .contractaddress, . isError '0'
-		}
+		if(result && result.status === '1')
+			transResult = result.result;
+		transLoaded++;
+		if(transLoaded == 2)
+			processTransactions();
+		else
+			document.getElementById('loadingTx').innerHTML = "Retrieving transactions (1/2)";
 	});
+	
+	// internal ether transactions (withdraw)
+	$.getJSON('http://api.etherscan.io/api?module=account&action=txlistinternal&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc', (result2) => {
+		if(result2 && result2.status === '1')
+			inTransResult = result2.result;
+		transLoaded++;
+		if(transLoaded == 2)
+			processTransactions();
+		else
+			document.getElementById('loadingTx').innerHTML = "Retrieving transactions (1/2)";
+	});
+	
+	
+	function processTransactions()
+	{
+		document.getElementById('loadingTx').innerHTML = "Processing transactions ..";
+	
+		let myAddr = publicAddr.toLowerCase();
+		let contractAddr = config.contractEtherDeltaAddr.toLowerCase();
+	
+		let txs = transResult;
+		
+		// non error transactions
+		txs = txs.filter((tx)=> { return tx.isError === '0'});
+		
+		let itxs = inTransResult;
+		// internal withdraws
+		let ethWithdrawInt = itxs.filter((itx)=> {return (itx.from.toLowerCase() === contractAddr);});
+		let eWhashes = ethWithdrawInt.map((ew) => { return ew.hash.toLowerCase();});
+		
+		// deposit
+		let to = txs.filter((tx)=> {return (tx.to.toLowerCase() === config.contractEtherDeltaAddr.toLowerCase());});
+		let ethDeposit = to.filter((tx)=> {return Number(tx.value) > 0; });
+		
+		// zero value
+		let zero = txs.filter((tx)=> {return Number(tx.value) == 0; });
+		let tokens = zero.filter((tz) => { return $.inArray( tz.hash, eWhashes ) < 0 ;});
+		
+		let outputTransactions = [];
+		
+		
+		for(var i = 0; i < ethWithdrawInt.length; i++)
+		{
+			let tx = ethWithdrawInt[i];
+			let val = bundle.utility.weiToEth(Number(tx.value));
+			outputTransactions.push({
+				'Value': val.toFixed(3),
+				'Value(8)': val.toFixed(8),
+				'Name': 'ETH',
+				'Hash': tx.hash,
+				'Type': 'Withdraw',
+				'Date': toDateTime(tx.timeStamp),	
+				})
+		}
+		
+		for(var j = 0; j < ethDeposit.length; j++)
+		{
+			let tx = ethDeposit[j];
+			let val = bundle.utility.weiToEth(Number(tx.value));
+			outputTransactions.push({
+				'Value': val.toFixed(3),
+				'Value(8)': val.toFixed(8),
+				'Name': 'ETH',
+				'Hash': tx.hash,
+				'Type': 'Deposit',
+				'Date': toDateTime(tx.timeStamp),	
+				})
+		}
+		
+		for(var l = 0; l < tokens.length; l++)
+		{
+			let unpacked = bundle.utility.processInputMethod (bundle.EtherDelta.web3, bundle.EtherDelta.contractEtherDelta, tokens[l].input);
+			if(unpacked && (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken'))
+			{
+				let token = bundle.EtherDelta.getToken(unpacked.params[0].value);
+				if(token && token.addr)
+				{
+					let dvsr = bundle.EtherDelta.getDivisor(token.addr);
+					let val = bundle.utility.weiToEth(unpacked.params[1].value, dvsr);
+					
+					let trans = {
+						'Value': val.toFixed(3),
+						'Value(8)': val.toFixed(8),
+						'Name': token.name,
+						'Hash': tokens[l].hash,
+						'Date': toDateTime(tokens[l].timeStamp),
+					};
+												
+					if(unpacked.name === 'depositToken')
+					{
+						trans.Type = 'Withdraw';
+					}
+					else
+					{
+						trans.Type = 'Deposit';
+					}			
+					outputTransactions.push(trans);
+				}	
+			}
+		} 
+		done();
+					
+					
+		function done()
+		{
+				// put table 
+			for(var k = 0; k < outputTransactions.length; k++)
+			{
+				let tx = outputTransactions[k];
+				document.getElementById('transactions').innerHTML += 
+				 tx.Type + ' ' + tx.Value + ' ' + tx.Name + ' <a href="https://etherscan.io/tx/' + tx.Hash + '">'+ tx.Hash + '</a><br>';
+			}
+			
+			document.getElementById('loadingTx').innerHTML = "Transactions retrieved";
+		}
+	}
 }
+
+
 	
 	function toDateTime(secs)
 	{

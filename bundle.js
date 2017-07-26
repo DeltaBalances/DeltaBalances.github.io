@@ -87,6 +87,64 @@ module.exports = (config) => {
 	return resultUnpackedD;
   }; 
   
+  utility.processInputMethod = function getInputMethod(web3In, contract, data)
+  {
+	  let abi_ =  contract.abi;
+	  let methodIDss = _addABI(abi_);
+	  let depositAbi = contract.abi.find(element => element.name === 'Deposit');
+	depositAbi.outputs = []; // error avoidance
+	  const solidityFunction = new SolidityFunction(web3In.eth, depositAbi, '');
+	  let result = solidityFunction.decodeMethod(data, methodIDss);
+	  
+	  return result;
+	  
+	  //https://github.com/ConsenSys/abi-decoder/blob/master/index.js
+		function _addABI(abiArray) 
+		{
+			let methodIDs = {};
+			  if (Array.isArray(abiArray)) 
+			  {
+
+				// Iterate new abi to generate method id's
+				abiArray.map((abi) => {
+				  if(abi.name){
+					const signature = new Web3().sha3(abi.name + "(" + abi.inputs.map(function(input) {return input.type;}).join(",") + ")");
+					if(abi.type == "event"){
+					  methodIDs[signature.slice(2)] = abi;
+					}
+					else{
+					  methodIDs[signature.slice(2, 10)] = abi;
+					}
+				  }
+				});
+
+				//state.savedABIs = state.savedABIs.concat(abiArray);
+			  }
+			  else {
+				throw new Error("Expected ABI array, got " + typeof abiArray);
+			  }
+			return methodIDs;
+		}
+	  
+  };
+  
+   utility.processInput = function processReceipt(web3In, contract, address, data)
+  {
+	  //deposit and withdraw have the same inputs
+								
+	let depositAbi = contract.abi.find(element => element.name === 'depositToken');
+	depositAbi.outputs = []; // error avoidance
+	//let withdrawAbi = contract.abi.find(element => element.name === 'withdrawToken');
+	
+	const solidityFunctionD = new SolidityFunction(web3In.eth, depositAbi, address);
+	//const solidityFunctionW = new SolidityFunction(web3In.eth, withdrawAbi, address);
+	
+	const resultUnpackedD = solidityFunctionD.unpackInput(data);
+	//const resultUnpackedW = solidityFunctionD.unpackInput(data);
+	
+	return resultUnpackedD;
+  }; 
+  
   
   utility.call = function call(web3In, contract, address, functionName, args, callback) {
     function proxy(retries) {
@@ -74811,6 +74869,7 @@ SolidityFunction.prototype.unpackOutput = function (output) {
     return result.length === 1 ? result[0] : result;
 };
 
+//tim
 SolidityFunction.prototype.unpackInput = function (output) {
     if (!output) {
         return;
@@ -74819,6 +74878,101 @@ SolidityFunction.prototype.unpackInput = function (output) {
     output = output.length >= 2 ? output.slice(2) : output;
     var result = coder.decodeParams(this._inputTypes, output);
     return result.length === 1 ? result[0] : result;
+};
+
+//tim https://github.com/ConsenSys/abi-decoder/blob/master/index.js
+SolidityFunction.prototype.decodeMethod = function _decodeMethod(data, methodIDs) {
+  const methodID = data.slice(2, 10);
+  const abiItem = methodIDs[methodID];
+  if (abiItem) {
+    const params = abiItem.inputs.map((item) => item.type);
+    let decoded = coder.decodeParams(params, data.slice(10));
+    return {
+      name: abiItem.name,
+      params: decoded.map((param, index) => {
+        let parsedParam = param;
+        if (abiItem.inputs[index].type.indexOf("uint") !== -1) {
+          parsedParam = new Web3().toBigNumber(param).toString();
+        }
+        return {
+          name: abiItem.inputs[index].name,
+          value: parsedParam,
+          type: abiItem.inputs[index].type
+        };
+      })
+    }
+  }
+};
+
+
+
+//tim https://github.com/ConsenSys/abi-decoder/blob/master/index.js
+function padZeros (address) {
+  var formatted = address;
+  if (address.indexOf('0x') != -1) {
+    formatted = address.slice(2);
+  }
+
+  if (formatted.length < 40) {
+    while (formatted.length < 40) formatted = "0" + formatted;
+  }
+  return "0x" + formatted;
+}
+
+//tim https://github.com/ConsenSys/abi-decoder/blob/master/index.js
+SolidityFunction.prototype.decodeLogs = function _decodeLogs(logs, methodIDs) {
+  return logs.map((logItem) => {
+    const methodID = logItem.topics[0].slice(2);
+    const method = methodIDs[methodID];
+    if (method) {
+      const logData = logItem.data;
+      let decodedParams = [];
+      let dataIndex = 0;
+      let topicsIndex = 1;
+
+      let dataTypes = [];
+      method.inputs.map(
+        (input) => {
+          if (!input.indexed) {
+            dataTypes.push(input.type);
+          }
+        }
+      );
+      const decodedData = coder.decodeParams(dataTypes, logData.slice(2));
+      // Loop topic and data to get the params
+      method.inputs.map(function (param) {
+        var decodedP = {
+          name: param.name,
+          type: param.type
+        };
+
+        if (param.indexed) {
+          decodedP.value = logItem.topics[topicsIndex];
+          topicsIndex++;
+        }
+        else {
+          decodedP.value = decodedData[dataIndex];
+          dataIndex++;
+        }
+
+        if (param.type == "address"){
+          decodedP.value = padZeros(new Web3().toBigNumber(decodedP.value).toString(16));
+        }
+        else if(param.type == "uint256" || param.type == "uint8" || param.type == "int" ){
+          decodedP.value = new Web3().toBigNumber(decodedP.value).toString(10);
+        }
+
+        decodedParams.push(decodedP);
+      });
+
+
+      return {
+        name: method.name,
+        events: decodedParams,
+        address: logItem.address
+      };
+    }
+  });
 };
 
 /**

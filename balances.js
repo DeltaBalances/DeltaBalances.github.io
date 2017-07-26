@@ -29,6 +29,8 @@
 	let showTransactions = true;
 	let maxtransoutput = 15;
 	
+	let walletWarningBalance = 0.005;
+	
     let balances = { // init with placeholder data
         ETH: {
             'Name': 'ETH',
@@ -479,6 +481,10 @@
         getEthBalance(address, (errBalance, resultBalance) => {
             if (!errBalance) {
                 const balance = bundle.utility.weiToEth(resultBalance);
+				if(balance < walletWarningBalance)
+				{
+					$('#errortext').html('Your ETH balance in wallet is low, EtherDelta deposit/withdraw might fail due to gas costs');
+				}
                 balances['ETH']['Wallet(8)'] = Number(balance).toFixed(8);
                 balances['ETH']['Wallet'] = Number(balance).toFixed(3);
             }

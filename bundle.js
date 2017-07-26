@@ -69,7 +69,25 @@ module.exports = (config) => {
     }
   };
 
- 
+  
+  utility.processReceipt = function processReceipt(web3In, contract, address, data)
+  {
+	  //deposit and withdraw have the same inputs
+								
+	let depositAbi = contract.abi.find(element => element.name === 'Deposit');
+	depositAbi.outputs = []; // error avoidance
+	//let withdrawAbi = contract.abi.find(element => element.name === 'withdrawToken');
+	
+	const solidityFunctionD = new SolidityFunction(web3In.eth, depositAbi, address);
+	//const solidityFunctionW = new SolidityFunction(web3In.eth, withdrawAbi, address);
+	
+	const resultUnpackedD = solidityFunctionD.unpackInput(data);
+	//const resultUnpackedW = solidityFunctionD.unpackInput(data);
+	
+	return resultUnpackedD;
+  }; 
+  
+  
   utility.call = function call(web3In, contract, address, functionName, args, callback) {
     function proxy(retries) {
       const web3 = new Web3();
@@ -129,6 +147,44 @@ module.exports = (config) => {
     }
   };
 
+  
+  utility.txReceipt = function txReceipt(web3, txHash, callback, index) {
+    function proxy() {
+      let url =
+        `https://${
+        config.ethTestnet ? config.ethTestnet : 'api'
+        }.etherscan.io/api?module=proxy&action=eth_GetTransactionReceipt&txhash=${
+        txHash}`;
+      if (config.etherscanAPIKey) url += `&apikey=${config.etherscanAPIKey}`;
+      utility.getURL(url, (err, body) => {
+        if (!err) {
+          const result = JSON.parse(body);
+          callback(undefined, result.result, index);
+        } else {
+          callback(err, undefined, index);
+        }
+      });
+    }
+    try {
+      if (web3.currentProvider) {
+        try {
+          web3.eth.getTransactionReceipt(txHash, (err, result) => {
+            if (err) {
+              proxy();
+            } else {
+              callback(undefined, result, index);
+            }
+          });
+        } catch (err) {
+          proxy();
+        }
+      } else {
+        proxy();
+      }
+    } catch (err) {
+      proxy();
+    }
+  };
  
   utility.getBalance = function getBalance(web3, address, callback) {
     function proxy() {
@@ -238,8 +294,111 @@ module.exports = (config) => {
     });
   };
 
-  
+   utility.blockNumber = function blockNumber(web3, callback) {
+    function proxy() {
+      let url =
+        `https://${
+        config.ethTestnet ? config.ethTestnet : 'api'
+        }.etherscan.io/api?module=proxy&action=eth_BlockNumber`;
+      if (config.etherscanAPIKey) url += `&apikey=${config.etherscanAPIKey}`;
+      utility.getURL(url, (err, body) => {
+        if (!err) {
+          const result = JSON.parse(body);
+          callback(undefined, Number(utility.hexToDec(result.result)));
+        } else {
+          callback(err, undefined);
+        }
+      });
+    }
+    if (web3.currentProvider) {
+      web3.eth.getBlockNumber((err, result) => {
+        if (!err) {
+          callback(undefined, Number(result));
+        } else {
+          proxy();
+        }
+      });
+    } else {
+      proxy();
+    }
+  };
 
+   utility.hexToDec = function hexToDec(hexStrIn, length) {
+    // length implies this is a two's complement number
+    let hexStr = hexStrIn;
+    if (hexStr.substring(0, 2) === '0x') hexStr = hexStr.substring(2);
+    hexStr = hexStr.toLowerCase();
+    if (!length) {
+      return utility.convertBase(hexStr, 16, 10);
+    }
+    const max = Math.pow(2, length); // eslint-disable-line no-restricted-properties
+    const answer = utility.convertBase(hexStr, 16, 10);
+    return answer > max / 2 ? max : answer;
+  };
+  
+  utility.convertBase = function convertBase(str, fromBase, toBase) {
+    const digits = utility.parseToDigitsArray(str, fromBase);
+    if (digits === null) return null;
+    let outArray = [];
+    let power = [1];
+    for (let i = 0; i < digits.length; i += 1) {
+      if (digits[i]) {
+        outArray = utility.add(outArray,
+          utility.multiplyByNumber(digits[i], power, toBase), toBase);
+      }
+      power = utility.multiplyByNumber(fromBase, power, toBase);
+    }
+    let out = '';
+    for (let i = outArray.length - 1; i >= 0; i -= 1) {
+      out += outArray[i].toString(toBase);
+    }
+    if (out === '') out = 0;
+    return out;
+  };
+  
+  utility.parseToDigitsArray = function parseToDigitsArray(str, base) {
+    const digits = str.split('');
+    const ary = [];
+    for (let i = digits.length - 1; i >= 0; i -= 1) {
+      const n = parseInt(digits[i], base);
+      if (isNaN(n)) return null;
+      ary.push(n);
+    }
+    return ary;
+  };
+  
+  utility.add = function add(x, y, base) {
+    const z = [];
+    const n = Math.max(x.length, y.length);
+    let carry = 0;
+    let i = 0;
+    while (i < n || carry) {
+      const xi = i < x.length ? x[i] : 0;
+      const yi = i < y.length ? y[i] : 0;
+      const zi = carry + xi + yi;
+      z.push(zi % base);
+      carry = Math.floor(zi / base);
+      i += 1;
+    }
+    return z;
+  };
+  
+   utility.multiplyByNumber = function multiplyByNumber(numIn, x, base) {
+    let num = numIn;
+    if (num < 0) return null;
+    if (num === 0) return [];
+    let result = [];
+    let power = x;
+    while (true) { 
+      if (num & 1) { 
+        result = utility.add(result, power, base);
+      }
+      num = num >> 1; 
+      if (num === 0) break;
+      power = utility.add(power, power, base);
+    }
+    return result;
+  };
 
   return utility;
 };
@@ -74650,6 +74809,16 @@ SolidityFunction.prototype.unpackOutput = function (output) {
     return result.length === 1 ? result[0] : result;
 };
 
+SolidityFunction.prototype.unpackInput = function (output) {
+    if (!output) {
+        return;
+    }
+
+    output = output.length >= 2 ? output.slice(2) : output;
+    var result = coder.decodeParams(this._inputTypes, output);
+    return result.length === 1 ? result[0] : result;
+};
+
 /**
  * Calls a contract function.
  *
@@ -101615,4 +101784,4 @@ exports.createContext = Script.createContext = function (context) {
 },{"indexof":420}],495:[function(require,module,exports){
 arguments[4][322][0].apply(exports,arguments)
 },{"dup":322}]},{},[4])(4)
-});
+});;

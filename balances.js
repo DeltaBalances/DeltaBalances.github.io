@@ -34,7 +34,7 @@
         },
     }
 
-    $(document).ready(function() {
+    $(document).ready(function() {	
 		// register enter press 
         $('#address').keypress(function(e) {
             if (e.keyCode == 13) {
@@ -50,7 +50,15 @@
 
 
 		// borrow some ED code for compatibility
-        bundle.EtherDelta.startEtherDelta(() => {
+        bundle.EtherDelta.startEtherDelta(() => 
+		{	
+			//hacky import of etherdelta config
+			if(module.exports)
+			{
+				bundle.EtherDelta.config.tokens = module.exports.tokens;
+				bundle.EtherDelta.config.pairs = module.exports.pairs;
+			}
+			
 			initiated = true;
 			if(autoStart)
 				myClick();

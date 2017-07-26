@@ -695,7 +695,7 @@ function getTransactions()
 	let inTransResult = undefined;
 	
 	document.getElementById('loadingTx').innerHTML = "Retrieving transactions (0/2)";
-	$.getJSON('http://api.etherscan.io/api?module=account&action=txlist&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc', (result) => {
+	$.getJSON('https://api.etherscan.io/api?module=account&action=txlist&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc', (result) => {
 		if(result && result.status === '1')
 			transResult = result.result;
 		transLoaded++;
@@ -706,7 +706,7 @@ function getTransactions()
 	});
 	
 	// internal ether transactions (withdraw)
-	$.getJSON('http://api.etherscan.io/api?module=account&action=txlistinternal&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc', (result2) => {
+	$.getJSON('https://api.etherscan.io/api?module=account&action=txlistinternal&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc', (result2) => {
 		if(result2 && result2.status === '1')
 			inTransResult = result2.result;
 		transLoaded++;

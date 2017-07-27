@@ -834,7 +834,7 @@ function getTransactions()
 						let dvsr = bundle.EtherDelta.getDivisor(token.addr);
 						let val = bundle.utility.weiToEth(unpacked.params[1].value, dvsr);
 						let type = '';
-						if(unpacked.name === 'depositToken')
+						if(unpacked.name === 'withdrawToken')
 						{
 							type = 'Withdraw';
 						}
@@ -875,7 +875,7 @@ function getTransactions()
 				'Name': '<a target="_blank" href="https://etherdelta.github.io/#' + name + '-ETH">' + name + '</a>',
 				'Value': val.toFixed(3),
 				'Value(8)': val.toFixed(8),
-				'Hash': '<a href="https://etherscan.io/tx/' + hash + '">'+ hash.substring(0,8)  + '...</a><br>',
+				'Hash': '<a target="_blank" href="https://etherscan.io/tx/' + hash + '">'+ hash.substring(0,8)  + '...</a><br>',
 				'Date': toDateTime(timeStamp),
 				'TimeStamp': timeStamp,
 			};

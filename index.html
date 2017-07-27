@@ -66,19 +66,19 @@
 		<div class="alert alert-warning" id='hint' style="display: none;">
 		<strong>Hint</strong> <span id="hinttext"></span>
 		</div>
-		<p> This ui is a work in progress, and is unfinished as of now</p>
+		<p> This ui is a work in progress, some things might look a little weird for now.</p>
         <h1>Balances on EtherDelta</h1>
 		<div id="addrIcon"></div><p style="display:inline;"id="addr"></p> 
 		
 		<div id="direct" class = "txt"></div>
 		
        
-
+<br><br>
 		
 		<div >
-				<div class="check" ><label><input type="checkbox" onclick="checkZero()" id="zero" checked>Hide zero balances     </label> </div>
-				<div class="check" ><label><input type="checkbox" onclick="checkDecimal()" id="decimals">Show more decimals     </label> </div>
-				<div class="check" ><label><input type="checkbox"  onclick="checkRemember()" id="remember" >Remember me     </label> </div>
+				<div class="check col-md-4" ><label><input type="checkbox" onclick="checkZero()" id="zero" checked>Hide zero balances     </label> </div>
+				<div class="check col-md-4" ><label><input type="checkbox" onclick="checkDecimal()" id="decimals">Show more decimals     </label> </div>
+				<div class="check col-md-4" ><label><input type="checkbox"  onclick="checkRemember()" id="remember" >Remember my address     </label> </div>
 		</div>
 
 			
@@ -102,7 +102,7 @@
 		</div>
 		<div class="col-md-7">
 			
-			  <h2>Latest transactions <img id= 'loadingTransactions' src="loading.gif" style="height: 1em; display:none;" alt="loading indicator" ></h2><span id="loadingTx" class = "txt" hidden></span>
+			  <h2>Latest deposit & withdaw <img id= 'loadingTransactions' src="loading.gif" style="height: 1em; display:none;" alt="loading indicator" ></h2><span id="loadingTx" class = "txt" hidden></span>
 				<br>
 			 <table   class="tablesorter table table-striped" id="transactionsTable">
 					<thead></thead>
@@ -119,8 +119,9 @@
       <footer>
 
 			<span id="selectDiv">Select contract:  </span>
-			<br>
-			<p>This website is unaffiliated with <a target="_blank" href="https://etherdelta.github.io/">EtherDelta</a>, this is just a community tool to make life  a bit easier.</p>
+			<br><br>
+			<p> Powered by <a target="_blank" href="https://etherdelta.github.io/">EtherDelta</a> & <a target="_blank" href="https://etherscan.io/">Etherscan</a>.</p>
+			<p>This website is unaffiliated with any of the above, this is just a community tool to make life  a bit easier.</p>
       </footer>
     </div> <!-- /container -->
 	

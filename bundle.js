@@ -70,6 +70,7 @@ module.exports = (config) => {
   };
 
   
+  
   utility.processReceipt = function processReceipt(web3In, contract, address, data)
   {
 	  //deposit and withdraw have the same inputs
@@ -87,14 +88,30 @@ module.exports = (config) => {
 	return resultUnpackedD;
   }; 
   
+  
+  
   utility.processInputMethod = function getInputMethod(web3In, contract, data)
   {
-	  let abi_ =  contract.abi;
-	  let methodIDss = _addABI(abi_);
-	  let depositAbi = contract.abi.find(element => element.name === 'Deposit');
-	depositAbi.outputs = []; // error avoidance
-	  const solidityFunction = new SolidityFunction(web3In.eth, depositAbi, '');
-	  let result = solidityFunction.decodeMethod(data, methodIDss);
+	  if(bundle.EtherDelta.config.methodIDS)
+	  {
+		  // yay
+	  } else
+	  {
+		  bundle.EtherDelta.config.methodIDS = _addABI(contract.abi);
+	  }
+	  
+	   if(bundle.EtherDelta.config.solFunc)
+	  {
+		  // yay
+	  } else
+	  {
+		   let depositAbi = contract.abi.find(element => element.name === 'Deposit');
+			depositAbi.outputs = []; // error avoidance
+			bundle.EtherDelta.config.solFunc = new SolidityFunction(web3In.eth, depositAbi, '');
+	  }
+	  
+	 
+	  let result = bundle.EtherDelta.config.solFunc.decodeMethod(data, bundle.EtherDelta.config.methodIDS);
 	  
 	  return result;
 	  
@@ -74869,16 +74886,7 @@ SolidityFunction.prototype.unpackOutput = function (output) {
     return result.length === 1 ? result[0] : result;
 };
 
-//tim
-SolidityFunction.prototype.unpackInput = function (output) {
-    if (!output) {
-        return;
-    }
 
-    output = output.length >= 2 ? output.slice(2) : output;
-    var result = coder.decodeParams(this._inputTypes, output);
-    return result.length === 1 ? result[0] : result;
-};
 
 //tim https://github.com/ConsenSys/abi-decoder/blob/master/index.js
 SolidityFunction.prototype.decodeMethod = function _decodeMethod(data, methodIDs) {

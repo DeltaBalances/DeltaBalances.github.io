@@ -1,8 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
-		<title id="tit">Delta Balances</title>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<title>Delta Balances</title>
+
+		<!-- Bootstrap -->
+		<link href="bootstrap.min.css" rel="stylesheet">
+		<link href="bootstrap-theme.min.css" rel="stylesheet">
+
+		<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+		<![endif]-->
 		<script type="text/javascript" src="/js/jquery-3.2.1.min.js"></script>
+		<script src="bootstrap.min.js"></script>
+		
+		<!-- custom -->
+
 		<script type="text/javascript" src="/js/bignumber.js"></script>
 		<script type="text/javascript" src="/js/web3.min.js"></script>	
 		<script type="text/javascript" src="/js/jquery.tablesorter.js"></script>
@@ -12,61 +31,94 @@
 		<!-- etherdelta bundle.js (somewhat stripped) -->
 		<script type="text/javascript" src="bundle.js"></script>
 	
-
-		<link rel="stylesheet" type="text/css" href="style.css">
+	<!--	<link rel="stylesheet" type="text/css" href="style.css"> -->
 	</head>
-	<body>
-		<div id="wrapper">
-			<div>
-			<span id="headd" >Balances on Etherdelta <span>
-				<div>
-					<br>
-					<input type="text" id="address" placeholder="Public ethereum address: 0x... (length 42)" required pattern="[a-zA-Z0-9]+"> 
-					<br>
-						<div id="errortext" class="txt" ></div>
-					<br>
-					<div><button id="refreshButton" type="button"  onclick="myClick()" >Get my balances & transactions</button> </div>
-					<br>
-					<div id="loading" class="txt"></div>
-					<img id= 'loadingIndicator' src="loading.gif" alt="loading indicator" >
-					<div id="loadingTx" class = "txt"></div><br>
+	<body style="padding-top: 50px;">
+		<div class="navbar navbar-inverse navbar-fixed-top">
+		  <div class="container">
+			<div class="navbar-header">
+			  <a class="navbar-brand hidden-xs" href="#">DeltaBalances    </a>
+			   <form class="navbar-form">
+				<div class="form-group" style="display:inline;">
+				  <div class="input-group" style="display:table; width:70%; margin: auto;">
+					<span class="input-group-addon" style="width:1%;"><span id="refreshButton"  onclick="myClick()" class="search"> Go</span></span>
+					<input class="form-control" name="addr" autocomplete="off" autofocus="autofocus" id="address" placeholder="Public ethereum address: 0x...         www.etherscan.io/address/YOURADRESS                Private key   (don't do it, but it does work)" required pattern="[a-zA-Z0-9]+">
+				  </div>
 				</div>
-				
-				
+			  </form>
 			</div>
-			<div >
+		  </div>
+		</div>
+	
+	
+		 <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+      <div class="container">
+	  
+		<div class="alert alert-danger" id='error' style="display: none;">
+		<strong>Error</strong> <span id="errortext"></span>
+		</div>
+		<div class="alert alert-warning" id='hint' style="display: none;">
+		<strong>Hint</strong> <span id="hinttext"></span>
+		</div>
+		<p> This ui is a work in progress, and is unfinished as of now</p>
+        <h1>Balances on EtherDelta</h1>
+		<h2 id="addr"></h2>
+		
+		<div id="direct" class = "txt"></div>
+		
+       
+
+		
+		<div >
 				<div class="check" ><label><input type="checkbox" onclick="checkZero()" id="zero" checked>Hide zero balances     </label> </div>
 				<div class="check" ><label><input type="checkbox" onclick="checkDecimal()" id="decimals">Show more decimals     </label> </div>
 				<div class="check" ><label><input type="checkbox"  onclick="checkRemember()" id="remember" >Remember me     </label> </div>
+		</div>
+
+			
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="col-md-5 ">
+			<div class="col-md-12">
+			  <h2>Balances <img id= 'loadingBalances' src="loading.gif" style="height: 1em; display:none;" alt="loading indicator" ></h2> <span id="loading" class="txt" hidden></span>
+					<br>
+					<table  class="tablesorter table table-striped" id="resultTable">
+					<thead></thead>
+					<tbody></tbody>
+					</table>
+							<p id = "contract"> </p>
+			 <!-- <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p> -->
 			</div>
-			<br>
-			<div id="addr" ></div>
-			<br>
-			<div>
-				<p>Balances:</p>
-				<table class="tablesorter" id="resultTable">
-				<thead></thead>
-				<tbody></tbody>
-				</table>
+		</div>
+		<div class="col-md-7">
+			<div class="col-md-12">
+			  <h2>Transactions <img id= 'loadingTransactions' src="loading.gif" style="height: 1em; display:none;" alt="loading indicator" ></h2><span id="loadingTx" class = "txt" hidden></span>
+				<br>
+			 <table   class="tablesorter table table-striped" id="transactionsTable">
+					<thead></thead>
+					<tbody></tbody>
+					</table>
+							<p id = "contract"> </p>
+			  <!-- <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p> -->
 			</div>
-			<br>
-			<div>
-				<p>Deposits and Withdrawals (last 15 in the last 3 days): </p>
-				<table class="tablesorter" id="transactionsTable">
-				<thead></thead>
-				<tbody></tbody>
-				</table>
-			</div>
-			<br>
-				<div id="direct" class = "txt"></div>
-			<br>
-			<p id = "contract"> </p>
-			<div>Select contract:</div>
-			<div id="selectDiv">  </div>
+		</div>
+      </div>
+
+      <hr>
+
+      <footer>
+
+			<span id="selectDiv">Select contract:  </span>
 			<br>
 			<p>This website is unaffiliated with <a target="_blank" href="https://etherdelta.github.io/">EtherDelta</a>, this is just a community tool to make life  a bit easier.</p>
-			<br>
+      </footer>
+    </div> <!-- /container -->
+	
 
-		</div>
 	</body>
 </html>

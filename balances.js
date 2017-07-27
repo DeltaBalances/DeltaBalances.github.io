@@ -263,8 +263,14 @@
 			$('#resultTable tbody').empty();
 			
             setStorage();
+			
+			
             document.getElementById('addr').innerHTML = 'Address: <a target="_blank" href="' + bundle.EtherDelta.addressLink(publicAddr) + '">' + publicAddr + '</a>';
-            console.log('getting wallet balances');
+			var icon = document.getElementById('addrIcon');
+			icon.style.backgroundImage = 'url(' + blockies.create({ seed:publicAddr.toLowerCase() ,size: 8,scale: 16}).toDataURL()+')';
+			
+		
+		  console.log('getting wallet balances');
 
 			// request all balances
             document.getElementById('loading').innerHTML = "Retrieving balances...";

@@ -738,6 +738,8 @@ function getTransactions()
 	$.getJSON('https://api.etherscan.io/api?module=account&action=txlist&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc', (result) => {
 		if(result && result.status === '1')
 			transResult = result.result;
+		else //0 no trans found
+			transResult = [];
 		transLoaded++;
 		if(transLoaded == 2)
 			processTransactions();
@@ -749,6 +751,8 @@ function getTransactions()
 	$.getJSON('https://api.etherscan.io/api?module=account&action=txlistinternal&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc', (result2) => {
 		if(result2 && result2.status === '1')
 			inTransResult = result2.result;
+		else
+			inTransResult = [];
 		transLoaded++;
 		if(transLoaded == 2)
 			processTransactions();

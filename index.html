@@ -1,42 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+		<!-- Bootstrap meta tags -->
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
 		<title>Delta Balances</title>
 
-		<!-- Bootstrap -->
-		<link href="bootstrap.min.css" rel="stylesheet">
-		<link href="bootstrap-theme.min.css" rel="stylesheet">
-
-		<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-		<!--[if lt IE 9]>
-		<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-		<![endif]-->
+		<!-- Bootstrap js -->
 		<script type="text/javascript" src="/js/jquery-3.2.1.min.js"></script>
 		<script src="bootstrap.min.js"></script>
+			<!-- IE9 fuck it
+			<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+			<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+			-->
 		
-		<!-- custom -->
+		<!-- Bootstrap css -->
+		<link href="bootstrap.min.css" rel="stylesheet">
+		<link href="bootstrap-theme.min.css" rel="stylesheet">
+		
+		<link rel="stylesheet" type="text/css" href="style.css">
+		
+	   <link rel="stylesheet" href="font-awesome.min.css">
+	
+		
+		
+		
 
+		<!-- Required js Web3 -->
 		<script type="text/javascript" src="/js/bignumber.js"></script>
 		<script type="text/javascript" src="/js/web3.min.js"></script>	
-
+		<!-- TableSorter -->
 		<script type="text/javascript" src="/js/jquery.tablesorter.js"></script>
 		<script type="text/javascript" src="/js/jquery.tablesorter.widgets.js"></script>
 		<script type="text/javascript" src="/js/widget-scroller.js"></script>
+		<!-- Blockies (eth address image) -->
 		<script type="text/javascript" src="/js/blockies.min.js"></script>		
 
-		<script>  var module = {}; </script>
+		<!-- EtherDelta -->
+		<script>  var module = {}; </script> <!-- trick to use node modue config -->
 		<script type="text/javascript" src="https://etherdelta.github.io/config.js"></script>
-		<script type="text/javascript" src="balances.js"></script>
-		<!-- etherdelta bundle.js (somewhat stripped) -->
 		<script type="text/javascript" src="bundle.js"></script>
+		
+		<!-- Main script -->
+		<script type="text/javascript" src="balances.js"></script>
+		
+		
+
 	
-		<link rel="stylesheet" type="text/css" href="style.css">
+		
 	</head>
 	<body style="padding-top: 50px;">
 		<div class="navbar navbar-inverse navbar-fixed-top">
@@ -46,7 +59,7 @@
 			   <form class="navbar-form" style="float:right; width:80%;">
 				<div class="form-group" style="display:inline;">
 				  <div class="input-group" style="display:table; width:80%; margin: auto;">
-					<span class="input-group-addon" id="refreshButton"  onclick="myClick()" style="width:1%; cursor:pointer;"><span class="search"> Go</span></span>
+					<span class="input-group-addon btn btn-default" id="refreshButton"  onclick="myClick()" style="width:1%; cursor:pointer;"><span class="search"> Go</span></span>
 					<input class="form-control" name="addr" autocomplete="off" autofocus="autofocus" id="address" placeholder="Public ethereum address: 0x...       www.etherscan.io/address/YOURADDRESS" required pattern="[a-zA-Z0-9]+">
 				  </div>
 				</div>
@@ -58,37 +71,43 @@
 	
 		 <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
-      <div class="container">
-	  
-		<div class="alert alert-danger" id='error' style="display: none;">
-		<strong>Error</strong> <span id="errortext"></span>
-		</div>
-		<div class="alert alert-warning" id='hint' style="display: none;">
-		<strong>Hint</strong> <span id="hinttext"></span>
-		</div>
-		<p> This ui is a work in progress, some things might look a little weird for now.</p>
-        <h1>Balances on EtherDelta</h1>
-		<div id="addrIcon"></div><p style="display:inline;"id="addr"></p> 
-		
-		<div id="direct" class = "txt"></div>
-		
-       
-<br><br>
-		
-		<div >
-				<div class="check col-md-4" ><label><input type="checkbox" onclick="checkZero()" id="zero" checked>Hide zero balances     </label> </div>
-				<div class="check col-md-4" ><label><input type="checkbox" onclick="checkDecimal()" id="decimals">Show more decimals     </label> </div>
-				<div class="check col-md-4" ><label><input type="checkbox"  onclick="checkRemember()" id="remember" >Remember my address     </label> </div>
-		</div>
+			<div class="alert alert-danger" id='error' style="display: none;">
+			<strong>Error</strong> <span id="errortext"></span>
+			</div>
+			<div class="alert alert-warning" id='hint' style="display: none;">
+			<strong>Hint</strong> <span id="hinttext"></span>
+			</div>
+		<div class="container" style="/*width:100% */">
+			
+			  
+				<div class="col-md-9" style="overflow:hidden;">
+					 This ui is a work in progress, some things might look a little weird for now.
+					<h1>Balances on EtherDelta</h1>
+					
+					<div class="row" style="white-space:nowrap; overflow:hidden;">
+					<div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block;" ></div><div style="padding-left: 3%; float:left; white-space:nowrap;" ><p style ="line-height:64px; white-space:nowrap; display: inline-block;" id="addr"></p></div>
+					</div>
+					<div  style="" id="direct" class = "txt"></div>
+				</div>
+				
+				
+				<div class = "col-md-3" style="border-left-width: 6px; border-left-style: solid; border-left-color: black;">
+					<h3> Settings: </h3>
+					<ul class="list-unstyled">
+						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero" checked><label for="zero" >Hide zero balances</label></li>
+						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals"><label for="decimals" >Show more decimals</label></li>
+						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkRemember()" id="remember" ><label for="remember">Remember my address</label></li>
+					</ul>
+						
+				</div>
 
 			
-      </div>
+		</div>
     </div>
 
     <div class="container">
-      <!-- Example row of columns -->
       <div class="row">
-        <div class="col-md-5 ">
+        <div class="col-md-5">
 			
 			  <h2>Balances <img id= 'loadingBalances' src="loading.gif" style="height: 1em; display:none;" alt="loading indicator" ></h2> <span id="loading" class="txt" hidden></span>
 					<br>
@@ -116,10 +135,8 @@
 
       <hr>
 
-      <footer>
-
-			<span id="selectDiv">Select contract:  </span>
-			<br><br>
+      <footer style="overflow:hidden;">
+			<div class="form-group" id="selectDiv"><label for="contactSelect">Select contract: </label></div>
 			<p> Powered by <a target="_blank" href="https://etherdelta.github.io/">EtherDelta</a> & <a target="_blank" href="https://etherscan.io/">Etherscan</a>.</p>
 			<p>This website is unaffiliated with any of the above, this is just a community tool to make life  a bit easier.</p>
       </footer>

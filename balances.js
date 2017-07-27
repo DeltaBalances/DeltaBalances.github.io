@@ -112,7 +112,7 @@
 			bundle.EtherDelta.changeContract(e.target.selectedIndex, () => {});
 		});
         placeholderTable();
-        document.getElementById('addr').innerHTML = 'Start by entering your public address';
+        document.getElementById('addr').innerHTML = 'Enter your address to get started';
 		
 		// url parameter ?addr=0x...
 		let addr = getParameterByName('addr');
@@ -709,24 +709,36 @@
 	function createSelect()
 	{
 		var div = document.getElementById("selectDiv");
-
+		
 		//Create array of options to be added
-		var array = config.contractEtherDeltaAddrs.map(x => { return x.addr + " " + x.info;});
+		var array = config.contractEtherDeltaAddrs.map(x => { return x.addr;});
 
 		//Create and append select list
 		var selectList = document.createElement("select");
 		selectList.id = "contractSelect";
-
+		var liveGroup = document.createElement("optgroup");
+		liveGroup.label = "Active";
+		var oldGroup = document.createElement("optgroup");
+		oldGroup.label = "Outdated - withdraw funds";
+		
 		//Create and append the options
 		for (var i = 0; i < array.length; i++) {
 			var option = document.createElement("option");
 			option.value = i;
 			option.text = array[i];
-			selectList.appendChild(option);
+			if(i == 0)
+			{
+				liveGroup.appendChild(option);
+			}
+			else 
+			{
+				oldGroup.appendChild(option);
+			}
 		}
+		selectList.appendChild(liveGroup);
+		selectList.appendChild(oldGroup);
 		div.appendChild(selectList);
 		selectList.selectedIndex = 0;
-		
 	}
 	
 	

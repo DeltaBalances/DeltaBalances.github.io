@@ -156,13 +156,17 @@
 		return decodeURIComponent(results[2].replace(/\+/g, " "));
 	}
 	
+	let changeZero = false;
 	// hide zero blance checkbox
     function checkZero() {
+		changeZero = true;
         hideZero = $('#zero').prop('checked');
         if (lastResult) {
+			//table1Loaded =  false;
             $('#resultTable tbody').empty();
-            finished();
+            makeTable(lastResult, hideZero);
         } 
+		changeZero = false;
     }
 
 	// remember me checkbox
@@ -183,6 +187,8 @@
         $('#transactionsTable thead').empty();
         
         if (lastResult) {
+			//table1Loaded = false;
+		//	table2Loaded = false;
            makeTable(lastResult, hideZero);
 		   makeTable2(lastResult2.slice(0,maxtransoutput));
         } else {
@@ -555,6 +561,10 @@
 		{
             $("#resultTable thead th").data("sorter", true);
             $("#resultTable").tablesorter({
+			//	widgets: [ 'scroller' ],
+			//	widgetOptions : {
+			//	  scroller_height : 500,
+			//	},
                 sortList: [[0, 0]]
             });
 
@@ -586,6 +596,13 @@
 		{
             $("#transactionsTable thead th").data("sorter", true);
             $("#transactionsTable").tablesorter({
+				//widgets: [ 'scroller' ],
+				//widgetOptions : {
+				  //scroller_height : 300,
+					//scroller_barWidth : 18,
+					//scroller_upAfterSort: true,
+					//scroller_jumpToHeader: true,
+				//},
                 sortList: [[4, 1]]
             });
 

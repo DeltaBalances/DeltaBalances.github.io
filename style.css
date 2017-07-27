@@ -1,178 +1,40 @@
-html {
-	
-	color: #333;
-    font-family: Helvetica, Arial, sans-serif;
-	text-align: center;
-	font-size: 18px;
 
-}
-
-body {
-	width: 100%;
-	height: 100%;
-	margin: 0 auto;
-}
-
-#wrapper {
-	width: 50%;
-	margin: 0 auto;
-}
-
-@media only screen and (max-width: 720px) {
-    #wrapper {
-        width:70%;
-    }
-}
-
-@media only screen and (max-width: 500px) {
-    #wrapper {
-        width:95%;
-    }
-}
-
-#headd {
-	font-size: 30px; 
-	font-weight: bold;
-}
-
-.txt {
-	font-size: 15px;
-}
-
-html label {
-	text-align: left;
-}
-
-button { font-size: 18px;}
-
-input { font-size: 18px; }
-
-#errortext {
-	color:red; 
-}
-
-#refreshButton {
-	width: 100%; 
-	height:10%;
-}
-
-#address {
-	width:100%;
-}
-
-#address .error{
-	background: #FF3232;
-}
-
-.check {
-	width: 33%;
-	float: left;
-	margin: 0 auto;
-}
-
-#addr {
-	width: 100%;
-	
-	text-align: center;
-	border-radius: 5px 5px 5px 5px; 
-	background: linear-gradient(#333 0%,#444 100%);
-	color: #FFF; font-weight: bold;
-	height: 40px;
-	line-height: 40px;
-	overflow: hidden;
-}
-
-#selectContract {
-	width: 100%;
-	margin: 0 auto;
-}
-
-#contractDiv {
-	width: 100%;
-	margin: 0 auto;
-}
-
-#addr a {
-	color: white;
-}
-
-input{
-	text-align: center;
-}
-table { 
-  color: #333;
-  font-family: Helvetica, Arial, sans-serif;
-  font-size: 18px;
-  width: 100%;
-  margin: 0 auto;
-  /* Table reset stuff */
-  border-collapse: collapse; border-spacing: 0; 
-}
-		
-td, th {  border: 0 none; height: 30px; }
-			
-th {
-  /* Gradient Background */
-	background: linear-gradient(#333 0%,#444 100%);
-	color: #FFF; font-weight: bold;
-	height: 40px;
-	text-align:right;
-	padding-right:30px;
-}
-		
-td { background: #FAFAFA; text-align: right; padding-right:30px; }
-
-/* Zebra Stripe Rows */
-		
-tr:nth-child(even) td { background: #EEE; } 
-tr:nth-child(odd) td { background: #FDFDFD; }
-
-
-
-/* Add border-radius to specific cells! */
-tr:first-child th:nth-child(1) { 
-  border-radius: 5px 0 0 0; 
-} 
-
-tr:first-child th:last-child { 
-  border-radius: 0 5px 0 0; 
-}
 
 table.tablesorter th.tablesorter-headerUnSorted {
-    background-image: url('/images/white-unsorted.gif');
+    background-image: url('/images/black-unsorted.gif');
     background-repeat: no-repeat;
-    background-position: 95% 50%;
+    background-position: 90% 50%;
     cursor: pointer;
-	background-color: #333;
+	/*background-color: #333;
 	color: #FFF; font-weight: bold;
 	height: 40px;
 	text-align:right;
-	padding-right:30px;
+	padding-right:30px;*/
 }
 
 .tablesorter th.tablesorter-headerSortUp,
 .tablesorter th.tablesorter-headerAsc
 {
-	background-image: url('/images/white-asc.gif');
+	background-image: url('/images/black-asc.gif');
     background-repeat: no-repeat;
-    background-position: 95% 50%;
+    background-position: 90% 50%;
     cursor: pointer;
-	background-color: #333;
+	/*background-color: #333;
 	color: #FFF; font-weight: bold;
 	height: 40px;
 	text-align:right;
-	padding-right:30px;
+	padding-right:30px;*/
 }
 
 .tablesorter th.tablesorter-headerSortDown,
 .tablesorter th.tablesorter-headerDesc {
-    background-image: url('/images/white-desc.gif');
+    background-image: url('/images/black-desc.gif');
     background-repeat: no-repeat;
-    background-position: 95% 50%;
+    background-position: 90% 50%;
     cursor: pointer;
-	background-color: #333;
+	/*background-color: #333;
 	color: #FFF; font-weight: bold;
 	height: 40px;
 	text-align:right;
-	padding-right:30px;
+	padding-right:30px; */
 }

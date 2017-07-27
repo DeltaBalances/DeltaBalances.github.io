@@ -24,14 +24,18 @@
 
 		<script type="text/javascript" src="/js/bignumber.js"></script>
 		<script type="text/javascript" src="/js/web3.min.js"></script>	
+
 		<script type="text/javascript" src="/js/jquery.tablesorter.js"></script>
+		<script type="text/javascript" src="/js/jquery.tablesorter.widgets.js"></script>
+				<script type="text/javascript" src="/js/widget-scroller.js"></script>
+
 		<script>  var module = {}; </script>
 		<script type="text/javascript" src="https://etherdelta.github.io/config.js"></script>
 		<script type="text/javascript" src="balances.js"></script>
 		<!-- etherdelta bundle.js (somewhat stripped) -->
 		<script type="text/javascript" src="bundle.js"></script>
 	
-	<!--	<link rel="stylesheet" type="text/css" href="style.css"> -->
+		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body style="padding-top: 50px;">
 		<div class="navbar navbar-inverse navbar-fixed-top">
@@ -41,7 +45,7 @@
 			   <form class="navbar-form" style="float:right; width:80%;">
 				<div class="form-group" style="display:inline;">
 				  <div class="input-group" style="display:table; width:80%; margin: auto;">
-					<span class="input-group-addon" style="width:1%;"><span id="refreshButton"  onclick="myClick()" class="search"> Go</span></span>
+					<span class="input-group-addon" id="refreshButton"  onclick="myClick()" style="width:1%; cursor:pointer;"><span class="search"> Go</span></span>
 					<input class="form-control" name="addr" autocomplete="off" autofocus="autofocus" id="address" placeholder="Public ethereum address: 0x...         www.etherscan.io/address/YOURADRESS                Private key   (don't do it, but it does work)" required pattern="[a-zA-Z0-9]+">
 				  </div>
 				</div>
@@ -84,7 +88,7 @@
       <!-- Example row of columns -->
       <div class="row">
         <div class="col-md-5 ">
-			<div class="col-md-12">
+			
 			  <h2>Balances <img id= 'loadingBalances' src="loading.gif" style="height: 1em; display:none;" alt="loading indicator" ></h2> <span id="loading" class="txt" hidden></span>
 					<br>
 					<table  class="tablesorter table table-striped" id="resultTable">
@@ -93,11 +97,11 @@
 					</table>
 							<p id = "contract"> </p>
 			 <!-- <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p> -->
-			</div>
+			
 		</div>
 		<div class="col-md-7">
-			<div class="col-md-12">
-			  <h2>Transactions <img id= 'loadingTransactions' src="loading.gif" style="height: 1em; display:none;" alt="loading indicator" ></h2><span id="loadingTx" class = "txt" hidden></span>
+			
+			  <h2>Latest transactions <img id= 'loadingTransactions' src="loading.gif" style="height: 1em; display:none;" alt="loading indicator" ></h2><span id="loadingTx" class = "txt" hidden></span>
 				<br>
 			 <table   class="tablesorter table table-striped" id="transactionsTable">
 					<thead></thead>
@@ -105,7 +109,7 @@
 					</table>
 							<p id = "contract"> </p>
 			  <!-- <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p> -->
-			</div>
+			
 		</div>
       </div>
 

@@ -29,6 +29,7 @@
 	let showTransactions = true;
 	let maxtransoutput = 15;
 	
+	let transactionDays = 3;
 	let walletWarningBalance = 0.005;
 	
     let balances = { // init with placeholder data
@@ -83,7 +84,7 @@
 					if(num)
 					{
 						blocknum = num;
-						startblock = num - 16000; // roughly 3 days back;
+						startblock = setStartBlock(blocknum, transactionDays);
 					}
 				});
 			}
@@ -136,6 +137,13 @@
 
     });
 
+	
+	function getStartBlock(blcknm, days)
+	{
+		startblock = blcknm - ((days * 24 * 60 * 60) / blocktime);
+		return startblock;
+	}
+	
 	function placeholderTable()
 	{
         let result = Object.values(balances);
@@ -144,6 +152,23 @@
 		makeTable2(result2);
 	}
 	
+	function validateDays(input)
+	{ 
+		input = parseInt(input);
+		let days = 1;
+		if(input < 1)
+			days = 1;
+		else if(input > 999)
+			days = 999;
+		else
+			days = input;
+		
+		transactionDays = days;
+		if(blocknum > 0)
+		{
+			getStartBlock(blocknum, transactionDays);
+		}
+	}
 	
 	function getParameterByName(name, url) 
 	{
@@ -190,7 +215,7 @@
 			//table1Loaded = false;
 		//	table2Loaded = false;
            makeTable(lastResult, hideZero);
-		   makeTable2(lastResult2.slice(0,maxtransoutput));
+		   makeTable2(lastResult2);
         } else {
 			placeholderTable();
 		}
@@ -239,6 +264,7 @@
 				{
 					console.log('blocknum re-used');
 					endblock = 99999999;
+					startblock = getStartBlock(blocknum, transactionDays);
 					getTransactions();
 				}
 				else 
@@ -249,7 +275,8 @@
 						if(num)
 						{
 							endblock = num;
-							startblock = num - 16000; // roughly 3 days back;
+							blocknum = num;
+							startblock = getStartBlock(blocknum, transactionDays);
 						}
 						getTransactions();
 					});
@@ -559,7 +586,7 @@
 	{
         if (table1Loaded) // reload existing table
         {
-            $("#resultTable").trigger("updateAll", [true, () => {}]);
+            $("#resultTable").trigger("update", [true, () => {}]);
 			$("#resultTable thead th").data("sorter", true);
 			//$("table").trigger("sorton", [[0,0]]);
             
@@ -567,10 +594,10 @@
 		{
             $("#resultTable thead th").data("sorter", true);
             $("#resultTable").tablesorter({
-			//	widgets: [ 'scroller' ],
-			//	widgetOptions : {
-			//	  scroller_height : 500,
-			//	},
+				widgets: [ 'scroller' ],
+				widgetOptions : {
+				  scroller_height : 500,
+				},
                 sortList: [[0, 0]]
             });
 
@@ -594,7 +621,7 @@
 	{
         if (table2Loaded) // reload existing table
         {
-            $("#transactionsTable").trigger("updateAll", [true, () => {}]);
+            $("#transactionsTable").trigger("update", [true, () => {}]);
 			$("#transactionsTable thead th").data("sorter", true);
 			//$("table").trigger("sorton", [[0,0]]);
             
@@ -602,13 +629,13 @@
 		{
             $("#transactionsTable thead th").data("sorter", true);
             $("#transactionsTable").tablesorter({
-				//widgets: [ 'scroller' ],
-				//widgetOptions : {
-				  //scroller_height : 300,
-					//scroller_barWidth : 18,
-					//scroller_upAfterSort: true,
-					//scroller_jumpToHeader: true,
-				//},
+				widgets: [ 'scroller' ],
+				widgetOptions : {
+				  scroller_height : 500,
+					scroller_barWidth : 18,
+					scroller_upAfterSort: true,
+					scroller_jumpToHeader: true,
+				},
                 sortList: [[4, 1]]
             });
 
@@ -900,7 +927,7 @@ function getTransactions()
 			let txs = Object.values(outputTransactions);
 			lastResult2 = txs;
 			
-			makeTable2(txs.slice(0,maxtransoutput));
+			makeTable2(txs);
 		}
 	}
 }

@@ -81,7 +81,7 @@
 			
 			  
 				<div class="col-md-9" style="overflow:hidden;">
-					 This ui is a work in progress, some things might look a little weird for now.
+					 This UI is a work in progress, some things might look a little weird for now.
 					<h1>Balances on EtherDelta</h1>
 					
 					<div class="row" style="white-space:nowrap; overflow:hidden;">
@@ -97,6 +97,7 @@
 						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero" checked><label for="zero" >Hide zero balances</label></li>
 						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals"><label for="decimals" >Show more decimals</label></li>
 						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkRemember()" id="remember" ><label for="remember">Remember my address</label></li>
+						<li><label>Transactions from last <input type="number" id="days" onchange="validateDays(this.value)" value="3" min="1" max="999" step="1"> days</label></li>
 					</ul>
 						
 				</div>

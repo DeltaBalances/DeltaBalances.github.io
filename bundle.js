@@ -493,8 +493,6 @@ module.exports = {
     { addr: '0x4aea7cf559f67cedcad07e12ae6bc00f07e8cf65', info: 'Deployed 08/30/2016 -- please withdraw' },
     { addr: '0x2136bbba2edca21afdddee838fff19ea70d10f03', info: 'Deployed 08/03/2016 -- please withdraw' },
     { addr: '0xc6b330df38d6ef288c953f1f2835723531073ce2', info: 'Deployed 07/08/2016 -- please withdraw' },
-	// decentrex
-	//{ addr: '0xbf29685856fae1e228878dfb35b280c0adcc3b05', info: 'Decentrex Deployed 05/26/2017' }
   ],
   ethTestnet: false,
   ethProvider: 'http://localhost:8545',
@@ -737,7 +735,7 @@ function EtherDelta() {
   }, 1);
   this.addrs = undefined;
   this.pks = undefined;
-  this.addrKinds = {};
+  //this.addrKinds = {};
   this.selectedAccount = 0;
   this.selectedToken = undefined;
   this.selectedBase = undefined;
@@ -748,21 +746,21 @@ function EtherDelta() {
   this.priceUpdated = Date.now();
   this.contractEtherDelta = undefined;
   this.contractToken = undefined;
-  this.eventsCache = {};
+  //this.eventsCache = {};
   this.publishingOrders = false;
   this.pendingTransactions = [];
   this.defaultdecimals = new BigNumber(1000000000000000000);
-  this.language = 'en';
+  //this.language = 'en';
   this.minOrderSize = 0.01;
-  this.messageToSend = undefined;
+  //this.messageToSend = undefined;
   //this.translator = undefined;
   this.secondsPerBlock = 15;
-  this.usersWithOrdersToUpdate = {};
+  //this.usersWithOrdersToUpdate = {};
   this.apiServerNonce = undefined;
-  this.ordersResultByPair = { orders: [], blockNumber: 0 };
-  this.topOrdersResult = { orders: [], blockNumber: 0 };
+  //this.ordersResultByPair = { orders: [], blockNumber: 0 };
+  //this.topOrdersResult = { orders: [], blockNumber: 0 };
   this.selectedContract = undefined;
-  this.returnTicker = {};
+  //this.returnTicker = {};
   this.web3 = undefined;
   this.daysOfData = 7;
   this.minGas = 0.005;

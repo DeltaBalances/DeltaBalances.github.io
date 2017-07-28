@@ -52,7 +52,21 @@
 	
 		
 	</head>
-	<body style="padding-top: 50px;">
+	<body >
+	
+		<div class="alert alert-danger alert-top " style="display:none;" onclick="hideError()" id='error' role="alert" >
+			<strong>Error</strong> <span id="errortext"></span>
+			<button type="button" class="close"  aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="alert alert-warning alert-top alert-dismissible"  onclick="hideHint()" style = "display:none;" role="alert" id='hint'>
+			<strong>Hint</strong> <span id="hinttext"></span>
+			<button type="button" class="close"  aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		
 		<div class="navbar navbar-inverse navbar-fixed-top">
 		  <div class="container">
 			<div class="navbar-header" style="width:100%;">
@@ -73,19 +87,14 @@
 		 <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
 		<div class="container" style="/*width:100% */">
-					<div class="alert alert-danger" id='error' style="display: none;">
-						<strong>Error</strong> <span id="errortext"></span>
-					</div>
-					<div class="alert alert-warning" id='hint' style="display: none;">
-						<strong>Hint</strong> <span id="hinttext"></span>
-					</div>
 			  
 				<div class="col-md-9" style="overflow:hidden;">
 					 This UI is a work in progress, some things might look a little weird for now.
 					<h1>EtherDelta Balances</h1>
 					
 					<div class="row" style="white-space:nowrap; overflow:hidden;">
-					<div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block;" ></div><div style="padding-left: 3%; float:left; white-space:nowrap;" ><p style ="line-height:64px; white-space:nowrap; display: inline-block;" id="addr"></p></div>
+						<div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block;" ></div>
+						<div style="padding-left: 3%; float:left; white-space:nowrap;" ><p style ="line-height:64px; white-space:nowrap; display: inline-block;" id="addr">Enter your address to get started</p></div>
 					</div>
 					<div  style="" id="direct" class = "txt"></div>
 					<br>
@@ -98,6 +107,7 @@
 					<ul class="list-unstyled">
 						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero" checked><label for="zero" >Hide zero balances</label></li>
 						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals"><label for="decimals" >Show more decimals</label></li>
+				<!--	<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkCustom()" id="custom" ><label for="custom">Show unlisted tokens</label></li> -->
 						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkRemember()" id="remember" ><label for="remember">Remember my address</label></li>
 						<li><label>Transactions from last <input type="number" id="days" onchange="validateDays(this.value)" value="3" min="1" max="999" step="1"> days</label></li>
 					</ul>
@@ -112,7 +122,7 @@
       <div class="row">
         <div class="col-md-5">
 			
-			  <h2>Balances <img id= 'loadingBalances' src="loading.gif" style="height: 1em; display:none;" alt="loading indicator" ></h2> <span id="loading" class="txt" hidden></span>
+			  <h2>Balances <button id='loadingBalances' onclick ="getBalances()" class="fa fa-refresh" style="display:none;"></button></h2>
 					<br>
 					<table  class="tablesorter table table-striped" id="resultTable">
 					<thead></thead>
@@ -120,11 +130,13 @@
 					</table>
 							<p id = "contract"> </p>
 			 <!-- <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p> -->
+			<!-- <span class="label label-primary">Name</span> Officially listed token <br>
+			 <span class="label label-warning">Name</span> Unlisted token -->
 			
 		</div>
 		<div class="col-md-7">
 			
-			  <h2>Deposit & Withdraw <img id= 'loadingTransactions' src="loading.gif" style="height: 1em; display:none;" alt="loading indicator" ></h2><span id="loadingTx" class = "txt" hidden></span>
+			  <h2>Deposit & Withdraw <button id='loadingTransactions' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button></h2>
 				<br>
 			 <table   class="tablesorter table table-striped" id="transactionsTable">
 					<thead></thead>

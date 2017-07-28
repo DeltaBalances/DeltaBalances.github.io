@@ -11,6 +11,36 @@
 	
 }
 
+ body {
+	 padding-top: 50px;
+ }
+ 
+ .fa-refresh {
+	 border:none;
+	 background-color:transparent;
+ }
+ 
+.dim {
+	 color:#D3D3D3 !important;
+ }
+
+/* xs */
+.alert.alert-top {
+  margin-bottom: 0;
+  border-radius: 0;
+  text-align: center;
+  width: 100%;
+  z-index:999; 
+  position:fixed;
+  padding-top:40px;
+}
+/* sm */
+@media (min-width: 768px) {
+    .alert.alert-top {
+	padding-top:15px;
+}
+
+
 
 /*** custom checkboxes ***/
 

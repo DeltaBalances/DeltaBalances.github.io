@@ -32,6 +32,16 @@
 	let transactionDays = 3;
 	let walletWarningBalance = 0.005;
 	
+	
+	let customTokens = [
+		 { addr: '0x949bed886c739f1a3273629b3320db0c5024c719', name: 'AMIS', decimals: 9 },
+	];
+	
+	let customPairs = [
+		{ token: 'AMIS', base: 'ETH' },
+	];
+	
+	
     let balances = { // init with placeholder data
         ETH: {
             'Name': 'ETH',
@@ -61,6 +71,8 @@
 		$('#error').hide();
 		$('#hint').hide();
 	
+		//getEthPlorerTokens();
+		
 		// register enter press 
         $('#address').keypress(function(e) {
             if (e.keyCode == 13) {
@@ -84,7 +96,7 @@
 					if(num)
 					{
 						blocknum = num;
-						startblock = setStartBlock(blocknum, transactionDays);
+						startblock = getStartBlock(blocknum, transactionDays);
 					}
 				});
 			}
@@ -137,6 +149,38 @@
 
     });
 
+	
+/*	function getEthPlorerTokens()
+	{
+		console.log('start plorer');
+		$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey=freekey', (result) => 
+		{
+			
+			console.log('end plorer');
+			if(result)
+			{
+				let ethbal = result.ETH.balance;
+				let customTokens = [];
+				for(var i = 0; i < result.tokens.length; i++)
+				{
+					let token = {
+						addr: result.tokens[i].tokeninfo.address,
+						name: result.tokens[i].tokeninfo.symbol,
+						decimals: result.tokens[i].tokeninfo.decimals,
+					}
+					customTokens.push(token);
+				}
+			}
+			
+			console.log('parsed tokens');
+			//.ETH.balance 
+			//.tokens[]
+					//.tokeninfo.address  .symbol .decimals
+				//	.balance
+		
+		});
+		
+	} */
 	
 	function getStartBlock(blcknm, days)
 	{
@@ -858,6 +902,7 @@ function getTransactions()
 		}
 		
 		
+		
 		for(var l = 0; l < tokens.length; l++)
 		{
 			let method = tokens[l].input.slice(0, 10);
@@ -885,6 +930,21 @@ function getTransactions()
 						outputTransactions.push(trans);
 					}	
 				}
+			} else if(method === '0x278b8c0e') // cancel
+			{
+				/*
+		
+				Function: cancelOrder(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, uint8 v, bytes32 r, bytes32 s)
+				MethodID: 0x278b8c0e
+		
+				*/
+		
+			} else
+			{
+				/*
+				Function: trade(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, address user, uint8 v, bytes32 r, bytes32 s, uint256 amount)
+				MethodID: 0x0a19b14a
+				*/
 			}
 		} 
 		

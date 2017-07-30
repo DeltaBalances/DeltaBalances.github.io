@@ -7,6 +7,12 @@ https://api.ethplorer.io/getAddressInfo/0x8d12a197cb00d4747a1fe03395095ce2a5cc68
 */
 let offlineCustomTokens = [
   {
+	"addr": "0x48c80f1f4d53d5951e5d5438b54cba84f29f32a5",
+    "name": "REPOLD",
+	"longname": "REP frozen contract",
+	"decimals": 18,
+  }, 
+  {
     "addr": "0xf77089f2f00fca83501705b711cbb10a0de77628",
     "name": "BMC",
     "longname": "BTCMACROECON",

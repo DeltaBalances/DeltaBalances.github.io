@@ -46,6 +46,7 @@
 		
 		<!-- Main script -->
 		<script type="text/javascript" src="balances.js"></script>
+		<script type="text/javascript" src="customTokens.js"></script>
 		
 		
 
@@ -105,9 +106,9 @@
 				<div class = "col-md-3" style="border-left-width: 6px; border-left-style: solid; border-left-color: black;">
 					<h3> Settings: </h3>
 					<ul class="list-unstyled">
+						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkCustom()" id="custom" ><label for="custom">Show unlisted tokens</label></li>
 						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero" checked><label for="zero" >Hide zero balances</label></li>
 						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals"><label for="decimals" >Show more decimals</label></li>
-				<!--	<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkCustom()" id="custom" ><label for="custom">Show unlisted tokens</label></li> -->
 						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkRemember()" id="remember" ><label for="remember">Remember my address</label></li>
 						<li><label>Transactions from last <input type="number" id="days" onchange="validateDays(this.value)" value="3" min="1" max="999" step="1"> days</label></li>
 					</ul>
@@ -128,6 +129,9 @@
 					<thead></thead>
 					<tbody></tbody>
 					</table>
+					<br>
+					<span class="label label-primary">Name</span> Officially listed on EtherDelta. <br>
+					<span class="label label-warning">Name</span> Trades on EtherDelta without listing.
 							<p id = "contract"> </p>
 			 <!-- <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p> -->
 			<!-- <span class="label label-primary">Name</span> Officially listed token <br>
@@ -142,6 +146,9 @@
 					<thead></thead>
 					<tbody></tbody>
 					</table>
+					<br>
+					<span class="label label-success">Name</span> Deposit into EtherDelta <br>
+					<span class="label label-danger">Name</span> Withdraw to Wallet
 							<p id = "contract"> </p>
 			  <!-- <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p> -->
 			

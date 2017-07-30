@@ -24,37 +24,42 @@
 	let hideZero = true;
     let decimals = false;
 	let fixedDecimals = 3; 
-	let customTokens = false;
     let remember = false;
 	
 	let showTransactions = true;
     let showBalances = true;	
+	let showCustomTokens = false;
 	
-	let columns;
 
     // user input & data
 	let publicAddr = '';
     let lastResult = undefined;
 	let lastResult2 = undefined;
+	let lastResult3 = undefined;
 	
 	// config
+	let tokenCount = 0; //auto loaded
 	let blocktime = 17;
 	let blocknum = -1;
 	let startblock = 0;
 	let endblock = 99999999	
 	let transactionDays = 3;
-	let walletWarningBalance = 0.005;
+	let walletWarningBalance = 0.003;
+	
+	let uniqueTokens = {};
+	let balances= {};
 	
 	// placeholder
-    let balances = { 
+    let balancesPlaceholder = { 
         ETH: {
             Name: 'ETH',
             Wallet: 0,
             EtherDelta: 0,
             Total: 0,
-			Custom: false,
+			Unlisted: false,
+			Address:'',
         },
-    }
+    };
 	
 	// placeholder
 	let transactionsPlaceholder = [
@@ -64,6 +69,7 @@
 			Value: 0,
 			Hash: '',
 			Date: toDateTimeNow(),
+			Unlisted: false,
 		}
 	];
 		
@@ -102,6 +108,21 @@
 				_delta.config.pairs = module.exports.pairs;
 			}
 			
+			_delta.config.customTokens = offlineCustomTokens;
+			
+			for(let i = 0; i < _delta.config.tokens.length; i++)
+			{
+				let token = _delta.config.tokens[i];
+				if(!uniqueTokens[token.addr])
+					uniqueTokens[token.addr] = token;
+			}
+			for(let i = 0; i < _delta.config.customTokens.length; i++)
+			{
+				let token = _delta.config.customTokens[i];
+				if(!uniqueTokens[token.addr])
+					uniqueTokens[token.addr] = token;
+			}
+			
 			initiated = true;
 			if(autoStart)
 				myClick();
@@ -119,7 +140,7 @@
 		
 		$('#zero').prop('checked', hideZero);
         $('#decimals').prop('checked', decimals);
-		$('#custom').prop('checked', customTokens);
+		$('#custom').prop('checked', showCustomTokens);
 		
 		// detect enter & keypresses in input
         $('#address').keypress(function(e) 
@@ -174,7 +195,6 @@
 		changeZero = true;
         hideZero = $('#zero').prop('checked');
         if (lastResult) {
-			//table1Loaded =  false;
             $('#resultTable tbody').empty();
             makeTable(lastResult, hideZero);
         } 
@@ -214,6 +234,33 @@
 		changedDecimals = false;
     }
 
+	function checkCustom()
+	{
+		showCustomTokens = $('#custom').prop('checked');
+		if(showCustomTokens) 
+		{
+			if(lastResult)
+			{
+				if(lastResult3)
+				{
+					makeTable(lastResult, hideZero);
+				}
+				else
+					getBalances();
+			}
+			if(lastResult2)
+				makeTable2(lastResult2);
+		}
+		else
+		{
+			if(lastResult)
+				makeTable(lastResult, hideZero);
+			if(lastResult2)
+				makeTable2(lastResult2);
+		}
+	}
+	
+	
 	function disableInput(disable)
 	{
 		$('#refreshButton').prop('disabled', disable);
@@ -273,11 +320,6 @@
 			$('#loadingTransactions').hide();
 	}
 	
-	function checkCustom()
-	{
-		customTokens = $('#custom').prop('checked');
-	}
-	
 	function myClick()
 	{
 		if(running)
@@ -319,12 +361,13 @@
 		trigger_1 = true;
 		trigger_2 = true;
 		
-        
+        lastResult = undefined;
+		lastResult2 = undefined;
+		lastResult3 = undefined;
 		
         if (publicAddr) 
 		{	
 			setStorage();
-			//getEthPlorerTokens(publicAddr);
 		
 			getTrans();
 			getBalances();
@@ -342,21 +385,43 @@
 		
 		if(showBalances)
 		{
+			balances = {};
+			
 			trigger_1 = false;
 			disableInput(true);
 			loadedW = 0; // wallet async load progress
 			loadedED = 0; // etherdelta async load progress
 			$('#resultTable tbody').empty();
 			showLoading(true,false);
-			for (let i = 0; i <_delta.config.tokens.length; i++) 
+			 
+			tokenCount = _delta.config.tokens.length;
+			let count1 = tokenCount;
+			if(showCustomTokens && _delta.config.customTokens)
+				tokenCount += _delta.config.customTokens.length;
+			
+			// init listed tokens at 0
+			for (let i = 0; i < tokenCount; i++) 
 			{
-                let token = _delta.config.tokens[i];
+				let token = undefined;
+				let custom = false;
+				if(i < count1)
+				{
+					token = _delta.config.tokens[i];
+				}
+				else
+				{
+					token = _delta.config.customTokens[i - count1];
+					custom = true;
+				}
+             
                 balances[token.name] = {
                     Name: token.name,
                     Wallet: 0,
                     EtherDelta: 0,
+					Unlisted: custom,
+					Address: token.addr,
                 };
-				
+
                 if (token.name === 'ETH') {
                     getEthBalanceW(publicAddr);
                     getTokenBalanceED(token, publicAddr);
@@ -379,7 +444,6 @@
 			trigger_2 = false;
 			disableInput(true);
 			
-			$('#resultTransactions tbody').empty();
 			showLoading(false, true);
 				
 			$('#transactionsTable tbody').empty();
@@ -517,44 +581,42 @@
 	// Functions - requests
 	// ##########################################################################################################################################
 	
-	function getEthPlorerTokens(addr)
+	function getCustomTokens()
 	{
-		console.log('start plorer');
-		$.getJSON('https://api.ethplorer.io/getAddressInfo/'+ addr + '?apiKey=freekey', (result) => 
+		
+		$.getJSON('https://api.ethplorer.io/getAddressInfo/'+ _delta.config.contractAddr + '?apiKey=freekey', (result) => 
 		{
 			let customTokens = [];
-			console.log('end plorer');
-			if(result)
-			{
-				let ethbal = result.ETH.balance;
-				
+			if(result && result.tokens.length > 0)
+			{	
 				for(var i = 0; i < result.tokens.length; i++)
 				{
 					let tk = result.tokens[i];
+					
 					if(tk.tokenInfo !== undefined)
 					{
-						let token = {
-							addr: tk.tokenInfo.address,
-							name: tk.tokenInfo.symbol,
-							decimals: tk.tokenInfo.decimals,
+						let tokenName = tk.tokenInfo.symbol;
+						let addr = tk.tokenInfo.address;
+						if(!uniqueTokens[addr])
+						{
+							let token = {
+								addr: tk.tokenInfo.address,
+								name: tokenName,  // nearly always symbol is the name on etherdelta (not: sonm,dice )
+								longname: tk.tokenInfo.name,
+								decimals: tk.tokenInfo.decimals,
+							};
+							uniqueTokens[addr] = token;
+							customTokens.push(token);						
 						}
-						customTokens.push(token);
 					}
-					
 				}
 			}
-			
-			console.log('parsed tokens');
-			//.ETH.balance 
-			//.tokens[]
-					//.tokeninfo.address  .symbol .decimals
-				//	.balance
-		
+			console.log('retrieved custom tokens ethplorer');
+			_delta.config.customTokens = customTokens;
 		});
-		
 	} 
 	
-	 function getEthBalance(address, callback)
+	function getEthBalance(address, callback)
 	{
         let url = `https://api.etherscan.io/api?module=account&action=balance&address=${  address   }&tag=latest`;
 
@@ -607,6 +669,8 @@
         });
     }
 
+
+	
 	// get wallet balance tokens
     function getTokenBalanceW(token, address)
 	{
@@ -614,7 +678,7 @@
 		{
             if (!errBalance) 
 			{
-                balances[token.name].Wallet = _util.weiToEth(resultBalance, _delta.getDivisor(token.addr));
+                balances[token.name].Wallet = _util.weiToEth(resultBalance, divisorFromDecimals(token.decimals));
             }
             loadedW++;
             finished();
@@ -628,10 +692,9 @@
         _util.call(_delta.web3, _delta.contractEtherDelta,_delta.config.contractEtherDeltaAddr, 'balanceOf', [token.addr, address], (err, result) => 
 			{
                 if (!err) {
-                    let availableBalance = _util.weiToEth(result, _delta.getDivisor(token));
+                    let availableBalance = _util.weiToEth(result, divisorFromDecimals(token.decimals));
                     if (availableBalance) {
-                        balances[token.name]['EtherDelta(8)'] = Number(availableBalance).toFixed(8);
-                        balances[token.name]['EtherDelta'] = Number(availableBalance).toFixed(3);
+                        balances[token.name].EtherDelta = availableBalance;
                     }
                 }
                 loadedED++;
@@ -682,7 +745,7 @@
 				if(tx.from.toLowerCase() === contractAddr)
 				{	
 					let val = _util.weiToEth(Number(tx.value));
-					let trans = createOutputTransaction('Withdraw', 'ETH', val, tx.hash, tx.timeStamp);
+					let trans = createOutputTransaction('Withdraw', 'ETH', val, tx.hash, tx.timeStamp, false, '');
 					outputTransactions.push(trans);
 					withdrawHashes[tx.hash.toLowerCase()] = true;
 				}
@@ -697,10 +760,10 @@
 				{
 					let val = Number(tx.value);
 					let txto = tx.to.toLowerCase();
-					if(val > 0 && txto === contractAddr)
+					if(val > 0 && txto === contractAddr) // eth deposit
 					{
 						let val2 = _util.weiToEth(val);
-						let trans = createOutputTransaction('Deposit', 'ETH', val2, tx.hash, tx.timeStamp);
+						let trans = createOutputTransaction('Deposit', 'ETH', val2, tx.hash, tx.timeStamp, false, '');
 						outputTransactions.push(trans);
 					}
 					else if(val == 0 && txto == contractAddr) 
@@ -724,10 +787,11 @@
 					let unpacked = _util.processInputMethod (_delta.web3, _delta.contractEtherDelta, tokens[l].input);
 					if(unpacked && (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken'))
 					{
-						let token = _delta.getToken(unpacked.params[0].value);
+						let token = uniqueTokens[unpacked.params[0].value];
 						if(token && token.addr)
 						{
-							let dvsr = _delta.getDivisor(token.addr);
+							let unlisted = token.longname && true;
+							let dvsr = divisorFromDecimals(token.decimals)
 							let val = _util.weiToEth(unpacked.params[1].value, dvsr);
 							let type = '';
 							if(unpacked.name === 'withdrawToken')
@@ -738,7 +802,7 @@
 							{
 								type = 'Deposit';
 							}
-							let trans = createOutputTransaction(type, token.name, val, tokens[l].hash, tokens[l].timeStamp);		
+							let trans = createOutputTransaction(type, token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr);		
 							outputTransactions.push(trans);
 						}	
 					}
@@ -764,7 +828,7 @@
 			//outputTransactions.sort((a,b) => {b.val - a.val;});
 			done();
 						
-			function createOutputTransaction(type, name, val, hash, timeStamp)
+			function createOutputTransaction(type, name, val, hash, timeStamp, unlisted, tokenaddr)
 			{
 				return {
 					Type: type,
@@ -772,6 +836,8 @@
 					Value: val,
 					Hash: hash,
 					Date: toDateTime(timeStamp),
+					Unlisted: unlisted,
+					TokenAddr: tokenaddr,
 				};
 			}
 			
@@ -812,32 +878,48 @@
 	// callback when balance request completes
     function finished()
 	{	
+	/*tokenCount = _delta.config.tokens.length;
+			let count1 = tokenCount;
+			if(showCustomTokens && _delta.config.customTokens)
+				tokenCount += _delta.config.customTokens.length;*/
+	
 		//check if all requests are complete
-        let count =_delta.config.tokens.length;
-      
-		// show progress
-        if (loadedED < count || loadedW < count) {
-          //  document.getElementById('loadingBalances').innerHTML = "Retrieving balances: Wallet (" + loadedW + '/' + count + ')  EtherDelta (' + loadedED + '/' + count + ')';
+        if (loadedED < tokenCount || loadedW < tokenCount) {
             return;
         }
-
+		
 		// get totals
-        for (var i = 0; i <_delta.config.tokens.length; i++) 
+        for (var i = 0; i < tokenCount; i++) 
 		{
-            let token =_delta.config.tokens[i];
+			let token = undefined;
+			if(i < _delta.config.tokens.length)
+			{
+				token = _delta.config.tokens[i];
+			}
+			else
+			{
+				token = _delta.config.customTokens[i - _delta.config.tokens.length];
+			}
             let bal = balances[token.name];
-            bal.Total = Number(bal.Wallet) + Number(bal.EtherDelta);
-            balances[token.name] = bal;
+			//if(bal)
+			{
+				bal.Total = Number(bal.Wallet) + Number(bal.EtherDelta);
+				balances[token.name] = bal;
+			}
         }
 
         let result = Object.values(balances);
         lastResult = result;
+		if(showCustomTokens)
+			lastResult3 = result;
 
 		makeTable(result, hideZero);
     }
 
 	function makeTable(result, hideZeros)
 	{
+		
+		$('#resultTable tbody').empty();
 		let filtered = result;
 		let loaded = table1Loaded;
 		if(changedDecimals)
@@ -849,6 +931,13 @@
 				return (Number(x.Total).toFixed(fixedDecimals) !== Number(0).toFixed(fixedDecimals) || x.Name === 'ETH');
             });
 		}
+		/*
+		if(!showCustomTokens)
+		{
+			filtered = result.filter(x => {
+				return !(x.Unlisted);
+            });
+		} */
         
 		buildHtmlTable('#resultTable', filtered, loaded, 'balances');
         trigger();
@@ -856,6 +945,7 @@
 
 	function makeTable2(result)
 	{
+		$('#transactionsTable tbody').empty();
 		let loaded = table2Loaded;
 		if(changedDecimals)
 			loaded = false;
@@ -865,7 +955,8 @@
 	
 	function placeholderTable()
 	{
-        let result = Object.values(balances);
+		balances = balancesPlaceholder;
+        let result = Object.values(balancesPlaceholder);
 		makeTable(result, false);
 		let result2 = transactionsPlaceholder;
 		makeTable2(result2);
@@ -999,10 +1090,12 @@
 	function buildHtmlTable(selector, myList, loaded, type) 
 	{
         let body = $(selector +' tbody');
-        columns = addAllColumnHeaders(myList, selector, loaded, type);
+        let columns = addAllColumnHeaders(myList, selector, loaded, type);
         
         for (var i = 0; i < myList.length; i++) 
 		{
+			if(!showCustomTokens && myList[i].Unlisted)
+					continue;
             let row$ = $('<tr/>');
 
             if(type === 'transactions')
@@ -1020,7 +1113,10 @@
 					}
 					else if(head == 'Name')
 					{
-						row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+						if( !myList[i].Unlisted)
+							row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+						else
+							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.github.io/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
 					}
 					else if(head == 'Type')
 					{
@@ -1045,6 +1141,8 @@
             }
 			else if(type === 'balances')
             {
+				//if(!balances[myList[i].Name])
+					//continue;
                 for (var colIndex = 0; colIndex < columns.length; colIndex++) 
 				{
                     let cellValue = myList[i][columns[colIndex]];
@@ -1058,7 +1156,10 @@
 					}
 					else if(head == 'Name')
 					{
-						row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+						if(! balances[cellValue].Unlisted)
+							row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+						else
+							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.github.io/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));
 					}
                 }
             }
@@ -1160,5 +1261,13 @@
 		return t.toLocaleString('en-En',{month: "long", day: "numeric", hour: 'numeric', minute: 'numeric'});
 	}
 
-	
+	function divisorFromDecimals(decimals)
+	{
+		let result = 1000000000000000000;
+		if (decimals !== undefined) 
+		{
+			result = Math.pow(10, decimals);
+		}
+		return new BigNumber(result);
+	}
 }

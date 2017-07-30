@@ -622,7 +622,7 @@
 
         $.getJSON(url, function(body) {
             const result = body; // {	status:1 , message: ok, result: }
-            if (status ==="1" && result) 
+            if (result && result.status === '1') 
 			{
                 const balance = new BigNumber(result.result);
                 callback(false, balance);
@@ -640,7 +640,7 @@
 
         $.getJSON(url, function(body) {
             const result = body; // {	status:1 , message: ok, result: }
-            if (status === "1" && result)
+            if (result && result.status == "1")
 			{
                 const balance = new BigNumber(result.result);
                 callback(false, balance);

@@ -49,6 +49,8 @@
 	let uniqueTokens = {};
 	let balances= {};
 	
+
+	
 	// placeholder
     let balancesPlaceholder = { 
         ETH: {
@@ -738,6 +740,8 @@
 			let itxs = inTransResult; //withdraws
 			let withdrawHashes = {};
 			
+			let gasCosts = [];
+			
 			// internal tx, withdraws
 			for(var i = 0; i < itxs.length; i++)
 			{
@@ -806,7 +810,7 @@
 							outputTransactions.push(trans);
 						}	
 					}
-				} /*else if(method === '0x278b8c0e') // cancel
+				} else if(method === '0x278b8c0e') // cancel
 				{
 					
 			
@@ -817,13 +821,29 @@
 			
 				} else
 				{
-					
+					gasCosts.push(tokens[l].gasUsed);
 					//Function: trade(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, address user, uint8 v, bytes32 r, bytes32 s, uint256 amount)
 					//MethodID: 0x0a19b14a
 					
-				}*/
+				}
 			} 
 			
+			let min = 999999999;
+			let max = 0;
+			let avg = 0;
+			let sum = 0;
+			for(var i = 0; i < gasCosts.length; i++)
+			{
+				let cost = Number(gasCosts[i]);
+				sum += cost;
+				
+				if(cost < min )
+					min = cost;
+				if(cost > max)
+					max= cost;
+			}
+			avg = sum / gasCosts.length;
+			var b = 100;
 			// sort by timestamp descending
 			//outputTransactions.sort((a,b) => {b.val - a.val;});
 			done();
@@ -1252,13 +1272,30 @@
 		var utcSeconds = secs;
 		var d = new Date(0);
 		d.setUTCSeconds(utcSeconds);
-		return d.toLocaleString('en-En',{month: "long", day: "numeric", hour: 'numeric', minute: 'numeric'});
+		return formatDate(d);
 	}
 	
 	function toDateTimeNow()
 	{
 		var t = new Date();
-		return t.toLocaleString('en-En',{month: "long", day: "numeric", hour: 'numeric', minute: 'numeric'});
+		return formatDate(t);
+	}
+
+	function formatDate(d)
+	{
+		var month = '' + (d.getMonth() + 1),
+			day = '' + d.getDate(),
+			year = d.getFullYear(),
+			hour = d.getHours(),
+			min = d.getMinutes();
+			
+
+		if (month.length < 2) month = '0' + month;
+		if (day.length < 2) day = '0' + day;
+		if (hour < 10) hour = '0' + hour;
+		if (min < 10) min = '0' + min;
+
+		return [year, month, day].join('-') + ' '+ [hour,min].join(':');
 	}
 
 	function divisorFromDecimals(decimals)

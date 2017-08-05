@@ -49,7 +49,9 @@ module.exports = (config) => {
             }
           });
         } else {
-          utility.getURL(`${config.homeURL}/${filename}`, (err, body) => {
+			let home =  window.location;
+			home = home.protocol + "//" + home.host + "/" + home.pathname.split('/')[1];
+          utility.getURL(`${home}/${filename}`, (err, body) => {
             if (err) {
               callback(err, undefined);
             } else {
@@ -359,7 +361,7 @@ module.exports = (config) => {
     }
     return ethUtil.toChecksumAddress(addr);
   };
-
+  
   utility.loadContract = function loadContract(web3, sourceCode, address, callback) {
     utility.readFile(`${sourceCode}.interface`, (errAbi, resultAbi) => {
       const abi = JSON.parse(resultAbi);
@@ -483,10 +485,11 @@ module.exports = (config) => {
 /* eslint-env browser */
 
 module.exports = {
-  homeURL: 'https://etherdelta.github.io',
+  homeURL: '',
   contractEtherDelta: 'smart_contract/etherdelta.sol',
   contractToken: 'smart_contract/token.sol',
-  contractReserveToken: 'smart_contract/reservetoken.sol',
+  contractDeltaBalance: 'smart_contract/deltabalances.sol',
+  contractDeltaBalanceAddr: '0xbe7B696Ce8789bD278F85583cFcdBbA1d7666aAf',
   contractEtherDeltaAddrs: [
     { addr: '0x8d12a197cb00d4747a1fe03395095ce2a5cc6819', info: 'Deployed 02/09/2017' },
     { addr: '0x373c55c277b866a69dc047cad488154ab9759466', info: 'Deployed 10/24/2016 -- please withdraw' },
@@ -764,6 +767,7 @@ function EtherDelta() {
   this.web3 = undefined;
   this.daysOfData = 7;
   this.minGas = 0.005;
+  this.contractDeltaBalance = undefined;
   /*
   window.addEventListener('load', () => {
     this.startEtherDelta();
@@ -792,10 +796,11 @@ EtherDelta.prototype.alertSuccess = function alertSuccess(message) {
 EtherDelta.prototype.addressLink = function addressLink(address) {
   return `https://${this.config.ethTestnet ? `${this.config.ethTestnet}.` : ''}etherscan.io/address/${address}`;
 };
+/*
 EtherDelta.prototype.contractAddr = function contractAddr(addr) {
   this.config.contractEtherDeltaAddr = addr;
 };
-
+*/
 
 EtherDelta.prototype.getDivisor = function getDivisor(tokenOrAddress) {
   let result = 1000000000000000000;
@@ -833,6 +838,8 @@ EtherDelta.prototype.getToken = function getToken(addrOrToken, name, decimals) {
 
 
 
+
+
 EtherDelta.prototype.loadWeb3 = function loadWeb3(callback) {
   this.config = config;
   // web3
@@ -848,6 +855,7 @@ EtherDelta.prototype.loadWeb3 = function loadWeb3(callback) {
   
 };
 
+/*
 EtherDelta.prototype.changeContract = function changeContract(index, callback)
 {
 	this.web3.version.getNetwork((error, version) => {
@@ -871,41 +879,52 @@ EtherDelta.prototype.changeContract = function changeContract(index, callback)
 			console.log('switched contract');
       });
   });
-};
+}; */
 
 EtherDelta.prototype.initContracts = function initContracts(callback) {
-  this.web3.version.getNetwork((error, version) => {
-    if (!error && version && Number(version) !== 1 && configName !== 'testnet') {
-      this.dialogError('You are connected to the Ethereum testnet. Please connect to the Ethereum mainnet.');
-    }
-    this.config = config;
-	this.config.contractEtherDeltaAddr = this.config.contractEtherDeltaAddrs[0].addr;
+	this.web3.version.getNetwork((error, version) => {
+		if (!error && version && Number(version) !== 1 && configName !== 'testnet') {
+			this.dialogError('You are connected to the Ethereum testnet. Please connect to the Ethereum mainnet.');
+		}
+		this.config = config;
+		this.config.contractEtherDeltaAddr = this.config.contractEtherDeltaAddrs[0].addr;
 	
-    if (Array.isArray(this.config.apiServers)) {
-      this.config.apiServer = this.config.apiServers[
-        Math.floor(Math.random() * this.config.apiServers.length)];
-      console.log('Selected API', this.config.apiServer);
-    }
+		if (Array.isArray(this.config.apiServers)) {
+			this.config.apiServer = this.config.apiServers[
+				Math.floor(Math.random() * this.config.apiServers.length)];
+			console.log('Selected API', this.config.apiServer);
+		}
 	
     });
     // load contract
     utility.loadContract(
-      this.web3,
-      this.config.contractEtherDelta,
-      this.config.contractEtherDeltaAddr,
-      (err, contractEtherDelta) => {
-        this.contractEtherDelta = contractEtherDelta;
-        utility.loadContract(
-          this.web3,
-          this.config.contractToken,
-          '0x0000000000000000000000000000000000000000',
-          (errLoadContract, contractToken) => {
-            this.contractToken = contractToken;
-            
-			callback();
-       
-      });
-  });
+		this.web3,
+		this.config.contractEtherDelta,
+		this.config.contractEtherDeltaAddr,
+		(err, contractEtherDelta) => 
+		{
+			
+			this.contractEtherDelta = contractEtherDelta;
+			utility.loadContract(
+				this.web3,
+				this.config.contractToken,
+				'0x0000000000000000000000000000000000000000',
+				(errLoadContract, contractToken) => {
+					this.contractToken = contractToken;
+					
+					utility.loadContract(
+						this.web3,
+						this.config.contractDeltaBalance,
+						this.config.contractDeltaBalanceAddr,
+						(err, contractDeltaBalance) => {
+							this.contractDeltaBalance = contractDeltaBalance;
+							callback();
+						});
+					
+				});
+			
+		});
+	
 };
 EtherDelta.prototype.startEtherDelta = function startEtherDelta(callback) {
   console.log('Beginning init', new Date());

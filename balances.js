@@ -28,7 +28,7 @@
 	
 	let showTransactions = true;
     let showBalances = true;	
-	let showCustomTokens = false;
+	let showCustomTokens = true;
 	
 
     // user input & data
@@ -43,7 +43,7 @@
 	let blocknum = -1;
 	let startblock = 0;
 	let endblock = 99999999	
-	let transactionDays = 3;
+	let transactionDays = 1;
 	let walletWarningBalance = 0.003;
 	
 	let uniqueTokens = {};
@@ -183,6 +183,12 @@
 				// auto start loading
 				myClick();
 			}
+		} 
+		else if(publicAddr) //autoload when remember is active
+		{
+			autoStart = true;
+			// auto start loading
+			myClick();
 		}
 	}
 		
@@ -241,17 +247,17 @@
 		showCustomTokens = $('#custom').prop('checked');
 		if(showCustomTokens) 
 		{
-			if(lastResult)
+			if(lastResult && lastResult2)
 			{
-				if(lastResult3)
-				{
-					makeTable(lastResult, hideZero);
-				}
-				else
-					getBalances();
-			}
-			if(lastResult2)
+
+				makeTable(lastResult, hideZero);
 				makeTable2(lastResult2);
+
+			}
+			else {
+				getAll();
+			}
+				
 		}
 		else
 		{
@@ -398,7 +404,7 @@
 			 
 			tokenCount = _delta.config.tokens.length;
 			let count1 = tokenCount;
-			if(showCustomTokens && _delta.config.customTokens)
+			//if(showCustomTokens && _delta.config.customTokens)
 				tokenCount += _delta.config.customTokens.length;
 			
 			// init listed tokens at 0
@@ -423,15 +429,10 @@
 					Unlisted: custom,
 					Address: token.addr,
                 };
-
-                if (token.name === 'ETH') {
-                    getEthBalanceW(publicAddr);
-                    getTokenBalanceED(token, publicAddr);
-                } else {
-                    getTokenBalanceW(token, publicAddr);
-                    getTokenBalanceED(token, publicAddr);
-                }
             }
+				getAllBalances();
+				//getDeltaBalances();
+				//getWalletBalances();
 		}
 	}	
 	
@@ -463,7 +464,7 @@
 				{
 					if(num)
 					{
-						endblock = num;
+						//endblock = num;
 						blocknum = num;
 						startblock = getStartBlock(blocknum, transactionDays);
 					}
@@ -583,6 +584,7 @@
 	// Functions - requests
 	// ##########################################################################################################################################
 	
+	/*
 	function getCustomTokens()
 	{
 		
@@ -617,92 +619,139 @@
 			_delta.config.customTokens = customTokens;
 		});
 	} 
+	*/
 	
-	function getEthBalance(address, callback)
+	const maxPerRequest = 120;
+	function getDeltaBalances()
 	{
-        let url = `https://api.etherscan.io/api?module=account&action=balance&address=${  address   }&tag=latest`;
-
-        $.getJSON(url, function(body) {
-            const result = body; // {	status:1 , message: ok, result: }
-            if (result && result.status === '1') 
-			{
-                const balance = new BigNumber(result.result);
-                callback(false, balance);
-            } 
-			else {
-                callback(true, undefined);
-            }
-        });
-
-    }
-
-    function getTokenBalance(token, address, callback)
-	{
-        let url = `https://api.etherscan.io/api?module=account&action=tokenbalance&contractaddress=${ token.addr }&address=${ address }&tag=latest`;
-
-        $.getJSON(url, function(body) {
-            const result = body; // {	status:1 , message: ok, result: }
-            if (result && result.status == "1")
-			{
-                const balance = new BigNumber(result.result);
-                callback(false, balance);
-            } 
-			else {
-                callback(true, undefined);
-            }
-        });
-    }
-	
-	  // get wallet balance ETH
-    function getEthBalanceW(address)
-	{
-        getEthBalance(address, (errBalance, resultBalance) => 
+		let tokens2 = _delta.config.tokens.map((token)=>{return token.addr;});
+		//if(showCustomTokens)
 		{
-            if (!errBalance) 
-			{
-                balances.ETH.Wallet = _util.weiToEth(resultBalance);
-				if(balances.ETH.Wallet < walletWarningBalance)
-				{
-					showHint('Your ETH balance in wallet is low, EtherDelta deposit/withdraw might fail due to gas costs');
+			tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
+		}
+		for(let i = 0; i < tokens2.length; i+= maxPerRequest)
+		{
+			deltaBalances(i, i+maxPerRequest, tokens2);
+		}
+		
+		function deltaBalances(startIndex, endIndex, tokens2)
+		{
+			 let tokens = tokens2.slice(startIndex, endIndex);
+			//deltaBalances(address etherdelta, address user,  address[] tokens) constant returns (uint[])
+			 _util.call(
+			  _delta.web3,
+			  _delta.contractDeltaBalance,
+			  _delta.config.contractDeltaBalanceAddr,
+			  'deltaBalances',
+			  [_delta.config.contractEtherDeltaAddr, publicAddr, tokens],
+			  (err, result) => 
+			  {
+				const returnedBalances = result;
+				if(returnedBalances && returnedBalances.length > 0)
+				{				
+					for(let i = 0; i< tokens.length; i++)
+					{
+						let token = uniqueTokens[tokens[i]];
+						balances[token.name].EtherDelta = _util.weiToEth(returnedBalances[i], divisorFromDecimals(token.decimals));
+						if(token.name === 'ETH')
+						{
+							if(balances.ETH.Wallet < walletWarningBalance)
+							{
+								showHint('Your ETH balance in wallet is low, EtherDelta deposit/withdraw might fail due to gas costs');
+							}
+						}
+						loadedED++;
+						finished();
+					}
 				}
-            }
-            loadedW++;
-            finished();
-        });
-    }
-
-
+			  });
+		}
+		
+	}
 	
-	// get wallet balance tokens
-    function getTokenBalanceW(token, address)
+	function getAllBalances()
 	{
-        getTokenBalance(token, address, (errBalance, resultBalance) => 
+		let tokens2 = _delta.config.tokens.map((token)=>{return token.addr;});
+	//	if(showCustomTokens)
+		{	
+			tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
+		}
+		for(let i = 0; i < tokens2.length; i+= maxPerRequest)
 		{
-            if (!errBalance) 
-			{
-                balances[token.name].Wallet = _util.weiToEth(resultBalance, divisorFromDecimals(token.decimals));
-            }
-            loadedW++;
-            finished();
-        });
-    }
-
-    // eth & tokens in etherdelta
-    function getTokenBalanceED(token, address)
+			allBalances(i, i+maxPerRequest, tokens2);
+		}
+		
+		function allBalances(startIndex, endIndex, tokens2)
+		{
+			let tokens = tokens2.slice(startIndex, endIndex);
+			//walletBalances(address user,  address[] tokens) constant returns (uint[]) {
+			 _util.call(
+			  _delta.web3,
+			  _delta.contractDeltaBalance,
+			  _delta.config.contractDeltaBalanceAddr,
+			  'allBalances',
+			  [_delta.config.contractEtherDeltaAddr, publicAddr, tokens],
+			  (err, result) =>
+			  {
+				const returnedBalances = result;
+				if(returnedBalances && returnedBalances.length > 0)
+				{	
+					
+					for(let i = 0; i< tokens.length; i++)
+					{
+						let j = i * 2;
+						let token = uniqueTokens[tokens[i]];
+						balances[token.name].EtherDelta = _util.weiToEth(returnedBalances[j], divisorFromDecimals(token.decimals));
+						balances[token.name].Wallet = _util.weiToEth(returnedBalances[j +1], divisorFromDecimals(token.decimals));
+						loadedW++;
+						loadedED++;
+						finished();
+					}
+				}
+			  });
+		}
+	}
+	
+	function getWalletBalances()
 	{
-
-        _util.call(_delta.web3, _delta.contractEtherDelta,_delta.config.contractEtherDeltaAddr, 'balanceOf', [token.addr, address], (err, result) => 
-			{
-                if (!err) {
-                    let availableBalance = _util.weiToEth(result, divisorFromDecimals(token.decimals));
-                    if (availableBalance) {
-                        balances[token.name].EtherDelta = availableBalance;
-                    }
-                }
-                loadedED++;
-                finished();
-            });
-    }
+		let tokens2 = _delta.config.tokens.map((token)=>{return token.addr;});
+		//if(showCustomTokens)
+		{
+			tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
+		}
+		for(let i = 0; i < tokens2.length; i+= 150)
+		{
+			walletBalances(i, i+150, tokens2);
+		}
+		
+		function walletBalances(startIndex, endIndex, tokens2)
+		{
+			let tokens = tokens2.slice(startIndex, endIndex);
+			//walletBalances(address user,  address[] tokens) constant returns (uint[]) {
+			 _util.call(
+			  _delta.web3,
+			  _delta.contractDeltaBalance,
+			  _delta.config.contractDeltaBalanceAddr,
+			  'walletBalances',
+			  [publicAddr, tokens],
+			  (err, result) => 
+			  {
+				const returnedBalances = result;
+				if(returnedBalances && returnedBalances.length > 0)
+				{				
+					for(let i = 0; i< tokens.length; i++)
+					{
+						let token = uniqueTokens[tokens[i]];
+						balances[token.name].Wallet = _util.weiToEth(returnedBalances[i], divisorFromDecimals(token.decimals));
+						loadedW++;
+						finished();
+					}
+				}
+			  });
+		}
+	}
+	
+	
 	
 	function getTransactions()
 	{
@@ -888,6 +937,7 @@
         if (loadedED < tokenCount || loadedW < tokenCount) {
             return;
         }
+		
 		
 		// get totals
         for (var i = 0; i < tokenCount; i++) 

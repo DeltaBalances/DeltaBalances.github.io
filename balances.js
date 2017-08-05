@@ -410,7 +410,6 @@
 			loadedW = 0; // wallet async load progress
 			loadedED = 0; // etherdelta async load progress
 			loadedBid = 0;
-			getPrices();
 			$('#resultTable tbody').empty();
 			showLoading(true,false);
 			 
@@ -445,6 +444,7 @@
 					Address: token.addr,
                 };
             }
+				getPrices();
 				getAllBalances();
 				//getDeltaBalances();
 				//getWalletBalances();

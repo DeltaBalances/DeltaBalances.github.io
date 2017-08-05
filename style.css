@@ -103,3 +103,8 @@ table.tablesorter th.tablesorter-headerUnSorted {
 	text-align:right;
 	padding-right:30px; */
 }
+
+#resultTable td:nth-child(5)
+{
+    border-left: 1px solid #ddd;
+}

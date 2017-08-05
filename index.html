@@ -95,10 +95,14 @@
 						<div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block;" ></div>
 						<div style="padding-left: 3%; float:left; white-space:nowrap;" ><p style ="line-height:64px; white-space:nowrap; display: inline-block;" id="addr">Enter your address to get started</p></div>
 					</div>
+					<p>Total ETH balance: <span id = 'ethbalance'>?</span><br>
+					Estimated token value: <span id = 'tokenbalance'>?</span></p>
 					<div  style="" id="direct" class = "txt"></div>
 					<br>
-					<p> Looking for a full trade history? Try the official <a target="_blank" href="https://etherdelta.github.io/trades.html">EtherDelta tool</a>
-					<p> Need help with EtherDelta? Read the <a href="https://www.reddit.com/r/EtherDelta/comments/6hrxjw/etherdelta_guides_for_first_time_users/" > guides</a> or use the <a href="https://gitter.im/etherdelta/etherdelta.github.io" >support chat</a>.</p>
+					Looking for a full trade history? Try the official <a target="_blank" href="https://etherdelta.github.io/trades.html">EtherDelta tool</a>
+					<br> Need help with EtherDelta? Read the <a href="https://www.reddit.com/r/EtherDelta/comments/6hrxjw/etherdelta_guides_for_first_time_users/" > guides</a> or use the <a href="https://gitter.im/etherdelta/etherdelta.github.io" >support chat</a>.
+					<br>
+					<br>
 				</div>
 				
 				
@@ -121,7 +125,7 @@
 
     <div class="container">
       <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-7">
 			
 			  <h2>Balances <button id='loadingBalances' onclick ="getBalances()" class="fa fa-refresh" style="display:none;"></button></h2>
 					<br>
@@ -138,7 +142,7 @@
 			 <span class="label label-warning">Name</span> Unlisted token -->
 			
 		</div>
-		<div class="col-md-7">
+		<div class="col-md-5">
 			
 			  <h2>Deposit & Withdraw <button id='loadingTransactions' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button></h2>
 				<br>

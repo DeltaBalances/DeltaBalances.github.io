@@ -16,6 +16,7 @@
 	let table2Loaded = false;
 	let loadedED = 0;
     let loadedW = 0;
+	let loadedBid = 0;
 	let trigger_1 = false;
 	let trigger_2 = false;
 	let running = false;
@@ -60,6 +61,8 @@
             Total: 0,
 			Unlisted: false,
 			Address:'',
+			Bid: '',
+			'Est. ETH': '',
         },
     };
 	
@@ -69,6 +72,7 @@
 			Type: 'Deposit',
 			Name: 'ETH',
 			Value: 0,
+		//	Price: 0,
 			Hash: '',
 			Date: toDateTimeNow(),
 			Unlisted: false,
@@ -88,7 +92,7 @@
     });
 	
 	function init()
-	{
+	{	
 		// borrow some ED code for compatibility
         _delta.startEtherDelta(() => 
 		{	
@@ -155,6 +159,11 @@
 				return true;
 			}
         });
+		
+		$(window).resize(function () { 
+			$("#transactionsTable").trigger("applyWidgets"); 
+			$("#resultTable").trigger("applyWidgets"); 
+		});
 		
 		// contract change
 		$('#contractSelect').change(e => {
@@ -394,11 +403,14 @@
 		if(showBalances)
 		{
 			balances = {};
+
 			
 			trigger_1 = false;
 			disableInput(true);
 			loadedW = 0; // wallet async load progress
 			loadedED = 0; // etherdelta async load progress
+			loadedBid = 0;
+			getPrices();
 			$('#resultTable tbody').empty();
 			showLoading(true,false);
 			 
@@ -426,6 +438,9 @@
                     Name: token.name,
                     Wallet: 0,
                     EtherDelta: 0,
+					Total: 0,
+					Bid: '',
+					'Est. ETH': '',
 					Unlisted: custom,
 					Address: token.addr,
                 };
@@ -620,6 +635,29 @@
 		});
 	} 
 	*/
+	
+	function getPrices()
+	{
+		$.getJSON(_delta.config.apiServer + '/returnTicker/', (result) => {
+			if(result)
+			{
+				let names = Object.keys(result);
+				for(let i = 0; i < names.length; i++)
+				{
+					let name = names[i];
+					name = name.replace('ETH_', '');
+					if(balances[name])
+					{
+						balances[name].Bid = Number(result[names[i]].bid);
+					}
+				}
+			}
+			
+			loadedBid++;
+			finished();
+		});
+		
+	}
 	
 	const maxPerRequest = 120;
 	function getDeltaBalances()
@@ -854,36 +892,132 @@
 							{
 								type = 'Deposit';
 							}
-							let trans = createOutputTransaction(type, token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr);		
+							let trans = createOutputTransaction(type, token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, '');		
 							outputTransactions.push(trans);
 						}	
 					}
-				}/* else if(method === '0x278b8c0e') // cancel
+				} /* else if(method === '0x278b8c0e') // cancel
 				{
-					
-			
 					//Function: cancelOrder(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, uint8 v, bytes32 r, bytes32 s)
 					//MethodID: 0x278b8c0e
 			
+					let unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, tokens[l].input);
+					if(unpacked && (unpacked.name === 'cancelOrder'))
+					{
+						let cancelType = 'sell';
+						let token = undefined;
+						let token2 = undefined;
+						if(unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
+						{
+							cancelType = 'buy';
+							token = uniqueTokens[unpacked.params[2].value];
+							token2 = uniqueTokens[unpacked.params[0].value];
+						}
+						else // buy
+						{
+							token = uniqueTokens[unpacked.params[0].value];
+							token2 = uniqueTokens[unpacked.params[2].value];
+						}
+						
+						if(token && token2 && token.addr && token2.addr)
+						{
+							let amount = 0;
+							let oppositeAmount = 0;
+							if(cancelType === 'sell')
+							{
+								amount = unpacked.params[1].value;
+								oppositeAmount = unpacked.params[3].value;
+							} else
+							{
+								oppositeAmount = unpacked.params[1].value;
+								amount = unpacked.params[3].value;
+							}
+							
+							let unlisted = token.longname && true;
+							let dvsr = divisorFromDecimals(token.decimals)
+							let dvsr2 = divisorFromDecimals(token2.decimals)
+							let val = _util.weiToEth(amount, dvsr);
+							let val2 = _util.weiToEth(oppositeAmount, dvsr2);
+							let price = 0;
+							//if(cancelType === 'sell')
+							{
+								price = val2 / val;
+							}
+	
+							let trans = createOutputTransaction('Cancel ' + cancelType , token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price);		
+							outputTransactions.push(trans);
+						}	
+					}
 					
 			
-				} else
+				}*/ /*else if(method === '0x0a19b14a') // trade
 				{
 
 					//Function: trade(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, address user, uint8 v, bytes32 r, bytes32 s, uint256 amount)
 					//MethodID: 0x0a19b14a
+			
+					let unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, tokens[l].input);
+					if(unpacked && (unpacked.name === 'trade'))
+					{
+						let tradeType = 'sell';
+						let token = undefined;
+						let token2 = undefined;
+						if(unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
+						{
+							tradeType = 'buy';
+							token = uniqueTokens[unpacked.params[2].value];
+							token2 = uniqueTokens[unpacked.params[0].value];
+						}
+						else // buy
+						{
+							token = uniqueTokens[unpacked.params[0].value];
+							token2 = uniqueTokens[unpacked.params[2].value];
+						}
+						
+						if(token && token2 && token.addr && token2.addr)
+						{
+							let amount = 0;
+							let oppositeAmount = 0;
+							if(tradeType === 'sell')
+							{
+								amount = unpacked.params[1].value;
+								oppositeAmount = unpacked.params[3].value;
+							} else
+							{
+								oppositeAmount = unpacked.params[1].value;
+								amount = unpacked.params[3].value;
+							}
+							
+							let unlisted = token.longname && true;
+							let dvsr = divisorFromDecimals(token.decimals)
+							let dvsr2 = divisorFromDecimals(token2.decimals)
+							let val = _util.weiToEth(amount, dvsr);
+							let val2 = _util.weiToEth(oppositeAmount, dvsr2);
+							
+							let price = 0;
+						//	if(tradeType === 'sell')
+							{
+								price = val2 / val;
+							}
+							
+	
+							let trans = createOutputTransaction('Taker ' + tradeType , token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price);		
+							outputTransactions.push(trans);
+						}	
+					}
 					
 				} */
 			} 
 
 			done();
 						
-			function createOutputTransaction(type, name, val, hash, timeStamp, unlisted, tokenaddr)
+			function createOutputTransaction(type, name, val, hash, timeStamp, unlisted, tokenaddr, price)
 			{
 				return {
 					Type: type,
 					Name: name,
 					Value: val,
+				//	Price: price,
 					Hash: hash,
 					Date: toDateTime(timeStamp),
 					Unlisted: unlisted,
@@ -938,10 +1072,13 @@
             return;
         }
 		
+		let sumETH = 0;
+		let sumToken = 0;
 		
 		// get totals
         for (var i = 0; i < tokenCount; i++) 
 		{
+
 			let token = undefined;
 			if(i < _delta.config.tokens.length)
 			{
@@ -952,13 +1089,32 @@
 				token = _delta.config.customTokens[i - _delta.config.tokens.length];
 			}
             let bal = balances[token.name];
-			//if(bal)
+			if(bal)
 			{
 				bal.Total = Number(bal.Wallet) + Number(bal.EtherDelta);
+				bal['Est. ETH'] = '';
+				if(bal.Bid && bal.Total)
+				{
+					if(token.name !== 'ETH')
+					{
+						let val = Number(bal.Bid) * Number(bal.Total);
+						bal['Est. ETH'] = val;
+						sumToken += val;
+					}
+				}
+				if(token.name === 'ETH')
+				{
+					balances.ETH.Bid = '';
+					balances.ETH['Est. ETH'] = bal.Total;
+					sumETH = balances.ETH.Total;
+				}
 				balances[token.name] = bal;
+				
 			}
         }
-
+		$('#ethbalance').html(sumETH.toFixed(fixedDecimals) + ' ETH');
+		$('#tokenbalance').html(sumToken.toFixed(fixedDecimals) + ' ETH');
+		
         let result = Object.values(balances);
         lastResult = result;
 		if(showCustomTokens)
@@ -1137,7 +1293,7 @@
     }
 
 
-    // Builds the HTML Table out of myList.
+ // Builds the HTML Table out of myList.
 	function buildHtmlTable(selector, myList, loaded, type) 
 	{
         let body = $(selector +' tbody');
@@ -1157,10 +1313,20 @@
                     if (cellValue == null) cellValue = "";
 					let head = columns[colIndex];
 					
-					if(head == 'Value')
+					if(head == 'Value' || head == 'Price')
 					{
-						let num = Number(cellValue).toFixed(fixedDecimals);
-						row$.append($('<td/>').html(num));
+						if(cellValue !== "" && cellValue !== undefined)
+						{
+							let dec = fixedDecimals;
+							if(head == 'Price')
+								dec += 2;
+							let num = Number(cellValue).toFixed(dec);
+							row$.append($('<td/>').html(num));
+						}
+						else
+						{
+							row$.append($('<td/>').html(cellValue));
+						}
 					}
 					else if(head == 'Name')
 					{
@@ -1178,6 +1344,14 @@
 						else if(cellValue == 'Withdraw')
 						{
 							row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
+						}
+						else if(cellValue == 'Cancel sell' || cellValue == 'Cancel buy')
+						{
+							row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
+						}
+						else
+						{
+							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
 						}
 					} 
 					else if( head == 'Hash')
@@ -1200,10 +1374,22 @@
                     if (cellValue == null) cellValue = "";
 					let head = columns[colIndex];
 					
-					if(head == 'Total' || head == 'EtherDelta' || head == 'Wallet' )
+					if(head == 'Total' || head == 'EtherDelta' || head == 'Wallet' || head == 'Bid' || head == 'Est. ETH')
 					{
-						let num = Number(cellValue).toFixed(fixedDecimals);
-						row$.append($('<td/>').html(num));
+						if(cellValue !== "" && cellValue !== undefined)
+						{
+							let dec = fixedDecimals;
+							if(head == 'Bid' )
+							{
+								dec +=2;
+							}
+							let num = Number(cellValue).toFixed(dec);
+							row$.append($('<td/>').html(num));
+						} else
+						{
+							row$.append($('<td/>').html(cellValue));
+						}
+						
 					}
 					else if(head == 'Name')
 					{
@@ -1211,6 +1397,9 @@
 							row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
 							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.github.io/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));
+					} else
+					{
+						row$.append($('<td/>').html(cellValue));
 					}
                 }
             }
@@ -1219,7 +1408,7 @@
     }
 
 	
-	let normalHeaders = {'Name': 1, 'Wallet':1, 'EtherDelta':1, 'Total':1, 'Value':1,'Type':1, 'Hash':1, 'Date':1};
+	let normalHeaders = {'Name': 1, 'Wallet':1, 'EtherDelta':1, 'Total':1, 'Value':1,'Type':1, 'Hash':1, 'Date':1, 'Price':1, 'Bid':1, 'Est. ETH':1};
     // Adds a header row to the table and returns the set of columns.
     // Need to do union of keys from all records as some records may not contain
     // all records.

@@ -13,6 +13,12 @@ let offlineCustomTokens = [
 	"decimals": 18,
   }, 
   {
+	"addr": "0x3d3ed0a4f0af930955806b34367e7c64a0e1c84a",
+    "name": "ASS",
+	"longname": "Ass token",
+	"decimals": 4,
+  }, 
+  {
     "addr": "0xf77089f2f00fca83501705b711cbb10a0de77628",
     "name": "BMC",
     "longname": "BTCMACROECON",

@@ -13,6 +13,18 @@ let offlineCustomTokens = [
 	"decimals": 18,
   }, 
   {
+	"addr": '0x96a65609a7b84e8842732deb08f56c3e21ac6f8a',
+	"name": 'CTR',
+	"longname": 'Centra',
+	"decimals": 18,
+  },
+  {
+	"addr": "0x27f706edde3aD952EF647Dd67E24e38CD0803DD6",
+    "name": "UET",
+	"longname": "Useless Ethereum Token",
+	"decimals": 18,
+  }, 
+  {
 	"addr": "0x3d3ed0a4f0af930955806b34367e7c64a0e1c84a",
     "name": "ASS",
 	"longname": "Ass token",

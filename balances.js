@@ -114,7 +114,6 @@
 				_delta.config.pairs = module.exports.pairs;
 			}
 			
-			_delta.config.customTokens = offlineCustomTokens;
 			
 			for(let i = 0; i < _delta.config.tokens.length; i++)
 			{
@@ -122,6 +121,9 @@
 				if(!uniqueTokens[token.addr])
 					uniqueTokens[token.addr] = token;
 			}
+			//filter out custom tokens that have been listed by now
+			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+			
 			for(let i = 0; i < _delta.config.customTokens.length; i++)
 			{
 				let token = _delta.config.customTokens[i];

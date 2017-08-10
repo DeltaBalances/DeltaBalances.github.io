@@ -266,12 +266,6 @@ let offlineCustomTokens = [
     "decimals": "8"
   },
   {
-    "addr": "0x2fe6ab85ebbf7776fee46d191ee4cea322cecf51",
-    "name": "CDT",
-    "longname": "CoinDash Token",
-    "decimals": "18"
-  },
-  {
     "addr": "0x9e77d5a1251b6f7d456722a6eac6d2d5980bd891",
     "name": "BRAT",
     "longname": "BRAT RED",
@@ -318,12 +312,6 @@ let offlineCustomTokens = [
     "name": "DAO",
     "longname": "The DAO",
     "decimals": 16
-  },
-  {
-    "addr": "0x77ace05b1a35dacf2536f7a4ca340bae268b7020",
-    "name": "CDT",
-    "longname": "CoinDash Token",
-    "decimals": "18"
   },
   {
     "addr": "0x9ded5aa16b119095728770b37985a8b887a7a6fd",

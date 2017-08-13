@@ -124,40 +124,68 @@
     </div>
 
     <div class="container">
-      <div class="row">
-        <div class="col-md-7">
+	
+	
+	<div class="row">
+        <div class="col-md-12">
 			
-			  <h2>Balances <button id='loadingBalances' onclick ="getBalances()" class="fa fa-refresh" style="display:none;"></button></h2>
+			<ul class="nav nav-tabs">
+				<li class="active"><a data-toggle="tab" href="#balancetab">Balances</a></li>
+				<li><a data-toggle="tab" href="#transactiontab">BETA: Transactions</a></li>
+			</ul>
+
+			<div class="tab-content">
+				<div id="balancetab" class="tab-pane active">
+				  <div class="row">
+					<div  class="col-md-7">
+						<h2>Balances <button id='loadingBalances' onclick ="getBalances()" class="fa fa-refresh" style="display:none;"></button></h2>
+						<br>
+						<table  class="tablesorter table table-striped" id="resultTable">
+							<thead></thead>
+							<tbody></tbody>
+						</table>
+						<br>
+						<span class="label label-primary">Name</span> Officially listed on EtherDelta. <br>
+						<span class="label label-warning">Name</span> Trades on EtherDelta without listing.
+						<p id = "contract"> </p>
+					</div>
+					<div  class="col-md-5">				
+						<h2>Deposit & Withdraw <button id='loadingTransactions' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button></h2>
+						<br>
+						<table class="tablesorter table table-striped" id="transactionsTable">
+							<thead></thead>
+							<tbody></tbody>
+						</table>
+						<br>
+						<span class="label label-success">Type</span> Deposit into EtherDelta <br>
+						<span class="label label-danger">Type</span> Withdraw to Wallet
+					</div>	
+				  </div>
+				</div>
+				<div id="transactiontab" class="tab-pane">
+					<h2>Transactions <button id='loadingTransactions2' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button></h2>
+					<strong>Warning</strong> This section is a work in progress, for the full trade history use the <a target="_blank" href="https://etherdelta.github.io/trades.html">EtherDelta tool</a> for now.</p>
+					<p><strong>Warning</strong> This is transaction input only, the output might be a partial fill. (e.g 50 out of 100)</p>
+					<p><strong>Warning</strong> Orders that you created and their results are not shown here.</p>
 					<br>
-					<table  class="tablesorter table table-striped" id="resultTable">
-					<thead></thead>
-					<tbody></tbody>
+					<table class="tablesorter table table-striped" id="transactionsTable2">
+						<thead></thead>
+						<tbody></tbody>
 					</table>
 					<br>
-					<span class="label label-primary">Name</span> Officially listed on EtherDelta. <br>
-					<span class="label label-warning">Name</span> Trades on EtherDelta without listing.
-							<p id = "contract"> </p>
-			 <!-- <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p> -->
-			<!-- <span class="label label-primary">Name</span> Officially listed token <br>
-			 <span class="label label-warning">Name</span> Unlisted token -->
-			
-		</div>
-		<div class="col-md-5">
-			
-			  <h2>Deposit & Withdraw <button id='loadingTransactions' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button></h2>
-				<br>
-			 <table   class="tablesorter table table-striped" id="transactionsTable">
-					<thead></thead>
-					<tbody></tbody>
-					</table>
 					<br>
-					<span class="label label-success">Deposit</span> Deposit into EtherDelta <br>
-					<span class="label label-danger">Withdraw</span> Withdraw to Wallet
-							<p id = "contract"> </p>
-			  <!-- <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p> -->
+					<span class="label label-success">Type</span> Deposit into EtherDelta <br>
+					<span class="label label-danger">Type</span> Withdraw to Wallet <br>
+					<span class="label label-default" >Type</span> Cancelled order <br>
+					<span class="label label-info" >Type</span> Trade (clicked on an order)
+				</div>
+			</div>
+			
+			
+			  
 			
 		</div>
-      </div>
+    </div><!-- /row -->
 
       <hr>
 

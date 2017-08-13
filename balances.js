@@ -69,10 +69,11 @@
 	// placeholder
 	let transactionsPlaceholder = [
 		{
+			Status:true,
 			Type: 'Deposit',
 			Name: 'ETH',
 			Value: 0,
-		//	Price: 0,
+			Price: 0,
 			Hash: '',
 			Date: toDateTimeNow(),
 			Unlisted: false,
@@ -164,7 +165,17 @@
 		
 		$(window).resize(function () { 
 			$("#transactionsTable").trigger("applyWidgets"); 
+			$("#transactionsTable2").trigger("applyWidgets"); 
 			$("#resultTable").trigger("applyWidgets"); 
+		});
+		
+				// tab change
+		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+			// fix scroller on tab change
+			$("#transactionsTable").trigger("applyWidgets"); 
+			$("#transactionsTable2").trigger("applyWidgets"); 
+			$("#resultTable").trigger("applyWidgets"); 
+			
 		});
 		
 		// contract change
@@ -241,6 +252,9 @@
 		
 		$('#transactionsTable tbody').empty();
         $('#transactionsTable thead').empty();
+		
+		$('#transactionsTable2 tbody').empty();
+        $('#transactionsTable2 thead').empty();
         
         if (lastResult) {
 			//table1Loaded = false;
@@ -288,6 +302,8 @@
 		$('#loadingBalances').addClass('dim');
 		$('#loadingTransactions').addClass('dim');
 		$("#loadingTransactions").prop("disabled", disable);
+		$('#loadingTransactions2').addClass('dim');
+		$("#loadingTransactions2").prop("disabled", disable);
 	}
 	
 	function showLoading(balance, trans)
@@ -305,6 +321,10 @@
 			$('#loadingTransactions').addClass('dim');
 			$('#loadingTransactions').prop('disabled', true);
 			$('#loadingTransactions').show();
+			$('#loadingTransactions2').addClass('fa-spin');
+			$('#loadingTransactions2').addClass('dim');
+			$('#loadingTransactions2').prop('disabled', true);
+			$('#loadingTransactions2').show();
 		}
 	}
 	
@@ -328,6 +348,10 @@
 			$('#loadingTransactions').removeClass('dim');
 			$('#loadingTransactions').prop('disabled', false);
 			$('#loadingTransactions').show();
+			$('#loadingTransactions2').removeClass('fa-spin');
+			$('#loadingTransactions2').removeClass('dim');
+			$('#loadingTransactions2').prop('disabled', false);
+			$('#loadingTransactions2').show();
 		}
 	}
 
@@ -335,8 +359,10 @@
 	{
 		if(balance)
 			$('#loadingBalances').hide();
-		if(trans)
+		if(trans) {
 			$('#loadingTransactions').hide();
+			$('#loadingTransactions2').hide();
+		}
 	}
 	
 	function myClick()
@@ -467,6 +493,7 @@
 			showLoading(false, true);
 				
 			$('#transactionsTable tbody').empty();
+			$('#transactionsTable2 tbody').empty();
 			if(blocknum >= 0) // blocknum also retrieved on page load, reuse it
 			{
 				console.log('blocknum re-used');
@@ -837,25 +864,25 @@
 				if(tx.from.toLowerCase() === contractAddr)
 				{	
 					let val = _util.weiToEth(Number(tx.value));
-					let trans = createOutputTransaction('Withdraw', 'ETH', val, tx.hash, tx.timeStamp, false, '');
+					let trans = createOutputTransaction('Withdraw', 'ETH', val, tx.hash, tx.timeStamp, false, 0, '', tx.isError === '0');
 					outputTransactions.push(trans);
 					withdrawHashes[tx.hash.toLowerCase()] = true;
 				}
-			}
+			}                 
 			let tokens = [];
 			
 			// normal tx, deposit, token, trade
 			for(var i =0; i < txs.length; i++)
 			{
 				let tx = txs[i];
-				if(tx.isError === '0')
+				//if(tx.isError === '0')
 				{
 					let val = Number(tx.value);
 					let txto = tx.to.toLowerCase();
 					if(val > 0 && txto === contractAddr) // eth deposit
 					{
 						let val2 = _util.weiToEth(val);
-						let trans = createOutputTransaction('Deposit', 'ETH', val2, tx.hash, tx.timeStamp, false, '');
+						let trans = createOutputTransaction('Deposit', 'ETH', val2, tx.hash, tx.timeStamp, false, 0, '', tx.isError === '0');
 						outputTransactions.push(trans);
 					}
 					else if(val == 0 && txto == contractAddr) 
@@ -894,11 +921,11 @@
 							{
 								type = 'Deposit';
 							}
-							let trans = createOutputTransaction(type, token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, '');		
+							let trans = createOutputTransaction(type, token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, '', tokens[l].isError === '0');		
 							outputTransactions.push(trans);
 						}	
 					}
-				} /* else if(method === '0x278b8c0e') // cancel
+				}  else if(method === '0x278b8c0e') // cancel
 				{
 					//Function: cancelOrder(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, uint8 v, bytes32 r, bytes32 s)
 					//MethodID: 0x278b8c0e
@@ -946,13 +973,13 @@
 								price = val2 / val;
 							}
 	
-							let trans = createOutputTransaction('Cancel ' + cancelType , token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price);		
+							let trans = createOutputTransaction('Cancel ' + cancelType , token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price, tokens[l].isError === '0');		
 							outputTransactions.push(trans);
 						}	
 					}
 					
 			
-				}*/ /*else if(method === '0x0a19b14a') // trade
+				} else if(method === '0x0a19b14a') // trade
 				{
 
 					//Function: trade(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, address user, uint8 v, bytes32 r, bytes32 s, uint256 amount)
@@ -961,12 +988,12 @@
 					let unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, tokens[l].input);
 					if(unpacked && (unpacked.name === 'trade'))
 					{
-						let tradeType = 'sell';
+						let tradeType = 'Sell';
 						let token = undefined;
 						let token2 = undefined;
 						if(unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
 						{
-							tradeType = 'buy';
+							tradeType = 'Buy';
 							token = uniqueTokens[unpacked.params[2].value];
 							token2 = uniqueTokens[unpacked.params[0].value];
 						}
@@ -980,7 +1007,7 @@
 						{
 							let amount = 0;
 							let oppositeAmount = 0;
-							if(tradeType === 'sell')
+							if(tradeType === 'Sell')
 							{
 								amount = unpacked.params[1].value;
 								oppositeAmount = unpacked.params[3].value;
@@ -1003,23 +1030,26 @@
 							}
 							
 	
-							let trans = createOutputTransaction('Taker ' + tradeType , token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price);		
+							let trans = createOutputTransaction(tradeType , token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price,  tokens[l].isError === '0');		
 							outputTransactions.push(trans);
 						}	
 					}
 					
-				} */
+				}
 			} 
 
 			done();
 						
-			function createOutputTransaction(type, name, val, hash, timeStamp, unlisted, tokenaddr, price)
+			function createOutputTransaction(type, name, val, hash, timeStamp, unlisted, tokenaddr, price, status)
 			{
+				if(status === undefined)
+					status = true;
 				return {
+					Status: status,
 					Type: type,
 					Name: name,
 					Value: val,
-				//	Price: price,
+					Price: price,
 					Hash: hash,
 					Date: toDateTime(timeStamp),
 					Unlisted: unlisted,
@@ -1120,6 +1150,7 @@
 		makeTable(result, hideZero);
     }
 
+	//balances table
 	function makeTable(result, hideZeros)
 	{
 		
@@ -1143,17 +1174,21 @@
             });
 		} */
         
-		buildHtmlTable('#resultTable', filtered, loaded, 'balances');
+		buildHtmlTable('#resultTable', filtered, loaded, 'balances', balanceHeaders);
         trigger();
 	}
 
+	//transactions table
 	function makeTable2(result)
 	{
+		let result2 = result.filter((x) => { return  x.Status && (x.Type === 'Deposit' || x.Type === 'Withdraw')});
 		$('#transactionsTable tbody').empty();
+		$('#transactionsTable2 tbody').empty();
 		let loaded = table2Loaded;
 		if(changedDecimals)
 			loaded = false;
-        buildHtmlTable('#transactionsTable', result, loaded, 'transactions');
+        buildHtmlTable('#transactionsTable', result2, loaded, 'transactions', depositHeaders);
+		buildHtmlTable('#transactionsTable2', result, loaded, 'transactions', transactionHeaders);
         trigger2();
 	}
 	
@@ -1255,6 +1290,9 @@
         {
             $("#transactionsTable").trigger("update", [true, () => {}]);
 			$("#transactionsTable thead th").data("sorter", true);
+			
+			 $("#transactionsTable2").trigger("update", [true, () => {}]);
+			$("#transactionsTable2 thead th").data("sorter", true);
 			//$("table").trigger("sorton", [[0,0]]);
             
         } else 
@@ -1266,9 +1304,19 @@
 				  scroller_height : 500,
 					scroller_barWidth : 18,
 					scroller_upAfterSort: true,
-					scroller_jumpToHeader: true,
 				},
                 sortList: [[4, 1]]
+            });
+			
+			$("#transactionsTable2 thead th").data("sorter", true);
+            $("#transactionsTable2").tablesorter({
+				widgets: [ 'scroller' ],
+				widgetOptions : {
+				  scroller_height : 500,
+					scroller_barWidth : 18,
+					scroller_upAfterSort: true,
+				},
+                sortList: [[5, 1]]
             });
 
             table2Loaded = true;
@@ -1291,10 +1339,10 @@
 
 
  // Builds the HTML Table out of myList.
-	function buildHtmlTable(selector, myList, loaded, type) 
+	function buildHtmlTable(selector, myList, loaded, type, headers) 
 	{
         let body = $(selector +' tbody');
-        let columns = addAllColumnHeaders(myList, selector, loaded, type);
+        let columns = addAllColumnHeaders(myList, selector, loaded, type, headers);
         
         for (var i = 0; i < myList.length; i++) 
 		{
@@ -1346,14 +1394,25 @@
 						{
 							row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
 						}
+						else if(cellValue == 'Buy')
+						{
+							row$.append($('<td/>').html('<span class="label label-info" >Trade</span><span class="label label-success" >' + cellValue + '</span>'));
+						}
 						else
 						{
-							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
+							row$.append($('<td/>').html('<span class="label label-info" >Trade</span><span class="label label-danger" >' + cellValue + '</span>'));
 						}
 					} 
 					else if( head == 'Hash')
 					{
 						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/tx/' + cellValue + '">'+ cellValue.substring(0,8)  + '...</a>'));
+					}
+					else if(head == 'Status')
+					{
+						if(cellValue)
+						    row$.append($('<td align="center"/>').html('<i style="color:green;" class="fa fa-check"></i>'));
+						else
+							row$.append($('<td align="center"/>').html('<i style="color:red;" class="fa fa-exclamation-circle"></i>'));
 					}
 					else
 					{
@@ -1404,12 +1463,13 @@
         }
     }
 
-	
-	let normalHeaders = {'Name': 1, 'Wallet':1, 'EtherDelta':1, 'Total':1, 'Value':1,'Type':1, 'Hash':1, 'Date':1, 'Price':1, 'Bid':1, 'Est. ETH':1};
+	let balanceHeaders = {'Name': 1, 'Wallet':1, 'EtherDelta':1, 'Total':1, 'Value':1,'Bid':1, 'Est. ETH':1};
+	let depositHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1};
+	let transactionHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1, 'Price':1, 'Status':1};
     // Adds a header row to the table and returns the set of columns.
     // Need to do union of keys from all records as some records may not contain
     // all records.
-    function addAllColumnHeaders(myList, selector, loaded, type) 
+    function addAllColumnHeaders(myList, selector, loaded, type, headers) 
 	{
         let columnSet = {};
 		
@@ -1429,7 +1489,7 @@
             let rowHash = myList[i];
             for (var key in rowHash) 
 			{
-				if( !columnSet[key] && normalHeaders[key] ) 
+				if( !columnSet[key] && headers[key] ) 
 				{
 					columnSet[key] = 1;
 					headerTr$.append($('<th/>').html(key));

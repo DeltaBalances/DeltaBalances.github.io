@@ -1317,7 +1317,7 @@
 					scroller_barWidth : 18,
 					scroller_upAfterSort: true,
 				},
-                sortList: [[5, 1]]
+                sortList: [[6, 1]]
             });
 
             table2Loaded = true;

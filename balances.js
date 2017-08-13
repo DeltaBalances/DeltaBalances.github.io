@@ -383,6 +383,7 @@
 		if(!autoStart)
 			publicAddr = getAddress();
 		
+		autoStart = false;
 		if(publicAddr)
 		{
 			getAll();

@@ -1142,6 +1142,7 @@
         }
 		$('#ethbalance').html(sumETH.toFixed(fixedDecimals) + ' ETH');
 		$('#tokenbalance').html(sumToken.toFixed(fixedDecimals) + ' ETH');
+		$('#totalbalance').html((sumETH + sumToken).toFixed(fixedDecimals) + ' ETH');
 		
         let result = Object.values(balances);
         lastResult = result;

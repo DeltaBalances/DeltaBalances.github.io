@@ -11,6 +11,38 @@
 	
 }
 
+#overviewTable {
+	width: 40%;
+	border:none;
+	font-size: 125%;
+   /* border-collapse: separate;
+    border-spacing: 20px 2px; */
+}
+
+#overviewTable td {
+	border:none;
+
+	
+}
+#overviewTable td:nth-child(2) {
+	text-align:right;
+
+}
+#overviewTable td
+{
+	padding:3px;
+}
+
+
+#overviewTable tr:nth-child(3)
+{
+    border-top: 1px solid black;
+}
+#overviewTable tr:nth-child(3) td
+{
+	padding:3px;
+}
+
  body {
 	 padding-top: 50px;
  }

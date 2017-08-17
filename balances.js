@@ -690,17 +690,17 @@
 	
 	function getPrices()
 	{
-		$.getJSON(_delta.config.apiServer + '/returnTicker/', (result) => {
+		$.getJSON(_delta.config.apiServer +'/nonce/'+ Date.now() + '/returnTicker/', (result) => {
 			if(result)
 			{
-				let names = Object.keys(result);
-				for(let i = 0; i < names.length; i++)
+				let results = Object.values(result);
+				for(let i = 0; i < results.length; i++)
 				{
-					let name = names[i];
-					name = name.replace('ETH_', '');
-					if(balances[name])
+					let token = uniqueTokens[results[i].tokenAddr];
+					
+					if(token && balances[token.name])
 					{
-						balances[name].Bid = Number(result[names[i]].bid);
+						balances[token.name].Bid = Number(results[i].bid);
 					}
 				}
 			}

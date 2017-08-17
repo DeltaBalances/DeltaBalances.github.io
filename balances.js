@@ -439,7 +439,7 @@
         if (publicAddr) 
 		{	
 			setStorage();
-		
+			$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/#' + publicAddr + '"> Direct Link </a> to this page');
 			getTrans();
 			getBalances();
 

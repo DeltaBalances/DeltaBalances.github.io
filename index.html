@@ -45,22 +45,28 @@
 			<script type="text/javascript" src="backupTokens.js"></script>
 		<script>
 			var etherDeltaConfig = undefined;
-			$.getJSON('https://etherdelta.github.io/config/main.json', function(jsonData) {
-				if(jsonData)
-				{
-					etherDeltaConfig = jsonData;
-				} else
-				{
-					etherDeltaConfig = offlineTokens;
-				}
-			});
+			try {
+				$.getJSON('https://etherdelta.github.io/config/main.json', function(jsonData) {
+					if(jsonData)
+					{
+						etherDeltaConfig = jsonData;
+					} else
+					{
+						etherDeltaConfig = offlineTokens;
+					}
+				});
+			} catch (err){
+				etherDeltaConfig = offlineTokens;
+			}
 			var stagingTokens = undefined;
-			$.getJSON('https://etherdelta.github.io/config/staging.json', function(jsonData) {
-				if(jsonData)
-				{
-					stagingTokens = jsonData;
-				} 
-			});
+			try {
+				$.getJSON('https://etherdelta.github.io/config/staging.json', function(jsonData) {
+					if(jsonData)
+					{
+						stagingTokens = jsonData;
+					} 
+				});
+			} catch (err) {}
 		</script>
 		<script type="text/javascript" src="bundle.js"></script>
 		
@@ -114,7 +120,7 @@
 						<div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;" ></div>
 						<div class="hidden-xs" style="padding-left: 3%; float:left;"> <p style ="line-height:64px;display: inline-block;"> </p> </div> <div style="float:left; white-space:nowrap;" ><p style ="line-height:64px; white-space:nowrap; display: inline-block;" id="addr">Enter your address to get started</p></div>
 					</div>
-					
+
 					<table class="table table-sm" cellspacing="0" cellpadding="0" id="overviewTable">
 					  <tr>
 						<td> Total ETH balance:</td>
@@ -130,7 +136,7 @@
 					  </tr>
 					</table>
 					
-
+					<span id="direct"></span> <br>
 					Looking for a full trade history? Try the official <a target="_blank" href="https://etherdelta.github.io/trades.html">EtherDelta tool</a>
 					<br> Need help with EtherDelta? Read the <a href="https://www.reddit.com/r/EtherDelta/comments/6hrxjw/etherdelta_guides_for_first_time_users/" > guides</a> or use the <a href="https://gitter.im/etherdelta/etherdelta.github.io" >support chat</a>.
 				</div>

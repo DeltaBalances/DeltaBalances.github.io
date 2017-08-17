@@ -410,6 +410,7 @@
 		autoStart = false;
 		if(publicAddr)
 		{
+			$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/#' + publicAddr + '"> Direct Link </a> to this page');
 			getAll();
 		}
 		else

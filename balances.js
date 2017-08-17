@@ -122,6 +122,8 @@
 				if(!uniqueTokens[token.addr])
 					uniqueTokens[token.addr] = token;
 			}
+			
+			
 			//filter out custom tokens that have been listed by now
 			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
 			
@@ -130,6 +132,28 @@
 				let token = _delta.config.customTokens[i];
 				if(!uniqueTokens[token.addr])
 					uniqueTokens[token.addr] = token;
+			}
+			
+			for(let i = 0; i < _delta.config.customTokens.length; i++)
+			{
+				let token = _delta.config.customTokens[i];
+				if(!uniqueTokens[token.addr])
+					uniqueTokens[token.addr] = token;
+			}
+			
+			if(stagingTokens)
+			{
+				let stageTokens = stagingTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+				for(let i = 0; i < _delta.config.customTokens.length; i++)
+				{
+					let token = stageTokens[i];
+					if(!uniqueTokens[token.addr])
+					{
+						token.longname = token.name;
+						uniqueTokens[token.addr] = token;
+						_delta.config.customTokens.push(token);
+					}
+				}
 			}
 			
 			initiated = true;

@@ -41,21 +41,31 @@
 
 		
 		<!-- EtherDelta -->
-
+			<script type="text/javascript" src="customTokens.js"></script>
+			<script type="text/javascript" src="backupTokens.js"></script>
 		<script>
 			var etherDeltaConfig = undefined;
 			$.getJSON('https://etherdelta.github.io/config/main.json', function(jsonData) {
 				if(jsonData)
 				{
 					etherDeltaConfig = jsonData;
+				} else
+				{
+					etherDeltaConfig = offlineTokens;
 				}
+			});
+			var stagingTokens = undefined;
+			$.getJSON('https://etherdelta.github.io/config/staging.json', function(jsonData) {
+				if(jsonData)
+				{
+					stagingTokens = jsonData;
+				} 
 			});
 		</script>
 		<script type="text/javascript" src="bundle.js"></script>
 		
 		<!-- Main script -->
 		<script type="text/javascript" src="balances.js"></script>
-		<script type="text/javascript" src="customTokens.js"></script>
 		
 		
 

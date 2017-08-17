@@ -39,9 +39,18 @@
 		<!-- Blockies (eth address image) -->
 		<script type="text/javascript" src="/js/blockies.min.js"></script>		
 
+		
 		<!-- EtherDelta -->
-		<script>  var module = {}; </script> <!-- trick to use node modue config -->
-		<script type="text/javascript" src="https://etherdelta.github.io/config.js"></script>
+
+		<script>
+			var etherDeltaConfig = undefined;
+			$.getJSON('https://etherdelta.github.io/config/main.json', function(jsonData) {
+				if(jsonData)
+				{
+					etherDeltaConfig = jsonData;
+				}
+			});
+		</script>
 		<script type="text/javascript" src="bundle.js"></script>
 		
 		<!-- Main script -->

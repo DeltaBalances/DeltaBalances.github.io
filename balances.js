@@ -43,7 +43,7 @@
 	let blocktime = 17;
 	let blocknum = -1;
 	let startblock = 0;
-	let endblock = 99999999	
+	let endblock = 'latest';	
 	let transactionDays = 1;
 	let walletWarningBalance = 0.003;
 	
@@ -109,10 +109,10 @@
 				});
 			}
 			//import of (updated?) etherdelta config
-			if(module.exports)
+			if(etherDeltaConfig)
 			{
-				_delta.config.tokens = module.exports.tokens;
-				_delta.config.pairs = module.exports.pairs;
+				_delta.config.tokens = etherDeltaConfig.tokens;
+				_delta.config.pairs = etherDeltaConfig.pairs;
 			}
 			
 			
@@ -498,7 +498,6 @@
 			if(blocknum >= 0) // blocknum also retrieved on page load, reuse it
 			{
 				console.log('blocknum re-used');
-				endblock = 99999999;
 				startblock = getStartBlock(blocknum, transactionDays);
 				getTransactions();
 			}
@@ -509,7 +508,6 @@
 				{
 					if(num)
 					{
-						//endblock = num;
 						blocknum = num;
 						startblock = getStartBlock(blocknum, transactionDays);
 					}
@@ -592,7 +590,7 @@
 	
 	function getStartBlock(blcknm, days)
 	{
-		startblock = blcknm - ((days * 24 * 60 * 60) / blocktime);
+		startblock = Math.floor(blcknm - ((days * 24 * 60 * 60) / blocktime));
 		return startblock;
 	}
 	
@@ -826,6 +824,8 @@
 		let transLoaded = 0;
 		let transResult = [];
 		let inTransResult = [];
+		let tradeLogResult = [];
+		let contractAddr =_delta.config.contractEtherDeltaAddr.toLowerCase();
 		
 
 		$.getJSON('https://api.etherscan.io/api?module=account&action=txlist&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey, (result) => {
@@ -845,17 +845,29 @@
 				processTransactions();
 		});
 		
+		/*
+		//trade logs
+		// topic[0] 0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d   
+		$.getJSON('https://api.etherscan.io/api?module=logs&action=getLogs&address=' + contractAddr + '&fromBlock=' + startblock + '&toBlock=' + endblock + '&topic0=0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d&apikey=' + _delta.config.etherscanAPIKey, (result3) => {
+			if(result3 && result3.status === '1')
+				tradeLogResult = result3.result;
+			transLoaded++;
+			if(transLoaded == 3)
+				processTransactions();
+		}); */
+		
 		
 		function processTransactions()
 		{
 			let myAddr = publicAddr.toLowerCase();
-			let contractAddr =_delta.config.contractEtherDeltaAddr.toLowerCase();
+			
 		
 			let txs = transResult;
 			let outputTransactions = [];
 			
 			let itxs = inTransResult; //withdraws
 			let withdrawHashes = {};
+			let logs = tradeLogResult;
 
 			
 			// internal tx, withdraws
@@ -896,8 +908,66 @@
 				}
 			}
 			
-			
-			
+			/*
+			for(var l = 0; l < tradeLogResult.length; l++)
+			{
+				let outputData = tradeLogResult[l].data;
+				//0 tokenget , 1 amountget, 2 tokengive, 3 amountgive,4 get 5 give
+				
+					let unpacked = _util.processOutput (_delta.web3, _delta.contractEtherDelta, outputData);
+					if(unpacked && (unpacked.params[4].value.toLowerCase() === myAddr || unpacked.params[5].value.toLowerCase() === myAddr) )
+					{
+						let tradeType = 'Sell';
+						let token = undefined;
+						let token2 = undefined;
+						let partner = undefined; 
+						if(unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
+						{
+							tradeType = 'Buy';
+							token = uniqueTokens[unpacked.params[2].value];
+							token2 = uniqueTokens[unpacked.params[0].value];
+							partner = unpacked.params[4].value;
+						}
+						else // buy
+						{
+							token = uniqueTokens[unpacked.params[0].value];
+							token2 = uniqueTokens[unpacked.params[2].value];
+							partner = unpacked.params[5].value;
+						}
+						
+						if(token && token2 && token.addr && token2.addr)
+						{
+							let amount = 0;
+							let oppositeAmount = 0;
+							if(tradeType === 'Sell')
+							{
+								amount = unpacked.params[1].value;
+								oppositeAmount = unpacked.params[3].value;
+							} else
+							{
+								oppositeAmount = unpacked.params[1].value;
+								amount = unpacked.params[3].value;
+							}
+							
+							let unlisted = token.longname && true;
+							let dvsr = divisorFromDecimals(token.decimals)
+							let dvsr2 = divisorFromDecimals(token2.decimals)
+							let val = _util.weiToEth(amount, dvsr);
+							let val2 = _util.weiToEth(oppositeAmount, dvsr2);
+							
+							let price = 0;
+						//	if(tradeType === 'sell')
+							{
+								price = val2 / val;
+							}
+							
+	
+							let trans = createOutputTransaction(tradeType , token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price,  true);		
+							outputTransactions.push(trans);	
+						}
+					} 
+			}
+			*/
 			for(var l = 0; l < tokens.length; l++)
 			{
 				let method = tokens[l].input.slice(0, 10);
@@ -985,7 +1055,7 @@
 
 					//Function: trade(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, address user, uint8 v, bytes32 r, bytes32 s, uint256 amount)
 					//MethodID: 0x0a19b14a
-			
+					
 					let unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, tokens[l].input);
 					if(unpacked && (unpacked.name === 'trade'))
 					{

@@ -21,6 +21,8 @@
 	let trigger_2 = false;
 	let running = false;
 	
+	var etherscanFallback = false;
+	
 	// settings
 	let hideZero = true;
     let decimals = false;
@@ -41,7 +43,7 @@
 	// config
 	let tokenCount = 0; //auto loaded
 	let blocktime = 17;
-	let blocknum = -1;
+	var blocknum = -1;
 	let startblock = 0;
 	let endblock = 'latest';	
 	let transactionDays = 1;
@@ -99,14 +101,20 @@
 		{	
 			if(!autoStart)
 			{
-				_util.blockNumber(_delta.web3, (err, num) => 
+				if(blocknum > -1)
 				{
-					if(!err && num)
+					startblock = getStartBlock(blocknum, transactionDays);
+				}
+				else {
+					_util.blockNumber(_delta.web3, (err, num) => 
 					{
-						blocknum = num;
-						startblock = getStartBlock(blocknum, transactionDays);
-					}
-				});
+						if(!err && num)
+						{
+							blocknum = num;
+							startblock = getStartBlock(blocknum, transactionDays);
+						}
+					});
+				}
 			}
 			//import of (updated?) etherdelta config
 			if(etherDeltaConfig)
@@ -119,7 +127,7 @@
 			for(let i = 0; i < _delta.config.tokens.length; i++)
 			{
 				let token = _delta.config.tokens[i];
-				if(!uniqueTokens[token.addr])
+				if(token && !uniqueTokens[token.addr])
 					uniqueTokens[token.addr] = token;
 			}
 			
@@ -130,14 +138,7 @@
 			for(let i = 0; i < _delta.config.customTokens.length; i++)
 			{
 				let token = _delta.config.customTokens[i];
-				if(!uniqueTokens[token.addr])
-					uniqueTokens[token.addr] = token;
-			}
-			
-			for(let i = 0; i < _delta.config.customTokens.length; i++)
-			{
-				let token = _delta.config.customTokens[i];
-				if(!uniqueTokens[token.addr])
+				if(token && !uniqueTokens[token.addr])
 					uniqueTokens[token.addr] = token;
 			}
 			
@@ -147,7 +148,7 @@
 				for(let i = 0; i < _delta.config.customTokens.length; i++)
 				{
 					let token = stageTokens[i];
-					if(!uniqueTokens[token.addr])
+					if(token && !uniqueTokens[token.addr])
 					{
 						token.longname = token.name;
 						uniqueTokens[token.addr] = token;
@@ -520,7 +521,7 @@
 				
 			$('#transactionsTable tbody').empty();
 			$('#transactionsTable2 tbody').empty();
-			if(blocknum >= 0) // blocknum also retrieved on page load, reuse it
+			if(blocknum > 0) // blocknum also retrieved on page load, reuse it
 			{
 				console.log('blocknum re-used');
 				startblock = getStartBlock(blocknum, transactionDays);
@@ -712,17 +713,19 @@
 		
 	}
 	
-	const maxPerRequest = 120;
+	let maxPerRequest = 120;
 	function getDeltaBalances()
 	{
 		let tokens2 = _delta.config.tokens.map((token)=>{return token.addr;});
-		//if(showCustomTokens)
+		tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
+		
+		let max = maxPerRequest
+		if(!etherscanFallback)
+				max = max * 10;
+			
+		for(let i = 0; i < tokens2.length; i+= max)
 		{
-			tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
-		}
-		for(let i = 0; i < tokens2.length; i+= maxPerRequest)
-		{
-			deltaBalances(i, i+maxPerRequest, tokens2);
+			deltaBalances(i, i+max, tokens2);
 		}
 		
 		function deltaBalances(startIndex, endIndex, tokens2)
@@ -762,14 +765,16 @@
 	
 	function getAllBalances()
 	{
-		let tokens2 = _delta.config.tokens.map((token)=>{return token.addr;});
-	//	if(showCustomTokens)
-		{	
-			tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
-		}
-		for(let i = 0; i < tokens2.length; i+= maxPerRequest)
+		let tokens2 = _delta.config.tokens.map((token)=>{return token.addr;});	
+		tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
+		
+		let max = maxPerRequest
+		if(!etherscanFallback)
+				max = max * 10;
+		
+		for(let i = 0; i < tokens2.length; i+= max)
 		{
-			allBalances(i, i+maxPerRequest, tokens2);
+			allBalances(i, i+max, tokens2);
 		}
 		
 		function allBalances(startIndex, endIndex, tokens2)
@@ -806,13 +811,15 @@
 	function getWalletBalances()
 	{
 		let tokens2 = _delta.config.tokens.map((token)=>{return token.addr;});
-		//if(showCustomTokens)
+		tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
+		
+		let max = maxPerRequest
+		if(!etherscanFallback)
+				max = max * 10;
+			
+		for(let i = 0; i < tokens2.length; i+= max)
 		{
-			tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
-		}
-		for(let i = 0; i < tokens2.length; i+= 150)
-		{
-			walletBalances(i, i+150, tokens2);
+			walletBalances(i, i+max, tokens2);
 		}
 		
 		function walletBalances(startIndex, endIndex, tokens2)

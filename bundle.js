@@ -101,10 +101,59 @@ module.exports = (config) => {
 	  
   };
     
-  utility.call = function call(web3In, contract, address, functionName, args, callback) {
-	 
-	 proxy(1);
+  utility.processOutput = function getOutput(web3In, contract, data)
+  {
 	  
+	  if(!bundle.EtherDelta.config.methodIDS)
+	  {
+		  bundle.EtherDelta.config.methodIDS = _addABI(contract.abi);
+	  }
+	  
+	   if(!bundle.EtherDelta.config.solFunc2)
+	  {
+		   let depositAbi = contract.abi.find(element => element.name === 'Trade');
+			depositAbi.outputs = []; // error avoidance
+			bundle.EtherDelta.config.solFunc2 = new SolidityFunction(web3In.eth, depositAbi, '');
+	  }
+	  
+	 
+	  let result = bundle.EtherDelta.config.solFunc2.decodeMethod2(data, bundle.EtherDelta.config.methodIDS, '6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d');
+	  
+	  return result;
+	  
+	  //https://github.com/ConsenSys/abi-decoder/blob/master/index.js
+		function _addABI(abiArray) 
+		{
+			let methodIDs = {};
+			  if (Array.isArray(abiArray)) 
+			  {
+
+				// Iterate new abi to generate method id's
+				abiArray.map((abi) => {
+				  if(abi.name){
+					const signature = new Web3().sha3(abi.name + "(" + abi.inputs.map(function(input) {return input.type;}).join(",") + ")");
+					if(abi.type == "event"){
+					  methodIDs[signature.slice(2)] = abi;
+					}
+					else{
+					  methodIDs[signature.slice(2, 10)] = abi;
+					}
+				  }
+				});
+
+				//state.savedABIs = state.savedABIs.concat(abiArray);
+			  }
+			  else {
+				throw new Error("Expected ABI array, got " + typeof abiArray);
+			  }
+			return methodIDs;
+		}
+	  
+	 
+  };
+	
+ 
+  utility.call = function call(web3In, contract, address, functionName, args, callback) {
     function proxy(retries) {
       const web3 = new Web3();
       const data = contract[functionName].getData.apply(null, args);
@@ -137,6 +186,29 @@ module.exports = (config) => {
           callback(err, undefined);
         }
       });
+    }
+    try {
+      if (web3In.currentProvider) {
+        const data = contract[functionName].getData.apply(null, args);
+        web3In.eth.call({ to: address, data }, (err, result) => {
+          if (!err) {
+            const functionAbi = contract.abi.find(element => element.name === functionName);
+            const solidityFunction = new SolidityFunction(web3In.Eth, functionAbi, address);
+            try {
+              const resultUnpacked = solidityFunction.unpackOutput(result);
+              callback(undefined, resultUnpacked);
+            } catch (errJson) {
+              proxy(1);
+            }
+          } else {
+            proxy(1);
+          }
+        });
+      } else {
+        proxy(1);
+      }
+    } catch (err) {
+      proxy(1);
     }
   };
 
@@ -222,9 +294,7 @@ module.exports = (config) => {
     });
   };
 
-   utility.blockNumber = function blockNumber(web3, callback) {
-	proxy();
-	
+  utility.blockNumber = function blockNumber(web3, callback) {
     function proxy() {
       let url =
         `https://${
@@ -239,6 +309,17 @@ module.exports = (config) => {
           callback(err, undefined);
         }
       });
+    }
+    if (web3.currentProvider) {
+      web3.eth.getBlockNumber((err, result) => {
+        if (!err) {
+          callback(undefined, Number(result));
+        } else {
+          proxy();
+        }
+      });
+    } else {
+      proxy();
     }
   };
 
@@ -453,16 +534,31 @@ EtherDelta.prototype.getToken = function getToken(addrOrToken, name, decimals) {
 
 EtherDelta.prototype.loadWeb3 = function loadWeb3(callback) {
   this.config = config;
-  // web3
-    // etherscan proxy
-    console.log('Connecting to Etherscan proxy');
-    this.web3 = new Web3();
-    this.connection = {
-      connection: 'Proxy',
-      provider: `https://etherscan.io`,
-      testnet: this.config.ethTestnet,
-    };
+  
+  let provider = 'https://mainnet.infura.io/'; 
+  
+  if (true) {
+    // mist/geth/parity situation
+    this.web3 = new Web3(new Web3.providers.HttpProvider(provider));
+    try {
+      this.connection = { connection: 'RPC', provider: provider, testnet: this.config.ethTestnet };
+      const block = this.web3.eth.blockNumber;
+	  if(block === undefined)
+		  throw 'fuck';
+	  blocknum = block;
+      console.log(`block: ${block}`);
+    } catch (err) {
+		etherscanFallback = true;
+	 console.log('catch, fallback etherscan');
+      this.connection = {
+        connection: 'Proxy',
+        provider: `https://${this.config.ethTestnet ? `${this.config.ethTestnet}.` : ''}etherscan.io`,
+        testnet: this.config.ethTestnet,
+      };
+      this.web3.setProvider(undefined);
+    }
     callback();
+  }
   
 };
 
@@ -65111,6 +65207,28 @@ SolidityFunction.prototype.unpackOutput = function (output) {
 //tim https://github.com/ConsenSys/abi-decoder/blob/master/index.js
 SolidityFunction.prototype.decodeMethod = function _decodeMethod(data, methodIDs) {
   const methodID = data.slice(2, 10);
+  const abiItem = methodIDs[methodID];
+  if (abiItem) {
+    const params = abiItem.inputs.map((item) => item.type);
+    let decoded = coder.decodeParams(params, data.slice(10));
+    return {
+      name: abiItem.name,
+      params: decoded.map((param, index) => {
+        let parsedParam = param;
+        if (abiItem.inputs[index].type.indexOf("uint") !== -1) {
+          parsedParam = new Web3().toBigNumber(param).toString();
+        }
+        return {
+          name: abiItem.inputs[index].name,
+          value: parsedParam,
+          type: abiItem.inputs[index].type
+        };
+      })
+    }
+  }
+};
+
+SolidityFunction.prototype.decodeMethod2 = function _decodeMethod2(data, methodIDs, methodID) {
   const abiItem = methodIDs[methodID];
   if (abiItem) {
     const params = abiItem.inputs.map((item) => item.type);

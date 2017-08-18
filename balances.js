@@ -716,8 +716,7 @@
 	let maxPerRequest = 120;
 	function getDeltaBalances()
 	{
-		let tokens2 = _delta.config.tokens.map((token)=>{return token.addr;});
-		tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
+		let tokens2 = Object.keys(uniqueTokens);	
 		
 		let max = maxPerRequest
 		if(!etherscanFallback)
@@ -765,8 +764,8 @@
 	
 	function getAllBalances()
 	{
-		let tokens2 = _delta.config.tokens.map((token)=>{return token.addr;});	
-		tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
+		let tokens2 = Object.keys(uniqueTokens);	
+
 		
 		let max = maxPerRequest
 		if(!etherscanFallback)
@@ -797,8 +796,9 @@
 					{
 						let j = i * 2;
 						let token = uniqueTokens[tokens[i]];
-						balances[token.name].EtherDelta = _util.weiToEth(returnedBalances[j], divisorFromDecimals(token.decimals));
-						balances[token.name].Wallet = _util.weiToEth(returnedBalances[j +1], divisorFromDecimals(token.decimals));
+						let div = divisorFromDecimals(token.decimals);
+						balances[token.name].EtherDelta = _util.weiToEth(returnedBalances[j], div );
+						balances[token.name].Wallet = _util.weiToEth(returnedBalances[j +1], div);
 						loadedW++;
 						loadedED++;
 						finished();
@@ -810,8 +810,7 @@
 	
 	function getWalletBalances()
 	{
-		let tokens2 = _delta.config.tokens.map((token)=>{return token.addr;});
-		tokens2 = tokens2.concat(_delta.config.customTokens.map((token)=>{return token.addr;}));
+		let tokens2 = Object.keys(uniqueTokens);
 		
 		let max = maxPerRequest
 		if(!etherscanFallback)

@@ -1197,7 +1197,7 @@
     function finished()
 	{	
 		//check if all requests are complete
-        if (loadedED < tokenCount || loadedW < tokenCount || loadedBid < 1) {
+        if (loadedED < tokenCount || loadedW < tokenCount /*|| loadedBid < 1*/) {
             return;
         }
 		
@@ -1230,6 +1230,9 @@
 						bal['Est. ETH'] = val;
 						sumToken += val;
 					}
+				} else {
+					bal.bid = '';
+					bal['Est. ETH'] = '';
 				}
 				if(token.name === 'ETH')
 				{
@@ -1372,7 +1375,7 @@
 		trigger_1 = true;
 		
 		
-        if(trigger_1 && (trigger_2 || !showTransactions))
+        if(trigger_1 && (trigger_2 || !showTransactions) && loadedBid >= 1)
 		{
 			disableInput(false);
 			hideLoading(true,true);

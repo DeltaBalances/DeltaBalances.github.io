@@ -1,6 +1,12 @@
 {
+	'use strict';
 	// Parameters
 	// ##########################################################################################################################################
+	
+	/*
+	let etherScanSocket = undefined;
+	let pingID = -1;
+	*/
 	
 	// shorthands
 	let _util = bundle.utility;
@@ -78,6 +84,7 @@
 			Price: 0,
 			Hash: '',
 			Date: toDateTimeNow(),
+			Details: '',
 			Unlisted: false,
 		}
 	];
@@ -165,6 +172,14 @@
 	
 	function readyInit()
 	{
+		/*if (!Notification) {
+			alert('Desktop notifications not available in your browser. Try Chromium.'); 
+			return;
+		}
+
+		if (Notification.permission !== "granted")
+			Notification.requestPermission(); */
+		
 		setAddrImage('0x0000000000000000000000000000000000000000');
 		createSelect();
 		//hideError();
@@ -412,7 +427,15 @@
 		if(publicAddr)
 		{
 			$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/#' + publicAddr + '"> Direct Link </a> to this page');
+			/*if(etherScanSocket !== undefined)
+			{
+				console.log('socket closed');
+				socketPing(false);
+				etherScanSocket.close();
+				etherScanSocket = undefined;
+			}*/
 			getAll();
+
 		}
 		else
 		{
@@ -443,7 +466,15 @@
 			$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/#' + publicAddr + '"> Direct Link </a> to this page');
 			getTrans();
 			getBalances();
-
+			/*etherScanSocket = new WebSocket("wss://socket.etherscan.io/wshandler");
+			console.log('creating socket');
+			let openmsg = {"event": "txlist", "address": publicAddr};
+			etherScanSocket.onmessage = function(evt) { socketResponse(evt); };
+			etherScanSocket.onopen = function (event) {
+				console.log('socket opened');
+				etherScanSocket.send(JSON.stringify(openmsg));
+				socketPing(true);
+			};*/
         } else {
 			running = false;
         }
@@ -939,66 +970,7 @@
 				}
 			}
 			
-			/*
-			for(var l = 0; l < tradeLogResult.length; l++)
-			{
-				let outputData = tradeLogResult[l].data;
-				//0 tokenget , 1 amountget, 2 tokengive, 3 amountgive,4 get 5 give
-				
-					let unpacked = _util.processOutput (_delta.web3, _delta.contractEtherDelta, outputData);
-					if(unpacked && (unpacked.params[4].value.toLowerCase() === myAddr || unpacked.params[5].value.toLowerCase() === myAddr) )
-					{
-						let tradeType = 'Sell';
-						let token = undefined;
-						let token2 = undefined;
-						let partner = undefined; 
-						if(unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
-						{
-							tradeType = 'Buy';
-							token = uniqueTokens[unpacked.params[2].value];
-							token2 = uniqueTokens[unpacked.params[0].value];
-							partner = unpacked.params[4].value;
-						}
-						else // buy
-						{
-							token = uniqueTokens[unpacked.params[0].value];
-							token2 = uniqueTokens[unpacked.params[2].value];
-							partner = unpacked.params[5].value;
-						}
-						
-						if(token && token2 && token.addr && token2.addr)
-						{
-							let amount = 0;
-							let oppositeAmount = 0;
-							if(tradeType === 'Sell')
-							{
-								amount = unpacked.params[1].value;
-								oppositeAmount = unpacked.params[3].value;
-							} else
-							{
-								oppositeAmount = unpacked.params[1].value;
-								amount = unpacked.params[3].value;
-							}
-							
-							let unlisted = token.longname && true;
-							let dvsr = divisorFromDecimals(token.decimals)
-							let dvsr2 = divisorFromDecimals(token2.decimals)
-							let val = _util.weiToEth(amount, dvsr);
-							let val2 = _util.weiToEth(oppositeAmount, dvsr2);
-							
-							let price = 0;
-						//	if(tradeType === 'sell')
-							{
-								price = val2 / val;
-							}
-							
-	
-							let trans = createOutputTransaction(tradeType , token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price,  true);		
-							outputTransactions.push(trans);	
-						}
-					} 
-			}
-			*/
+			
 			for(var l = 0; l < tokens.length; l++)
 			{
 				let method = tokens[l].input.slice(0, 10);
@@ -1154,6 +1126,7 @@
 					Price: price,
 					Hash: hash,
 					Date: toDateTime(timeStamp),
+					Details: window.location + 'tx.html#' + hash,
 					Unlisted: unlisted,
 					TokenAddr: tokenaddr,
 				};
@@ -1520,6 +1493,11 @@
 						else
 							row$.append($('<td align="center"/>').html('<i style="color:red;" class="fa fa-exclamation-circle"></i>'));
 					}
+					else if(head == 'Details')
+					{
+						
+						row$.append($('<td/>').html('<a href="'+cellValue+'" target="_blank"> See details</a>'));
+					}
 					else
 					{
 						row$.append($('<td/>').html(cellValue));
@@ -1571,7 +1549,7 @@
 
 	let balanceHeaders = {'Name': 1, 'Wallet':1, 'EtherDelta':1, 'Total':1, 'Value':1,'Bid':1, 'Est. ETH':1};
 	let depositHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1};
-	let transactionHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1, 'Price':1, 'Status':1};
+	let transactionHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1, 'Price':1, 'Status':1, 'Details':1};
     // Adds a header row to the table and returns the set of columns.
     // Need to do union of keys from all records as some records may not contain
     // all records.
@@ -1690,4 +1668,67 @@
 		}
 		return new BigNumber(result);
 	}
+	
+/*	function socketResponse(event) {
+		console.log('received socket msg');
+		if(event)
+		{
+			let resp = JSON.parse(event.data);
+			console.log(resp.event);
+			sendNotification(resp.event);
+			if(resp.event == "welcome")
+			{
+				console.log('rec welcome');
+			}
+			else if(resp.event == "pong")
+			{
+				console.log('rec pong');
+			}
+			else if(resp.event == "subscribe-txlist")
+			{
+				if( resp.status == 1)
+				{
+					console.log('ok');
+				} else 
+				{
+					console.log('notok');
+				}
+			}
+		} else {
+			console.log('empty msg');
+		}
+
+	}
+	
+	
+	function socketPing(active) {
+		if(active)
+		{
+			pingID  = setInterval(function() 
+			{
+				console.log('send ping');
+				let pingmsg = {"event": "ping"};
+				etherScanSocket.send(JSON.stringify(pingmsg));
+			}, 18000);
+			
+		} else {
+			if(pingID > -1)
+				clearInterval(pingID);
+			pingID = -1;
+		}
+	}
+	
+	function sendNotification(text){
+		if (Notification.permission !== "granted")
+			Notification.requestPermission();
+		else {
+			var notification = new Notification('Notification title', {
+			icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
+			body: text,
+			});
+		}
+		//notification.onclick = function () {
+		//	window.open("http://stackoverflow.com/a/13328397/1269037");      
+		//};
+	} */
 }

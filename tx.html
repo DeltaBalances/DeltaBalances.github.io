@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Bootstrap meta tags -->
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Delta Balances</title>
+
+		<!-- Bootstrap js -->
+		<script type="text/javascript" src="/js/jquery-3.2.1.min.js"></script>
+		<script src="bootstrap.min.js"></script>
+		
+		<!-- Bootstrap css -->
+		<link href="bootstrap.min.css" rel="stylesheet">
+		<link href="bootstrap-theme.min.css" rel="stylesheet">
+		
+		<!-- custom css  (tablesorter icons, checkboxes..) -->
+		<link rel="stylesheet" type="text/css" href="style.css">
+		
+	    <link rel="stylesheet" href="font-awesome.min.css">
+	
+		
+		
+		
+
+		<!-- Required js Web3 -->
+		<script type="text/javascript" src="/js/bignumber.js"></script>
+		<script type="text/javascript" src="/js/web3.min.js"></script>	
+		<!-- TableSorter -->
+		<script type="text/javascript" src="/js/jquery.tablesorter.js"></script>
+		<script type="text/javascript" src="/js/jquery.tablesorter.widgets.js"></script>
+		<script type="text/javascript" src="/js/widget-scroller.js"></script>
+
+		
+		<!-- EtherDelta -->
+			<script type="text/javascript" src="customTokens.js"></script>
+			<script type="text/javascript" src="backupTokens.js"></script>
+		<script>
+			var etherDeltaConfig = undefined;
+			try {
+				$.getJSON('https://etherdelta.github.io/config/main.json', function(jsonData) {
+					if(jsonData)
+					{
+						etherDeltaConfig = jsonData;
+					} else
+					{
+						etherDeltaConfig = offlineTokens;
+					}
+				});
+			} catch (err){
+				etherDeltaConfig = offlineTokens;
+			}
+			var stagingTokens = undefined;
+			try {
+				$.getJSON('https://etherdelta.github.io/config/staging.json', function(jsonData) {
+					if(jsonData)
+					{
+						stagingTokens = jsonData;
+					} 
+				});
+			} catch (err) {}
+		</script>
+		<script type="text/javascript" src="bundle.js"></script>
+		
+		<!-- Main script -->
+		<script type="text/javascript" src="tx.js"></script>
+		
+		
+
+	
+		
+	</head>
+	<body >
+	
+		<div class="alert alert-danger alert-top " style="display:none;" onclick="hideError()" id='error' role="alert" >
+			<strong>Error</strong> <span id="errortext"></span>
+			<button type="button" class="close"  aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="alert alert-warning alert-top alert-dismissible"  onclick="hideHint()" style = "display:none;" role="alert" id='hint'>
+			<strong>Hint</strong> <span id="hinttext"></span>
+			<button type="button" class="close"  aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		
+		<div class="navbar navbar-inverse navbar-fixed-top">
+		  <div class="container">
+			<div class="navbar-header" style="width:100%;">
+			  <a class="navbar-brand hidden-xs" href="#">DeltaBalances</a>
+			   <form id="form" class="navbar-form" >
+				<div class="form-group" style="display:inline;">
+				  <div class="input-group" style="display:table; width:80%; margin: auto;">
+					<span class="input-group-addon btn btn-default" id="refreshButton"  onclick="myClick()" style="width:1%; cursor:pointer;"><span class="search"> Go</span></span>
+					<input class="form-control" name="addr" autocomplete="off" autofocus="autofocus" id="address" placeholder="Transaction Hash: 0x...       www.etherscan.io/tx/HASH" required pattern="[a-zA-Z0-9]+">
+				  </div>
+				</div>
+			  </form>
+			</div>
+		  </div>
+		</div>
+	
+	
+		 <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+		<div class="container" > 
+				<div class="col-md-12" style="overflow:hidden;">
+					<h2>EtherDelta Transaction <button id='loading' onclick ="myClick()" class="fa fa-refresh" style="display:none;"></button></h2>
+					
+					<table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
+					  <tr>
+						<td> Hash</td>
+						<td id = 'hash'></td>
+					  </tr>
+					  <tr>
+						<td> Status</td>
+						<td id = 'status'></td>
+					  </tr>
+					  <tr>
+						<td> From</td>
+						<td id = 'from'></td>
+					  </tr>
+					  <tr>
+						<td>To </td>
+						<td id = 'to'></td>
+					  </tr>
+					  
+					  <tr>
+						<td>ETH value </td>
+						<td id = 'ethval'></td>
+					  </tr>
+					  <tr>
+						<td>Type</td>
+						<td id = 'inputtype'></td>
+					  </tr>
+					  <tr>
+						<td>Gas Price </td>
+						<td id = 'gasgwei'></td>
+					  </tr>
+					  <tr>
+						<td>Gas Limit </td>
+						<td id = 'gaslimit'></td>
+					  </tr>
+					  <tr>
+						<td>Gas Cost </td>
+						<td id = 'gascost'></td>
+					  </tr>
+					  <tr>
+						<td>Nonce </td>
+						<td id = 'nonce'></td>
+					  </tr>
+					   
+					</table>
+					
+					
+					Time <span id= "time"></span> (to be implemented)<br>
+					
+					<h2>Summary</h2>
+					<span id="summary" ></span>
+				</div>
+
+			
+		</div>
+    </div>
+
+    <div class="container">
+	
+	
+	<div class="row">
+        <div class="col-md-12">
+			
+
+			<div class="tab-content">
+				<div id="balancetab" class="tab-pane active">
+				  <div class="row">
+					<div  class="col-md-6">
+						<h2>Input data </h2>
+						<p> Transaction input sent to the blockchain, what you attempted to do.</p> <br>
+						<div id="inputdata"></div>
+					</div>
+					<div  class="col-md-6">				
+						<h2>Output data </h2>
+						<p>Transaction event logs on the blockchain, what actually happened. </p> <br>
+						<div id="outputdata"></div>
+					</div>	
+				  </div>
+				</div>
+			</div>
+			
+			
+			  
+			
+		</div>
+    </div><!-- /row -->
+
+      <hr>
+
+      <footer style="overflow:hidden;">
+			<p> Powered by <a target="_blank" href="https://etherdelta.github.io/">EtherDelta</a> & <a target="_blank" href="https://etherscan.io/">Etherscan</a></p>
+			<p> If you enjoy the site, you are always welcome to buy me a beer:  <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank" >0xf6E914D07d12636759868a61E52973d17ED7111B</a> </p>
+      </footer>
+    </div> <!-- /container -->
+	
+
+	</body>
+</html>

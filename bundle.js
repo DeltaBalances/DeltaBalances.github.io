@@ -56,12 +56,14 @@ module.exports = (config) => {
   {
 	  if(!bundle.EtherDelta.config.methodIDS)
 	  {
-		  bundle.EtherDelta.config.methodIDS = _addABI(contract.abi);
+		  let abi1 = _addABI(bundle.EtherDelta.contractEtherDelta.abi);
+		  let abi2 = _addABI(bundle.EtherDelta.contractToken.abi);
+		  bundle.EtherDelta.config.methodIDS = Object.assign(abi1, abi2);
 	  }
 	  
 	   if(!bundle.EtherDelta.config.solFunc)
 	  {
-		   let depositAbi = contract.abi.find(element => element.name === 'Deposit');
+		   let depositAbi = bundle.EtherDelta.contractEtherDelta.abi.find(element => element.name === 'Deposit');
 			depositAbi.outputs = []; // error avoidance
 			bundle.EtherDelta.config.solFunc = new SolidityFunction(web3In.eth, depositAbi, '');
 	  }
@@ -101,23 +103,25 @@ module.exports = (config) => {
 	  
   };
     
-  utility.processOutput = function getOutput(web3In, contract, data)
+  utility.processOutputMethod = function getOutput(web3In, contract, data)
   {
-	  
 	  if(!bundle.EtherDelta.config.methodIDS)
 	  {
-		  bundle.EtherDelta.config.methodIDS = _addABI(contract.abi);
+		  let abi1 = _addABI(bundle.EtherDelta.contractEtherDelta.abi);
+		  let abi2 = _addABI(bundle.EtherDelta.contractToken.abi);
+		  bundle.EtherDelta.config.methodIDS = Object.assign(abi1, abi2);
 	  }
 	  
-	   if(!bundle.EtherDelta.config.solFunc2)
+	  if(!bundle.EtherDelta.config.solFunc2)
 	  {
-		   let depositAbi = contract.abi.find(element => element.name === 'Trade');
+		   let depositAbi = bundle.EtherDelta.contractEtherDelta.abi.find(element => element.name === 'Trade');
 			depositAbi.outputs = []; // error avoidance
 			bundle.EtherDelta.config.solFunc2 = new SolidityFunction(web3In.eth, depositAbi, '');
 	  }
 	  
-	 
-	  let result = bundle.EtherDelta.config.solFunc2.decodeMethod2(data, bundle.EtherDelta.config.methodIDS, '6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d');
+	  let topic = data.topics[0] + "";
+	  topic = topic.slice(2,topic.length);
+	  let result = bundle.EtherDelta.config.solFunc2.decodeMethod2(data.data, bundle.EtherDelta.config.methodIDS, topic);
 	  
 	  return result;
 	  
@@ -65232,7 +65236,7 @@ SolidityFunction.prototype.decodeMethod2 = function _decodeMethod2(data, methodI
   const abiItem = methodIDs[methodID];
   if (abiItem) {
     const params = abiItem.inputs.map((item) => item.type);
-    let decoded = coder.decodeParams(params, data.slice(10));
+    let decoded = coder.decodeParams(params, data.slice(2));
     return {
       name: abiItem.name,
       params: decoded.map((param, index) => {

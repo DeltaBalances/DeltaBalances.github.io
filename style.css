@@ -18,6 +18,23 @@
    /* border-collapse: separate;
     border-spacing: 20px 2px; */
 }
+
+#txOverviewTable {
+	width: 100%;
+	border:none;
+	font-size: 125%;
+}
+
+#txOverviewTable td {
+	border:none;
+	padding:3px 50px;
+}
+
+#txOverviewTable td :first-child{
+	border:none;
+	padding:3px 0px;
+}
+
 /* sm */
 @media (max-width: 650px) {
     #overviewTable {
@@ -27,16 +44,12 @@
 
 #overviewTable td {
 	border:none;
-
+	padding:3px;
 	
 }
 #overviewTable td:nth-child(2) {
 	text-align:right;
 
-}
-#overviewTable td
-{
-	padding:3px;
 }
 
 

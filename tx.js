@@ -448,7 +448,7 @@
 							
 							let obj = {
 								'type': 'Taker '+ tradeType, 
-								'note': 'Clicked an order in the orderbook',
+								'note': 'Clicked an order in the orderbook to trade.',
 								'token': token,
 								'amount': val,
 								'price': price,
@@ -584,7 +584,7 @@
 						
 						let obj = {
 								'type': 'Approve',
-								'note': 'Now allows tokens to be transferred',
+								'note': 'Now allows tokens to be transferred by deposit transaction (2/2)',
 								'sender':sender,
 								'token': token,
 								'to': to,
@@ -717,12 +717,12 @@
 							else
 							{
 								type = 'Deposit';
-								note = 'Transaction (2/2)Request EtherDelta to withdraw tokens';
+								note = 'Transaction (2/2) of a deposit, request EtherDelta to deposit tokens';
 							}	
 							
 							let obj = {
 								'type': 'Token ' + type,
-								'note': 'Transaction (1/2) of a deposit. Request EtherDelta to move tokens for you.',
+								'note': note,
 								'token':token,
 								'amount':val,
 								'unlisted':unlisted,
@@ -840,7 +840,7 @@
 							
 							let obj = {
 								'type': 'Taker '+ tradeType,
-								'note': 'Clicked an order in the EtherDelta orderbook',
+								'note': 'Clicked an order in the orderbook to trade.',
 								'token':token,
 								'amount':val,
 								'price': price,
@@ -918,10 +918,18 @@
 				sum += 'Bad jump destination, someone filled this order before you. (Sent earlier or with a higher gas price).<br>';
 			}
 			else if ( transaction.input.type === 'Token Deposit' || transaction.input.type === 'Token Withdraw') {
-				sum += 'Bad jump destination, token deposit/withdraw failed. Check if the token is not locked (Still in ICO, rewards period, disabled etc).<br>';
+				sum += 'Bad jump destination, token deposit/withdraw failed. You might not have hade the right account balance left. Otherwsise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br>';
 			}
 		} else {
 			sum += 'Transaction failed.<br>';
+		}
+		
+		if(transaction.input && transaction.input.note)
+		{
+			sum += transaction.input.note +'<br>';
+		} else if(transaction.output)
+		{
+			sum += transaction.output[0].note +'<br>';
 		}
 		if(transaction.input && transaction.input.type === 'Transfer' )
 		{

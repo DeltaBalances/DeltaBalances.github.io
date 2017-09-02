@@ -918,7 +918,7 @@
 				sum += 'Bad jump destination, someone filled this order before you. (Sent earlier or with a higher gas price).<br>';
 			}
 			else if ( transaction.input.type === 'Token Deposit' || transaction.input.type === 'Token Withdraw') {
-				sum += 'Bad jump destination, token deposit/withdraw failed. You might not have hade the right account balance left. Otherwsise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br>';
+				sum += 'Bad jump destination, token deposit/withdraw failed. You might not have had the right account balance left. Otherwsise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br>';
 			}
 		} else {
 			sum += 'Transaction failed.<br>';

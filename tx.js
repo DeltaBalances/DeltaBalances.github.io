@@ -225,7 +225,7 @@
 		
         if (transactionHash) 
 		{	
-			$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/transaction.html#' + transactionHash + '"> Direct Link </a> to this page');
+			//$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/transaction.html#' + transactionHash + '"> Direct Link </a> to this page');
 			getTransactions();
         } else {
 			running = false;
@@ -308,7 +308,6 @@
 		let statusResult = undefined;
 		
 		let transLoaded = 0;
-		let contractAddr =_delta.config.contractEtherDeltaAddr.toLowerCase();
 		
 		// status https://api.etherscan.io/api?module=transaction&action=getstatus&txhash=0x15f8e5ea1079d9a0bb04a4c58ae5fe7654b5b2b4463375ff7ffb490aa0032f3a&apikey=YourApiKeyToken
 		// https://api.etherscan.io/api?module=proxy&action=eth_GetTransactionReceipt&txhash='+ transactionHash;

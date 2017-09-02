@@ -966,10 +966,12 @@
 		$('#cost').html('??');
 		$('#gasprice').html();
 		$('#gasgwei').html(transaction.gasGwei + ' Gwei (' + transaction.gasPrice.toFixed(10) + ' ETH)');
-		if(transaction.status !== 'Pending') {
+		if(transaction.status === 'Completed') {
 			$('#gascost').html(Number(transaction.gasEth).toFixed(5) + ' ETH');
-		} else {
+		} else if(transaction.status === 'Pending') {
 			$('#gascost').html('Pending');
+		} else {
+			$('#gascost').html('Failed');
 		}
 		$('#gaslimit').html(transaction.gasLimit);
 		$('#nonce').html(transaction.nonce);

@@ -84,7 +84,7 @@
 			Price: 0,
 			Hash: '',
 			Date: toDateTimeNow(),
-			Details: '',
+			Details: window.location +'/tx.html',
 			Unlisted: false,
 		}
 	];

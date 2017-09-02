@@ -84,7 +84,7 @@
 			Price: 0,
 			Hash: '',
 			Date: toDateTimeNow(),
-			Details: window.location +'/tx.html',
+			Details: window.location.origin + window.location.pathname + 'tx.html',
 			Unlisted: false,
 		}
 	];
@@ -1126,7 +1126,7 @@
 					Price: price,
 					Hash: hash,
 					Date: toDateTime(timeStamp),
-					Details: window.location + 'tx.html#' + hash,
+					Details: window.location.origin + window.location.pathname + 'tx.html#' + hash,
 					Unlisted: unlisted,
 					TokenAddr: tokenaddr,
 				};

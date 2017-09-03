@@ -941,7 +941,7 @@
 				sum += 'Warning, you sent tokens to the EtherDelta contract without a deposit, you can no longer access these tokens. <br>';
 			}
 		}
-		if(!transaction.input && transaction.output.length == 0)
+		if(!transaction.input && (!transaction.output || transaction.output.length == 0))
 		{
 			sum += 'This does not seem to be an EtherDelta transaction <br>'; 
 		}

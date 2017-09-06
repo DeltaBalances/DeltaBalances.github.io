@@ -926,7 +926,7 @@
 		if(transaction.input && transaction.input.note)
 		{
 			sum += transaction.input.note +'<br>';
-		} else if(transaction.output)
+		} else if(transaction.output && transaction.output.length > 0)
 		{
 			sum += transaction.output[0].note +'<br>';
 		}

@@ -16,6 +16,7 @@
 	let initiated = false;
 	let autoStart = false;
 	
+	let requestID = 0;
 	
 	// loading states
     let table1Loaded = false;
@@ -337,7 +338,7 @@
 	function disableInput(disable)
 	{
 		$('#refreshButton').prop('disabled', disable);
-        $("#address").prop("disabled", disable);
+       // $("#address").prop("disabled", disable);
 		$("#loadingBalances").prop("disabled", disable);
 		$('#loadingBalances').addClass('dim');
 		$('#loadingTransactions').addClass('dim');
@@ -408,7 +409,7 @@
 	function myClick()
 	{
 		if(running)
-			return;
+			requestID++;
 		if(!initiated)
 		{
 			autoStart = true;
@@ -434,7 +435,7 @@
 				etherScanSocket.close();
 				etherScanSocket = undefined;
 			}*/
-			getAll();
+			getAll(false, requestID);
 
 		}
 		else
@@ -446,10 +447,10 @@
 		}
 	}
 	
-	function getAll(autoload)
+	function getAll(autoload, rqid)
 	{
-		if(running)
-			return;
+		//if(running)
+		//	return;
 		
 		running = true;
 		
@@ -464,8 +465,8 @@
 		{	
 			setStorage();
 			$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/#' + publicAddr + '"> Direct Link </a> to this page');
-			getTrans();
-			getBalances();
+			getTrans(rqid);
+			getBalances(rqid);
 			/*etherScanSocket = new WebSocket("wss://socket.etherscan.io/wshandler");
 			console.log('creating socket');
 			let openmsg = {"event": "txlist", "address": publicAddr};
@@ -480,7 +481,7 @@
         }
 	}
 	
-	function getBalances()
+	function getBalances(rqid)
 	{
 		if(!trigger_1)
 			return;
@@ -530,18 +531,17 @@
 					Address: token.addr,
                 };
             }
-				getPrices();
-				getAllBalances();
+				getPrices(rqid);
+				getAllBalances(rqid);
 				//getDeltaBalances();
 				//getWalletBalances();
 		}
 	}	
 	
-	function getTrans()
+	function getTrans(rqid)
 	{
 		if(!trigger_2)
 			return;
-		
 		
 		if(showTransactions)
 		{
@@ -556,7 +556,7 @@
 			{
 				console.log('blocknum re-used');
 				startblock = getStartBlock(blocknum, transactionDays);
-				getTransactions();
+				getTransactions(rqid);
 			}
 			else 
 			{
@@ -568,7 +568,7 @@
 						blocknum = num;
 						startblock = getStartBlock(blocknum, transactionDays);
 					}
-					getTransactions();
+					getTransactions(rqid);
 				});
 			}
 		}
@@ -721,19 +721,22 @@
 	} 
 	*/
 	
-	function getPrices()
+	function getPrices(rqid)
 	{
 		$.getJSON(_delta.config.apiServer +'/nonce/'+ Date.now() + '/returnTicker/', (result) => {
-			if(result)
+			if(requestID <= rqid)
 			{
-				let results = Object.values(result);
-				for(let i = 0; i < results.length; i++)
+				if(result)
 				{
-					let token = uniqueTokens[results[i].tokenAddr];
-					
-					if(token && balances[token.name])
+					let results = Object.values(result);
+					for(let i = 0; i < results.length; i++)
 					{
-						balances[token.name].Bid = Number(results[i].bid);
+						let token = uniqueTokens[results[i].tokenAddr];
+						
+						if(token && balances[token.name])
+						{
+							balances[token.name].Bid = Number(results[i].bid);
+						}
 					}
 				}
 			}
@@ -745,7 +748,7 @@
 	}
 	
 	let maxPerRequest = 120;
-	function getDeltaBalances()
+	function getDeltaBalances(rqid)
 	{
 		let tokens2 = Object.keys(uniqueTokens);	
 		
@@ -770,6 +773,8 @@
 			  [_delta.config.contractEtherDeltaAddr, publicAddr, tokens],
 			  (err, result) => 
 			  {
+				if(requestID > rqid)
+					return;
 				const returnedBalances = result;
 				if(returnedBalances && returnedBalances.length > 0)
 				{				
@@ -793,7 +798,7 @@
 		
 	}
 	
-	function getAllBalances()
+	function getAllBalances(rqid)
 	{
 		let tokens2 = Object.keys(uniqueTokens);	
 
@@ -819,6 +824,8 @@
 			  [_delta.config.contractEtherDeltaAddr, publicAddr, tokens],
 			  (err, result) =>
 			  {
+				 if(requestID > rqid)
+					return;
 				const returnedBalances = result;
 				if(returnedBalances && returnedBalances.length > 0)
 				{	
@@ -839,7 +846,7 @@
 		}
 	}
 	
-	function getWalletBalances()
+	function getWalletBalances(rqid)
 	{
 		let tokens2 = Object.keys(uniqueTokens);
 		
@@ -864,6 +871,8 @@
 			  [publicAddr, tokens],
 			  (err, result) => 
 			  {
+				if(requestID > rqid)
+					return;
 				const returnedBalances = result;
 				if(returnedBalances && returnedBalances.length > 0)
 				{				
@@ -881,7 +890,7 @@
 	
 	
 	
-	function getTransactions()
+	function getTransactions(rqid)
 	{
 		let transLoaded = 0;
 		let transResult = [];
@@ -891,6 +900,8 @@
 		
 
 		$.getJSON('https://api.etherscan.io/api?module=account&action=txlist&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey, (result) => {
+			if(requestID > rqid)
+					return;
 			if(result && result.status === '1')
 				transResult = result.result;
 			transLoaded++;
@@ -900,6 +911,8 @@
 		
 		// internal ether transactions (withdraw)
 		$.getJSON('https://api.etherscan.io/api?module=account&action=txlistinternal&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey, (result2) => {
+			if(requestID > rqid)
+					return;
 			if(result2 && result2.status === '1')
 				inTransResult = result2.result;
 			transLoaded++;
@@ -1353,6 +1366,7 @@
 			disableInput(false);
 			hideLoading(true,true);
 			running = false;
+			requestID++;
 			buttonLoading(true, true);
 		}
 		else
@@ -1407,6 +1421,7 @@
 			disableInput(false);
 			hideLoading(true,true);
 			running = false;
+			requestID++;
 			buttonLoading(true, true);
 		}
 		else

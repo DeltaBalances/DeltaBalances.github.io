@@ -342,6 +342,15 @@
 		
 		function processTransactions(tx, txStatus, txLog)
 		{
+			if(!tx)
+			{
+				console.log('error');
+				showError('failed to load transaction from <a href="https://etherscan.io/tx/' + transactionHash + '" + target="_blank"> Etherscan </a>');
+				disableInput(false);
+				hideLoading();
+				running = false;
+				return;
+			}
 			console.log('completed requests');
 			let pending = false;
 			if(!tx.blockHash ||!tx.blockNumber || !tx.transactionIndex)

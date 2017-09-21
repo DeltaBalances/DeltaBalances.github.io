@@ -423,14 +423,20 @@
 						{
 							let amount = 0;
 							let oppositeAmount = 0;
+							let buyUser = '';
+							let sellUser = '';
 							if(tradeType === 'Sell')
 							{
 								amount = unpacked.params[1].value;
 								oppositeAmount = unpacked.params[3].value;
+								sellUser = unpacked.params[5].value;
+								buyUser = unpacked.params[4].value;
 							} else
 							{
 								oppositeAmount = unpacked.params[1].value;
 								amount = unpacked.params[3].value;
+								sellUser = unpacked.params[4].value;
+								buyUser = unpacked.params[5].value;
 							}
 							
 							let unlisted = token.longname && true;
@@ -453,6 +459,8 @@
 								'price': price,
 								'ETH': val2,
 								'unlisted': unlisted,
+								'buyer': buyUser,
+								'seller': sellUser,
 							};
 							outputs.push(obj);
 						}
@@ -968,8 +976,8 @@
 		$('#summary').html(sum);
 	
 		$('#hash').html(hashLink(transaction.hash, true));
-		$('#from').html(addressLink(transaction.from, true));
-		$('#to').html(addressLink(transaction.to, true));
+		$('#from').html(addressLink(transaction.from, true, false));
+		$('#to').html(addressLink(transaction.to, true, false));
 		$('#cost').html('??');
 		$('#gasprice').html();
 		$('#gasgwei').html(transaction.gasGwei + ' Gwei (' + transaction.gasPrice.toFixed(10) + ' ETH)');
@@ -1076,12 +1084,14 @@
 		return '<a target = "_blank" href="' + url + '">'+hash +' </a>';
 	}
 	
-	function addressLink(addr, html) {
+	function addressLink(addr, html, short) {
 		let url = 'https://etherscan.io/address/' + addr;
 		if(!html)
 			return url
-		
-		return '<a target="_blank" href="' + url + '">'+ addressName(addr) +' </a>';
+		let displayText = addressName(addr);
+		if(short)
+			displayText = displayText.slice(0,6) + '..';
+		return '<a target="_blank" href="' + url + '">'+ displayText +' </a>';
 	}
 	
 	function addressName(addr) {
@@ -1178,6 +1188,11 @@
 					cellValue = myList[i].name;
 				else if(keys[i] == 'price')
 					cellValue = Number(cellValue).toFixed(5);
+				else if(keys[i] == 'seller' || keys[i] == 'buyer')
+				{
+					cellValue = addressLink(cellValue, true, true);
+				}
+				
 				if (cellValue == null) cellValue = "";
 				//let head = columns[colIndex];
 				

@@ -419,7 +419,7 @@
 		hideError();
 		hideHint();
 		disableInput(true);
-		
+		$('#downloadBalances').html('');
 		// validate address
 		if(!autoStart)
 			publicAddr = getAddress();
@@ -1234,8 +1234,10 @@
 		$('#tokenbalance').html(sumToken.toFixed(fixedDecimals) + ' ETH');
 		$('#totalbalance').html((sumETH + sumToken).toFixed(fixedDecimals) + ' ETH');
 		
+		
         let result = Object.values(balances);
         lastResult = result;
+		downloadBalances();
 		if(showCustomTokens)
 			lastResult3 = result;
 
@@ -1651,13 +1653,13 @@
 		return formatDate(d);
 	}
 	
-	function toDateTimeNow()
+	function toDateTimeNow(short)
 	{
 		var t = new Date();
-		return formatDate(t);
+		return formatDate(t, short);
 	}
 
-	function formatDate(d)
+	function formatDate(d, short)
 	{
 		var month = '' + (d.getMonth() + 1),
 			day = '' + d.getDate(),
@@ -1671,7 +1673,10 @@
 		if (hour < 10) hour = '0' + hour;
 		if (min < 10) min = '0' + min;
 
-		return [year, month, day].join('-') + ' '+ [hour,min].join(':');
+		if(!short)
+			return [year, month, day].join('-') + ' '+ [hour,min].join(':');
+		else
+			return [year, month, day].join('');
 	}
 
 	function divisorFromDecimals(decimals)
@@ -1682,6 +1687,43 @@
 			result = Math.pow(10, decimals);
 		}
 		return new BigNumber(result);
+	}
+	
+	function downloadBalances()
+	{
+		if(lastResult)
+		{
+			let allBal = lastResult;
+			allBal = allBal.filter((x) => {return x.Total > 0;});
+			
+			
+			var A = [
+					['Token name', 'Wallet', 'EtherDelta', 'Total']
+					];  // initialize array of rows with header row as 1st item
+			for(var i=0;i< allBal.length;++i)
+			{ 
+				let arr = [ allBal[i].Name, allBal[i].Wallet, allBal[i].EtherDelta, allBal[i].Total];
+				A.push(arr); 
+			}
+			var csvRows = [];
+			for(var i=0,l=A.length; i<l; ++i){
+				csvRows.push(A[i].join(','));   // unquoted CSV row
+			}
+			var csvString = csvRows.join("\r\n");
+
+			var sp = document.createElement('span');
+			sp.innerHTML = "Export balances as CSV ";
+			var a = document.createElement('a');
+			a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
+			a.href     = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
+			a.target   = '_blank';
+			a.download = toDateTimeNow(true) + '-' + publicAddr + '.csv';
+			sp.appendChild(a);
+			var parent = document.getElementById('downloadBalances');
+			parent.appendChild(sp);
+			//parent.appendCild(a);
+		}
+		
 	}
 	
 /*	function socketResponse(event) {

@@ -1697,9 +1697,8 @@
 			allBal = allBal.filter((x) => {return x.Total > 0;});
 			
 			
-			var A = [
-					['Token name', 'Wallet', 'EtherDelta', 'Total']
-					];  // initialize array of rows with header row as 1st item
+			var A = [ ['Token name', 'Wallet', 'EtherDelta', 'Total'] ];  
+			// initialize array of rows with header row as 1st item
 			for(var i=0;i< allBal.length;++i)
 			{ 
 				let arr = [ allBal[i].Name, allBal[i].Wallet, allBal[i].EtherDelta, allBal[i].Total];
@@ -1719,6 +1718,8 @@
 			a.target   = '_blank';
 			a.download = toDateTimeNow(true) + '-' + publicAddr + '.csv';
 			sp.appendChild(a);
+			
+			$('#downloadBalances').html('');
 			var parent = document.getElementById('downloadBalances');
 			parent.appendChild(sp);
 			//parent.appendCild(a);

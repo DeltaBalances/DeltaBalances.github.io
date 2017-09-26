@@ -24,6 +24,7 @@
 	let loadedED = 0;
     let loadedW = 0;
 	let loadedBid = 0;
+	let loadedCustom = false;
 	let trigger_1 = false;
 	let trigger_2 = false;
 	let running = false;
@@ -38,7 +39,7 @@
 	
 	let showTransactions = true;
     let showBalances = true;	
-	let showCustomTokens = true;
+	let showCustomTokens = false;
 	
 
     // user input & data
@@ -124,46 +125,64 @@
 					});
 				}
 			}
-			//import of (updated?) etherdelta config
+			//import of etherdelta config
 			if(etherDeltaConfig)
 			{
 				_delta.config.tokens = etherDeltaConfig.tokens;
 				_delta.config.pairs = etherDeltaConfig.pairs;
 			}
 			
-			
+			// note all listed tokens
 			for(let i = 0; i < _delta.config.tokens.length; i++)
 			{
 				let token = _delta.config.tokens[i];
-				if(token && !uniqueTokens[token.addr])
-					uniqueTokens[token.addr] = token;
+				if(token) {
+					token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+					token.addr = token.addr.toLowerCase();
+					token.unlisted = false;
+					_delta.config.tokens[i] = token;
+					if(!uniqueTokens[token.addr]) {
+						uniqueTokens[token.addr] = token;
+					}
+				}	
 			}
 			
-			
+			//format MEW tokens like ED tokens
+			offlineCustomTokens = offlineCustomTokens.map((x) => { return {"name": escapeHtml(x.symbol),
+																		   "addr": x.address.toLowerCase(),
+																		   "unlisted": true,
+																		   "decimals":x.decimal,
+																		  };
+																 });
 			//filter out custom tokens that have been listed by now
 			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
-			
+			// note custom tokens
 			for(let i = 0; i < _delta.config.customTokens.length; i++)
 			{
 				let token = _delta.config.customTokens[i];
-				if(token && !uniqueTokens[token.addr])
+				if(token && !uniqueTokens[token.addr]) {
 					uniqueTokens[token.addr] = token;
+				}
 			}
 			
-			if(stagingTokens)
+			// treat tokens listed as staging as unlisted custom tokens
+			if(stagingTokens && stagingTokens.tokens)
 			{
-				let stageTokens = stagingTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
-				for(let i = 0; i < _delta.config.customTokens.length; i++)
+				//filter tokens that we already know
+				let stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+				for(let i = 0; i < stageTokens.length; i++)
 				{
 					let token = stageTokens[i];
 					if(token && !uniqueTokens[token.addr])
 					{
-						token.longname = token.name;
+						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+						token.unlisted = true;
 						uniqueTokens[token.addr] = token;
 						_delta.config.customTokens.push(token);
 					}
 				}
 			}
+			
 			
 			initiated = true;
 			if(autoStart)
@@ -313,15 +332,15 @@
 		showCustomTokens = $('#custom').prop('checked');
 		if(showCustomTokens) 
 		{
-			if(lastResult && lastResult2)
+			if(lastResult && lastResult2 && loadedCustom)
 			{
 
 				makeTable(lastResult, hideZero);
 				makeTable2(lastResult2);
 
 			}
-			else {
-				getAll();
+			else if(publicAddr) {
+				myClick();
 			}
 				
 		}
@@ -497,12 +516,13 @@
 			loadedW = 0; // wallet async load progress
 			loadedED = 0; // etherdelta async load progress
 			loadedBid = 0;
+			loadedCustom = false;
 			$('#resultTable tbody').empty();
 			showLoading(true,false);
 			 
 			tokenCount = _delta.config.tokens.length;
 			let count1 = tokenCount;
-			//if(showCustomTokens && _delta.config.customTokens)
+			if(showCustomTokens && _delta.config.customTokens)
 				tokenCount += _delta.config.customTokens.length;
 			
 			// init listed tokens at 0
@@ -684,43 +704,6 @@
 	// Functions - requests
 	// ##########################################################################################################################################
 	
-	/*
-	function getCustomTokens()
-	{
-		
-		$.getJSON('https://api.ethplorer.io/getAddressInfo/'+ _delta.config.contractAddr + '?apiKey=freekey', (result) => 
-		{
-			let customTokens = [];
-			if(result && result.tokens.length > 0)
-			{	
-				for(var i = 0; i < result.tokens.length; i++)
-				{
-					let tk = result.tokens[i];
-					
-					if(tk.tokenInfo !== undefined)
-					{
-						let tokenName = tk.tokenInfo.symbol;
-						let addr = tk.tokenInfo.address;
-						if(!uniqueTokens[addr])
-						{
-							let token = {
-								addr: tk.tokenInfo.address,
-								name: tokenName,  // nearly always symbol is the name on etherdelta (not: sonm,dice )
-								longname: tk.tokenInfo.name,
-								decimals: tk.tokenInfo.decimals,
-							};
-							uniqueTokens[addr] = token;
-							customTokens.push(token);						
-						}
-					}
-				}
-			}
-			console.log('retrieved custom tokens ethplorer');
-			_delta.config.customTokens = customTokens;
-		});
-	} 
-	*/
-	
 	function getPrices(rqid)
 	{
 		$.getJSON(_delta.config.apiServer +'/nonce/'+ Date.now() + '/returnTicker/', (result) => {
@@ -748,63 +731,15 @@
 	}
 	
 	let maxPerRequest = 120;
-	function getDeltaBalances(rqid)
-	{
-		let tokens2 = Object.keys(uniqueTokens);	
-		
-		let max = maxPerRequest
-		if(!etherscanFallback)
-				max = max * 10;
-			
-		for(let i = 0; i < tokens2.length; i+= max)
-		{
-			deltaBalances(i, i+max, tokens2);
-		}
-		
-		function deltaBalances(startIndex, endIndex, tokens2)
-		{
-			 let tokens = tokens2.slice(startIndex, endIndex);
-			//deltaBalances(address etherdelta, address user,  address[] tokens) constant returns (uint[])
-			 _util.call(
-			  _delta.web3,
-			  _delta.contractDeltaBalance,
-			  _delta.config.contractDeltaBalanceAddr,
-			  'deltaBalances',
-			  [_delta.config.contractEtherDeltaAddr, publicAddr, tokens],
-			  (err, result) => 
-			  {
-				if(requestID > rqid)
-					return;
-				const returnedBalances = result;
-				if(returnedBalances && returnedBalances.length > 0)
-				{				
-					for(let i = 0; i< tokens.length; i++)
-					{
-						let token = uniqueTokens[tokens[i]];
-						balances[token.name].EtherDelta = _util.weiToEth(returnedBalances[i], divisorFromDecimals(token.decimals));
-						if(token.name === 'ETH')
-						{
-							if(balances.ETH.Wallet < walletWarningBalance)
-							{
-								showHint('Your ETH balance in wallet is low, EtherDelta deposit/withdraw might fail due to gas costs');
-							}
-						}
-						loadedED++;
-						finished();
-					}
-				}
-			  });
-		}
-		
-	}
-	
+
 	function getAllBalances(rqid)
 	{
 		let tokens2 = Object.keys(uniqueTokens);	
-
+		tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted || showCustomTokens});
+		tokenCount = tokens2.length;
 		
 		let max = maxPerRequest
-		if(!etherscanFallback)
+		if(!etherscanFallback) //etherscan request can't hold too much data
 				max = max * 10;
 		
 		for(let i = 0; i < tokens2.length; i+= max)
@@ -829,7 +764,7 @@
 				const returnedBalances = result;
 				if(returnedBalances && returnedBalances.length > 0)
 				{	
-					
+					loadedCustom = showCustomTokens;
 					for(let i = 0; i< tokens.length; i++)
 					{
 						let j = i * 2;
@@ -845,48 +780,7 @@
 			  });
 		}
 	}
-	
-	function getWalletBalances(rqid)
-	{
-		let tokens2 = Object.keys(uniqueTokens);
-		
-		let max = maxPerRequest
-		if(!etherscanFallback)
-				max = max * 10;
-			
-		for(let i = 0; i < tokens2.length; i+= max)
-		{
-			walletBalances(i, i+max, tokens2);
-		}
-		
-		function walletBalances(startIndex, endIndex, tokens2)
-		{
-			let tokens = tokens2.slice(startIndex, endIndex);
-			//walletBalances(address user,  address[] tokens) constant returns (uint[]) {
-			 _util.call(
-			  _delta.web3,
-			  _delta.contractDeltaBalance,
-			  _delta.config.contractDeltaBalanceAddr,
-			  'walletBalances',
-			  [publicAddr, tokens],
-			  (err, result) => 
-			  {
-				if(requestID > rqid)
-					return;
-				const returnedBalances = result;
-				if(returnedBalances && returnedBalances.length > 0)
-				{				
-					for(let i = 0; i< tokens.length; i++)
-					{
-						let token = uniqueTokens[tokens[i]];
-						balances[token.name].Wallet = _util.weiToEth(returnedBalances[i], divisorFromDecimals(token.decimals));
-						loadedW++;
-						finished();
-					}
-				}
-			  });
-		}
-	}
+
 	
 	
 	
@@ -996,7 +890,7 @@
 						let token = uniqueTokens[unpacked.params[0].value];
 						if(token && token.addr)
 						{
-							let unlisted = token.longname && true;
+							let unlisted = token.unlisted;
 							let dvsr = divisorFromDecimals(token.decimals)
 							let val = _util.weiToEth(unpacked.params[1].value, dvsr);
 							let type = '';
@@ -1049,7 +943,7 @@
 								amount = unpacked.params[3].value;
 							}
 							
-							let unlisted = token.longname && true;
+							let unlisted = token.unlisted;
 							let dvsr = divisorFromDecimals(token.decimals)
 							let dvsr2 = divisorFromDecimals(token2.decimals)
 							let val = _util.weiToEth(amount, dvsr);
@@ -1104,7 +998,7 @@
 								amount = unpacked.params[3].value;
 							}
 							
-							let unlisted = token.longname && true;
+							let unlisted = token.unlisted;
 							let dvsr = divisorFromDecimals(token.decimals)
 							let dvsr2 = divisorFromDecimals(token2.decimals)
 							let val = _util.weiToEth(amount, dvsr);
@@ -1471,10 +1365,11 @@
 					}
 					else if(head == 'Name')
 					{
+						// name  in <!-- --> for sorting
 						if( !myList[i].Unlisted)
-							row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<!--' + cellValue + ' --><a  target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
-							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.github.io/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-warning" href="https://etherdelta.github.io/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
 					}
 					else if(head == 'Type')
 					{
@@ -1550,10 +1445,11 @@
 					}
 					else if(head == 'Name')
 					{
+						// name  in <!-- --> for sorting
 						if(! balances[cellValue].Unlisted)
-							row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
-							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.github.io/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-warning" href="https://etherdelta.github.io/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));
 					} else
 					{
 						row$.append($('<td/>').html(cellValue));
@@ -1725,6 +1621,19 @@
 			//parent.appendCild(a);
 		}
 		
+	}
+	
+	
+	function escapeHtml(text) {
+	  var map = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#039;'
+	  };
+
+		return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 	}
 	
 /*	function socketResponse(event) {

@@ -40,14 +40,14 @@
 			<script type="text/javascript" src="customTokens.js"></script>
 			<script type="text/javascript" src="backupTokens.js"></script>
 		<script>
+			// try to get updated token list from EtherDelta, otherwise use own backup
+		
 			var etherDeltaConfig = undefined;
 			try {
 				$.getJSON('https://etherdelta.github.io/config/main.json', function(jsonData) {
-					if(jsonData)
-					{
+					if(jsonData) {
 						etherDeltaConfig = jsonData;
-					} else
-					{
+					} else {
 						etherDeltaConfig = offlineTokens;
 					}
 				});
@@ -57,12 +57,15 @@
 			var stagingTokens = undefined;
 			try {
 				$.getJSON('https://etherdelta.github.io/config/staging.json', function(jsonData) {
-					if(jsonData)
-					{
+					if(jsonData) {
 						stagingTokens = jsonData;
-					} 
+					} else {
+						stagingTokens = offlineStagingTokens;
+					}
 				});
-			} catch (err) {}
+			} catch (err) {
+				stagingTokens = offlineStagingTokens;
+			}
 		</script>
 		<script type="text/javascript" src="bundle.js"></script>
 		

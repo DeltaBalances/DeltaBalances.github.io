@@ -49,41 +49,58 @@
 		// borrow some ED code for compatibility
         _delta.startEtherDelta(() => 
 		{	
-			//import of (updated?) etherdelta config
+			//import of etherdelta config
 			if(etherDeltaConfig)
 			{
 				_delta.config.tokens = etherDeltaConfig.tokens;
 				_delta.config.pairs = etherDeltaConfig.pairs;
 			}
 			
-			
+			// note all listed tokens
 			for(let i = 0; i < _delta.config.tokens.length; i++)
 			{
 				let token = _delta.config.tokens[i];
-				if(token && !uniqueTokens[token.addr])
-					uniqueTokens[token.addr] = token;
+				if(token) {
+					token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+					token.addr = token.addr.toLowerCase();
+					token.unlisted = false;
+					_delta.config.tokens[i] = token;
+					if(!uniqueTokens[token.addr]) {
+						uniqueTokens[token.addr] = token;
+					}
+				}	
 			}
 			
-			
+			//format MEW tokens like ED tokens
+			offlineCustomTokens = offlineCustomTokens.map((x) => { return {"name": escapeHtml(x.symbol),
+																		   "addr": x.address.toLowerCase(),
+																		   "unlisted": true,
+																		   "decimals":x.decimal,
+																		  };
+																 });
 			//filter out custom tokens that have been listed by now
 			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
-			
+			// note custom tokens
 			for(let i = 0; i < _delta.config.customTokens.length; i++)
 			{
 				let token = _delta.config.customTokens[i];
-				if(token && !uniqueTokens[token.addr])
+				if(token && !uniqueTokens[token.addr]) {
 					uniqueTokens[token.addr] = token;
+				}
 			}
 			
-			if(stagingTokens)
+			// treat tokens listed as staging as unlisted custom tokens
+			if(stagingTokens && stagingTokens.tokens)
 			{
-				let stageTokens = stagingTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
-				for(let i = 0; i < _delta.config.customTokens.length; i++)
+				//filter tokens that we already know
+				let stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+				for(let i = 0; i < stageTokens.length; i++)
 				{
 					let token = stageTokens[i];
 					if(token && !uniqueTokens[token.addr])
 					{
-						token.longname = token.name;
+						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+						token.unlisted = true;
 						uniqueTokens[token.addr] = token;
 						_delta.config.customTokens.push(token);
 					}
@@ -448,7 +465,7 @@
 								buyUser = unpacked.params[5].value;
 							}
 							
-							let unlisted = token.longname && true;
+							let unlisted = token.unlisted;
 							let dvsr = divisorFromDecimals(token.decimals)
 							let dvsr2 = divisorFromDecimals(base.decimals)
 							let val = _util.weiToEth(amount, dvsr);
@@ -485,7 +502,7 @@
 						
 						if(token && token.addr)
 						{
-							let unlisted = token.longname && true;
+							let unlisted = token.unlisted;
 							let dvsr = divisorFromDecimals(token.decimals)
 							let val = _util.weiToEth(rawAmount, dvsr);
 							let balance = _util.weiToEth(rawBalance, dvsr);
@@ -542,7 +559,7 @@
 								amount = unpacked.params[3].value;
 							}
 							
-							let unlisted = token.longname && true;
+							let unlisted = token.unlisted;
 							let dvsr = divisorFromDecimals(token.decimals)
 							let dvsr2 = divisorFromDecimals(token2.decimals)
 							let val = _util.weiToEth(amount, dvsr);
@@ -574,7 +591,7 @@
 						let token = uniqueTokens[outputLogs[i].address];
 						let dvsr = divisorFromDecimals(token.decimals)
 						let val = _util.weiToEth(rawAmount, dvsr);
-						let unlisted = token.longname && true;
+						let unlisted = token.unlisted;
 						
 						let obj = {
 								'type': 'Transfer',
@@ -596,7 +613,7 @@
 						let token = uniqueTokens[outputLogs[i].address];
 						let dvsr = divisorFromDecimals(token.decimals)
 						let val = _util.weiToEth(rawAmount, dvsr);
-						let unlisted = token.longname && true;
+						let unlisted = token.unlisted;
 						
 						let obj = {
 								'type': 'Approve',
@@ -635,7 +652,7 @@
 						{
 							let dvsr = divisorFromDecimals(token.decimals);
 							amount = _util.weiToEth(rawAmount, dvsr);
-							unlisted = token.longname && true;
+							unlisted = token.unlisted;
 						}
 						let obj = 
 							{
@@ -664,7 +681,7 @@
 						{
 							let dvsr = divisorFromDecimals(token.decimals);
 							amount = _util.weiToEth(rawAmount, dvsr);
-							unlisted = token.longname && true;
+							unlisted = token.unlisted;
 						}
 						let obj =
 							{
@@ -720,7 +737,7 @@
 						let token = uniqueTokens[unpacked.params[0].value];
 						if(token && token.addr)
 						{
-							let unlisted = token.longname && true;
+							let unlisted = token.unlisted;
 							let dvsr = divisorFromDecimals(token.decimals)
 							let val = _util.weiToEth(unpacked.params[1].value, dvsr);
 							let type = '';
@@ -783,7 +800,7 @@
 								amount = unpacked.params[3].value;
 							}
 							
-							let unlisted = token.longname && true;
+							let unlisted = token.unlisted;
 							let dvsr = divisorFromDecimals(token.decimals)
 							let dvsr2 = divisorFromDecimals(token2.decimals)
 							let val = _util.weiToEth(amount, dvsr);
@@ -842,7 +859,7 @@
 								amount = unpacked.params[3].value;
 							}
 							
-							let unlisted = token.longname && true;
+							let unlisted = token.unlisted;
 							let dvsr = divisorFromDecimals(token.decimals)
 							let dvsr2 = divisorFromDecimals(token2.decimals)
 							let val = _util.weiToEth(amount, dvsr);
@@ -1247,5 +1264,17 @@
 	
 	function capitalizeFirstLetter(string) {
 		return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+	
+	function escapeHtml(text) {
+	  var map = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#039;'
+	  };
+
+		return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 	}
 }

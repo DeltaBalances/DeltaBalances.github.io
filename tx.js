@@ -284,6 +284,11 @@
 				{
 					address =  '0x'+ address;
 				} 
+				else if(address.length == 42 && address.slice(0, 2) === '0x')  //wallet addr, not transaction hash
+				{
+					window.location = window.location.origin + window.location.pathname + '/../#' + address;
+					return;
+				}
 				else 
 				{
 					if (!addr) // ignore if in url arguments

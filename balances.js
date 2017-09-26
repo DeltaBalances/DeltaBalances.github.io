@@ -599,7 +599,6 @@
 	
 	// Functions - validation
 	// ##########################################################################################################################################
-	
 	// check if input address is valid
     function getAddress(addr) 
 	{
@@ -620,7 +619,14 @@
 			
 			if(! _delta.web3.isAddress(address)) 
 			{
-				// possible private key, show warning
+				if (address.length == 66 && address.slice(0, 2) === '0x') 
+				{
+					// transaction hash, go to transaction details
+					window.location = window.location.origin + window.location.pathname + 'tx.html#' + address;
+					return;
+				} 
+
+				// possible private key, show warning   (private key, or tx without 0x)
 				if (address.length == 64 && address.slice(0, 2) !== '0x') 
 				{
 					if (!addr) // ignore if in url arguments

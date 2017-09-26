@@ -502,6 +502,8 @@
 	
 	function getBalances(rqid)
 	{
+		if(!rqid)
+			rqid = requestID;
 		if(!trigger_1)
 			return;
 		

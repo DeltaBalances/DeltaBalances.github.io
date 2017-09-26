@@ -1015,11 +1015,11 @@
 				} 
 				else if(transaction.output[i].type == "Deposit" || transaction.output[i].type == "Token Deposit")
 				{
-					sum += "Deposited " +  transaction.output[i].amount + " " + transaction.output[i].token.name + ", new balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name;
+					sum += "Deposited " +  transaction.output[i].amount + " " + transaction.output[i].token.name + ", new balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name + '<br>';
 				}
 				else if(transaction.output[i].type == "Withdraw" || transaction.output[i].type == "Token Withdraw")
 				{
-					sum += "Withdrew " +  transaction.output[i].amount + " " + transaction.output[i].token.name + ", new balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name;
+					sum += "Withdrew " +  transaction.output[i].amount + " " + transaction.output[i].token.name + ", new balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name + '<br>';
 				}
 			}
 			

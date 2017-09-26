@@ -944,14 +944,14 @@
 			sum += 'Success!<br>';
 		}
 		else if(transaction.status === 'Pending') {
-			sum += 'Transaction is pending, try again later. If it takes too long, raise your gas price.<br>';
+			sum += 'Transaction is pending, try again later. If it takes too long, raise your gas price next time.<br>';
 		}
 		else if(transaction.status === 'Error: Bad jump destination' ) {
 			if (transaction.input.type === 'Taker Sell' || transaction.input.type === 'Taker Buy') {
 				sum += 'Bad jump destination, someone filled this order before you. (Sent earlier or with a higher gas price).<br>';
 			}
 			else if ( transaction.input.type === 'Token Deposit' || transaction.input.type === 'Token Withdraw') {
-				sum += 'Bad jump destination, token deposit/withdraw failed. You might not have had the right account balance left. Otherwsise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br>';
+				sum += 'Bad jump destination, token deposit/withdraw failed. You might not have had the right account balance left. Otherwise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br>';
 			}
 		} else {
 			sum += 'Transaction failed.<br>';
@@ -986,19 +986,56 @@
 		let tradeCount = 0;
 		if(transaction.output)
 		{
-			for(i = 0; i < transaction.output.length; i++)
+			// output price can get wrong decimals if trading like 15e-10, so get price from input if possible. 
+			if(transaction.input && transaction.output.length == 1 && transaction.output[0].price)
 			{
-				if(transaction.output[i].type === 'Taker Sell' || transaction.output[i].type === 'Taker Buy')
+				transaction.output[0].price = transaction.input.price;
+				if(transaction.output[0].amount < transaction.input.amount)
 				{
-					tradeCount++;
+					sum += "Partial fill, ";
 				}
 			}
-		
+			
+			let spent = 0;
+			let received = 0;
+			
+			for(let i = 0; i < transaction.output.length; i++)
+			{
+				if(transaction.output[i].type == 'Taker Buy')
+				{
+					tradeCount++;
+					sum += "Bought " + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " ETH each, " + transaction.output[i].ETH + " ETH in total. <br>";
+					spent += transaction.output[i].ETH;
+				}
+				else if(transaction.output[i].type == 'Taker Sell')
+				{
+					tradeCount++;
+					sum += "Sold " + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " ETH each, " + transaction.output[i].ETH + " ETH in total. <br>";
+					received += transaction.output[i].ETH;
+				} 
+				else if(transaction.output[i].type == "Deposit" || transaction.output[i].type == "Token Deposit")
+				{
+					sum += "Deposited " +  transaction.output[i].amount + " " + transaction.output[i].token.name + ", new balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name;
+				}
+				else if(transaction.output[i].type == "Withdraw" || transaction.output[i].type == "Token Withdraw")
+				{
+					sum += "Withdrew " +  transaction.output[i].amount + " " + transaction.output[i].token.name + ", new balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name;
+				}
+			}
+			
 			if(tradeCount > 1 && transaction.to !== _delta.config.contractEtherDeltaAddr)
 			{
-				sum += 'This transaction was made by a contract that has made multiple trades in a single transaction.';
+				sum += 'This transaction was made by a contract that has made multiple trades in a single transaction. <br>';
+				// sum up what a custom cotract did in multiple trades
+				sum += "ETH gain over these trades: " + (received - spent - Number(transaction.gasEth)) + " (incl. gas cost). <br>";
+			}
+			else if (tradeCount > 0 && transaction.to !== _delta.config.contractEtherDeltaAddr)
+			{
+				sum += 'This transaction was made by a contract instead of a user. <br>';
 			}
 		}
+		
+		
 		$('#summary').html(sum);
 	
 		$('#hash').html(hashLink(transaction.hash, true));
@@ -1038,7 +1075,8 @@
 		displayParse(transaction.input, "#inputdata");
 		$('#outputdata').html('');
 		if(transaction.output ) {
-			for(i = 0; i < transaction.output.length; i++)
+			
+			for(let i = 0; i < transaction.output.length; i++)
 			{
 				displayParse(transaction.output[i], "#outputdata");
 			}
@@ -1131,7 +1169,7 @@
 			return uniqueTokens[lcAddr].name + " Contract";
 		}
 		
-		for(i = 0; i < _delta.config.contractEtherDeltaAddrs.length ; i++)
+		for(let i = 0; i < _delta.config.contractEtherDeltaAddrs.length ; i++)
 		{
 			if(lcAddr == _delta.config.contractEtherDeltaAddrs[i].addr)
 			{
@@ -1147,7 +1185,7 @@
 	function checkOldED(addr)
 	{
 		let lcAddr = addr.toLowerCase();
-		for(i = 0; i < _delta.config.contractEtherDeltaAddrs.length ; i++)
+		for(let i = 0; i < _delta.config.contractEtherDeltaAddrs.length ; i++)
 		{
 			if(lcAddr == _delta.config.contractEtherDeltaAddrs[i].addr)
 			{

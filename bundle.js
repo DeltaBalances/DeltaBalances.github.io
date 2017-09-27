@@ -1,3 +1,18 @@
+/*
+	web3.js is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    web3.js is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.bundle = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (Buffer){
 
@@ -686,11 +701,7 @@ module.exports = {
     'use strict';
 
     /*
-      bignumber.js v4.0.1
-      A JavaScript library for arbitrary-precision arithmetic.
-      https://github.com/MikeMcl/bignumber.js
-      Copyright (c) 2017 Michael Mclaughlin <M8ch88l@gmail.com>
-      MIT Expat Licence
+      bignumber.js v4.0.1 MIT Expat Licence
     */
 
 
@@ -709,17 +720,11 @@ module.exports = {
         POWS_TEN = [1, 10, 100, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13],
         SQRT_BASE = 1e7,
 
-        /*
-         * The limit on the value of DECIMAL_PLACES, TO_EXP_NEG, TO_EXP_POS, MIN_EXP, MAX_EXP, and
-         * the arguments to toExponential, toFixed, toFormat, and toPrecision, beyond which an
-         * exception is thrown (if ERRORS is true).
-         */
+     
         MAX = 1E9;                                   // 0 to MAX_INT32
 
 
-    /*
-     * Create and return a BigNumber constructor.
-     */
+   
     function constructorFactory(config) {
         var div, parseNumeric,
 
@@ -729,30 +734,11 @@ module.exports = {
             ONE = new BigNumber(1),
 
 
-            /********************************* EDITABLE DEFAULTS **********************************/
-
-
-            /*
-             * The default values below must be integers within the inclusive ranges stated.
-             * The values can also be changed at run-time using BigNumber.config.
-             */
-
+           
             // The maximum number of decimal places for operations involving division.
             DECIMAL_PLACES = 20,                     // 0 to MAX
 
-            /*
-             * The rounding mode used when rounding to the above decimal places, and when using
-             * toExponential, toFixed, toFormat and toPrecision, and round (default value).
-             * UP         0 Away from zero.
-             * DOWN       1 Towards zero.
-             * CEIL       2 Towards +Infinity.
-             * FLOOR      3 Towards -Infinity.
-             * HALF_UP    4 Towards nearest neighbour. If equidistant, up.
-             * HALF_DOWN  5 Towards nearest neighbour. If equidistant, down.
-             * HALF_EVEN  6 Towards nearest neighbour. If equidistant, towards even neighbour.
-             * HALF_CEIL  7 Towards nearest neighbour. If equidistant, towards +Infinity.
-             * HALF_FLOOR 8 Towards nearest neighbour. If equidistant, towards -Infinity.
-             */
+           
             ROUNDING_MODE = 4,                       // 0 to 8
 
             // EXPONENTIAL_AT : [TO_EXP_NEG , TO_EXP_POS]
@@ -785,24 +771,7 @@ module.exports = {
             // Whether to use cryptographically-secure random number generation, if available.
             CRYPTO = false,                          // true or false
 
-            /*
-             * The modulo mode used when calculating the modulus: a mod n.
-             * The quotient (q = a / n) is calculated according to the corresponding rounding mode.
-             * The remainder (r) is calculated as: r = a - n * q.
-             *
-             * UP        0 The remainder is positive if the dividend is negative, else is negative.
-             * DOWN      1 The remainder has the same sign as the dividend.
-             *             This modulo mode is commonly known as 'truncated division' and is
-             *             equivalent to (a % n) in JavaScript.
-             * FLOOR     3 The remainder has the same sign as the divisor (Python %).
-             * HALF_EVEN 6 This modulo mode implements the IEEE 754 remainder function.
-             * EUCLID    9 Euclidian division. q = sign(n) * floor(a / abs(n)).
-             *             The remainder is always positive.
-             *
-             * The truncated division, floored division, Euclidian division and IEEE 754 remainder
-             * modes are commonly used for the modulus operation.
-             * Although the other rounding modes can also be used, they may not give useful results.
-             */
+           
             MODULO_MODE = 1,                         // 0 to 9
 
             // The maximum number of significant digits of the result of the toPower operation.
@@ -820,19 +789,13 @@ module.exports = {
             };
 
 
-        /******************************************************************************************/
+       
 
 
         // CONSTRUCTOR
 
 
-        /*
-         * The BigNumber constructor and exported function.
-         * Create and return a new instance of a BigNumber object.
-         *
-         * n {number|string|BigNumber} A numeric value.
-         * [b] {number} The base of n. Integer, 2 to 64 inclusive.
-         */
+      
         function BigNumber( n, b ) {
             var c, e, i, num, len, str,
                 x = this;
@@ -1011,39 +974,6 @@ module.exports = {
         BigNumber.EUCLID = 9;
 
 
-        /*
-         * Configure infrequently-changing library-wide settings.
-         *
-         * Accept an object or an argument list, with one or many of the following properties or
-         * parameters respectively:
-         *
-         *   DECIMAL_PLACES  {number}  Integer, 0 to MAX inclusive
-         *   ROUNDING_MODE   {number}  Integer, 0 to 8 inclusive
-         *   EXPONENTIAL_AT  {number|number[]}  Integer, -MAX to MAX inclusive or
-         *                                      [integer -MAX to 0 incl., 0 to MAX incl.]
-         *   RANGE           {number|number[]}  Non-zero integer, -MAX to MAX inclusive or
-         *                                      [integer -MAX to -1 incl., integer 1 to MAX incl.]
-         *   ERRORS          {boolean|number}   true, false, 1 or 0
-         *   CRYPTO          {boolean|number}   true, false, 1 or 0
-         *   MODULO_MODE     {number}           0 to 9 inclusive
-         *   POW_PRECISION   {number}           0 to MAX inclusive
-         *   FORMAT          {object}           See BigNumber.prototype.toFormat
-         *      decimalSeparator       {string}
-         *      groupSeparator         {string}
-         *      groupSize              {number}
-         *      secondaryGroupSize     {number}
-         *      fractionGroupSeparator {string}
-         *      fractionGroupSize      {number}
-         *
-         * (The values assigned to the above FORMAT object properties are not checked for validity.)
-         *
-         * E.g.
-         * BigNumber.config(20, 4) is equivalent to
-         * BigNumber.config({ DECIMAL_PLACES : 20, ROUNDING_MODE : 4 })
-         *
-         * Ignore properties/parameters set to null or undefined.
-         * Return an object with the properties current values.
-         */
         BigNumber.config = BigNumber.set = function () {
             var v, p,
                 i = 0,
@@ -1175,40 +1105,19 @@ module.exports = {
         };
 
 
-        /*
-         * Return a new BigNumber whose value is the maximum of the arguments.
-         *
-         * arguments {number|string|BigNumber}
-         */
+    
         BigNumber.max = function () { return maxOrMin( arguments, P.lt ); };
 
 
-        /*
-         * Return a new BigNumber whose value is the minimum of the arguments.
-         *
-         * arguments {number|string|BigNumber}
-         */
+     
         BigNumber.min = function () { return maxOrMin( arguments, P.gt ); };
 
 
-        /*
-         * Return a new BigNumber with a random value equal to or greater than 0 and less than 1,
-         * and with dp, or DECIMAL_PLACES if dp is omitted, decimal places (or less if trailing
-         * zeros are produced).
-         *
-         * [dp] {number} Decimal places. Integer, 0 to MAX inclusive.
-         *
-         * 'random() decimal places not an integer: {dp}'
-         * 'random() decimal places out of range: {dp}'
-         * 'random() crypto unavailable: {crypto}'
-         */
+     
         BigNumber.random = (function () {
             var pow2_53 = 0x20000000000000;
 
-            // Return a 53 bit integer n, where 0 <= n < 9007199254740992.
-            // Check if Math.random() produces more than 32 bits of randomness.
-            // If it does, assume at least 53 bits are produced, otherwise assume at least 30 bits.
-            // 0x40000000 is 2^30, 0x800000 is 2^23, 0x1fffff is 2^21 - 1.
+          
             var random53bitInt = (Math.random() * pow2_53) & 0x1fffff
               ? function () { return mathfloor( Math.random() * pow2_53 ); }
               : function () { return ((Math.random() * 0x40000000 | 0) * 0x800000) +
@@ -1683,15 +1592,7 @@ module.exports = {
         })();
 
 
-        /*
-         * Return a string representing the value of BigNumber n in fixed-point or exponential
-         * notation rounded to the specified decimal places or significant digits.
-         *
-         * n is a BigNumber.
-         * i is the index of the last digit required (i.e. the digit that may be rounded up).
-         * rm is the rounding mode.
-         * caller is caller id: toExponential 19, toFixed 20, toFormat 21, toPrecision 24.
-         */
+   
         function format( n, i, rm, caller ) {
             var c0, e, ne, len, str;
 
@@ -1773,10 +1674,7 @@ module.exports = {
         }
 
 
-        /*
-         * Return true if n is an integer in range, otherwise throw.
-         * Use for argument validation when ERRORS is true.
-         */
+   
         function intValidatorWithErrors( n, min, max, caller, name ) {
             if ( n < min || n > max || n != truncate(n) ) {
                 raise( caller, ( name || 'decimal places' ) +
@@ -1787,10 +1685,6 @@ module.exports = {
         }
 
 
-        /*
-         * Strip trailing zeros, calculate base 10 exponent and check against MIN_EXP and MAX_EXP.
-         * Called by minus, plus and times.
-         */
         function normalise( n, c, e ) {
             var i = 1,
                 j = c.length;
@@ -1905,10 +1799,7 @@ module.exports = {
         }
 
 
-        /*
-         * Round x to sd significant digits using rounding mode rm. Check for over/under-flow.
-         * If r is truthy, it is known that there are more digits after the rounding digit.
-         */
+      
         function round( x, sd, rm, r ) {
             var d, i, j, k, n, ni, rd,
                 xc = x.c,
@@ -1917,12 +1808,6 @@ module.exports = {
             // if x is not Infinity or NaN...
             if (xc) {
 
-                // rd is the rounding digit, i.e. the digit after the digit that may be rounded up.
-                // n is a base 1e14 number, the value of the element of array x.c containing rd.
-                // ni is the index of n within x.c.
-                // d is the number of digits of n.
-                // i is the index of rd within n including leading zeros.
-                // j is the actual index of rd within n (if < 0, rd is a leading zero).
                 out: {
 
                     // Get the number of digits of the first element of xc.
@@ -2070,9 +1955,7 @@ module.exports = {
         // PROTOTYPE/INSTANCE METHODS
 
 
-        /*
-         * Return a new BigNumber whose value is the absolute value of this BigNumber.
-         */
+       
         P.absoluteValue = P.abs = function () {
             var x = new BigNumber(this);
             if ( x.s < 0 ) x.s = 1;
@@ -2080,32 +1963,20 @@ module.exports = {
         };
 
 
-        /*
-         * Return a new BigNumber whose value is the value of this BigNumber rounded to a whole
-         * number in the direction of Infinity.
-         */
+       
         P.ceil = function () {
             return round( new BigNumber(this), this.e + 1, 2 );
         };
 
 
-        /*
-         * Return
-         * 1 if the value of this BigNumber is greater than the value of BigNumber(y, b),
-         * -1 if the value of this BigNumber is less than the value of BigNumber(y, b),
-         * 0 if they have the same value,
-         * or null if the value of either is NaN.
-         */
+       
         P.comparedTo = P.cmp = function ( y, b ) {
             id = 1;
             return compare( this, new BigNumber( y, b ) );
         };
 
 
-        /*
-         * Return the number of decimal places of the value of this BigNumber, or null if the value
-         * of this BigNumber is ±Infinity or NaN.
-         */
+       
         P.decimalPlaces = P.dp = function () {
             var n, v,
                 c = this.c;
@@ -2121,26 +1992,7 @@ module.exports = {
         };
 
 
-        /*
-         *  n / 0 = I
-         *  n / N = N
-         *  n / I = 0
-         *  0 / n = 0
-         *  0 / 0 = N
-         *  0 / N = N
-         *  0 / I = 0
-         *  N / n = N
-         *  N / 0 = N
-         *  N / N = N
-         *  N / I = N
-         *  I / n = I
-         *  I / 0 = I
-         *  I / N = N
-         *  I / I = N
-         *
-         * Return a new BigNumber whose value is the value of this BigNumber divided by the value of
-         * BigNumber(y, b), rounded according to DECIMAL_PLACES and ROUNDING_MODE.
-         */
+       
         P.dividedBy = P.div = function ( y, b ) {
             id = 3;
             return div( this, new BigNumber( y, b ), DECIMAL_PLACES, ROUNDING_MODE );
@@ -2213,70 +2065,35 @@ module.exports = {
         };
 
 
-        /*
-         * Return true if the value of this BigNumber is NaN, otherwise returns false.
-         */
         P.isNaN = function () {
             return !this.s;
         };
 
 
-        /*
-         * Return true if the value of this BigNumber is negative, otherwise returns false.
-         */
         P.isNegative = P.isNeg = function () {
             return this.s < 0;
         };
 
 
-        /*
-         * Return true if the value of this BigNumber is 0 or -0, otherwise returns false.
-         */
         P.isZero = function () {
             return !!this.c && this.c[0] == 0;
         };
 
 
-        /*
-         * Return true if the value of this BigNumber is less than the value of BigNumber(y, b),
-         * otherwise returns false.
-         */
         P.lessThan = P.lt = function ( y, b ) {
             id = 8;
             return compare( this, new BigNumber( y, b ) ) < 0;
         };
 
 
-        /*
-         * Return true if the value of this BigNumber is less than or equal to the value of
-         * BigNumber(y, b), otherwise returns false.
-         */
+     
         P.lessThanOrEqualTo = P.lte = function ( y, b ) {
             id = 9;
             return ( b = compare( this, new BigNumber( y, b ) ) ) === -1 || b === 0;
         };
 
 
-        /*
-         *  n - 0 = n
-         *  n - N = N
-         *  n - I = -I
-         *  0 - n = -n
-         *  0 - 0 = 0
-         *  0 - N = N
-         *  0 - I = -I
-         *  N - n = N
-         *  N - 0 = N
-         *  N - N = N
-         *  N - I = N
-         *  I - n = I
-         *  I - 0 = I
-         *  I - N = N
-         *  I - I = N
-         *
-         * Return a new BigNumber whose value is the value of this BigNumber minus the value of
-         * BigNumber(y, b).
-         */
+       
         P.minus = P.sub = function ( y, b ) {
             var i, j, t, xLTy,
                 x = this,
@@ -2391,27 +2208,7 @@ module.exports = {
         };
 
 
-        /*
-         *   n % 0 =  N
-         *   n % N =  N
-         *   n % I =  n
-         *   0 % n =  0
-         *  -0 % n = -0
-         *   0 % 0 =  N
-         *   0 % N =  N
-         *   0 % I =  0
-         *   N % n =  N
-         *   N % 0 =  N
-         *   N % N =  N
-         *   N % I =  N
-         *   I % n =  N
-         *   I % 0 =  N
-         *   I % N =  N
-         *   I % I =  N
-         *
-         * Return a new BigNumber whose value is the value of this BigNumber modulo the value of
-         * BigNumber(y, b). The result depends on the value of MODULO_MODE.
-         */
+       
         P.modulo = P.mod = function ( y, b ) {
             var q, s,
                 x = this;
@@ -2456,26 +2253,6 @@ module.exports = {
         };
 
 
-        /*
-         *  n + 0 = n
-         *  n + N = N
-         *  n + I = I
-         *  0 + n = n
-         *  0 + 0 = 0
-         *  0 + N = N
-         *  0 + I = I
-         *  N + n = N
-         *  N + 0 = N
-         *  N + N = N
-         *  N + I = N
-         *  I + n = I
-         *  I + 0 = I
-         *  I + N = N
-         *  I + I = I
-         *
-         * Return a new BigNumber whose value is the value of this BigNumber plus the value of
-         * BigNumber(y, b).
-         */
         P.plus = P.add = function ( y, b ) {
             var t,
                 x = this,
@@ -2551,11 +2328,6 @@ module.exports = {
         };
 
 
-        /*
-         * Return the number of significant digits of the value of this BigNumber.
-         *
-         * [z] {boolean|number} Whether to count integer-part trailing zeros: true, false, 1 or 0.
-         */
         P.precision = P.sd = function (z) {
             var n, v,
                 x = this,
@@ -2586,19 +2358,7 @@ module.exports = {
         };
 
 
-        /*
-         * Return a new BigNumber whose value is the value of this BigNumber rounded to a maximum of
-         * dp decimal places using rounding mode rm, or to 0 and ROUNDING_MODE respectively if
-         * omitted.
-         *
-         * [dp] {number} Decimal places. Integer, 0 to MAX inclusive.
-         * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
-         *
-         * 'round() decimal places out of range: {dp}'
-         * 'round() decimal places not an integer: {dp}'
-         * 'round() rounding mode not an integer: {rm}'
-         * 'round() rounding mode out of range: {rm}'
-         */
+       
         P.round = function ( dp, rm ) {
             var n = new BigNumber(this);
 
@@ -2611,18 +2371,7 @@ module.exports = {
         };
 
 
-        /*
-         * Return a new BigNumber whose value is the value of this BigNumber shifted by k places
-         * (powers of 10). Shift to the right if n > 0, and to the left if n < 0.
-         *
-         * k {number} Integer, -MAX_SAFE_INTEGER to MAX_SAFE_INTEGER inclusive.
-         *
-         * If k is out of range and ERRORS is false, the result will be ±0 if k < 0, or ±Infinity
-         * otherwise.
-         *
-         * 'shift() argument not an integer: {k}'
-         * 'shift() argument out of range: {k}'
-         */
+      
         P.shift = function (k) {
             var n = this;
             return isValidInt( k, -MAX_SAFE_INTEGER, MAX_SAFE_INTEGER, 16, 'argument' )
@@ -2635,17 +2384,7 @@ module.exports = {
         };
 
 
-        /*
-         *  sqrt(-n) =  N
-         *  sqrt( N) =  N
-         *  sqrt(-I) =  N
-         *  sqrt( I) =  I
-         *  sqrt( 0) =  0
-         *  sqrt(-0) = -0
-         *
-         * Return a new BigNumber whose value is the square root of the value of this BigNumber,
-         * rounded according to DECIMAL_PLACES and ROUNDING_MODE.
-         */
+        
         P.squareRoot = P.sqrt = function () {
             var m, n, r, rep, t,
                 x = this,
@@ -2746,26 +2485,7 @@ module.exports = {
         };
 
 
-        /*
-         *  n * 0 = 0
-         *  n * N = N
-         *  n * I = I
-         *  0 * n = 0
-         *  0 * 0 = 0
-         *  0 * N = N
-         *  0 * I = N
-         *  N * n = N
-         *  N * 0 = N
-         *  N * N = N
-         *  N * I = N
-         *  I * n = I
-         *  I * 0 = N
-         *  I * N = N
-         *  I * I = I
-         *
-         * Return a new BigNumber whose value is the value of this BigNumber times the value of
-         * BigNumber(y, b).
-         */
+      
         P.times = P.mul = function ( y, b ) {
             var c, e, i, j, k, m, xcL, xlo, xhi, ycL, ylo, yhi, zc,
                 base, sqrtBase,
@@ -2837,18 +2557,6 @@ module.exports = {
         };
 
 
-        /*
-         * Return a new BigNumber whose value is the value of this BigNumber rounded to a maximum of
-         * sd significant digits using rounding mode rm, or ROUNDING_MODE if rm is omitted.
-         *
-         * [sd] {number} Significant digits. Integer, 1 to MAX inclusive.
-         * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
-         *
-         * 'toDigits() precision out of range: {sd}'
-         * 'toDigits() precision not an integer: {sd}'
-         * 'toDigits() rounding mode not an integer: {rm}'
-         * 'toDigits() rounding mode out of range: {rm}'
-         */
         P.toDigits = function ( sd, rm ) {
             var n = new BigNumber(this);
             sd = sd == null || !isValidInt( sd, 1, MAX, 18, 'precision' ) ? null : sd | 0;
@@ -2857,67 +2565,20 @@ module.exports = {
         };
 
 
-        /*
-         * Return a string representing the value of this BigNumber in exponential notation and
-         * rounded using ROUNDING_MODE to dp fixed decimal places.
-         *
-         * [dp] {number} Decimal places. Integer, 0 to MAX inclusive.
-         * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
-         *
-         * 'toExponential() decimal places not an integer: {dp}'
-         * 'toExponential() decimal places out of range: {dp}'
-         * 'toExponential() rounding mode not an integer: {rm}'
-         * 'toExponential() rounding mode out of range: {rm}'
-         */
+        
         P.toExponential = function ( dp, rm ) {
             return format( this,
               dp != null && isValidInt( dp, 0, MAX, 19 ) ? ~~dp + 1 : null, rm, 19 );
         };
 
 
-        /*
-         * Return a string representing the value of this BigNumber in fixed-point notation rounding
-         * to dp fixed decimal places using rounding mode rm, or ROUNDING_MODE if rm is omitted.
-         *
-         * Note: as with JavaScript's number type, (-0).toFixed(0) is '0',
-         * but e.g. (-0.00001).toFixed(0) is '-0'.
-         *
-         * [dp] {number} Decimal places. Integer, 0 to MAX inclusive.
-         * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
-         *
-         * 'toFixed() decimal places not an integer: {dp}'
-         * 'toFixed() decimal places out of range: {dp}'
-         * 'toFixed() rounding mode not an integer: {rm}'
-         * 'toFixed() rounding mode out of range: {rm}'
-         */
         P.toFixed = function ( dp, rm ) {
             return format( this, dp != null && isValidInt( dp, 0, MAX, 20 )
               ? ~~dp + this.e + 1 : null, rm, 20 );
         };
 
 
-        /*
-         * Return a string representing the value of this BigNumber in fixed-point notation rounded
-         * using rm or ROUNDING_MODE to dp decimal places, and formatted according to the properties
-         * of the FORMAT object (see BigNumber.config).
-         *
-         * FORMAT = {
-         *      decimalSeparator : '.',
-         *      groupSeparator : ',',
-         *      groupSize : 3,
-         *      secondaryGroupSize : 0,
-         *      fractionGroupSeparator : '\xA0',    // non-breaking space
-         *      fractionGroupSize : 0
-         * };
-         *
-         * [dp] {number} Decimal places. Integer, 0 to MAX inclusive.
-         * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
-         *
-         * 'toFormat() decimal places not an integer: {dp}'
-         * 'toFormat() decimal places out of range: {dp}'
-         * 'toFormat() rounding mode not an integer: {rm}'
-         * 'toFormat() rounding mode out of range: {rm}'
-         */
+       
         P.toFormat = function ( dp, rm ) {
             var str = format( this, dp != null && isValidInt( dp, 0, MAX, 21 )
               ? ~~dp + this.e + 1 : null, rm, 21 );
@@ -2960,18 +2621,7 @@ module.exports = {
         };
 
 
-        /*
-         * Return a string array representing the value of this BigNumber as a simple fraction with
-         * an integer numerator and an integer denominator. The denominator will be a positive
-         * non-zero value less than or equal to the specified maximum denominator. If a maximum
-         * denominator is not specified, the denominator will be the lowest value necessary to
-         * represent the number exactly.
-         *
-         * [md] {number|string|BigNumber} Integer >= 1 and < Infinity. The maximum denominator.
-         *
-         * 'toFraction() max denominator not an integer: {md}'
-         * 'toFraction() max denominator out of range: {md}'
-         */
+      
         P.toFraction = function (md) {
             var arr, d0, d2, e, exp, n, n0, q, s,
                 k = ERRORS,
@@ -3052,24 +2702,7 @@ module.exports = {
         };
 
 
-        /*
-         * Return a BigNumber whose value is the value of this BigNumber raised to the power n.
-         * If m is present, return the result modulo m.
-         * If n is negative round according to DECIMAL_PLACES and ROUNDING_MODE.
-         * If POW_PRECISION is non-zero and m is not present, round to POW_PRECISION using
-         * ROUNDING_MODE.
-         *
-         * The modular power operation works efficiently when x, n, and m are positive integers,
-         * otherwise it is equivalent to calculating x.toPower(n).modulo(m) (with POW_PRECISION 0).
-         *
-         * n {number} Integer, -MAX_SAFE_INTEGER to MAX_SAFE_INTEGER inclusive.
-         * [m] {number|string|BigNumber} The modulus.
-         *
-         * 'pow() exponent not an integer: {n}'
-         * 'pow() exponent out of range: {n}'
-         *
-         * Performs 54 loop iterations for n of 9007199254740991.
-         */
+      
         P.toPower = P.pow = function ( n, m ) {
             var k, y, z,
                 i = mathfloor( n < 0 ? -n : +n ),
@@ -3136,38 +2769,13 @@ module.exports = {
         };
 
 
-        /*
-         * Return a string representing the value of this BigNumber rounded to sd significant digits
-         * using rounding mode rm or ROUNDING_MODE. If sd is less than the number of digits
-         * necessary to represent the integer part of the value in fixed-point notation, then use
-         * exponential notation.
-         *
-         * [sd] {number} Significant digits. Integer, 1 to MAX inclusive.
-         * [rm] {number} Rounding mode. Integer, 0 to 8 inclusive.
-         *
-         * 'toPrecision() precision not an integer: {sd}'
-         * 'toPrecision() precision out of range: {sd}'
-         * 'toPrecision() rounding mode not an integer: {rm}'
-         * 'toPrecision() rounding mode out of range: {rm}'
-         */
         P.toPrecision = function ( sd, rm ) {
             return format( this, sd != null && isValidInt( sd, 1, MAX, 24, 'precision' )
               ? sd | 0 : null, rm, 24 );
         };
 
 
-        /*
-         * Return a string representing the value of this BigNumber in base b, or base 10 if b is
-         * omitted. If a base is specified, including base 10, round according to DECIMAL_PLACES and
-         * ROUNDING_MODE. If a base is not specified, and this BigNumber has a positive exponent
-         * that is equal to or greater than TO_EXP_POS, or a negative exponent equal to or less than
-         * TO_EXP_NEG, return exponential notation.
-         *
-         * [b] {number} Integer, 2 to 64 inclusive.
-         *
-         * 'toString() base not an integer: {b}'
-         * 'toString() base out of range: {b}'
-         */
+        
         P.toString = function (b) {
             var str,
                 n = this,
@@ -3309,11 +2917,7 @@ module.exports = {
     }
 
 
-    /*
-     * Return true if n is a valid number in range, otherwise false.
-     * Use for argument validation when ERRORS is false.
-     * Note: parseInt('1e+1') == 1 but parseFloat('1e+1') == 10.
-     */
+    
     function intValidatorNoErrors( n, min, max ) {
         return ( n = truncate(n) ) >= min && n <= max;
     }
@@ -3324,11 +2928,7 @@ module.exports = {
     }
 
 
-    /*
-     * Convert string of baseIn to an array of numbers of baseOut.
-     * Eg. convertBase('255', 10, 16) returns [15, 15].
-     * Eg. convertBase('ff', 16, 10) returns [2, 5, 5].
-     */
+   
     function toBaseOut( str, baseIn, baseOut ) {
         var j,
             arr = [0],
@@ -7176,13 +6776,7 @@ exports.hash = hash;
 }).call(this,require("buffer").Buffer)
 },{"buffer":373}],29:[function(require,module,exports){
 'use strict';
-/*
- * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
- * Digest Algorithm, as defined in RFC 1321.
- * Version 2.1 Copyright (C) Paul Johnston 1999 - 2002.
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
- * Distributed under the BSD License
- * See http://pajhome.org.uk/crypt/md5 for more info.
+/* Distributed under the BSD License
  */
 
 var helpers = require('./helpers');
@@ -7549,14 +7143,7 @@ module.exports = function md5(buf) {
 	        keySize: 256/32
 	    });
 
-	    /**
-	     * Shortcut functions to the cipher's object interface.
-	     *
-	     * @example
-	     *
-	     *     var ciphertext = CryptoJS.AES.encrypt(message, key, cfg);
-	     *     var plaintext  = CryptoJS.AES.decrypt(ciphertext, key, cfg);
-	     */
+	    
 	    C.AES = BlockCipher._createHelper(AES);
 	}());
 
@@ -7596,69 +7183,22 @@ module.exports = function md5(buf) {
 	    var C_algo = C.algo;
 	    var EvpKDF = C_algo.EvpKDF;
 
-	    /**
-	     * Abstract base cipher template.
-	     *
-	     * @property {number} keySize This cipher's key size. Default: 4 (128 bits)
-	     * @property {number} ivSize This cipher's IV size. Default: 4 (128 bits)
-	     * @property {number} _ENC_XFORM_MODE A constant representing encryption mode.
-	     * @property {number} _DEC_XFORM_MODE A constant representing decryption mode.
-	     */
+	   
 	    var Cipher = C_lib.Cipher = BufferedBlockAlgorithm.extend({
-	        /**
-	         * Configuration options.
-	         *
-	         * @property {WordArray} iv The IV to use for this operation.
-	         */
+	        
 	        cfg: Base.extend(),
 
-	        /**
-	         * Creates this cipher in encryption mode.
-	         *
-	         * @param {WordArray} key The key.
-	         * @param {Object} cfg (Optional) The configuration options to use for this operation.
-	         *
-	         * @return {Cipher} A cipher instance.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var cipher = CryptoJS.algo.AES.createEncryptor(keyWordArray, { iv: ivWordArray });
-	         */
+	        
 	        createEncryptor: function (key, cfg) {
 	            return this.create(this._ENC_XFORM_MODE, key, cfg);
 	        },
 
-	        /**
-	         * Creates this cipher in decryption mode.
-	         *
-	         * @param {WordArray} key The key.
-	         * @param {Object} cfg (Optional) The configuration options to use for this operation.
-	         *
-	         * @return {Cipher} A cipher instance.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var cipher = CryptoJS.algo.AES.createDecryptor(keyWordArray, { iv: ivWordArray });
-	         */
+	       
 	        createDecryptor: function (key, cfg) {
 	            return this.create(this._DEC_XFORM_MODE, key, cfg);
 	        },
 
-	        /**
-	         * Initializes a newly created cipher.
-	         *
-	         * @param {number} xformMode Either the encryption or decryption transormation mode constant.
-	         * @param {WordArray} key The key.
-	         * @param {Object} cfg (Optional) The configuration options to use for this operation.
-	         *
-	         * @example
-	         *
-	         *     var cipher = CryptoJS.algo.AES.create(CryptoJS.algo.AES._ENC_XFORM_MODE, keyWordArray, { iv: ivWordArray });
-	         */
+	       
 	        init: function (xformMode, key, cfg) {
 	            // Apply config defaults
 	            this.cfg = this.cfg.extend(cfg);
@@ -7671,13 +7211,7 @@ module.exports = function md5(buf) {
 	            this.reset();
 	        },
 
-	        /**
-	         * Resets this cipher to its initial state.
-	         *
-	         * @example
-	         *
-	         *     cipher.reset();
-	         */
+	       
 	        reset: function () {
 	            // Reset data buffer
 	            BufferedBlockAlgorithm.reset.call(this);
@@ -7686,18 +7220,7 @@ module.exports = function md5(buf) {
 	            this._doReset();
 	        },
 
-	        /**
-	         * Adds data to be encrypted or decrypted.
-	         *
-	         * @param {WordArray|string} dataUpdate The data to encrypt or decrypt.
-	         *
-	         * @return {WordArray} The data after processing.
-	         *
-	         * @example
-	         *
-	         *     var encrypted = cipher.process('data');
-	         *     var encrypted = cipher.process(wordArray);
-	         */
+	       
 	        process: function (dataUpdate) {
 	            // Append
 	            this._append(dataUpdate);
@@ -7706,20 +7229,7 @@ module.exports = function md5(buf) {
 	            return this._process();
 	        },
 
-	        /**
-	         * Finalizes the encryption or decryption process.
-	         * Note that the finalize operation is effectively a destructive, read-once operation.
-	         *
-	         * @param {WordArray|string} dataUpdate The final data to encrypt or decrypt.
-	         *
-	         * @return {WordArray} The data after final processing.
-	         *
-	         * @example
-	         *
-	         *     var encrypted = cipher.finalize();
-	         *     var encrypted = cipher.finalize('data');
-	         *     var encrypted = cipher.finalize(wordArray);
-	         */
+	       
 	        finalize: function (dataUpdate) {
 	            // Final data update
 	            if (dataUpdate) {
@@ -7740,19 +7250,7 @@ module.exports = function md5(buf) {
 
 	        _DEC_XFORM_MODE: 2,
 
-	        /**
-	         * Creates shortcut functions to a cipher's object interface.
-	         *
-	         * @param {Cipher} cipher The cipher to create a helper for.
-	         *
-	         * @return {Object} An object with encrypt and decrypt shortcut functions.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var AES = CryptoJS.lib.Cipher._createHelper(CryptoJS.algo.AES);
-	         */
+	        
 	        _createHelper: (function () {
 	            function selectCipherStrategy(key) {
 	                if (typeof key == 'string') {
@@ -7776,11 +7274,7 @@ module.exports = function md5(buf) {
 	        }())
 	    });
 
-	    /**
-	     * Abstract base stream cipher template.
-	     *
-	     * @property {number} blockSize The number of 32-bit words this cipher operates on. Default: 1 (32 bits)
-	     */
+	   
 	    var StreamCipher = C_lib.StreamCipher = Cipher.extend({
 	        _doFinalize: function () {
 	            // Process partial blocks
@@ -7792,57 +7286,22 @@ module.exports = function md5(buf) {
 	        blockSize: 1
 	    });
 
-	    /**
-	     * Mode namespace.
-	     */
+	   
 	    var C_mode = C.mode = {};
 
-	    /**
-	     * Abstract base block cipher mode template.
-	     */
+	   
 	    var BlockCipherMode = C_lib.BlockCipherMode = Base.extend({
-	        /**
-	         * Creates this mode for encryption.
-	         *
-	         * @param {Cipher} cipher A block cipher instance.
-	         * @param {Array} iv The IV words.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var mode = CryptoJS.mode.CBC.createEncryptor(cipher, iv.words);
-	         */
+	      
 	        createEncryptor: function (cipher, iv) {
 	            return this.Encryptor.create(cipher, iv);
 	        },
 
-	        /**
-	         * Creates this mode for decryption.
-	         *
-	         * @param {Cipher} cipher A block cipher instance.
-	         * @param {Array} iv The IV words.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var mode = CryptoJS.mode.CBC.createDecryptor(cipher, iv.words);
-	         */
+	       
 	        createDecryptor: function (cipher, iv) {
 	            return this.Decryptor.create(cipher, iv);
 	        },
 
-	        /**
-	         * Initializes a newly created mode.
-	         *
-	         * @param {Cipher} cipher A block cipher instance.
-	         * @param {Array} iv The IV words.
-	         *
-	         * @example
-	         *
-	         *     var mode = CryptoJS.mode.CBC.Encryptor.create(cipher, iv.words);
-	         */
+	        
 	        init: function (cipher, iv) {
 	            this._cipher = cipher;
 	            this._iv = iv;
@@ -7862,16 +7321,7 @@ module.exports = function md5(buf) {
 	         * CBC encryptor.
 	         */
 	        CBC.Encryptor = CBC.extend({
-	            /**
-	             * Processes the data block at offset.
-	             *
-	             * @param {Array} words The data words to operate on.
-	             * @param {number} offset The offset where the block starts.
-	             *
-	             * @example
-	             *
-	             *     mode.processBlock(data.words, offset);
-	             */
+	           
 	            processBlock: function (words, offset) {
 	                // Shortcuts
 	                var cipher = this._cipher;
@@ -7886,20 +7336,9 @@ module.exports = function md5(buf) {
 	            }
 	        });
 
-	        /**
-	         * CBC decryptor.
-	         */
+	       
 	        CBC.Decryptor = CBC.extend({
-	            /**
-	             * Processes the data block at offset.
-	             *
-	             * @param {Array} words The data words to operate on.
-	             * @param {number} offset The offset where the block starts.
-	             *
-	             * @example
-	             *
-	             *     mode.processBlock(data.words, offset);
-	             */
+	           
 	            processBlock: function (words, offset) {
 	                // Shortcuts
 	                var cipher = this._cipher;
@@ -7940,27 +7379,12 @@ module.exports = function md5(buf) {
 	        return CBC;
 	    }());
 
-	    /**
-	     * Padding namespace.
-	     */
+	   
 	    var C_pad = C.pad = {};
 
-	    /**
-	     * PKCS #5/7 padding strategy.
-	     */
+	    
 	    var Pkcs7 = C_pad.Pkcs7 = {
-	        /**
-	         * Pads data using the algorithm defined in PKCS #5/7.
-	         *
-	         * @param {WordArray} data The data to pad.
-	         * @param {number} blockSize The multiple that the data should be padded to.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     CryptoJS.pad.Pkcs7.pad(wordArray, 4);
-	         */
+	        
 	        pad: function (data, blockSize) {
 	            // Shortcut
 	            var blockSizeBytes = blockSize * 4;
@@ -7982,17 +7406,6 @@ module.exports = function md5(buf) {
 	            data.concat(padding);
 	        },
 
-	        /**
-	         * Unpads data that had been padded using the algorithm defined in PKCS #5/7.
-	         *
-	         * @param {WordArray} data The data to unpad.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     CryptoJS.pad.Pkcs7.unpad(wordArray);
-	         */
 	        unpad: function (data) {
 	            // Get number of padding bytes from last byte
 	            var nPaddingBytes = data.words[(data.sigBytes - 1) >>> 2] & 0xff;
@@ -8002,18 +7415,9 @@ module.exports = function md5(buf) {
 	        }
 	    };
 
-	    /**
-	     * Abstract base block cipher template.
-	     *
-	     * @property {number} blockSize The number of 32-bit words this cipher operates on. Default: 4 (128 bits)
-	     */
+	   
 	    var BlockCipher = C_lib.BlockCipher = Cipher.extend({
-	        /**
-	         * Configuration options.
-	         *
-	         * @property {Mode} mode The block mode to use. Default: CBC
-	         * @property {Padding} padding The padding strategy to use. Default: Pkcs7
-	         */
+	       
 	        cfg: Cipher.cfg.extend({
 	            mode: CBC,
 	            padding: Pkcs7
@@ -8069,58 +7473,14 @@ module.exports = function md5(buf) {
 	        blockSize: 128/32
 	    });
 
-	    /**
-	     * A collection of cipher parameters.
-	     *
-	     * @property {WordArray} ciphertext The raw ciphertext.
-	     * @property {WordArray} key The key to this ciphertext.
-	     * @property {WordArray} iv The IV used in the ciphering operation.
-	     * @property {WordArray} salt The salt used with a key derivation function.
-	     * @property {Cipher} algorithm The cipher algorithm.
-	     * @property {Mode} mode The block mode used in the ciphering operation.
-	     * @property {Padding} padding The padding scheme used in the ciphering operation.
-	     * @property {number} blockSize The block size of the cipher.
-	     * @property {Format} formatter The default formatting strategy to convert this cipher params object to a string.
-	     */
+	   
 	    var CipherParams = C_lib.CipherParams = Base.extend({
-	        /**
-	         * Initializes a newly created cipher params object.
-	         *
-	         * @param {Object} cipherParams An object with any of the possible cipher parameters.
-	         *
-	         * @example
-	         *
-	         *     var cipherParams = CryptoJS.lib.CipherParams.create({
-	         *         ciphertext: ciphertextWordArray,
-	         *         key: keyWordArray,
-	         *         iv: ivWordArray,
-	         *         salt: saltWordArray,
-	         *         algorithm: CryptoJS.algo.AES,
-	         *         mode: CryptoJS.mode.CBC,
-	         *         padding: CryptoJS.pad.PKCS7,
-	         *         blockSize: 4,
-	         *         formatter: CryptoJS.format.OpenSSL
-	         *     });
-	         */
+	       
 	        init: function (cipherParams) {
 	            this.mixIn(cipherParams);
 	        },
 
-	        /**
-	         * Converts this cipher params object to a string.
-	         *
-	         * @param {Format} formatter (Optional) The formatting strategy to use.
-	         *
-	         * @return {string} The stringified cipher params.
-	         *
-	         * @throws Error If neither the formatter nor the default formatter is set.
-	         *
-	         * @example
-	         *
-	         *     var string = cipherParams + '';
-	         *     var string = cipherParams.toString();
-	         *     var string = cipherParams.toString(CryptoJS.format.OpenSSL);
-	         */
+	       
 	        toString: function (formatter) {
 	            return (formatter || this.formatter).stringify(this);
 	        }
@@ -8135,19 +7495,7 @@ module.exports = function md5(buf) {
 	     * OpenSSL formatting strategy.
 	     */
 	    var OpenSSLFormatter = C_format.OpenSSL = {
-	        /**
-	         * Converts a cipher params object to an OpenSSL-compatible string.
-	         *
-	         * @param {CipherParams} cipherParams The cipher params object.
-	         *
-	         * @return {string} The OpenSSL-compatible string.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var openSSLString = CryptoJS.format.OpenSSL.stringify(cipherParams);
-	         */
+	       
 	        stringify: function (cipherParams) {
 	            // Shortcuts
 	            var ciphertext = cipherParams.ciphertext;
@@ -8163,19 +7511,7 @@ module.exports = function md5(buf) {
 	            return wordArray.toString(Base64);
 	        },
 
-	        /**
-	         * Converts an OpenSSL-compatible string to a cipher params object.
-	         *
-	         * @param {string} openSSLStr The OpenSSL-compatible string.
-	         *
-	         * @return {CipherParams} The cipher params object.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var cipherParams = CryptoJS.format.OpenSSL.parse(openSSLString);
-	         */
+	      
 	        parse: function (openSSLStr) {
 	            // Parse base64
 	            var ciphertext = Base64.parse(openSSLStr);
@@ -8197,37 +7533,14 @@ module.exports = function md5(buf) {
 	        }
 	    };
 
-	    /**
-	     * A cipher wrapper that returns ciphertext as a serializable cipher params object.
-	     */
+	  
 	    var SerializableCipher = C_lib.SerializableCipher = Base.extend({
-	        /**
-	         * Configuration options.
-	         *
-	         * @property {Formatter} format The formatting strategy to convert cipher param objects to and from a string. Default: OpenSSL
-	         */
+	       
 	        cfg: Base.extend({
 	            format: OpenSSLFormatter
 	        }),
 
-	        /**
-	         * Encrypts a message.
-	         *
-	         * @param {Cipher} cipher The cipher algorithm to use.
-	         * @param {WordArray|string} message The message to encrypt.
-	         * @param {WordArray} key The key.
-	         * @param {Object} cfg (Optional) The configuration options to use for this operation.
-	         *
-	         * @return {CipherParams} A cipher params object.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var ciphertextParams = CryptoJS.lib.SerializableCipher.encrypt(CryptoJS.algo.AES, message, key);
-	         *     var ciphertextParams = CryptoJS.lib.SerializableCipher.encrypt(CryptoJS.algo.AES, message, key, { iv: iv });
-	         *     var ciphertextParams = CryptoJS.lib.SerializableCipher.encrypt(CryptoJS.algo.AES, message, key, { iv: iv, format: CryptoJS.format.OpenSSL });
-	         */
+	       
 	        encrypt: function (cipher, message, key, cfg) {
 	            // Apply config defaults
 	            cfg = this.cfg.extend(cfg);
@@ -8252,23 +7565,7 @@ module.exports = function md5(buf) {
 	            });
 	        },
 
-	        /**
-	         * Decrypts serialized ciphertext.
-	         *
-	         * @param {Cipher} cipher The cipher algorithm to use.
-	         * @param {CipherParams|string} ciphertext The ciphertext to decrypt.
-	         * @param {WordArray} key The key.
-	         * @param {Object} cfg (Optional) The configuration options to use for this operation.
-	         *
-	         * @return {WordArray} The plaintext.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var plaintext = CryptoJS.lib.SerializableCipher.decrypt(CryptoJS.algo.AES, formattedCiphertext, key, { iv: iv, format: CryptoJS.format.OpenSSL });
-	         *     var plaintext = CryptoJS.lib.SerializableCipher.decrypt(CryptoJS.algo.AES, ciphertextParams, key, { iv: iv, format: CryptoJS.format.OpenSSL });
-	         */
+	       
 	        decrypt: function (cipher, ciphertext, key, cfg) {
 	            // Apply config defaults
 	            cfg = this.cfg.extend(cfg);
@@ -8282,21 +7579,7 @@ module.exports = function md5(buf) {
 	            return plaintext;
 	        },
 
-	        /**
-	         * Converts serialized ciphertext to CipherParams,
-	         * else assumed CipherParams already and returns ciphertext unchanged.
-	         *
-	         * @param {CipherParams|string} ciphertext The ciphertext.
-	         * @param {Formatter} format The formatting strategy to use to parse serialized ciphertext.
-	         *
-	         * @return {CipherParams} The unserialized ciphertext.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var ciphertextParams = CryptoJS.lib.SerializableCipher._parse(ciphertextStringOrParams, format);
-	         */
+	       
 	        _parse: function (ciphertext, format) {
 	            if (typeof ciphertext == 'string') {
 	                return format.parse(ciphertext, this);
@@ -8306,32 +7589,12 @@ module.exports = function md5(buf) {
 	        }
 	    });
 
-	    /**
-	     * Key derivation function namespace.
-	     */
+	   
 	    var C_kdf = C.kdf = {};
 
-	    /**
-	     * OpenSSL key derivation function.
-	     */
+	   
 	    var OpenSSLKdf = C_kdf.OpenSSL = {
-	        /**
-	         * Derives a key and IV from a password.
-	         *
-	         * @param {string} password The password to derive from.
-	         * @param {number} keySize The size in words of the key to generate.
-	         * @param {number} ivSize The size in words of the IV to generate.
-	         * @param {WordArray|string} salt (Optional) A 64-bit salt to use. If omitted, a salt will be generated randomly.
-	         *
-	         * @return {CipherParams} A cipher params object with the key, IV, and salt.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var derivedParams = CryptoJS.kdf.OpenSSL.execute('Password', 256/32, 128/32);
-	         *     var derivedParams = CryptoJS.kdf.OpenSSL.execute('Password', 256/32, 128/32, 'saltsalt');
-	         */
+	       
 	        execute: function (password, keySize, ivSize, salt) {
 	            // Generate random salt
 	            if (!salt) {
@@ -8350,37 +7613,14 @@ module.exports = function md5(buf) {
 	        }
 	    };
 
-	    /**
-	     * A serializable cipher wrapper that derives the key from a password,
-	     * and returns ciphertext as a serializable cipher params object.
-	     */
+	    
 	    var PasswordBasedCipher = C_lib.PasswordBasedCipher = SerializableCipher.extend({
-	        /**
-	         * Configuration options.
-	         *
-	         * @property {KDF} kdf The key derivation function to use to generate a key and IV from a password. Default: OpenSSL
-	         */
+	       
 	        cfg: SerializableCipher.cfg.extend({
 	            kdf: OpenSSLKdf
 	        }),
 
-	        /**
-	         * Encrypts a message using a password.
-	         *
-	         * @param {Cipher} cipher The cipher algorithm to use.
-	         * @param {WordArray|string} message The message to encrypt.
-	         * @param {string} password The password.
-	         * @param {Object} cfg (Optional) The configuration options to use for this operation.
-	         *
-	         * @return {CipherParams} A cipher params object.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var ciphertextParams = CryptoJS.lib.PasswordBasedCipher.encrypt(CryptoJS.algo.AES, message, 'password');
-	         *     var ciphertextParams = CryptoJS.lib.PasswordBasedCipher.encrypt(CryptoJS.algo.AES, message, 'password', { format: CryptoJS.format.OpenSSL });
-	         */
+	       
 	        encrypt: function (cipher, message, password, cfg) {
 	            // Apply config defaults
 	            cfg = this.cfg.extend(cfg);
@@ -8400,23 +7640,7 @@ module.exports = function md5(buf) {
 	            return ciphertext;
 	        },
 
-	        /**
-	         * Decrypts serialized ciphertext using a password.
-	         *
-	         * @param {Cipher} cipher The cipher algorithm to use.
-	         * @param {CipherParams|string} ciphertext The ciphertext to decrypt.
-	         * @param {string} password The password.
-	         * @param {Object} cfg (Optional) The configuration options to use for this operation.
-	         *
-	         * @return {WordArray} The plaintext.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var plaintext = CryptoJS.lib.PasswordBasedCipher.decrypt(CryptoJS.algo.AES, formattedCiphertext, 'password', { format: CryptoJS.format.OpenSSL });
-	         *     var plaintext = CryptoJS.lib.PasswordBasedCipher.decrypt(CryptoJS.algo.AES, ciphertextParams, 'password', { format: CryptoJS.format.OpenSSL });
-	         */
+	        
 	        decrypt: function (cipher, ciphertext, password, cfg) {
 	            // Apply config defaults
 	            cfg = this.cfg.extend(cfg);
@@ -8456,13 +7680,9 @@ module.exports = function md5(buf) {
 	}
 }(this, function () {
 
-	/**
-	 * CryptoJS core components.
-	 */
+	
 	var CryptoJS = CryptoJS || (function (Math, undefined) {
-	    /*
-	     * Local polyfil of Object.create
-	     */
+	    
 	    var create = Object.create || (function () {
 	        function F() {};
 
@@ -8479,41 +7699,17 @@ module.exports = function md5(buf) {
 	        };
 	    }())
 
-	    /**
-	     * CryptoJS namespace.
-	     */
+	   
 	    var C = {};
 
-	    /**
-	     * Library namespace.
-	     */
+	   
 	    var C_lib = C.lib = {};
 
-	    /**
-	     * Base object for prototypal inheritance.
-	     */
 	    var Base = C_lib.Base = (function () {
 
 
 	        return {
-	            /**
-	             * Creates a new object that inherits from this object.
-	             *
-	             * @param {Object} overrides Properties to copy into the new object.
-	             *
-	             * @return {Object} The new object.
-	             *
-	             * @static
-	             *
-	             * @example
-	             *
-	             *     var MyType = CryptoJS.lib.Base.extend({
-	             *         field: 'value',
-	             *
-	             *         method: function () {
-	             *         }
-	             *     });
-	             */
+	           
 	            extend: function (overrides) {
 	                // Spawn
 	                var subtype = create(this);
@@ -8539,18 +7735,7 @@ module.exports = function md5(buf) {
 	                return subtype;
 	            },
 
-	            /**
-	             * Extends this object and runs the init method.
-	             * Arguments to create() will be passed to init().
-	             *
-	             * @return {Object} The new object.
-	             *
-	             * @static
-	             *
-	             * @example
-	             *
-	             *     var instance = MyType.create();
-	             */
+	           
 	            create: function () {
 	                var instance = this.extend();
 	                instance.init.apply(instance, arguments);
@@ -8558,32 +7743,11 @@ module.exports = function md5(buf) {
 	                return instance;
 	            },
 
-	            /**
-	             * Initializes a newly created object.
-	             * Override this method to add some logic when your objects are created.
-	             *
-	             * @example
-	             *
-	             *     var MyType = CryptoJS.lib.Base.extend({
-	             *         init: function () {
-	             *             // ...
-	             *         }
-	             *     });
-	             */
+	           
 	            init: function () {
 	            },
 
-	            /**
-	             * Copies properties into this object.
-	             *
-	             * @param {Object} properties The properties to mix in.
-	             *
-	             * @example
-	             *
-	             *     MyType.mixIn({
-	             *         field: 'value'
-	             *     });
-	             */
+	            
 	            mixIn: function (properties) {
 	                for (var propertyName in properties) {
 	                    if (properties.hasOwnProperty(propertyName)) {
@@ -8597,40 +7761,16 @@ module.exports = function md5(buf) {
 	                }
 	            },
 
-	            /**
-	             * Creates a copy of this object.
-	             *
-	             * @return {Object} The clone.
-	             *
-	             * @example
-	             *
-	             *     var clone = instance.clone();
-	             */
+	            
 	            clone: function () {
 	                return this.init.prototype.extend(this);
 	            }
 	        };
 	    }());
 
-	    /**
-	     * An array of 32-bit words.
-	     *
-	     * @property {Array} words The array of 32-bit words.
-	     * @property {number} sigBytes The number of significant bytes in this word array.
-	     */
+	    
 	    var WordArray = C_lib.WordArray = Base.extend({
-	        /**
-	         * Initializes a newly created word array.
-	         *
-	         * @param {Array} words (Optional) An array of 32-bit words.
-	         * @param {number} sigBytes (Optional) The number of significant bytes in the words.
-	         *
-	         * @example
-	         *
-	         *     var wordArray = CryptoJS.lib.WordArray.create();
-	         *     var wordArray = CryptoJS.lib.WordArray.create([0x00010203, 0x04050607]);
-	         *     var wordArray = CryptoJS.lib.WordArray.create([0x00010203, 0x04050607], 6);
-	         */
+	        
 	        init: function (words, sigBytes) {
 	            words = this.words = words || [];
 
@@ -8641,34 +7781,12 @@ module.exports = function md5(buf) {
 	            }
 	        },
 
-	        /**
-	         * Converts this word array to a string.
-	         *
-	         * @param {Encoder} encoder (Optional) The encoding strategy to use. Default: CryptoJS.enc.Hex
-	         *
-	         * @return {string} The stringified word array.
-	         *
-	         * @example
-	         *
-	         *     var string = wordArray + '';
-	         *     var string = wordArray.toString();
-	         *     var string = wordArray.toString(CryptoJS.enc.Utf8);
-	         */
+	       
 	        toString: function (encoder) {
 	            return (encoder || Hex).stringify(this);
 	        },
 
-	        /**
-	         * Concatenates a word array to this word array.
-	         *
-	         * @param {WordArray} wordArray The word array to append.
-	         *
-	         * @return {WordArray} This word array.
-	         *
-	         * @example
-	         *
-	         *     wordArray1.concat(wordArray2);
-	         */
+	        
 	        concat: function (wordArray) {
 	            // Shortcuts
 	            var thisWords = this.words;
@@ -8698,13 +7816,7 @@ module.exports = function md5(buf) {
 	            return this;
 	        },
 
-	        /**
-	         * Removes insignificant bits.
-	         *
-	         * @example
-	         *
-	         *     wordArray.clamp();
-	         */
+	      
 	        clamp: function () {
 	            // Shortcuts
 	            var words = this.words;
@@ -8715,15 +7827,7 @@ module.exports = function md5(buf) {
 	            words.length = Math.ceil(sigBytes / 4);
 	        },
 
-	        /**
-	         * Creates a copy of this word array.
-	         *
-	         * @return {WordArray} The clone.
-	         *
-	         * @example
-	         *
-	         *     var clone = wordArray.clone();
-	         */
+	       
 	        clone: function () {
 	            var clone = Base.clone.call(this);
 	            clone.words = this.words.slice(0);
@@ -8731,19 +7835,7 @@ module.exports = function md5(buf) {
 	            return clone;
 	        },
 
-	        /**
-	         * Creates a word array filled with random bytes.
-	         *
-	         * @param {number} nBytes The number of random bytes to generate.
-	         *
-	         * @return {WordArray} The random word array.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var wordArray = CryptoJS.lib.WordArray.random(16);
-	         */
+	       
 	        random: function (nBytes) {
 	            var words = [];
 
@@ -8773,28 +7865,12 @@ module.exports = function md5(buf) {
 	        }
 	    });
 
-	    /**
-	     * Encoder namespace.
-	     */
+	   
 	    var C_enc = C.enc = {};
 
-	    /**
-	     * Hex encoding strategy.
-	     */
+	   
 	    var Hex = C_enc.Hex = {
-	        /**
-	         * Converts a word array to a hex string.
-	         *
-	         * @param {WordArray} wordArray The word array.
-	         *
-	         * @return {string} The hex string.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var hexString = CryptoJS.enc.Hex.stringify(wordArray);
-	         */
+	       
 	        stringify: function (wordArray) {
 	            // Shortcuts
 	            var words = wordArray.words;
@@ -8811,19 +7887,7 @@ module.exports = function md5(buf) {
 	            return hexChars.join('');
 	        },
 
-	        /**
-	         * Converts a hex string to a word array.
-	         *
-	         * @param {string} hexStr The hex string.
-	         *
-	         * @return {WordArray} The word array.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var wordArray = CryptoJS.enc.Hex.parse(hexString);
-	         */
+	       
 	        parse: function (hexStr) {
 	            // Shortcut
 	            var hexStrLength = hexStr.length;
@@ -8838,23 +7902,9 @@ module.exports = function md5(buf) {
 	        }
 	    };
 
-	    /**
-	     * Latin1 encoding strategy.
-	     */
+	   
 	    var Latin1 = C_enc.Latin1 = {
-	        /**
-	         * Converts a word array to a Latin1 string.
-	         *
-	         * @param {WordArray} wordArray The word array.
-	         *
-	         * @return {string} The Latin1 string.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var latin1String = CryptoJS.enc.Latin1.stringify(wordArray);
-	         */
+	       
 	        stringify: function (wordArray) {
 	            // Shortcuts
 	            var words = wordArray.words;
@@ -8870,19 +7920,7 @@ module.exports = function md5(buf) {
 	            return latin1Chars.join('');
 	        },
 
-	        /**
-	         * Converts a Latin1 string to a word array.
-	         *
-	         * @param {string} latin1Str The Latin1 string.
-	         *
-	         * @return {WordArray} The word array.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var wordArray = CryptoJS.enc.Latin1.parse(latin1String);
-	         */
+	      
 	        parse: function (latin1Str) {
 	            // Shortcut
 	            var latin1StrLength = latin1Str.length;
@@ -8897,23 +7935,9 @@ module.exports = function md5(buf) {
 	        }
 	    };
 
-	    /**
-	     * UTF-8 encoding strategy.
-	     */
+	   
 	    var Utf8 = C_enc.Utf8 = {
-	        /**
-	         * Converts a word array to a UTF-8 string.
-	         *
-	         * @param {WordArray} wordArray The word array.
-	         *
-	         * @return {string} The UTF-8 string.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var utf8String = CryptoJS.enc.Utf8.stringify(wordArray);
-	         */
+	        
 	        stringify: function (wordArray) {
 	            try {
 	                return decodeURIComponent(escape(Latin1.stringify(wordArray)));
@@ -8922,55 +7946,22 @@ module.exports = function md5(buf) {
 	            }
 	        },
 
-	        /**
-	         * Converts a UTF-8 string to a word array.
-	         *
-	         * @param {string} utf8Str The UTF-8 string.
-	         *
-	         * @return {WordArray} The word array.
-	         *
-	         * @static
-	         *
-	         * @example
-	         *
-	         *     var wordArray = CryptoJS.enc.Utf8.parse(utf8String);
-	         */
+	       
 	        parse: function (utf8Str) {
 	            return Latin1.parse(unescape(encodeURIComponent(utf8Str)));
 	        }
 	    };
 
-	    /**
-	     * Abstract buffered block algorithm template.
-	     *
-	     * The property blockSize must be implemented in a concrete subtype.
-	     *
-	     * @property {number} _minBufferSize The number of blocks that should be kept unprocessed in the buffer. Default: 0
-	     */
+	   
 	    var BufferedBlockAlgorithm = C_lib.BufferedBlockAlgorithm = Base.extend({
-	        /**
-	         * Resets this block algorithm's data buffer to its initial state.
-	         *
-	         * @example
-	         *
-	         *     bufferedBlockAlgorithm.reset();
-	         */
+	        
 	        reset: function () {
 	            // Initial values
 	            this._data = new WordArray.init();
 	            this._nDataBytes = 0;
 	        },
 
-	        /**
-	         * Adds new data to this block algorithm's buffer.
-	         *
-	         * @param {WordArray|string} data The data to append. Strings are converted to a WordArray using UTF-8.
-	         *
-	         * @example
-	         *
-	         *     bufferedBlockAlgorithm._append('data');
-	         *     bufferedBlockAlgorithm._append(wordArray);
-	         */
+	       
 	        _append: function (data) {
 	            // Convert string to WordArray, else assume WordArray already
 	            if (typeof data == 'string') {
@@ -8982,20 +7973,7 @@ module.exports = function md5(buf) {
 	            this._nDataBytes += data.sigBytes;
 	        },
 
-	        /**
-	         * Processes available data blocks.
-	         *
-	         * This method invokes _doProcessBlock(offset), which must be implemented by a concrete subtype.
-	         *
-	         * @param {boolean} doFlush Whether all blocks and partial blocks should be processed.
-	         *
-	         * @return {WordArray} The processed data.
-	         *
-	         * @example
-	         *
-	         *     var processedData = bufferedBlockAlgorithm._process();
-	         *     var processedData = bufferedBlockAlgorithm._process(!!'flush');
-	         */
+	       
 	        _process: function (doFlush) {
 	            // Shortcuts
 	            var data = this._data;
@@ -9037,15 +8015,7 @@ module.exports = function md5(buf) {
 	            return new WordArray.init(processedWords, nBytesReady);
 	        },
 
-	        /**
-	         * Creates a copy of this object.
-	         *
-	         * @return {Object} The clone.
-	         *
-	         * @example
-	         *
-	         *     var clone = bufferedBlockAlgorithm.clone();
-	         */
+	     
 	        clone: function () {
 	            var clone = Base.clone.call(this);
 	            clone._data = this._data.clone();
@@ -27481,324 +26451,8 @@ module.exports = {
 };
 
 },{"./parser":136,"./signer":137,"./utils":138,"./verify":139}],136:[function(require,module,exports){
-// Copyright 2012 Joyent, Inc.  All rights reserved.
 
-var assert = require('assert-plus');
-var util = require('util');
-var utils = require('./utils');
-
-
-
-///--- Globals
-
-var HASH_ALGOS = utils.HASH_ALGOS;
-var PK_ALGOS = utils.PK_ALGOS;
-var HttpSignatureError = utils.HttpSignatureError;
-var InvalidAlgorithmError = utils.InvalidAlgorithmError;
-var validateAlgorithm = utils.validateAlgorithm;
-
-var State = {
-  New: 0,
-  Params: 1
-};
-
-var ParamsState = {
-  Name: 0,
-  Quote: 1,
-  Value: 2,
-  Comma: 3
-};
-
-
-///--- Specific Errors
-
-
-function ExpiredRequestError(message) {
-  HttpSignatureError.call(this, message, ExpiredRequestError);
-}
-util.inherits(ExpiredRequestError, HttpSignatureError);
-
-
-function InvalidHeaderError(message) {
-  HttpSignatureError.call(this, message, InvalidHeaderError);
-}
-util.inherits(InvalidHeaderError, HttpSignatureError);
-
-
-function InvalidParamsError(message) {
-  HttpSignatureError.call(this, message, InvalidParamsError);
-}
-util.inherits(InvalidParamsError, HttpSignatureError);
-
-
-function MissingHeaderError(message) {
-  HttpSignatureError.call(this, message, MissingHeaderError);
-}
-util.inherits(MissingHeaderError, HttpSignatureError);
-
-function StrictParsingError(message) {
-  HttpSignatureError.call(this, message, StrictParsingError);
-}
-util.inherits(StrictParsingError, HttpSignatureError);
-
-///--- Exported API
-
-module.exports = {
-
-  /**
-   * Parses the 'Authorization' header out of an http.ServerRequest object.
-   *
-   * Note that this API will fully validate the Authorization header, and throw
-   * on any error.  It will not however check the signature, or the keyId format
-   * as those are specific to your environment.  You can use the options object
-   * to pass in extra constraints.
-   *
-   * As a response object you can expect this:
-   *
-   *     {
-   *       "scheme": "Signature",
-   *       "params": {
-   *         "keyId": "foo",
-   *         "algorithm": "rsa-sha256",
-   *         "headers": [
-   *           "date" or "x-date",
-   *           "digest"
-   *         ],
-   *         "signature": "base64"
-   *       },
-   *       "signingString": "ready to be passed to crypto.verify()"
-   *     }
-   *
-   * @param {Object} request an http.ServerRequest.
-   * @param {Object} options an optional options object with:
-   *                   - clockSkew: allowed clock skew in seconds (default 300).
-   *                   - headers: required header names (def: date or x-date)
-   *                   - algorithms: algorithms to support (default: all).
-   *                   - strict: should enforce latest spec parsing
-   *                             (default: false).
-   * @return {Object} parsed out object (see above).
-   * @throws {TypeError} on invalid input.
-   * @throws {InvalidHeaderError} on an invalid Authorization header error.
-   * @throws {InvalidParamsError} if the params in the scheme are invalid.
-   * @throws {MissingHeaderError} if the params indicate a header not present,
-   *                              either in the request headers from the params,
-   *                              or not in the params from a required header
-   *                              in options.
-   * @throws {StrictParsingError} if old attributes are used in strict parsing
-   *                              mode.
-   * @throws {ExpiredRequestError} if the value of date or x-date exceeds skew.
-   */
-  parseRequest: function parseRequest(request, options) {
-    assert.object(request, 'request');
-    assert.object(request.headers, 'request.headers');
-    if (options === undefined) {
-      options = {};
-    }
-    if (options.headers === undefined) {
-      options.headers = [request.headers['x-date'] ? 'x-date' : 'date'];
-    }
-    assert.object(options, 'options');
-    assert.arrayOfString(options.headers, 'options.headers');
-    assert.optionalNumber(options.clockSkew, 'options.clockSkew');
-
-    if (!request.headers.authorization)
-      throw new MissingHeaderError('no authorization header present in ' +
-                                   'the request');
-
-    options.clockSkew = options.clockSkew || 300;
-
-
-    var i = 0;
-    var state = State.New;
-    var substate = ParamsState.Name;
-    var tmpName = '';
-    var tmpValue = '';
-
-    var parsed = {
-      scheme: '',
-      params: {},
-      signingString: '',
-
-      get algorithm() {
-        return this.params.algorithm.toUpperCase();
-      },
-
-      get keyId() {
-        return this.params.keyId;
-      }
-    };
-
-    var authz = request.headers.authorization;
-    for (i = 0; i < authz.length; i++) {
-      var c = authz.charAt(i);
-
-      switch (Number(state)) {
-
-      case State.New:
-        if (c !== ' ') parsed.scheme += c;
-        else state = State.Params;
-        break;
-
-      case State.Params:
-        switch (Number(substate)) {
-
-        case ParamsState.Name:
-          var code = c.charCodeAt(0);
-          // restricted name of A-Z / a-z
-          if ((code >= 0x41 && code <= 0x5a) || // A-Z
-              (code >= 0x61 && code <= 0x7a)) { // a-z
-            tmpName += c;
-          } else if (c === '=') {
-            if (tmpName.length === 0)
-              throw new InvalidHeaderError('bad param format');
-            substate = ParamsState.Quote;
-          } else {
-            throw new InvalidHeaderError('bad param format');
-          }
-          break;
-
-        case ParamsState.Quote:
-          if (c === '"') {
-            tmpValue = '';
-            substate = ParamsState.Value;
-          } else {
-            throw new InvalidHeaderError('bad param format');
-          }
-          break;
-
-        case ParamsState.Value:
-          if (c === '"') {
-            parsed.params[tmpName] = tmpValue;
-            substate = ParamsState.Comma;
-          } else {
-            tmpValue += c;
-          }
-          break;
-
-        case ParamsState.Comma:
-          if (c === ',') {
-            tmpName = '';
-            substate = ParamsState.Name;
-          } else {
-            throw new InvalidHeaderError('bad param format');
-          }
-          break;
-
-        default:
-          throw new Error('Invalid substate');
-        }
-        break;
-
-      default:
-        throw new Error('Invalid substate');
-      }
-
-    }
-
-    if (!parsed.params.headers || parsed.params.headers === '') {
-      if (request.headers['x-date']) {
-        parsed.params.headers = ['x-date'];
-      } else {
-        parsed.params.headers = ['date'];
-      }
-    } else {
-      parsed.params.headers = parsed.params.headers.split(' ');
-    }
-
-    // Minimally validate the parsed object
-    if (!parsed.scheme || parsed.scheme !== 'Signature')
-      throw new InvalidHeaderError('scheme was not "Signature"');
-
-    if (!parsed.params.keyId)
-      throw new InvalidHeaderError('keyId was not specified');
-
-    if (!parsed.params.algorithm)
-      throw new InvalidHeaderError('algorithm was not specified');
-
-    if (!parsed.params.signature)
-      throw new InvalidHeaderError('signature was not specified');
-
-    // Check the algorithm against the official list
-    parsed.params.algorithm = parsed.params.algorithm.toLowerCase();
-    try {
-      validateAlgorithm(parsed.params.algorithm);
-    } catch (e) {
-      if (e instanceof InvalidAlgorithmError)
-        throw (new InvalidParamsError(parsed.params.algorithm + ' is not ' +
-          'supported'));
-      else
-        throw (e);
-    }
-
-    // Build the signingString
-    for (i = 0; i < parsed.params.headers.length; i++) {
-      var h = parsed.params.headers[i].toLowerCase();
-      parsed.params.headers[i] = h;
-
-      if (h === 'request-line') {
-        if (!options.strict) {
-          /*
-           * We allow headers from the older spec drafts if strict parsing isn't
-           * specified in options.
-           */
-          parsed.signingString +=
-            request.method + ' ' + request.url + ' HTTP/' + request.httpVersion;
-        } else {
-          /* Strict parsing doesn't allow older draft headers. */
-          throw (new StrictParsingError('request-line is not a valid header ' +
-            'with strict parsing enabled.'));
-        }
-      } else if (h === '(request-target)') {
-        parsed.signingString +=
-          '(request-target): ' + request.method.toLowerCase() + ' ' +
-          request.url;
-      } else {
-        var value = request.headers[h];
-        if (value === undefined)
-          throw new MissingHeaderError(h + ' was not in the request');
-        parsed.signingString += h + ': ' + value;
-      }
-
-      if ((i + 1) < parsed.params.headers.length)
-        parsed.signingString += '\n';
-    }
-
-    // Check against the constraints
-    var date;
-    if (request.headers.date || request.headers['x-date']) {
-        if (request.headers['x-date']) {
-          date = new Date(request.headers['x-date']);
-        } else {
-          date = new Date(request.headers.date);
-        }
-      var now = new Date();
-      var skew = Math.abs(now.getTime() - date.getTime());
-
-      if (skew > options.clockSkew * 1000) {
-        throw new ExpiredRequestError('clock skew of ' +
-                                      (skew / 1000) +
-                                      's was greater than ' +
-                                      options.clockSkew + 's');
-      }
-    }
-
-    options.headers.forEach(function (hdr) {
-      // Remember that we already checked any headers in the params
-      // were in the request, so if this passes we're good.
-      if (parsed.params.headers.indexOf(hdr) < 0)
-        throw new MissingHeaderError(hdr + ' was not a signed header');
-    });
-
-    if (options.algorithms) {
-      if (options.algorithms.indexOf(parsed.params.algorithm) === -1)
-        throw new InvalidParamsError(parsed.params.algorithm +
-                                     ' is not a supported algorithm');
-    }
-
-    return parsed;
-  }
-
-};
+module.exports = {};
 
 },{"./utils":138,"assert-plus":11,"util":493}],137:[function(require,module,exports){
 (function (Buffer){
@@ -61817,27 +60471,7 @@ SolidityTypeBytes.prototype.staticPartLength = function (name) {
 module.exports = SolidityTypeBytes;
 
 },{"./formatters":281,"./type":286}],279:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file coder.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var f = require('./formatters');
 
@@ -62106,27 +60740,7 @@ module.exports = SolidityTypeDynamicBytes;
 
 
 },{"./formatters":281,"./type":286}],281:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file formatters.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var BigNumber = require('bignumber.js');
 var utils = require('../utils/utils');
@@ -62396,27 +61010,7 @@ SolidityTypeInt.prototype.staticPartLength = function (name) {
 module.exports = SolidityTypeInt;
 
 },{"./formatters":281,"./type":286}],283:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file param.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var utils = require('../utils/utils');
 
@@ -62949,40 +61543,6 @@ if (typeof XMLHttpRequest === 'undefined') {
 
 
 },{}],290:[function(require,module,exports){
-/*
-    This file is part of web3.js.
-
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** @file config.js
- * @authors:
- *   Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
-
-/**
- * Utils
- * 
- * @module utils
- */
-
-/**
- * Utility functions
- * 
- * @class [utils] config
- * @constructor
- */
 
 
 /// required to define ETH_BIGNUMBER_ROUNDING_MODE
@@ -63030,27 +61590,6 @@ module.exports = {
 
 
 },{"bignumber.js":321}],291:[function(require,module,exports){
-/*
-    This file is part of web3.js.
-
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file sha3.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var CryptoJS = require('crypto-js');
 var sha3 = require('crypto-js/sha3');
@@ -63070,40 +61609,6 @@ module.exports = function (value, options) {
 
 
 },{"crypto-js":38,"crypto-js/sha3":59}],292:[function(require,module,exports){
-/*
-    This file is part of web3.js.
-
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/**
- * @file utils.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
-
-/**
- * Utils
- *
- * @module utils
- */
-
-/**
- * Utility functions
- *
- * @class [utils] utils
- * @constructor
- */
 
 
 var BigNumber = require('bignumber.js');
@@ -63674,32 +62179,7 @@ module.exports={
 }
 
 },{}],294:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/**
- * @file web3.js
- * @authors:
- *   Jeffrey Wilcke <jeff@ethdev.com>
- *   Marek Kotewicz <marek@ethdev.com>
- *   Marian Oancea <marian@ethdev.com>
- *   Fabian Vogelsteller <fabian@ethdev.com>
- *   Gav Wood <g@ethdev.com>
- * @date 2014
- */
 
 var RequestManager = require('./web3/requestmanager');
 var Iban = require('./web3/iban');
@@ -63822,27 +62302,7 @@ module.exports = Web3;
 
 
 },{"./utils/sha3":291,"./utils/utils":292,"./version.json":293,"./web3/batch":296,"./web3/extend":300,"./web3/httpprovider":304,"./web3/iban":305,"./web3/ipcprovider":306,"./web3/methods/db":309,"./web3/methods/eth":310,"./web3/methods/net":311,"./web3/methods/personal":312,"./web3/methods/shh":313,"./web3/property":316,"./web3/requestmanager":317,"./web3/settings":318}],295:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file allevents.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2014
- */
 
 var sha3 = require('../utils/sha3');
 var SolidityEvent = require('./event');
@@ -63912,27 +62372,7 @@ module.exports = AllSolidityEvents;
 
 
 },{"../utils/sha3":291,"../utils/utils":292,"./event":299,"./filter":301,"./formatters":302,"./methods/watches":314}],296:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file batch.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var Jsonrpc = require('./jsonrpc');
 var errors = require('./errors');
@@ -63980,27 +62420,7 @@ module.exports = Batch;
 
 
 },{"./errors":298,"./jsonrpc":307}],297:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/**
- * @file contract.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2014
- */
 
 var utils = require('../utils/utils');
 var coder = require('../solidity/coder');
@@ -64280,27 +62700,7 @@ var Contract = function (eth, abi, address) {
 module.exports = ContractFactory;
 
 },{"../solidity/coder":279,"../utils/utils":292,"./allevents":295,"./event":299,"./function":303}],298:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file errors.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 module.exports = {
     InvalidNumberOfParams: function () {
@@ -64320,27 +62720,7 @@ module.exports = {
 
 
 },{}],299:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file event.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2014
- */
 
 var utils = require('../utils/utils');
 var coder = require('../solidity/coder');
@@ -64580,31 +62960,7 @@ module.exports = extend;
 
 
 },{"./../utils/utils":292,"./formatters":302,"./method":308,"./property":316}],301:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** @file filter.js
- * @authors:
- *   Jeffrey Wilcke <jeff@ethdev.com>
- *   Marek Kotewicz <marek@ethdev.com>
- *   Marian Oancea <marian@ethdev.com>
- *   Fabian Vogelsteller <fabian@ethdev.com>
- *   Gav Wood <g@ethdev.com>
- * @date 2014
- */
 
 var formatters = require('./formatters');
 var utils = require('../utils/utils');
@@ -64812,28 +63168,6 @@ module.exports = Filter;
 
 
 },{"../utils/utils":292,"./formatters":302}],302:[function(require,module,exports){
-/*
-    This file is part of web3.js.
-
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file formatters.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @author Fabian Vogelsteller <fabian@ethdev.com>
- * @date 2015
- */
 
 var utils = require('../utils/utils');
 var config = require('../utils/config');
@@ -65113,27 +63447,7 @@ module.exports = {
 
 
 },{"../utils/config":290,"../utils/utils":292,"./iban":305}],303:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/**
- * @file function.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var coder = require('../solidity/coder');
 var utils = require('../utils/utils');
@@ -65481,29 +63795,7 @@ module.exports = SolidityFunction;
 
 
 },{"../solidity/coder":279,"../utils/sha3":291,"../utils/utils":292,"./formatters":302}],304:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** @file httpprovider.js
- * @authors:
- *   Marek Kotewicz <marek@ethdev.com>
- *   Marian Oancea <marian@ethdev.com>
- *   Fabian Vogelsteller <fabian@ethdev.com>
- * @date 2015
- */
 
 "use strict";
 
@@ -65629,27 +63921,7 @@ module.exports = HttpProvider;
 
 
 },{"./errors":298,"xmlhttprequest":289}],305:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file iban.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var BigNumber = require('bignumber.js');
 
@@ -65858,27 +64130,6 @@ module.exports = Iban;
 
 
 },{"bignumber.js":321}],306:[function(require,module,exports){
-/*
-    This file is part of web3.js.
-
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** @file ipcprovider.js
- * @authors:
- *   Fabian Vogelsteller <fabian@ethdev.com>
- * @date 2015
- */
 
 "use strict";
 
@@ -66067,27 +64318,6 @@ module.exports = IpcProvider;
 
 
 },{"../utils/utils":292,"./errors":298}],307:[function(require,module,exports){
-/*
-    This file is part of web3.js.
-
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** @file jsonrpc.js
- * @authors:
- *   Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var Jsonrpc = function () {
     // singleton pattern
@@ -66099,22 +64329,12 @@ var Jsonrpc = function () {
     this.messageId = 1;
 };
 
-/**
- * @return {Jsonrpc} singleton
- */
 Jsonrpc.getInstance = function () {
     var instance = new Jsonrpc();
     return instance;
 };
 
-/**
- * Should be called to valid json create payload object
- *
- * @method toPayload
- * @param {Function} method of jsonrpc call, required
- * @param {Array} params, an array of method params, optional
- * @returns {Object} valid jsonrpc payload object
- */
+
 Jsonrpc.prototype.toPayload = function (method, params) {
     if (!method)
         console.error('jsonrpc method should be specified!');
@@ -66127,13 +64347,7 @@ Jsonrpc.prototype.toPayload = function (method, params) {
     };
 };
 
-/**
- * Should be called to check if jsonrpc response is valid
- *
- * @method isValidResponse
- * @param {Object}
- * @returns {Boolean} true if response is valid, otherwise false
- */
+
 Jsonrpc.prototype.isValidResponse = function (response) {
     return !!response &&
         !response.error &&
@@ -66142,13 +64356,7 @@ Jsonrpc.prototype.isValidResponse = function (response) {
         response.result !== undefined; // only undefined is not valid json object
 };
 
-/**
- * Should be called to create batch payload object
- *
- * @method toBatchPayload
- * @param {Array} messages, an array of objects with method (required) and params (optional) fields
- * @returns {Array} batch payload
- */
+
 Jsonrpc.prototype.toBatchPayload = function (messages) {
     var self = this;
     return messages.map(function (message) {
@@ -66160,27 +64368,8 @@ module.exports = Jsonrpc;
 
 
 },{}],308:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
 
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/**
- * @file method.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var utils = require('../utils/utils');
 var errors = require('./errors');
@@ -66327,27 +64516,7 @@ module.exports = Method;
 
 
 },{"../utils/utils":292,"./errors":298}],309:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** @file db.js
- * @authors:
- *   Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var Method = require('../method');
 
@@ -66395,28 +64564,6 @@ var methods = function () {
 module.exports = DB;
 
 },{"../method":308}],310:[function(require,module,exports){
-/*
-    This file is part of web3.js.
-
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/**
- * @file eth.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @author Fabian Vogelsteller <fabian@ethdev.com>
- * @date 2015
- */
 
 "use strict";
 
@@ -66740,27 +64887,7 @@ module.exports = Eth;
 
 
 },{"../../utils/config":290,"../../utils/utils":292,"../contract":297,"../filter":301,"../formatters":302,"../iban":305,"../method":308,"../namereg":315,"../property":316,"../syncing":319,"../transfer":320,"./watches":314}],311:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** @file eth.js
- * @authors:
- *   Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var utils = require('../../utils/utils');
 var Property = require('../property');
@@ -66794,28 +64921,7 @@ var properties = function () {
 module.exports = Net;
 
 },{"../../utils/utils":292,"../property":316}],312:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/**
- * @file eth.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @author Fabian Vogelsteller <fabian@ethdev.com>
- * @date 2015
- */
 
 "use strict";
 
@@ -66889,27 +64995,7 @@ var properties = function () {
 module.exports = Personal;
 
 },{"../formatters":302,"../method":308,"../property":316}],313:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** @file shh.js
- * @authors:
- *   Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var Method = require('../method');
 var formatters = require('../formatters');
@@ -66977,27 +65063,7 @@ module.exports = Shh;
 
 
 },{"../filter":301,"../formatters":302,"../method":308,"./watches":314}],314:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** @file watches.js
- * @authors:
- *   Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var Method = require('../method');
 
@@ -67093,27 +65159,7 @@ module.exports = {
 
 
 },{"../method":308}],315:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file namereg.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var globalRegistrarAbi = require('../contracts/GlobalRegistrar.json');
 var icapRegistrarAbi= require('../contracts/ICAPRegistrar.json');
@@ -67134,28 +65180,7 @@ module.exports = {
 
 
 },{"../contracts/GlobalRegistrar.json":273,"../contracts/ICAPRegistrar.json":274}],316:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/**
- * @file property.js
- * @author Fabian Vogelsteller <fabian@frozeman.de>
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var utils = require('../utils/utils');
 
@@ -67280,31 +65305,6 @@ module.exports = Property;
 
 
 },{"../utils/utils":292}],317:[function(require,module,exports){
-/*
-    This file is part of web3.js.
-
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file requestmanager.js
- * @author Jeffrey Wilcke <jeff@ethdev.com>
- * @author Marek Kotewicz <marek@ethdev.com>
- * @author Marian Oancea <marian@ethdev.com>
- * @author Fabian Vogelsteller <fabian@ethdev.com>
- * @author Gav Wood <g@ethdev.com>
- * @date 2014
- */
 
 var Jsonrpc = require('./jsonrpc');
 var utils = require('../utils/utils');
@@ -67558,27 +65558,7 @@ module.exports = Settings;
 
 
 },{}],319:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** @file syncing.js
- * @authors:
- *   Fabian Vogelsteller <fabian@ethdev.com>
- * @date 2015
- */
 
 var formatters = require('./formatters');
 var utils = require('../utils/utils');
@@ -67653,27 +65633,7 @@ module.exports = IsSyncing;
 
 
 },{"../utils/utils":292,"./formatters":302}],320:[function(require,module,exports){
-/*
-    This file is part of web3.js.
 
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/** 
- * @file transfer.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2015
- */
 
 var Iban = require('./iban');
 var exchangeAbi = require('../contracts/SmartExchange.json');

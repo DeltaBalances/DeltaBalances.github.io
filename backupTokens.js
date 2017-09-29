@@ -515,6 +515,14 @@ adds some tokens unlisted on EtherDelta, but avoids too many shitcoins.
 */
 
 let offlineCustomTokens = [
+	//added
+	{
+		"address": "0x014b50466590340d41307cc54dcee990c8d58aa8",
+		"symbol" : "ICOS",
+		"decimal" : 6,
+	},
+
+	//MEW
 	{
 	"address":"0xAf30D2a7E90d7DC361c8C4585e9BB7D2F6f15bc7",
 	"symbol":"1ST",

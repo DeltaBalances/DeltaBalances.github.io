@@ -240,7 +240,7 @@
 		
 		// contract change
 		$('#contractSelect').change(e => {
-			_delta.changeContract(e.target.selectedIndex, () => {});
+			_delta.changeContract(e.target.selectedIndex);
 		});
 		
 		getStorage();

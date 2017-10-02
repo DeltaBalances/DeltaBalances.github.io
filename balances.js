@@ -1375,9 +1375,9 @@
 					{
 						// name  in <!-- --> for sorting
 						if( !myList[i].Unlisted)
-							row$.append($('<td/>').html('<!--' + cellValue + ' --><a  target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<!--' + cellValue + ' --><a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
-							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-warning" href="https://etherdelta.github.io/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
 					}
 					else if(head == 'Type')
 					{
@@ -1455,9 +1455,9 @@
 					{
 						// name  in <!-- --> for sorting
 						if(! balances[cellValue].Unlisted)
-							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-primary" href="https://etherdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
-							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-warning" href="https://etherdelta.github.io/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));
 					} else
 					{
 						row$.append($('<td/>').html(cellValue));

@@ -949,7 +949,7 @@
 			sum += 'Success!<br>';
 		}
 		else if(transaction.status === 'Pending') {
-			sum += 'Transaction is pending, try again later. If it takes too long, raise your gas price next time.<br>';
+			sum += 'Transaction is pending, try again later. For a faster transaction raise your gas price next time.<br> Pending for a really long time? Try to <a href="https://www.reddit.com/r/EtherDelta/comments/72tctz/guide_how_to_cancel_a_pending_transaction/" target="_blank">cancel or replace</a> it. <br>';
 		}
 		else if(transaction.status === 'Error: Bad jump destination' ) {
 			if (transaction.input.type === 'Taker Sell' || transaction.input.type === 'Taker Buy') {

@@ -785,6 +785,13 @@
 						finished();
 					}
 				}
+				else 
+				{
+					showError('Failed to load balances, try again');
+					loadedW = tokenCount;
+					loadedED = tokenCount;
+					finished();
+				}
 			  });
 		}
 	}

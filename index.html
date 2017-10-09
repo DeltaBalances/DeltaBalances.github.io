@@ -29,30 +29,22 @@
 		<script>
 			// try to get updated token list from EtherDelta, otherwise use own backup
 		
-			var etherDeltaConfig = undefined;
+			var etherDeltaConfig = offlineTokens;
 			try {
-				$.getJSON('https://etherdelta.github.io/config/main.json', function(jsonData) {
-					if(jsonData) {
-						etherDeltaConfig = jsonData;
-					} else {
-						etherDeltaConfig = offlineTokens;
-					}
-				});
-			} catch (err){
-				etherDeltaConfig = offlineTokens;
-			}
-			var stagingTokens = undefined;
+					$.getJSON('https://etherdelta.github.io/config/main.json', function(jsonData) {
+						if(jsonData && jsonData.tokens) {
+							etherDeltaConfig = jsonData;
+						}
+					});
+				} catch (err){}
+			var stagingTokens = offlineStagingTokens;
 			try {
-				$.getJSON('https://etherdelta.github.io/config/staging.json', function(jsonData) {
-					if(jsonData) {
-						stagingTokens = jsonData;
-					} else {
-						stagingTokens = offlineStagingTokens;
-					}
-				});
-			} catch (err) {
-				stagingTokens = offlineStagingTokens;
-			}
+					$.getJSON('https://etherdelta.github.io/config/staging.json', function(jsonData) {
+						if(jsonData && jsonData.tokens) {
+							stagingTokens = jsonData;
+						}
+					});
+				} catch (err) {}
 		</script>
 		<script type="text/javascript" src="bundle.min.js"></script>
 		

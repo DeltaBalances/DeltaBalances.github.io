@@ -50,10 +50,14 @@
         _delta.startEtherDelta(() => 
 		{	
 			//import of etherdelta config
-			if(etherDeltaConfig)
+			if(etherDeltaConfig && etherDeltaConfig.tokens)
 			{
 				_delta.config.tokens = etherDeltaConfig.tokens;
-				_delta.config.pairs = etherDeltaConfig.pairs;
+			}
+			else 
+			{
+				showError('failed to load token data');
+				return;
 			}
 			
 			// note all listed tokens

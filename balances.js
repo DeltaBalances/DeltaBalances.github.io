@@ -24,6 +24,10 @@
 	let loadedED = 0;
     let loadedW = 0;
 	let loadedBid = 0;
+	let displayedED = false;
+	let displayedW = false;
+	let displayedBid = false;
+	
 	let loadedCustom = false;
 	let trigger_1 = false;
 	let trigger_2 = false;
@@ -526,6 +530,10 @@
 			loadedW = 0; // wallet async load progress
 			loadedED = 0; // etherdelta async load progress
 			loadedBid = 0;
+			displayedED = false;
+			displayedW = false;
+			displayedBid = false;
+			
 			loadedCustom = false;
 			$('#resultTable tbody').empty();
 			showLoading(true,false);
@@ -552,8 +560,8 @@
              
                 balances[token.name] = {
                     Name: token.name,
-                    Wallet: 0,
-                    EtherDelta: 0,
+                    Wallet: '' ,
+                    EtherDelta: '',
 					Total: 0,
 					Bid: '',
 					'Est. ETH': '',
@@ -1220,6 +1228,10 @@
 		if(loadedED >= tokenCount && loadedW >= tokenCount)
 			loadedBothBalances = true;
 		
+		displayedED = loadedED >= tokenCount;
+		displayedW = loadedW >= tokenCount;
+		displayedBid = loadedBid >= 1;
+		
 		// get totals
 		for (var i = 0; i < tokenCount; i++) 
 		{
@@ -1236,10 +1248,13 @@
 			let bal = balances[token.name];
 			if(bal)
 			{
+				
 				if(loadedBothBalances)
 					bal.Total = Number(bal.Wallet) + Number(bal.EtherDelta);
+				else if(displayedED)
+					bal.Total = bal.EtherDelta;
 				else
-					bal.Total = '';
+					bal.Total = bal.Wallet;
 					
 				bal['Est. ETH'] = '';
 				if(bal.Bid && bal.Total)
@@ -1398,11 +1413,11 @@
 
             table1Loaded = true;
         }
-		if(loadedW >= tokenCount && loadedED >= tokenCount)
+		if(displayedW && displayedED && displayedBid)
 			trigger_1 = true;
 		
 		
-        if(trigger_1 && (trigger_2 || !showTransactions) && loadedBid >= 1)
+        if(trigger_1 && (trigger_2 || !showTransactions))
 		{
 			disableInput(false);
 			hideLoading(true,true);

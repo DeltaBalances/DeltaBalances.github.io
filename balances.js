@@ -515,7 +515,11 @@
 		if(showBalances)
 		{
 			balances = {};
-
+			
+			$('#ethbalance').html('');
+			$('#tokenbalance').html('');
+			$('#totalbalance').html('');
+			$('#downloadBalances').html('');
 			
 			trigger_1 = false;
 			disableInput(true);
@@ -557,10 +561,11 @@
 					Address: token.addr,
                 };
             }
+				
+				//getAllBalances(rqid);
+				getDeltaBalances(rqid);
+				getWalletBalances(rqid);
 				getPrices(rqid);
-				getAllBalances(rqid);
-				//getDeltaBalances();
-				//getWalletBalances();
 		}
 	}	
 	
@@ -737,13 +742,14 @@
 			}
 			
 			loadedBid++;
-			finished();
+			finishedBalanceRequest();
 		});
 		
 	}
 	
 	let maxPerRequest = 120;
 
+	//wallet & etherdelta balances in 1 request
 	function getAllBalances(rqid)
 	{
 		let tokens2 = Object.keys(uniqueTokens);	
@@ -786,7 +792,7 @@
 						balances[token.name].Wallet = _util.weiToEth(returnedBalances[j +1], div);
 						loadedW++;
 						loadedED++;
-						finished();
+						finishedBalanceRequest();
 					}
 				}
 				else 
@@ -794,12 +800,119 @@
 					showError('Failed to load balances, try again');
 					loadedW = tokenCount;
 					loadedED = tokenCount;
-					finished();
+					finishedBalanceRequest();
 				}
 			  });
 		}
 	}
 
+	//separate request for etherdelta balances
+	function getDeltaBalances(rqid)
+	{
+		let tokens2 = Object.keys(uniqueTokens);	
+		tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted || showCustomTokens});
+		tokenCount = tokens2.length;
+		
+		let max = maxPerRequest
+		if(!etherscanFallback) //etherscan request can't hold too much data
+				max = max * 10;
+		
+		for(let i = 0; i < tokens2.length; i+= max)
+		{
+			deltaBalances(i, i+max, tokens2);
+		}
+		
+		function deltaBalances(startIndex, endIndex, tokens2)
+		{
+			let tokens = tokens2.slice(startIndex, endIndex);
+			//walletBalances(address user,  address[] tokens) constant returns (uint[]) {
+			 _util.call(
+			  _delta.web3,
+			  _delta.contractDeltaBalance,
+			  _delta.config.contractDeltaBalanceAddr,
+			  'deltaBalances',
+			  [_delta.config.contractEtherDeltaAddr, publicAddr, tokens],
+			  (err, result) =>
+			  {
+				 if(requestID > rqid)
+					return;
+				const returnedBalances = result;
+				if(returnedBalances && returnedBalances.length > 0)
+				{	
+					loadedCustom = showCustomTokens;
+					for(let i = 0; i< tokens.length; i++)
+					{
+						let token = uniqueTokens[tokens[i]];
+						let div = divisorFromDecimals(token.decimals);
+						balances[token.name].EtherDelta = _util.weiToEth(returnedBalances[i], div );
+						loadedED++;
+						if(loadedED >= tokenCount)
+							finishedBalanceRequest();
+					}
+				}
+				else 
+				{
+					showError('Failed to load EtherDelta balances, try again');
+					loadedED = tokenCount;
+					finishedBalanceRequest();
+				}
+			  });
+		}
+	}
+	
+	//separate request for wallet balances
+	function getWalletBalances(rqid)
+	{
+		let tokens2 = Object.keys(uniqueTokens);	
+		tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted || showCustomTokens});
+		tokenCount = tokens2.length;
+		
+		let max = maxPerRequest
+		if(!etherscanFallback) //etherscan request can't hold too much data
+				max = max * 10;
+		
+		for(let i = 0; i < tokens2.length; i+= max)
+		{
+			walletBalances(i, i+max, tokens2);
+		}
+		
+		function walletBalances(startIndex, endIndex, tokens2)
+		{
+			let tokens = tokens2.slice(startIndex, endIndex);
+			//walletBalances(address user,  address[] tokens) constant returns (uint[]) {
+			 _util.call(
+			  _delta.web3,
+			  _delta.contractDeltaBalance,
+			  _delta.config.contractDeltaBalanceAddr,
+			  'walletBalances',
+			  [publicAddr, tokens],
+			  (err, result) =>
+			  {
+				 if(requestID > rqid)
+					return;
+				const returnedBalances = result;
+				if(returnedBalances && returnedBalances.length > 0)
+				{	
+					loadedCustom = showCustomTokens;
+					for(let i = 0; i< tokens.length; i++)
+					{
+						let token = uniqueTokens[tokens[i]];
+						let div = divisorFromDecimals(token.decimals);
+						balances[token.name].Wallet = _util.weiToEth(returnedBalances[i], div);
+						loadedW++;
+						if(loadedW >= tokenCount)
+							finishedBalanceRequest();
+					}
+				}
+				else 
+				{
+					showError('Failed to load Wallet balances, try again');
+					loadedW = tokenCount;
+					finishedBalanceRequest();
+				}
+			  });
+		}
+	}
 	
 	
 	
@@ -1093,18 +1206,22 @@
 	}
 	
 	// callback when balance request completes
-    function finished()
+    function finishedBalanceRequest()
 	{	
 		//check if all requests are complete
-        if (loadedED < tokenCount || loadedW < tokenCount /*|| loadedBid < 1*/) {
+        if (loadedED < tokenCount && loadedW < tokenCount /*|| loadedBid < 1*/) {
             return;
         }
 		
 		let sumETH = 0;
 		let sumToken = 0;
 		
+		let loadedBothBalances = false;
+		if(loadedED >= tokenCount && loadedW >= tokenCount)
+			loadedBothBalances = true;
+		
 		// get totals
-        for (var i = 0; i < tokenCount; i++) 
+		for (var i = 0; i < tokenCount; i++) 
 		{
 
 			let token = undefined;
@@ -1116,10 +1233,14 @@
 			{
 				token = _delta.config.customTokens[i - _delta.config.tokens.length];
 			}
-            let bal = balances[token.name];
+			let bal = balances[token.name];
 			if(bal)
 			{
-				bal.Total = Number(bal.Wallet) + Number(bal.EtherDelta);
+				if(loadedBothBalances)
+					bal.Total = Number(bal.Wallet) + Number(bal.EtherDelta);
+				else
+					bal.Total = '';
+					
 				bal['Est. ETH'] = '';
 				if(bal.Bid && bal.Total)
 				{
@@ -1129,9 +1250,8 @@
 						bal['Est. ETH'] = val;
 						sumToken += val;
 					}
-				} else {
+				} else if(! bal.bid) {
 					bal.bid = '';
-					bal['Est. ETH'] = '';
 				}
 				if(token.name === 'ETH')
 				{
@@ -1142,15 +1262,20 @@
 				balances[token.name] = bal;
 				
 			}
-        }
-		$('#ethbalance').html(sumETH.toFixed(fixedDecimals) + ' ETH');
-		$('#tokenbalance').html(sumToken.toFixed(fixedDecimals) + ' ETH');
-		$('#totalbalance').html((sumETH + sumToken).toFixed(fixedDecimals) + ' ETH');
+		}
 		
+		if(loadedBothBalances)
+		{
+			$('#ethbalance').html(sumETH.toFixed(fixedDecimals) + ' ETH');
+			$('#tokenbalance').html(sumToken.toFixed(fixedDecimals) + ' ETH');
+			$('#totalbalance').html((sumETH + sumToken).toFixed(fixedDecimals) + ' ETH');
+		}
+		 
 		
         let result = Object.values(balances);
         lastResult = result;
-		downloadBalances();
+		if(loadedED >= tokenCount && loadedW >= tokenCount)
+			downloadBalances();
 		if(showCustomTokens)
 			lastResult3 = result;
 
@@ -1273,7 +1398,8 @@
 
             table1Loaded = true;
         }
-		trigger_1 = true;
+		if(loadedW >= tokenCount && loadedED >= tokenCount)
+			trigger_1 = true;
 		
 		
         if(trigger_1 && (trigger_2 || !showTransactions) && loadedBid >= 1)

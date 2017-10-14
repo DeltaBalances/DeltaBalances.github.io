@@ -1089,7 +1089,7 @@
 							let val = _util.weiToEth(amount, dvsr);
 							let val2 = _util.weiToEth(oppositeAmount, dvsr2);
 							let price = 0;
-							//if(cancelType === 'sell')
+							if(val !== 0)
 							{
 								price = val2 / val;
 							}
@@ -1145,7 +1145,7 @@
 							let val2 = _util.weiToEth(oppositeAmount, dvsr2);
 							
 							let price = 0;
-						//	if(tradeType === 'sell')
+							if(val !== 0)
 							{
 								price = val2 / val;
 							}

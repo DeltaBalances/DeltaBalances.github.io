@@ -1,6 +1,13 @@
 // offline backup of EtherDelta tokens if request for the live EtherDelta file fails (site changed/down?)
 // from EtherDelta 2017-10-09
 
+
+//tokens that somehow break the balanceOf contract call, temporarily blacklisted
+let tokenBlacklist = {
+	"0x6044b34a29e96f542f96f103c996864d0a812238" : "FLP",
+	"0xe8da050c3140183d4f5f01e048ac136e2da5253f" : "STMG" 
+}
+
 let offlineTokens = {
 	"tokens": [
     { "addr": "0x0000000000000000000000000000000000000000", "name": "ETH", "decimals": 18 },

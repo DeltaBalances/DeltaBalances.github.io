@@ -144,7 +144,7 @@
 			for(let i = 0; i < _delta.config.tokens.length; i++)
 			{
 				let token = _delta.config.tokens[i];
-				if(token) {
+				if(token && !tokenBlacklist[token.addr]) {
 					token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
 					token.addr = token.addr.toLowerCase();
 					token.unlisted = false;
@@ -168,7 +168,7 @@
 			for(let i = 0; i < _delta.config.customTokens.length; i++)
 			{
 				let token = _delta.config.customTokens[i];
-				if(token && !uniqueTokens[token.addr]) {
+				if(token && !tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) {
 					uniqueTokens[token.addr] = token;
 				}
 			}
@@ -181,7 +181,7 @@
 				for(let i = 0; i < stageTokens.length; i++)
 				{
 					let token = stageTokens[i];
-					if(token && !uniqueTokens[token.addr])
+					if(token && !tokenBlacklist[token.addr] && !uniqueTokens[token.addr])
 					{
 						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
 						token.unlisted = true;

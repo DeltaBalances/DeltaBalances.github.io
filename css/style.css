@@ -1,0 +1,195 @@
+
+/* address icon */
+#addrIcon {
+    width: 64px;
+    height: 64px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    border-radius: 50%;
+    box-shadow: inset rgba(255, 255, 255, 0.6) 0 2px 2px, inset rgba(0, 0, 0, 0.3) 0 -2px 6px;
+
+	
+}
+
+#overviewTable {
+	width: 50%;
+	border:none;
+	font-size: 125%;
+   /* border-collapse: separate;
+    border-spacing: 20px 2px; */
+}
+
+#txOverviewTable {
+	width: 100%;
+	border:none;
+	font-size: 125%;
+}
+
+#txOverviewTable td {
+	border:none;
+	padding:3px 50px;
+}
+
+#txOverviewTable td :first-child{
+	border:none;
+	padding:3px 0px;
+}
+
+/* sm */
+@media (max-width: 650px) {
+    #overviewTable {
+	width: 100%;
+	}
+}
+
+#overviewTable td {
+	border:none;
+	padding:3px;
+	
+}
+#overviewTable td:nth-child(2) {
+	text-align:right;
+
+}
+
+
+#overviewTable tr:nth-child(3)
+{
+    border-top: 1px solid black;
+}
+#overviewTable tr:nth-child(3) td
+{
+	padding:3px;
+}
+
+body {
+  padding-top: 50px;
+}
+@media (max-width: 768px) {
+  body {
+    padding-top: 70px;
+  }
+}
+
+#form {
+  float:right; width:80%;
+}
+@media (max-width: 768px) {
+  #form {
+    float:right; width:100%;
+  }
+}
+
+.navbar-default {
+   background-color: black;
+}
+ 
+ 
+ .jumbotron {
+    padding-top: 10px;
+    padding-bottom: 25px;
+}
+ 
+ .fa-refresh {
+	 border:none;
+	 background-color:transparent;
+ }
+ 
+.dim {
+	 color:#D3D3D3 !important;
+ }
+
+/* xs */
+.alert.alert-top {
+  margin-bottom: 0;
+  border-radius: 0;
+  text-align: center;
+  width: 100%;
+  z-index:999; 
+  position:fixed;
+  padding-top:40px;
+}
+/* sm */
+@media (min-width: 768px) {
+    .alert.alert-top {
+	padding-top:15px;
+	}
+}
+
+
+
+/*** custom checkboxes ***/
+
+input[type=number] {  
+  display: inline-block;
+  width:50px;
+  }
+
+input[type=checkbox] { display:none; } /* to hide the checkbox itself */
+input[type=checkbox] + label:before {
+  font-family: FontAwesome;
+  display: inline-block;
+  font-size:150%;
+  vertical-align: middle;
+}
+
+input[type=checkbox] + label:before { content: "\f096"; } /* unchecked icon */
+input[type=checkbox] + label:before { letter-spacing: 13px; } /* space between checkbox and label */
+
+input[type=checkbox]:checked + label:before { content: "\f046"; } /* checked icon */
+input[type=checkbox]:checked + label:before { letter-spacing: 10px; } /* allow space for check mark */
+
+/* tablesorter icons */
+
+table.tablesorter th.tablesorter-headerUnSorted {
+    background-image: url('images/black-unsorted.gif');
+    background-repeat: no-repeat;
+    background-position: 90% 50%;
+    cursor: pointer;
+	/*background-color: #333;
+	color: #FFF; font-weight: bold;
+	height: 40px;
+	text-align:right;
+	padding-right:30px;*/
+}
+
+.tablesorter th.tablesorter-headerSortUp,
+.tablesorter th.tablesorter-headerAsc
+{
+	background-image: url('images/black-asc.gif');
+    background-repeat: no-repeat;
+    background-position: 90% 50%;
+    cursor: pointer;
+	/*background-color: #333;
+	color: #FFF; font-weight: bold;
+	height: 40px;
+	text-align:right;
+	padding-right:30px;*/
+}
+
+.tablesorter th.tablesorter-headerSortDown,
+.tablesorter th.tablesorter-headerDesc {
+    background-image: url('images/black-desc.gif');
+    background-repeat: no-repeat;
+    background-position: 90% 50%;
+    cursor: pointer;
+	/*background-color: #333;
+	color: #FFF; font-weight: bold;
+	height: 40px;
+	text-align:right;
+	padding-right:30px; */
+}
+
+#resultTable td:nth-child(5)
+{
+    border-left: 1px solid #ddd;
+}
+
+.navbar-form{
+webkit-box-shadow: inset 0 0 0 transparent,0 0 0 transparent !important;
+box-shadow: inset 0 0 0 transparent,0 0 0 transparent !important;
+}
+
+.navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
+    border-color: transparent;
+}

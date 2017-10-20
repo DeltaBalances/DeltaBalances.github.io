@@ -154,7 +154,7 @@ input[type=checkbox]:checked + label:before { letter-spacing: 10px; } /* allow s
 /* tablesorter icons */
 
 table.tablesorter th.tablesorter-headerUnSorted {
-    background-image: url('/images/black-unsorted.gif');
+    background-image: url('images/black-unsorted.gif');
     background-repeat: no-repeat;
     background-position: 90% 50%;
     cursor: pointer;
@@ -163,7 +163,7 @@ table.tablesorter th.tablesorter-headerUnSorted {
 .tablesorter th.tablesorter-headerSortUp,
 .tablesorter th.tablesorter-headerAsc
 {
-	background-image: url('/images/black-asc.gif');
+	background-image: url('images/black-asc.gif');
     background-repeat: no-repeat;
     background-position: 90% 50%;
     cursor: pointer;
@@ -171,7 +171,7 @@ table.tablesorter th.tablesorter-headerUnSorted {
 
 .tablesorter th.tablesorter-headerSortDown,
 .tablesorter th.tablesorter-headerDesc {
-    background-image: url('/images/black-desc.gif');
+    background-image: url('images/black-desc.gif');
     background-repeat: no-repeat;
     background-position: 90% 50%;
     cursor: pointer;

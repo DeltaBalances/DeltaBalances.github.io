@@ -554,7 +554,7 @@ EtherDelta.prototype.getToken = function getToken(addrOrToken, name, decimals) {
 EtherDelta.prototype.loadWeb3 = function loadWeb3(callback) {
   this.config = config;
   
-  let provider = 'https://mainnet.infura.io/'; 
+  let provider = 'https://mainnet.infura.io/DeltaBalances '; 
   
   if (true) {
     // mist/geth/parity situation

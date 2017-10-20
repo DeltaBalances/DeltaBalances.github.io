@@ -212,7 +212,7 @@
 		
 		hideError();
 		hideHint();
-		disableInput(true);
+	//	disableInput(true);
 		showLoading();
 		clearOverview();
 		

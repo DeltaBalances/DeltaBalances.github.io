@@ -372,6 +372,7 @@
 		$("#loadingTransactions").prop("disabled", disable);
 		$('#loadingTransactions2').addClass('dim');
 		$("#loadingTransactions2").prop("disabled", disable);
+	
 	}
 	
 	function showLoading(balance, trans)
@@ -445,7 +446,7 @@
 		
 		hideError();
 		hideHint();
-		disableInput(true);
+		//disableInput(true);
 		$('#downloadBalances').html('');
 		// validate address
 		if(!autoStart)
@@ -526,7 +527,7 @@
 			$('#downloadBalances').html('');
 			
 			trigger_1 = false;
-			disableInput(true);
+			//disableInput(true);
 			loadedW = 0; // wallet async load progress
 			loadedED = 0; // etherdelta async load progress
 			loadedBid = 0;
@@ -585,7 +586,7 @@
 		if(showTransactions)
 		{
 			trigger_2 = false;
-			disableInput(true);
+			//disableInput(true);
 			
 			showLoading(false, true);
 				
@@ -731,7 +732,8 @@
 	
 	function getPrices(rqid)
 	{
-		$.getJSON(_delta.config.apiServer +'/nonce/'+ Date.now() + '/returnTicker/', (result) => {
+		let retry = 0;
+		$.getJSON(_delta.config.apiServer +'/nonce/'+ Date.now() + '/returnTicker/').done( (result) => {
 			if(requestID <= rqid)
 			{
 				if(result)
@@ -746,11 +748,28 @@
 							balances[token.name].Bid = Number(results[i].bid);
 						}
 					}
+				} else
+				{
+					loadedBid = -1;
 				}
+				
+				loadedBid++;
+				finishedBalanceRequest();
 			}
 			
-			loadedBid++;
-			finishedBalanceRequest();
+			
+		}).fail((result) => {
+			if(requestID <= rqid)
+			{
+				if(retry < 2)
+				{
+					retry++;
+					getPrices(rqid);
+					return;
+				}
+				loadedBid = -1;
+				finishedBalanceRequest();
+			}
 		});
 		
 	}
@@ -1230,7 +1249,7 @@
 		
 		displayedED = loadedED >= tokenCount;
 		displayedW = loadedW >= tokenCount;
-		displayedBid = loadedBid >= 1;
+		displayedBid = loadedBid >= 1 || loadedBid ==-1;
 		
 		// get totals
 		for (var i = 0; i < tokenCount; i++) 

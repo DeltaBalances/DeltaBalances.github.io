@@ -79,11 +79,13 @@ body {
 }
 
 #form {
-  float:right; width:80%;
+  float:right; width:63%;
 }
+
+
 @media (max-width: 768px) {
   #form {
-    float:right; width:100%;
+    float:right; width:85%;
   }
 }
 
@@ -194,4 +196,16 @@ box-shadow: inset 0 0 0 transparent,0 0 0 transparent !important;
 #homeLink2
 {
 	color: white;
+}
+
+#logo1 {
+
+    transform: translateX(-375%) translateY(-15%);
+    max-height: 30px;
+}
+
+#logo2 {
+	 transform: translateX(+30%) translateY(+65%);
+    max-height: 30px; 
+	float:left;
 }

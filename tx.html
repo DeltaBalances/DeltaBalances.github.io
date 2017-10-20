@@ -65,18 +65,21 @@
 			</button>
 		</div>
 		
+		
 		<div class="navbar navbar-inverse navbar-fixed-top">
 		  <div class="container">
-			<div class="navbar-header" style="width:100%;">
-			  <a class="navbar-brand hidden-xs" href="./">DeltaBalances</a>
-			   <form id="form" class="navbar-form" >
-				<div class="form-group" style="display:inline;">
-				  <div class="input-group" style="display:table; width:80%; margin: auto;">
-					<span class="input-group-addon btn btn-default" id="refreshButton"  onclick="myClick()" style="width:1%; cursor:pointer;"><span class="search"> Go</span></span>
-					<input class="form-control" name="addr" autocomplete="off" autofocus="autofocus" id="address" placeholder="Transaction hash 0x....    Ethereum address 0x...      etherscan url  /tx/   /address/" required pattern="[a-zA-Z0-9]+">
-				  </div>
+			<div class="navbar-header" style="width:100%;white-space: nowrap;">
+			  <a class="navbar-brand hidden-xs" style="padding-left: 90px;" href="./"><img id="logo1" align="right" src="logo-white.png" alt="logo"><span id="homeLink1">Delta</span><span id="homeLink2">Balances</span></a>
+			  <a class="input-group visible-xs" href="./"><img id="logo2" align="right" src="logo-white.png" alt="logo"></a> 
+				<div id="form" class="navbar-form">
+			
+					<div class="input-group add-on" style="width:100%">
+						<input class="form-control" type="text" autocomplete="off" autofocus="autofocus" id="address" placeholder="Transaction hash 0x....    Ethereum address 0x...      etherscan url  /tx/   /address/">
+						<div class="input-group-btn">
+							<button class="btn btn-default" id="refreshButton" onClick="myClick()"><i class="fa fa-search" aria-hidden="true"></i></button>
+						</div>
+					</div>
 				</div>
-			  </form>
 			</div>
 		  </div>
 		</div>

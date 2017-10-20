@@ -426,11 +426,30 @@
 
 	function hideLoading(balance, trans)
 	{
+		if(!publicAddr)
+		{			
+			hideLoading(balance,trans);
+			return;
+		}
 		if(balance)
-			$('#loadingBalances').hide();
-		if(trans) {
-			$('#loadingTransactions').hide();
-			$('#loadingTransactions2').hide();
+		{
+			if(!trans)
+				$('#loadingBalances').removeClass('fa-spin');		
+			else
+				$('#loadingBalances').hide();
+		}
+		if(trans) 
+		{
+			if(!balance)
+			{
+				$('#loadingTransactions2').removeClass('fa-spin');		
+				$('#loadingTransactions').removeClass('fa-spin');		
+			}
+			else
+			{
+				$('#loadingTransactions2').hide();
+				$('#loadingTransactions').hide();
+			}
 		}
 	}
 	
@@ -732,46 +751,56 @@
 	
 	function getPrices(rqid)
 	{
-		let retry = 0;
-		$.getJSON(_delta.config.apiServer +'/nonce/'+ Date.now() + '/returnTicker/').done( (result) => {
-			if(requestID <= rqid)
-			{
-				if(result)
+		let retries = 0;
+		retry();
+		function retry()
+		{
+			$.getJSON(_delta.config.apiServer +'/nonce/'+ Date.now() + '/returnTicker/').done( (result) => {
+				if(requestID <= rqid)
 				{
-					let results = Object.values(result);
-					for(let i = 0; i < results.length; i++)
+					if(result)
 					{
-						let token = uniqueTokens[results[i].tokenAddr];
-						
-						if(token && balances[token.name])
+						let results = Object.values(result);
+						for(let i = 0; i < results.length; i++)
 						{
-							balances[token.name].Bid = Number(results[i].bid);
+							let token = uniqueTokens[results[i].tokenAddr];
+							
+							if(token && balances[token.name])
+							{
+								balances[token.name].Bid = Number(results[i].bid);
+							}
 						}
+					} else
+					{
+						loadedBid = -1;
+						finishedBalanceRequest();
+						return;
 					}
-				} else
-				{
-					loadedBid = -1;
+					
+					loadedBid = 1;
+					finishedBalanceRequest();
 				}
 				
-				loadedBid++;
-				finishedBalanceRequest();
-			}
-			
-			
-		}).fail((result) => {
-			if(requestID <= rqid)
-			{
-				if(retry < 2)
+				
+			}).fail((result) => {
+				if(requestID <= rqid)
 				{
-					retry++;
-					getPrices(rqid);
-					return;
+					if(retries < 4)
+					{
+						retries++;
+						loadedBid = 0;
+						retry();
+						return;
+					} 
+					else 
+					{
+						showError("Failed to retrieve EtherDelta Prices after 5 tries. Try again later");
+						loadedBid = -1;
+						finishedBalanceRequest();
+					}
 				}
-				loadedBid = -1;
-				finishedBalanceRequest();
-			}
-		});
-		
+			});
+		}		
 	}
 	
 	let maxPerRequest = 120;
@@ -782,6 +811,7 @@
 		let tokens2 = Object.keys(uniqueTokens);	
 		tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted || showCustomTokens});
 		tokenCount = tokens2.length;
+		let retries = 0;
 		
 		let max = maxPerRequest
 		if(!etherscanFallback) //etherscan request can't hold too much data
@@ -824,10 +854,20 @@
 				}
 				else 
 				{
-					showError('Failed to load balances, try again');
-					loadedW = tokenCount;
-					loadedED = tokenCount;
-					finishedBalanceRequest();
+					//retry only with single infura request, don't bother with multiple etherscan requests
+					if(retries < 1 && tokens.length2.length <= max)
+					{
+						retries++;
+						allBalances(startIndex,endIndex,tokens2);
+						return;
+					}
+					else 
+					{
+						showError('Failed to load balances after 2 tries, try again later');
+						loadedED = tokenCount;
+						loadedW = tokenCount;
+						finishedBalanceRequest();
+					}
 				}
 			  });
 		}
@@ -839,6 +879,7 @@
 		let tokens2 = Object.keys(uniqueTokens);	
 		tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted || showCustomTokens});
 		tokenCount = tokens2.length;
+		let retries = 0;
 		
 		let max = maxPerRequest
 		if(!etherscanFallback) //etherscan request can't hold too much data
@@ -879,9 +920,19 @@
 				}
 				else 
 				{
-					showError('Failed to load EtherDelta balances, try again');
-					loadedED = tokenCount;
-					finishedBalanceRequest();
+					//retry only with single infura request, don't bother with multiple etherscan requests
+					if(retries < 1 && tokens.length2.length <= max)
+					{
+						retries++;
+						deltaBalances(startIndex,endIndex,tokens2);
+						return;
+					}
+					else 
+					{
+						showError('Failed to load EtherDelta balances after 2 tries, try again later');
+						loadedED = tokenCount;
+						finishedBalanceRequest();
+					}
 				}
 			  });
 		}
@@ -893,6 +944,7 @@
 		let tokens2 = Object.keys(uniqueTokens);	
 		tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted || showCustomTokens});
 		tokenCount = tokens2.length;
+		let retries = 0;
 		
 		let max = maxPerRequest
 		if(!etherscanFallback) //etherscan request can't hold too much data
@@ -905,6 +957,7 @@
 		
 		function walletBalances(startIndex, endIndex, tokens2)
 		{
+			
 			let tokens = tokens2.slice(startIndex, endIndex);
 			//walletBalances(address user,  address[] tokens) constant returns (uint[]) {
 			 _util.call(
@@ -933,9 +986,19 @@
 				}
 				else 
 				{
-					showError('Failed to load Wallet balances, try again');
-					loadedW = tokenCount;
-					finishedBalanceRequest();
+					//retry only with single infura request, don't bother with multiple etherscan requests
+					if(retries < 1 && tokens.length2.length <= max)
+					{
+						retries++;
+						walletBalances(startIndex,endIndex,tokens2);
+						return;
+					}
+					else 
+					{
+						showError('Failed to load Wallet balances after 2 tries, try again later');
+						loadedW = tokenCount;
+						finishedBalanceRequest();
+					}
 				}
 			  });
 		}
@@ -1236,7 +1299,7 @@
     function finishedBalanceRequest()
 	{	
 		//check if all requests are complete
-        if (loadedED < tokenCount && loadedW < tokenCount /*|| loadedBid < 1*/) {
+        if (loadedED < tokenCount && loadedW < tokenCount) {
             return;
         }
 		
@@ -1249,7 +1312,7 @@
 		
 		displayedED = loadedED >= tokenCount;
 		displayedW = loadedW >= tokenCount;
-		displayedBid = loadedBid >= 1 || loadedBid ==-1;
+		displayedBid = loadedBid >= 1 || loadedBid <= -1;
 		
 		// get totals
 		for (var i = 0; i < tokenCount; i++) 
@@ -1446,7 +1509,7 @@
 		}
 		else
 		{
-			hideLoading(false,true);
+			hideLoading(trigger_1, trigger_2 || !showTransactions);
 		}
         table1Loaded = true;
     }
@@ -1491,7 +1554,7 @@
         }
 		trigger_2 = true;
 	
-		if(trigger_1 && (trigger_2 || !showBalances))
+		if(trigger_2 && (trigger_1 || !showBalances))
 		{
 			disableInput(false);
 			hideLoading(true,true);
@@ -1501,7 +1564,7 @@
 		}
 		else
 		{
-			hideLoading(false,true);
+			hideLoading(trigger_1 || !showBalances, trigger_2);
 		}
         table2Loaded = true;
     }

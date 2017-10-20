@@ -147,6 +147,7 @@
 			if(trans)
 			{
 				transactionHash = trans;
+				window.location.hash = transactionHash;
 				autoStart = true;
 				// auto start loading
 				myClick();
@@ -222,7 +223,7 @@
 		autoStart = false;
 		if(transactionHash)
 		{
-			$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/transaction.html#' + transactionHash + '"> Direct Link </a> to this page');
+			window.location.hash = transactionHash;
 			getAll();
 
 		}
@@ -246,7 +247,7 @@
 		
         if (transactionHash) 
 		{	
-			//$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/transaction.html#' + transactionHash + '"> Direct Link </a> to this page');
+			window.location.hash = transactionHash;
 			getTransactions();
         } else {
 			running = false;

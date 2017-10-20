@@ -454,7 +454,7 @@
 		autoStart = false;
 		if(publicAddr)
 		{
-			$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/#' + publicAddr + '"> Direct Link </a> to this page');
+			window.location.hash = publicAddr;
 			/*if(etherScanSocket !== undefined)
 			{
 				console.log('socket closed');
@@ -491,7 +491,7 @@
         if (publicAddr) 
 		{	
 			setStorage();
-			$('#direct').html('<a target="_blank" href="https://deltaBalances.github.io/#' + publicAddr + '"> Direct Link </a> to this page');
+			window.location.hash = publicAddr;
 			getTrans(rqid);
 			getBalances(rqid);
 			/*etherScanSocket = new WebSocket("wss://socket.etherscan.io/wshandler");

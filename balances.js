@@ -428,8 +428,8 @@
 	{
 		if(!publicAddr)
 		{			
-			hideLoading(balance,trans);
-			return;
+			balance = true;
+			trans = true;
 		}
 		if(balance)
 		{

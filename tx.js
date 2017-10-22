@@ -28,7 +28,7 @@
 	let transactionHash = '';
     let lastTxData = undefined;
 	let lastTxLog = undefined;
-	
+	let txDate = "??";
 	
 	let uniqueTokens = {};
 		
@@ -344,7 +344,7 @@
 			if(result && result.status === '1')
 				statusResult = result.result;
 			transLoaded++;
-			if(transLoaded == 3)
+			if(transLoaded == 4)
 				processTransactions(transResult, statusResult, logResult);
 		});
 		
@@ -352,18 +352,38 @@
 			if(result )
 				logResult = result.result;
 			transLoaded++;
-			if(transLoaded == 3)
+			if(transLoaded == 4)
 				processTransactions(transResult, statusResult, logResult);
 		});
 		
 		$.getJSON('https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
 			if(result )
+			{
 				transResult = result.result;
+				if(transResult.blockNumber)
+				{
+					$.getJSON( 'https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + _util.hexToDec(transResult.blockNumber) + '&apikey='+_delta.config.etherscanAPIKey, ( res ) => {
+						if(res && res.status == "1" && res.result)
+						{
+							let unixtime = res.result.timeStamp;
+							if(unixtime)
+								txDate = toDateTime(unixtime);
+						}
+							transLoaded++;
+							if(transLoaded == 4)
+								processTransactions(transResult, statusResult, logResult);
+					});
+				} else 
+				{
+					transLoaded++; // no time call
+				}
+			}
 			transLoaded++;
-			if(transLoaded == 3)
+			if(transLoaded == 4)
 				processTransactions(transResult, statusResult, logResult);
 		});
 		
+
 		
 		
 		
@@ -1064,12 +1084,20 @@
 		$('#gaslimit').html(transaction.gasLimit);
 		$('#nonce').html(transaction.nonce);
 		if(transaction.status === 'Completed')
+		{
 			$('#status').html('<i style="color:green;" class="fa fa-check"></i>' + ' ' + transaction.status);
+			$('#time').html(txDate);
+		}
 		else if(transaction.status === 'Pending')
+		{
 			$('#status').html('<i class="fa fa-cog fa-fw"></i>' + ' ' + transaction.status);
+			$('#time').html('Pending');
+		}
 		else
+		{
 			$('#status').html('<i style="color:red;" class="fa fa-exclamation-circle"></i>' + ' ' + transaction.status);
-		$('#time').html('??');
+			$('#time').html('txDate');
+		}
 		$('#ethval').html(transaction.value);
 		$('#inputdata').html('');
 		if(transaction.input && transaction.input.type)

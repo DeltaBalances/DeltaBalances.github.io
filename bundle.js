@@ -134,7 +134,7 @@ module.exports = (config) => {
 			bundle.EtherDelta.config.solFunc2 = new SolidityFunction(web3In.eth, depositAbi, '');
 	  }
 	  
-	  let topic = data.topics[0] + "";
+	  let topic = data.topics[0];
 	  topic = topic.slice(2,topic.length);
 	  let result = bundle.EtherDelta.config.solFunc2.decodeMethod2(data.data, bundle.EtherDelta.config.methodIDS, topic);
 	  
@@ -229,6 +229,51 @@ module.exports = (config) => {
     } catch (err) {
       proxy(1);
     }
+  };
+
+  
+  
+  utility.getTradeLogs = function getTradeLogs(web3In, contractAddress, startblock, endblock, rpcID, callback) {
+    	
+	  const filterObj = JSON.stringify([{
+			fromBlock: '0x' + utility.decToHex(startblock),
+			toBlock: '0x' + utility.decToHex(endblock),
+			address: '0x8d12a197cb00d4747a1fe03395095ce2a5cc6819', //contractAddress,
+			topics: ['0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d'] //[web3.sha3('newtest(string,uint256,string,string,uint256)')]
+		 }]);
+	  
+	  let retries = 0;
+	  retry();
+	  
+	  function retry()
+	  {
+		  jQuery.ajax({
+				headers: {
+					'Accept': '*/*',
+					'Content-Type': 'application/json'
+				},
+				type: "POST",
+				async: true,
+				'url': 'https://mainnet.infura.io/DeltaBalances',
+				'data': '{"jsonrpc":"2.0","method":"eth_getLogs","params":' +filterObj + ' ,"id":'+ rpcID + '}',
+				'dataType': 'json',
+		  }).done( (result) => {
+			if(result.result && result.result.length > 0)
+			{
+				callback(result.result);
+			}
+		  }).fail((result) => {
+			if(retries < 1) {
+				retries++;
+				retry();
+				return;
+			}
+			else {
+				callback(undefined);
+			}
+		  });
+	  }
+ 
   };
 
   
@@ -342,6 +387,26 @@ module.exports = (config) => {
     }
   };
 
+   utility.decToHex = function decToHex(dec, lengthIn) {
+    let length = lengthIn;
+    if (!length) length = 32;
+    if (dec < 0) {
+      // return convertBase((Math.pow(2, length) + decStr).toString(), 10, 16);
+      return (new BigNumber(2)).pow(length).add(new BigNumber(dec)).toString(16);
+    }
+    let result = null;
+    try {
+      result = utility.convertBase(dec.toString(), 10, 16);
+    } catch (err) {
+      result = null;
+    }
+    if (result) {
+      return result;
+    }
+    return (new BigNumber(dec)).toString(16);
+  };
+  
+  
    utility.hexToDec = function hexToDec(hexStrIn, length) {
     // length implies this is a two's complement number
     let hexStr = hexStrIn;

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Bootstrap meta tags -->
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Delta Balances</title>
+
+		<!-- Bootstrap js -->
+		<script type="text/javascript" src="js/jquery.tablesorter.combined.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		
+		<!-- Bootstrap, bootstrap-theme, fontawesome & custom css -->
+		<link href="css/combinedStyles.css" rel="stylesheet">
+
+		<!-- Required js Web3 -->
+		<script type="text/javascript" src="js/bignumber.js"></script>
+		<!-- Blockies (eth address image) -->
+		<script type="text/javascript" src="js/blockies.min.js"></script>		
+	
+		<!-- EtherDelta -->
+			<script type="text/javascript" src="backupTokens.js"></script>
+		<script>
+			// try to get updated token list from EtherDelta, otherwise use own backup
+		
+			var etherDeltaConfig = offlineTokens;
+			try {
+					$.getJSON('https://etherdelta.github.io/config/main.json', function(jsonData) {
+						if(jsonData && jsonData.tokens) {
+							etherDeltaConfig = jsonData;
+						}
+					});
+				} catch (err){}
+			var stagingTokens = offlineStagingTokens;
+			try {
+					$.getJSON('https://etherdelta.github.io/config/staging.json', function(jsonData) {
+						if(jsonData && jsonData.tokens) {
+							stagingTokens = jsonData;
+						}
+					});
+				} catch (err) {}
+		</script>
+		<script type="text/javascript" src="bundle.min.js"></script>
+		
+		<!-- Main script -->
+		<script type="text/javascript" src="history.js"></script>
+		
+		
+
+	
+		
+	</head>
+	<body >
+	
+		<div class="alert alert-danger alert-top " style="display:none;" onclick="hideError()" id='error' role="alert" >
+			<strong>Error</strong> <span id="errortext"></span>
+			<button type="button" class="close"  aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="alert alert-warning alert-top alert-dismissible"  onclick="hideHint()" style = "display:none;" role="alert" id='hint'>
+			<strong>Hint</strong> <span id="hinttext"></span>
+			<button type="button" class="close"  aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		
+		<div class="navbar navbar-inverse navbar-fixed-top">
+		  <div class="container">
+			<div class="navbar-header" style="width:100%;white-space: nowrap;">
+			  <a class="navbar-brand hidden-xs" style="padding-left: 90px;" href="."><img id="logo1" align="right" src="logo-white.png" alt="logo"><span id="homeLink1">Delta</span><span id="homeLink2">Balances</span></a>
+			  <a class="input-group visible-xs" href="."><img id="logo2" align="right" src="logo-white.png" alt="logo"></a> 
+				<div id="form" class="navbar-form">
+			
+					<div class="input-group add-on" style="width:100%">
+						<input class="form-control" type="text" autocomplete="off" autofocus="autofocus" id="address" placeholder="Ethereum address 0x...    Transaction hash 0x....       etherscan url  /tx/   /address/">
+						<div class="input-group-btn">
+							<button class="btn btn-default" id="refreshButton" onClick="myClick()"><i class="fa fa-search" aria-hidden="true"></i></button>
+						</div>
+					</div>
+				</div>
+			</div>
+		  </div>
+		</div>
+	
+	
+		 <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+		<div class="container" > 
+				<div class="col-md-12" style="overflow:hidden;">
+					<h2>EtherDelta Trade History</h2>
+					
+					<div style="white-space:nowrap; overflow:hidden;">
+						<div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;" ></div>
+						<div class="hidden-xs" style="padding-left: 3%; float:left;"> <p style ="line-height:64px;display: inline-block;"> </p> </div> <div style="float:left; white-space:nowrap;" ><p style ="line-height:64px; white-space:nowrap; display: inline-block;" id="addr">Enter your address or tx hash to get started</p></div>
+					</div>
+					<ul class="list-unstyled">
+						<li><span>Trades from last <input type="number" id="days" onchange="validateDays(this.value)" value="1" min="1" max="999" step="1"> days (assuming 15s per block)</span> </li>
+						<li><span id="selectedBlocks"></span> </li>
+					</ul>
+					<br>
+					<strong>This is a work in progress. Bugfixes & Improvements coming soon</strong>
+					
+					<br>
+					<br>
+					<span id="downloadTrades"></span>
+					
+					
+				</div>
+		</div>
+    </div>
+
+    <div class="container">
+	
+	
+	<div class="row">
+        <div class="col-md-12">
+			
+				<div id="" >
+					<h2>Trades<button id='loadingTransactions' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button></h2>
+						<br>
+						<table class="tablesorter table table-striped" id="transactionsTable">
+							<thead></thead>
+							<tbody></tbody>
+						</table>
+						<br>
+					Expecting to see more here? Increase the 'days' variable at the top. <br>
+					
+					<br>
+					<div class="col-md-6">
+						<span class="label label-default" >Taker</span> Clicked an existing order.<br>
+						<span class="label label-info" >Maker</span> Made a new order.<br>
+					</div>
+					<div class="col-md-6">
+						<span class="label label-success">Buy</span> Traded ETH for Tokens.<br>
+						<span class="label label-danger">Sell</span> Traded Tokens for ETH.<br>
+					</div>
+				
+				</div>
+
+		</div>
+    </div><!-- /row -->
+
+      <hr>
+
+       <footer style="overflow:hidden;">
+			<p> Powered by <a target="_blank" href="https://etherdelta.com">EtherDelta</a> & <a target="_blank" href="https://etherscan.io/">Etherscan</a></p>
+			<p> Any questions or suggestions? Make an issue/request on <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">github</a> or send a message to /u/deltabalances on reddit.</p>
+			<p> If you enjoy the site, you are always welcome to buy me a beer:  <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank" >0xf6E914D07d12636759868a61E52973d17ED7111B</a> </p>
+      </footer>
+    </div> <!-- /container -->
+	
+
+	</body>
+</html>

@@ -971,28 +971,28 @@
 	
 		let sum = '';
 		if(transaction.status === 'Completed') {
-			sum += 'Success!<br>';
+			sum += 'Status: Completed<br>';
 		}
 		else if(transaction.status === 'Pending') {
-			sum += 'Transaction is pending, try again later. For a faster transaction raise your gas price next time.<br> Pending for a really long time? Try to <a href="https://www.reddit.com/r/EtherDelta/comments/72tctz/guide_how_to_cancel_a_pending_transaction/" target="_blank">cancel or replace</a> it. <br>';
+			sum += 'Status: Transaction is pending, try again later. For a faster transaction raise your gas price next time.<br> Pending for a really long time? Try to <a href="https://www.reddit.com/r/EtherDelta/comments/72tctz/guide_how_to_cancel_a_pending_transaction/" target="_blank">cancel or replace</a> it. <br>';
 		}
 		else if(transaction.status === 'Error: Bad jump destination' ) {
 			if (transaction.input.type === 'Taker Sell' || transaction.input.type === 'Taker Buy') {
-				sum += 'Bad jump destination, someone filled this order before you. (Sent earlier or with a higher gas price).<br>';
+				sum += 'Status: Bad jump destination, someone filled this order before you. (Sent earlier or with a higher gas price).<br>';
 			}
 			else if ( transaction.input.type === 'Token Deposit' || transaction.input.type === 'Token Withdraw') {
-				sum += 'Bad jump destination, token deposit/withdraw failed. You might not have had the right account balance left. Otherwise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br>';
+				sum += 'Status: Bad jump destination, token deposit/withdraw failed. You might not have had the right account balance left. Otherwise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br>';
 			}
 		} else {
-			sum += 'Transaction failed.<br>';
+			sum += 'Status: Transaction failed.<br>';
 		}
 		
 		if(transaction.input && transaction.input.note)
 		{
-			sum += transaction.input.note +'<br>';
+			sum += 'Transaction type: ' + transaction.input.note +'<br>';
 		} else if(transaction.output && transaction.output.length > 0)
 		{
-			sum += transaction.output[0].note +'<br>';
+			sum += 'Transaction type: '+ transaction.output[0].note +'<br>';
 		}
 		if(transaction.input && transaction.input.type === 'Transfer' )
 		{
@@ -1287,10 +1287,18 @@
 					
 				let cellValue = myList[i];
 				if(keys[i] == 'token')
-					cellValue = myList[i].name;
+				{
+					let name = myList[i].name;
+					if( !myList[i].unlisted)
+						cellValue = '<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + name + '-ETH">' + name + '</a>';
+					else
+						cellValue = '<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].addr + '-ETH">' + name + '</a>';
+				}
 				else if(keys[i] == 'price')
+				{
 					cellValue = Number(cellValue).toFixed(5);
-				else if(keys[i] == 'seller' || keys[i] == 'buyer')
+				}
+				else if(keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to')
 				{
 					cellValue = addressLink(cellValue, true, true);
 				}

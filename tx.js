@@ -1158,7 +1158,7 @@
 	function displayParse(parsedInput, id)
 	{
 		if(!parsedInput) {
-			$(id).html('No familair EtherDelta input recognized');
+			$(id).html('No familiair EtherDelta input recognized');
 			console.log('fuck');
 			return;
 		}

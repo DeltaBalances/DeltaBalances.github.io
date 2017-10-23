@@ -78,16 +78,13 @@ body {
   }
 }
 
+/*
 #form {
   float:right; width:63%;
 }
 
+*/
 
-@media (max-width: 768px) {
-  #form {
-    float:right; width:85%;
-  }
-}
 
 .navbar-default {
    background-color: black;
@@ -205,7 +202,80 @@ box-shadow: inset 0 0 0 transparent,0 0 0 transparent !important;
 }
 
 #logo2 {
-	 transform: translateX(+30%) translateY(+65%);
+	 transform: translateX(+30%) translateY(-15%);
     max-height: 30px; 
 	float:left;
+}
+
+
+@media (max-width: 768px) {
+#logo2 {
+	 transform: translateX(+5%) translateY(+15%);
+    max-height: 30px; 
+	float:left;
+}
+}
+
+#navButton {
+	padding-top:100px;
+}
+
+.navbar-toggle{
+  top:10px !important;
+  right:-20px !important;
+  position:relative;
+}
+
+.customWidth1
+{
+	width:70%;
+}
+.customWidth2
+{
+	width:70%;
+}
+
+@media (max-width: 768px) {
+    
+
+    .navbar-nav {
+        text-align: center;
+    }
+}
+
+@media (max-width: 1200px) {
+    .customWidth1
+{
+	width:60%;
+}
+
+    .customWidth2
+{
+	width:63%;
+}
+}
+
+
+@media (max-width: 995px) {
+    .customWidth1
+{
+	width:60%;
+}
+
+    .customWidth2
+{
+	width:52%;
+}
+}
+
+@media (max-width: 768px) {
+    .customWidth1
+{
+	width:100%;
+}
+
+    .customWidth2
+{
+	width:100%;
+}
 }

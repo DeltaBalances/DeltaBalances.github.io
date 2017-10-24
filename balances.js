@@ -280,6 +280,10 @@
 			// auto start loading
 			myClick();
 		}
+		else if(!addr && !publicAddr)
+		{
+			$('#address').focus();
+		}
 	}
 		
 
@@ -303,6 +307,10 @@
     function checkRemember()
 	{
         remember = $('#remember').prop('checked');
+		if(!remember)
+		{
+			window.location.hash = "";
+		}
         setStorage();
     }
 
@@ -699,6 +707,7 @@
 		
 		document.getElementById('address').value = address;
 		document.getElementById('addr').innerHTML = 'Address: <a target="_blank" href="' + _delta.addressLink(address) + '">' + address + '</a>';
+		$('#historyNav').attr("href", "history.html#" + address);
 		setAddrImage(address);
 		return address;
     }

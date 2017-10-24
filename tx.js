@@ -132,6 +132,7 @@
 			}
         });
 
+		checkStorage();
 		
 		// url parameter ?addr=0x... /#0x..
 		let trans = getParameterByName('trans');
@@ -153,6 +154,10 @@
 				myClick();
 			}
 		} 
+		if(!trans)
+		{
+			$('#address').focus();
+		}
 	}
 		
 
@@ -1361,4 +1366,18 @@
 
 		return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 	}
+	
+	function checkStorage() 
+	{
+        if (typeof(Storage) !== "undefined") 
+		{
+			let addr = localStorage.getItem("address");
+			if(addr)
+			{
+				$('#overviewNav').attr("href", "index.html#" + addr);
+				$('#historyNav').attr("href", "history.html#" + addr);
+			}
+        } 
+    }
+
 }

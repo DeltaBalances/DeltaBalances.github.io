@@ -216,14 +216,18 @@
 				publicAddr = addr;
 				//autoStart = true;
 				// auto start loading
-				myClick();
+				//myClick();
 			}
 		} 
 		else if(publicAddr) //autoload when remember is active
 		{
 			//autoStart = true;
 			// auto start loading
-			myClick();
+			//myClick();
+		}
+		else if(!addr && !publicAddr)
+		{
+			$('#address').focus();
 		}
 	}
 		
@@ -435,6 +439,7 @@
 		
 		document.getElementById('address').value = address;
 		document.getElementById('addr').innerHTML = 'Address: <a target="_blank" href="' + _delta.addressLink(address) + '">' + address + '</a>';
+		$('#overviewNav').attr("href", "index.html#" + address);
 		setAddrImage(address);
 		return address;
     }

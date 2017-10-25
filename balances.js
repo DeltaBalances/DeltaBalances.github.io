@@ -282,6 +282,7 @@
 		}
 		else if(!addr && !publicAddr)
 		{
+			_delta.connectSocket();
 			$('#address').focus();
 		}
 	}
@@ -761,7 +762,42 @@
 	function getPrices(rqid)
 	{
 		let retries = 0;
-		retry();
+		retry2();
+		
+		function retry2()
+		{
+			if(true)
+			{
+				_delta.socketTicker((err,result,rid) => {
+					if(!err && result)
+					{
+						let results = Object.values(result);
+						for(let i = 0; i < results.length; i++)
+						{
+							let token = uniqueTokens[results[i].tokenAddr];
+							
+							if(token && balances[token.name])
+							{
+								balances[token.name].Bid = Number(results[i].bid);
+							}
+						}
+						loadedBid = 1;
+						finishedBalanceRequest();
+						return;
+					} else
+					{
+						retries++;
+						loadedBid = 0;
+						retry();
+						return;
+					}
+					
+				}, rqid)
+			} else {
+				retry();
+			}
+		}
+		
 		function retry()
 		{
 			$.getJSON(_delta.config.apiServer +'/nonce/'+ Date.now() + '/returnTicker/').done( (result) => {
@@ -779,6 +815,9 @@
 								balances[token.name].Bid = Number(results[i].bid);
 							}
 						}
+						loadedBid = 1;
+						finishedBalanceRequest();
+						return;
 					} else
 					{
 						loadedBid = -1;
@@ -786,8 +825,7 @@
 						return;
 					}
 					
-					loadedBid = 1;
-					finishedBalanceRequest();
+					
 				}
 				
 				
@@ -796,9 +834,15 @@
 				{
 					if(retries < 4)
 					{
+						
 						retries++;
 						loadedBid = 0;
-						retry();
+						if(_delta.socketConnected)
+						{
+							retry2();
+						} else {
+							retry();
+						}
 						return;
 					} 
 					else 

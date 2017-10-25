@@ -493,6 +493,7 @@ module.exports = (config) => {
 
 module.exports = {
   homeURL: 'https://deltabalances.github.io',
+  socketURL: 'https://socket.etherdelta.com',
   contractEtherDelta: 'smart_contract/etherdelta.sol',
   contractToken: 'smart_contract/token.sol',
   contractDeltaBalance: 'smart_contract/deltabalances.sol',
@@ -559,6 +560,57 @@ function EtherDelta() {
   this.web3 = undefined;
   this.minGas = 0.005;
   this.contractDeltaBalance = undefined;
+  this.socket = null;
+  this.socketConnected = false;
+  
+}
+
+EtherDelta.prototype.socketTicker = function socketTicker(callback, rqid)  {
+    
+	if(!bundle.EtherDelta.socketConnected)
+	{
+		bundle.EtherDelta.connectSocket(() => 
+			{
+				getMarket();
+			}
+		);
+	}
+	else 
+	{
+		getMarket();
+	}
+	
+	function getMarket()
+	{
+		bundle.EtherDelta.socket.emit('getMarket', {  });
+		bundle.EtherDelta.socket.once('market', (market) => {
+				callback(null, market.returnTicker, rqid);
+		});
+	}
+ };
+ 
+ EtherDelta.prototype.connectSocket = function connectSocket(callbackConnect) {
+	 let socketURL = 'https://socket.etherdelta.com';
+	bundle.EtherDelta.socket = io.connect(socketURL, { transports: ['websocket'] });
+	  bundle.EtherDelta.socket.on('connect', () => {
+		console.log('socket connected');
+		bundle.EtherDelta.socketConnected = true;
+		if(callbackConnect)
+		{
+			callbackConnect();
+		} 
+	  });
+	  
+	  bundle.EtherDelta.socket.on('disconnect', () => {
+			  bundle.EtherDelta.socketConnected = false;
+			  console.log('socket disconnected');
+	  });
+
+			
+	  	setTimeout(() => {
+				if(!bundle.EtherDelta.socketConnected)
+					bundle.EtherDelta.connectSocket(callbackConnect);
+		}, 7000);	
 }
 
 EtherDelta.prototype.dialogInfo = function dialogInfo(message) {

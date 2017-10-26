@@ -31,8 +31,7 @@
 	let txDate = "??";
 	
 	let uniqueTokens = {};
-		
-		
+	let unknownToken = false;
 		
 	// Functions - initialisation
 	// ##########################################################################################################################################
@@ -204,6 +203,16 @@
 		$('#loading').hide();
 	}
 	
+	function setToken(address)
+	{
+		if(uniqueTokens[address])
+			return uniqueTokens[address];
+		else
+		{
+			unknownToken = true;
+			return {addr: address, name: '???', decimals:18};					
+		}
+	}
 	
 	function myClick()
 	{
@@ -215,6 +224,7 @@
 			return;
 		}
 		
+		unknownToken = false;
 		hideError();
 		hideHint();
 	//	disableInput(true);
@@ -471,12 +481,12 @@
 						if(unpacked.params[0].value === _delta.config.tokens[0].addr) // send get eth  -> buy form sell order
 						{
 							tradeType = 'Buy';
-							token = uniqueTokens[unpacked.params[2].value];
+							token = setToken(unpacked.params[2].value);				
 							base = uniqueTokens[unpacked.params[0].value];
 						}
 						else // taker sell
 						{
-							token = uniqueTokens[unpacked.params[0].value];
+							token = setToken(unpacked.params[0].value);	
 							base = uniqueTokens[unpacked.params[2].value];
 						}
 						
@@ -530,7 +540,7 @@
 					else if(unpacked.name == 'Deposit' || unpacked.name == 'Withdraw')
 					{
 						let type = unpacked.name;
-						let token = uniqueTokens[unpacked.params[0].value];
+						let token = setToken(unpacked.params[0].value);	
 						let user = unpacked.params[1].value;
 						let rawAmount = unpacked.params[2].value;
 						let rawBalance = unpacked.params[3].value;
@@ -571,13 +581,13 @@
 						if(unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
 						{
 							cancelType = 'buy';
-							token = uniqueTokens[unpacked.params[2].value];
-							token2 = uniqueTokens[unpacked.params[0].value];
+							token = setToken(unpacked.params[2].value);	
+							token2 = setToken(unpacked.params[0].value);
 						}
 						else // buy
 						{
-							token = uniqueTokens[unpacked.params[0].value];
-							token2 = uniqueTokens[unpacked.params[2].value];
+							token = setToken(unpacked.params[0].value);	
+							token2 = setToken(unpacked.params[2].value);
 						}
 						
 						if(token && token2 && token.addr && token2.addr)
@@ -623,7 +633,8 @@
 						let to = outputLogs[i].topics[2];
 						to = '0x' + to.slice(to.length -40);
 						let rawAmount = unpacked.params[0].value;
-						let token = uniqueTokens[outputLogs[i].address];
+						let token = token = setToken(outputLogs[i].address);	
+						
 						let dvsr = divisorFromDecimals(token.decimals)
 						let val = _util.weiToEth(rawAmount, dvsr);
 						let unlisted = token.unlisted;
@@ -645,7 +656,7 @@
 						let to = outputLogs[i].topics[2];
 						to = '0x' + to.slice(to.length -40);
 						let rawAmount = unpacked.params[0].value;
-						let token = uniqueTokens[outputLogs[i].address];
+						let token = token = setToken(outputLogs[i].address);
 						let dvsr = divisorFromDecimals(token.decimals)
 						let val = _util.weiToEth(rawAmount, dvsr);
 						let unlisted = token.unlisted;
@@ -681,7 +692,7 @@
 						let to = unpacked.params[0].value;
 						let rawAmount = unpacked.params[1].value;
 						let amount = 0;
-						let token = uniqueTokens[tx.to];
+						let token = setToken(tx.to);
 						let unlisted = true; 
 						if(token && token.addr)
 						{
@@ -710,7 +721,7 @@
 						let sender = unpacked.params[0].value;
 						let rawAmount = unpacked.params[1].value;
 						let amount = 0;
-						let token = uniqueTokens[tx.to];
+						let token = setToken(tx.to);
 						let unlisted = true; 
 						if(token && token.addr)
 						{
@@ -769,7 +780,7 @@
 					let unpacked = _util.processInputMethod (_delta.web3, _delta.contractEtherDelta, input);
 					if(unpacked && (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken'))
 					{
-						let token = uniqueTokens[unpacked.params[0].value];
+						let token = setToken(unpacked.params[0].value);
 						if(token && token.addr)
 						{
 							let unlisted = token.unlisted;
@@ -812,13 +823,13 @@
 						if(unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
 						{
 							cancelType = 'buy';
-							token = uniqueTokens[unpacked.params[2].value];
-							token2 = uniqueTokens[unpacked.params[0].value];
+							token = setToken(unpacked.params[2].value);
+							token2 = setToken(unpacked.params[0].value);
 						}
 						else // buy
 						{
-							token = uniqueTokens[unpacked.params[0].value];
-							token2 = uniqueTokens[unpacked.params[2].value];
+							token = setToken(unpacked.params[0].value);
+							token2 = setToken(unpacked.params[2].value);
 						}
 						
 						if(token && token2 && token.addr && token2.addr)
@@ -871,13 +882,13 @@
 						if(unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
 						{
 							tradeType = 'Buy';
-							token = uniqueTokens[unpacked.params[2].value];
-							token2 = uniqueTokens[unpacked.params[0].value];
+							token = setToken(unpacked.params[2].value);
+							token2 = setToken(unpacked.params[0].value);
 						}
 						else // buy
 						{
-							token = uniqueTokens[unpacked.params[0].value];
-							token2 = uniqueTokens[unpacked.params[2].value];
+							token = setToken(unpacked.params[0].value);
+							token2 = setToken(unpacked.params[2].value);
 						}
 						
 						if(token && token2 && token.addr && token2.addr)
@@ -992,6 +1003,11 @@
 			sum += 'Status: Transaction failed.<br>';
 		}
 		
+		if(unknownToken)
+		{
+			sum += "<strong>This token is still unknown to DeltaBalances </strong>, amount and price might be wrong if the token has less than 18 decimals <br> "
+			
+		}
 		if(transaction.input && transaction.input.note)
 		{
 			sum += 'Transaction type: ' + transaction.input.note +'<br>';
@@ -1294,7 +1310,7 @@
 				if(keys[i] == 'token')
 				{
 					let name = myList[i].name;
-					if( !myList[i].unlisted)
+					if( !myList[i].unlisted && !unknownToken)
 						cellValue = '<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + name + '-ETH">' + name + '</a>';
 					else
 						cellValue = '<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].addr + '-ETH">' + name + '</a>';

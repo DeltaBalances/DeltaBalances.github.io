@@ -633,7 +633,7 @@
 						let to = outputLogs[i].topics[2];
 						to = '0x' + to.slice(to.length -40);
 						let rawAmount = unpacked.params[0].value;
-						let token = token = setToken(outputLogs[i].address);	
+						let token = setToken(outputLogs[i].address);	
 						
 						let dvsr = divisorFromDecimals(token.decimals)
 						let val = _util.weiToEth(rawAmount, dvsr);
@@ -656,7 +656,7 @@
 						let to = outputLogs[i].topics[2];
 						to = '0x' + to.slice(to.length -40);
 						let rawAmount = unpacked.params[0].value;
-						let token = token = setToken(outputLogs[i].address);
+						let token = setToken(outputLogs[i].address);
 						let dvsr = divisorFromDecimals(token.decimals)
 						let val = _util.weiToEth(rawAmount, dvsr);
 						let unlisted = token.unlisted;

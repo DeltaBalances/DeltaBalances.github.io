@@ -110,6 +110,23 @@
 				}
 			}
 			
+			if(allShitCoins)
+			{
+				//filter tokens that we already know
+				let shitCoins = allShitCoins.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+				for(let i = 0; i < shitCoins.length; i++)
+				{
+					let token = shitCoins[i];
+					if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr])
+					{
+						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+						token.unlisted = true;
+						uniqueTokens[token.addr] = token;
+						_delta.config.customTokens.push(token);
+					}
+				}
+			}
+			
 			initiated = true;
 			if(autoStart)
 				myClick();

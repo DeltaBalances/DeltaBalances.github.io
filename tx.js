@@ -183,6 +183,9 @@
 		$('#loading').addClass('dim');
 		$('#loading').prop('disabled', true);
 		$('#loading').show();
+		$('#refreshButtonLoading').show();
+		$('#refreshButtonSearch').hide();
+		
 	}
 	
 	function buttonLoading()
@@ -196,11 +199,15 @@
 		$('#loading').removeClass('dim');
 		$('#loading').prop('disabled', false);
 		$('#loading').show();
+		$('#refreshButtonLoading').hide();
+		$('#refreshButtonSearch').show();
 	}
 
 	function hideLoading()
 	{
 		$('#loading').hide();
+		$('#refreshButtonLoading').hide();
+		$('#refreshButtonSearch').show();
 	}
 	
 	function setToken(address)

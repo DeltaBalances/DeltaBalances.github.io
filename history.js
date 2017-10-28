@@ -252,7 +252,9 @@
 			$('#loadingTransactions').addClass('dim');
 			$('#loadingTransactions').prop('disabled', true);
 			$('#loadingTransactions').show();
-		}
+			$('#refreshButtonLoading').show();
+			$('#refreshButtonSearch').hide();
+		} 
 	}
 	
 	function buttonLoading(trans)
@@ -268,6 +270,8 @@
 			$('#loadingTransactions').removeClass('dim');
 			$('#loadingTransactions').prop('disabled', false);
 			$('#loadingTransactions').show();
+			$('#refreshButtonLoading').hide();
+			$('#refreshButtonSearch').show();
 		}
 	}
 
@@ -281,6 +285,8 @@
 		if(trans) 
 		{
 			$('#loadingTransactions').hide();
+			$('#refreshButtonLoading').hide();
+			$('#refreshButtonSearch').show();
 		}
 	}
 	

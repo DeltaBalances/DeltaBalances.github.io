@@ -392,6 +392,8 @@
 			$('#loadingBalances').addClass('dim');
 			$('#loadingBalances').prop('disabled', true);
 			$('#loadingBalances').show();
+			$('#refreshButtonLoading').show();
+			$('#refreshButtonSearch').hide();
 		}
 		if(trans)
 		{
@@ -403,6 +405,13 @@
 			$('#loadingTransactions2').addClass('dim');
 			$('#loadingTransactions2').prop('disabled', true);
 			$('#loadingTransactions2').show();
+			$('#refreshButtonLoading').show();
+			$('#refreshButtonSearch').hide();
+		}
+		if(!trans && !balance)
+		{
+			$('#refreshButtonLoading').hide();
+			$('#refreshButtonSearch').show();
 		}
 	}
 	
@@ -419,6 +428,8 @@
 			$('#loadingBalances').removeClass('dim');
 			$('#loadingBalances').prop('disabled', false);
 			$('#loadingBalances').show();
+			$('#refreshButtonLoading').show();
+			$('#refreshButtonSearch').hide();
 		}
 		if(trans)
 		{
@@ -430,6 +441,13 @@
 			$('#loadingTransactions2').removeClass('dim');
 			$('#loadingTransactions2').prop('disabled', false);
 			$('#loadingTransactions2').show();
+			$('#refreshButtonLoading').show();
+			$('#refreshButtonSearch').hide();
+		}
+		if(trans && balance)
+		{
+			$('#refreshButtonLoading').hide();
+			$('#refreshButtonSearch').show();
 		}
 	}
 
@@ -439,6 +457,8 @@
 		{			
 			balance = true;
 			trans = true;
+			$('#refreshButtonLoading').hide();
+			$('#refreshButtonSearch').show();
 		}
 		if(balance)
 		{
@@ -459,6 +479,12 @@
 				$('#loadingTransactions2').hide();
 				$('#loadingTransactions').hide();
 			}
+		}
+		
+		if(trans && balance)
+		{
+			$('#refreshButtonLoading').hide();
+			$('#refreshButtonSearch').show();
 		}
 	}
 	

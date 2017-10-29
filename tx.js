@@ -1062,7 +1062,7 @@
 		if(transaction.output)
 		{
 			// output price can get wrong decimals if trading like 15e-10, so get price from input if possible. 
-			if(transaction.input && transaction.output.length == 1 && transaction.output[0].price)
+			if(transaction.input && transaction.output.length == 1 && transaction.output[0].price >= 0)
 			{
 				transaction.output[0].price = transaction.input.price;
 				if(transaction.output[0].amount < transaction.input.amount)

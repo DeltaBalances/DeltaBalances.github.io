@@ -589,9 +589,14 @@ EtherDelta.prototype.socketTicker = function socketTicker(callback, rqid)  {
 	}
  };
  
- EtherDelta.prototype.connectSocket = function connectSocket(callbackConnect) {
+ EtherDelta.prototype.connectSocket = function connectSocket(callbackConnect, callBackNotifications) {
 	 let socketURL = 'https://socket.etherdelta.com';
-	bundle.EtherDelta.socket = io.connect(socketURL, { transports: ['websocket'] });
+	  bundle.EtherDelta.socket = io.connect(socketURL, { transports: ['websocket'], 
+		'reconnection': true,
+		'reconnectionDelay': 250,
+		'reconnectionAttempts': 5 }
+		);
+		
 	  bundle.EtherDelta.socket.on('connect', () => {
 		console.log('socket connected');
 		bundle.EtherDelta.socketConnected = true;
@@ -606,11 +611,26 @@ EtherDelta.prototype.socketTicker = function socketTicker(callback, rqid)  {
 			  console.log('socket disconnected');
 	  });
 
+	   
+		if(callBackNotifications)
+		{	
+			bundle.EtherDelta.socket.on('orders', (orders) => {
+				callBackNotifications('orders', orders);
+			});
+			bundle.EtherDelta.socket.on('funds', (funds) => {
+				callBackNotifications('funds', funds);
+			});
+			bundle.EtherDelta.socket.on('trades', (trades) => {
+				callBackNotifications('trades', trades);
+			});
+		}
+	   
 			
-	  	setTimeout(() => {
+	  /*	setTimeout(() => {
 				if(!bundle.EtherDelta.socketConnected)
 					bundle.EtherDelta.connectSocket(callbackConnect);
 		}, 7000);	
+		*/
 }
 
 EtherDelta.prototype.dialogInfo = function dialogInfo(message) {

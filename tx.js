@@ -1059,6 +1059,7 @@
 		}
 		
 		let tradeCount = 0;
+		let zeroDecWarning = '';
 		if(transaction.output)
 		{
 			// output price can get wrong decimals if trading like 15e-10, so get price from input if possible. 
@@ -1078,12 +1079,20 @@
 			{
 				if(transaction.output[i].type == 'Taker Buy')
 				{
+					if(transaction.output[i].token.decimals == 0 && !zeroDecWarning)
+					{
+						zeroDecWarning = "<strong>Note: </strong> " + transaction.output[i].token.name + " has 0 decimals precision. Numbers might be lower than expected due to rounding. <br>";
+					}
 					tradeCount++;
 					sum += "Bought " + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " ETH each, " + transaction.output[i].ETH + " ETH in total. <br>";
 					spent += transaction.output[i].ETH;
 				}
 				else if(transaction.output[i].type == 'Taker Sell')
 				{
+					if(transaction.output[i].token.decimals == 0 && !zeroDecWarning)
+					{
+						zeroDecWarning = "<strong>Note: </strong> " + transaction.output[i].token.name + " has 0 decimals precision. Numbers might be lower than expected due to rounding. <br>"
+					}
 					tradeCount++;
 					sum += "Sold " + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " ETH each, " + transaction.output[i].ETH + " ETH in total. <br>";
 					received += transaction.output[i].ETH;
@@ -1108,6 +1117,9 @@
 			{
 				sum += 'This transaction was made by a contract instead of a user. <br>';
 			}
+			
+			if(zeroDecWarning)
+				sum += zeroDecWarning;
 		}
 		
 		

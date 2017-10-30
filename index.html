@@ -177,7 +177,8 @@
 						</table>
 						<br>
 						<span id="downloadBalances"></span>
-						<p>Price estimates come directly from the EtherDelta Volume ticker, any weird prices come directly from what EtherDelta reports.
+						<p> Token not in the list? Select 'show unlisted tokens' to show more.</p>
+						<p>Price estimates come directly from the EtherDelta orderbook
 						</p><br>
 						<span class="label label-primary">Name</span> Officially listed on EtherDelta. <br>
 						<span class="label label-warning">Name</span> Trades on EtherDelta without listing.
@@ -202,8 +203,8 @@
 				</div>
 				<div id="transactiontab" class="tab-pane">
 					<h2>Transactions <button id='loadingTransactions2' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button></h2>
-					<p><strong>Warning</strong> This is transaction input only, for output click on details.</p>
-					<p><strong>Warning</strong> New orders that you create (maker) are not shown here. Try the trade <a target="_blank" href="history.html">history</a> in the top right</p>
+					<p>Go to the <strong><a target="_blank" href="history.html">History</a> </strong> tab for a full trade history</p>
+					<p><strong>Notes</strong> <br>This does not include maker trades, only taker. <br>This is transaction input only, for output click on details.</p>
 					<br>
 					<table class="tablesorter table table-striped" id="transactionsTable2">
 						<thead></thead>

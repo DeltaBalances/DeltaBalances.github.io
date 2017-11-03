@@ -816,6 +816,9 @@
 		{
             $("#transactionsTable thead th").data("sorter", true);
             $("#transactionsTable").tablesorter({
+				textExtraction: {
+					2: function(node, table, cellIndex){ return $(node).find("a").text(); },
+				},
 				widgets: [ 'scroller' ],
 				widgetOptions : {
 				  scroller_height : 500,
@@ -885,11 +888,10 @@
 					else if(head == 'Token')
 					{
 						cellValue = cellValue.name;
-						// name  in <!-- --> for sorting
 						if( !myList[i].Unlisted)
-							row$.append($('<td/>').html('<!--' + cellValue + ' --><a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
-							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
 					}
 					else if(head == 'Type')
 					{

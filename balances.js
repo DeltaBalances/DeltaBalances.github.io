@@ -191,6 +191,23 @@
 				}
 			}
 			
+			if(allShitCoins)
+			{
+				//filter tokens that we already know
+				let shitCoins = allShitCoins.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+				for(let i = 0; i < shitCoins.length; i++)
+				{
+					let token = shitCoins[i];
+					if(token && !tokenBlacklist[token.addr] && !uniqueTokens[token.addr])
+					{
+						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+						token.unlisted = true;
+						uniqueTokens[token.addr] = token;
+						_delta.config.customTokens.push(token);
+					}
+				}
+			}
+			
 			
 			initiated = true;
 			if(autoStart)
@@ -934,7 +951,7 @@
 				else 
 				{
 					//retry only with single infura request, don't bother with multiple etherscan requests
-					if(retries < 1 && tokens.length2.length <= max)
+					if(retries < 1 &&  tokens2.length <= max)
 					{
 						retries++;
 						allBalances(startIndex,endIndex,tokens2);
@@ -1000,7 +1017,7 @@
 				else 
 				{
 					//retry only with single infura request, don't bother with multiple etherscan requests
-					if(retries < 1 && tokens.length2.length <= max)
+					if(retries < 1 &&  tokens2.length <= max)
 					{
 						retries++;
 						deltaBalances(startIndex,endIndex,tokens2);
@@ -1066,7 +1083,7 @@
 				else 
 				{
 					//retry only with single infura request, don't bother with multiple etherscan requests
-					if(retries < 1 && tokens.length2.length <= max)
+					if(retries < 1 && tokens2.length <= max)
 					{
 						retries++;
 						walletBalances(startIndex,endIndex,tokens2);
@@ -1565,6 +1582,9 @@
 		{
             $("#resultTable thead th").data("sorter", true);
             $("#resultTable").tablesorter({
+				textExtraction: {
+					0: function(node, table, cellIndex){ return $(node).find("a").text(); },
+				},
 				widgets: [ 'scroller' ],
 				widgetOptions : {
 				  scroller_height : 500,
@@ -1611,6 +1631,9 @@
             $("#transactionsTable").tablesorter({
 				widgets: [ 'scroller' ],
 				widgetOptions : {
+					textExtraction: {
+					1: function(node, table, cellIndex){ return $(node).find("a").text(); },
+				},
 				  scroller_height : 500,
 					scroller_barWidth : 18,
 					scroller_upAfterSort: true,
@@ -1620,6 +1643,9 @@
 			
 			$("#transactionsTable2 thead th").data("sorter", true);
             $("#transactionsTable2").tablesorter({
+				textExtraction: {
+					2: function(node, table, cellIndex){ return $(node).find("a").text(); },
+				},
 				widgets: [ 'scroller' ],
 				widgetOptions : {
 				  scroller_height : 500,
@@ -1686,11 +1712,10 @@
 					}
 					else if(head == 'Name')
 					{
-						// name  in <!-- --> for sorting
 						if( !myList[i].Unlisted)
-							row$.append($('<td/>').html('<!--' + cellValue + ' --><a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
-							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
 					}
 					else if(head == 'Type')
 					{
@@ -1766,11 +1791,10 @@
 					}
 					else if(head == 'Name')
 					{
-						// name  in <!-- --> for sorting
 						if(! balances[cellValue].Unlisted)
-							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
-							row$.append($('<td/>').html('<!--' + cellValue + ' --><a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));
 					} else
 					{
 						row$.append($('<td/>').html(cellValue));

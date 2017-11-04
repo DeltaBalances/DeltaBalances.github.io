@@ -1494,7 +1494,7 @@
         if (hideZeros) 
 		{
             filtered = result.filter(x => {
-				return (Number(x.Total).toFixed(fixedDecimals) !== Number(0).toFixed(fixedDecimals) || x.Name === 'ETH');
+				return (Number(x.Total) > 0 || x.Name === 'ETH');
             });
 		}
 		/*

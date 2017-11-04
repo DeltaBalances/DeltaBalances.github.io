@@ -68,7 +68,8 @@
 	
 	// placeholder
     let balancesPlaceholder = { 
-        ETH: {
+        "0x0000000000000000000000000000000000000000" : 
+		{
             Name: 'ETH',
             Wallet: 0,
             EtherDelta: 0,
@@ -144,15 +145,17 @@
 			for(let i = 0; i < _delta.config.tokens.length; i++)
 			{
 				let token = _delta.config.tokens[i];
-				if(token && !tokenBlacklist[token.addr]) {
+				if(token)
+				{
 					token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
 					token.addr = token.addr.toLowerCase();
 					token.unlisted = false;
 					_delta.config.tokens[i] = token;
-					if(!uniqueTokens[token.addr]) {
+					if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
+					{	
 						uniqueTokens[token.addr] = token;
 					}
-				}	
+				}
 			}
 			
 			//format MEW tokens like ED tokens
@@ -163,7 +166,7 @@
 																		  };
 																 });
 			//filter out custom tokens that have been listed by now
-			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr])});
 			// note custom tokens
 			for(let i = 0; i < _delta.config.customTokens.length; i++)
 			{
@@ -177,16 +180,20 @@
 			if(stagingTokens && stagingTokens.tokens)
 			{
 				//filter tokens that we already know
-				let stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+				let stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr])});
 				for(let i = 0; i < stageTokens.length; i++)
 				{
 					let token = stageTokens[i];
-					if(token && !tokenBlacklist[token.addr] && !uniqueTokens[token.addr])
+					if(token)
 					{
 						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+						token.addr = token.addr.toLowerCase();
 						token.unlisted = true;
-						uniqueTokens[token.addr] = token;
-						_delta.config.customTokens.push(token);
+						if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
+						{	
+							uniqueTokens[token.addr] = token;
+							_delta.config.customTokens.push(token);
+						}
 					}
 				}
 			}
@@ -198,17 +205,20 @@
 				for(let i = 0; i < shitCoins.length; i++)
 				{
 					let token = shitCoins[i];
-					if(token && !tokenBlacklist[token.addr] && !uniqueTokens[token.addr])
+					if(token)
 					{
 						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+						token.addr = token.addr.toLowerCase();
 						token.unlisted = true;
-						uniqueTokens[token.addr] = token;
-						_delta.config.customTokens.push(token);
+						if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
+						{	
+							uniqueTokens[token.addr] = token;
+							_delta.config.customTokens.push(token);
+						}
 					}
 				}
 			}
-			
-			
+
 			initiated = true;
 			if(autoStart)
 				myClick();
@@ -366,6 +376,7 @@
 		showCustomTokens = $('#custom').prop('checked');
 		if(showCustomTokens) 
 		{
+			tokenCount = Object.keys(uniqueTokens).length;
 			if(lastResult && lastResult2 && loadedCustom)
 			{
 
@@ -380,6 +391,8 @@
 		}
 		else
 		{
+			tokenCount = _delta.config.tokens.length;
+
 			if(lastResult)
 				makeTable(lastResult, hideZero);
 			if(lastResult2)
@@ -609,43 +622,40 @@
 			loadedCustom = false;
 			$('#resultTable tbody').empty();
 			showLoading(true,false);
-			 
-			tokenCount = _delta.config.tokens.length;
-			let count1 = tokenCount;
-			if(showCustomTokens && _delta.config.customTokens)
-				tokenCount += _delta.config.customTokens.length;
 			
-			// init listed tokens at 0
-			for (let i = 0; i < tokenCount; i++) 
+			let allCount = Object.keys(uniqueTokens).length;
+			let allTokens = Object.values(uniqueTokens);
+			if(!showCustomTokens){
+				tokenCount = allTokens.filter((x) => {return !x.unlisted}).length;
+			} else {
+				tokenCount = allCount;
+			}
+
+			for (let i = 0; i < allCount; i++) 
 			{
-				let token = undefined;
-				let custom = false;
-				if(i < count1)
-				{
-					token = _delta.config.tokens[i];
-				}
-				else
-				{
-					token = _delta.config.customTokens[i - count1];
-					custom = true;
-				}
-             
-                balances[token.name] = {
-                    Name: token.name,
-                    Wallet: '' ,
-                    EtherDelta: '',
-					Total: 0,
-					Bid: '',
-					'Est. ETH': '',
-					Unlisted: custom,
-					Address: token.addr,
-                };
-            }
+				let token = allTokens[i];
+				if(token)
+					initBalance(token);					
+			}
 				
 				//getAllBalances(rqid);
 				getDeltaBalances(rqid);
 				getWalletBalances(rqid);
 				getPrices(rqid);
+				
+				function initBalance(tokenObj, customToken)
+				{		
+					balances[tokenObj.addr] = {
+						Name: tokenObj.name,
+						Wallet: '' ,
+						EtherDelta: '',
+						Total: 0,
+						Bid: '',
+						'Est. ETH': '',
+						Unlisted: tokenObj.unlisted,
+						Address: tokenObj.addr,
+					};
+				}
 		}
 	}	
 	
@@ -819,9 +829,9 @@
 						{
 							let token = uniqueTokens[results[i].tokenAddr];
 							
-							if(token && balances[token.name])
+							if(token && balances[token.addr])
 							{
-								balances[token.name].Bid = Number(results[i].bid);
+								balances[token.addr].Bid = Number(results[i].bid);
 							}
 						}
 						loadedBid = 1;
@@ -853,9 +863,9 @@
 						{
 							let token = uniqueTokens[results[i].tokenAddr];
 							
-							if(token && balances[token.name])
+							if(token && balances[token.addr])
 							{
-								balances[token.name].Bid = Number(results[i].bid);
+								balances[token.addr].Bid = Number(results[i].bid);
 							}
 						}
 						loadedBid = 1;
@@ -890,7 +900,7 @@
 					} 
 					else 
 					{
-						showError("Failed to retrieve EtherDelta Prices after 5 tries. Try again later");
+						showError("Failed to retrieve EtherDelta Prices after 5 tries. Try again (later)");
 						loadedBid = -1;
 						finishedBalanceRequest();
 					}
@@ -905,8 +915,9 @@
 	function getAllBalances(rqid)
 	{
 		let tokens2 = Object.keys(uniqueTokens);	
-		tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted || showCustomTokens});
-		tokenCount = tokens2.length;
+		if(!showCustomTokens) {
+			tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted});
+		}
 		let retries = 0;
 		
 		let max = maxPerRequest
@@ -918,9 +929,9 @@
 			allBalances(i, i+max, tokens2);
 		}
 		
-		function allBalances(startIndex, endIndex, tokens2)
+		function allBalances(startIndex, endIndex, tokens3)
 		{
-			let tokens = tokens2.slice(startIndex, endIndex);
+			let tokens = tokens3.slice(startIndex, endIndex);
 			//walletBalances(address user,  address[] tokens) constant returns (uint[]) {
 			 _util.call(
 			  _delta.web3,
@@ -941,8 +952,8 @@
 						let j = i * 2;
 						let token = uniqueTokens[tokens[i]];
 						let div = divisorFromDecimals(token.decimals);
-						balances[token.name].EtherDelta = _util.weiToEth(returnedBalances[j], div );
-						balances[token.name].Wallet = _util.weiToEth(returnedBalances[j +1], div);
+						balances[token.addr].EtherDelta = _util.weiToEth(returnedBalances[j], div );
+						balances[token.addr].Wallet = _util.weiToEth(returnedBalances[j +1], div);
 						loadedW++;
 						loadedED++;
 						finishedBalanceRequest();
@@ -951,10 +962,10 @@
 				else 
 				{
 					//retry only with single infura request, don't bother with multiple etherscan requests
-					if(retries < 1 &&  tokens2.length <= max)
+					if(retries < 1 &&  tokens3.length <= max)
 					{
 						retries++;
-						allBalances(startIndex,endIndex,tokens2);
+						allBalances(startIndex,endIndex,tokens3);
 						return;
 					}
 					else 
@@ -968,13 +979,15 @@
 			  });
 		}
 	}
+	
 
 	//separate request for etherdelta balances
 	function getDeltaBalances(rqid)
 	{
 		let tokens2 = Object.keys(uniqueTokens);	
-		tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted || showCustomTokens});
-		tokenCount = tokens2.length;
+		if(!showCustomTokens) {
+			tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted});
+		}
 		let retries = 0;
 		
 		let max = maxPerRequest
@@ -986,9 +999,9 @@
 			deltaBalances(i, i+max, tokens2);
 		}
 		
-		function deltaBalances(startIndex, endIndex, tokens2)
+		function deltaBalances(startIndex, endIndex, tokens3)
 		{
-			let tokens = tokens2.slice(startIndex, endIndex);
+			let tokens = tokens3.slice(startIndex, endIndex);
 			//walletBalances(address user,  address[] tokens) constant returns (uint[]) {
 			 _util.call(
 			  _delta.web3,
@@ -1008,7 +1021,7 @@
 					{
 						let token = uniqueTokens[tokens[i]];
 						let div = divisorFromDecimals(token.decimals);
-						balances[token.name].EtherDelta = _util.weiToEth(returnedBalances[i], div );
+						balances[token.addr].EtherDelta = _util.weiToEth(returnedBalances[i], div );
 						loadedED++;
 						if(loadedED >= tokenCount)
 							finishedBalanceRequest();
@@ -1017,10 +1030,10 @@
 				else 
 				{
 					//retry only with single infura request, don't bother with multiple etherscan requests
-					if(retries < 1 &&  tokens2.length <= max)
+					if(retries < 1 &&  tokens3.length <= max)
 					{
 						retries++;
-						deltaBalances(startIndex,endIndex,tokens2);
+						deltaBalances(startIndex,endIndex,tokens3);
 						return;
 					}
 					else 
@@ -1038,8 +1051,9 @@
 	function getWalletBalances(rqid)
 	{
 		let tokens2 = Object.keys(uniqueTokens);	
-		tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted || showCustomTokens});
-		tokenCount = tokens2.length;
+		if(!showCustomTokens) {
+			tokens2 = tokens2.filter((x) => {return !uniqueTokens[x].unlisted});
+		}
 		let retries = 0;
 		
 		let max = maxPerRequest
@@ -1051,10 +1065,10 @@
 			walletBalances(i, i+max, tokens2);
 		}
 		
-		function walletBalances(startIndex, endIndex, tokens2)
+		function walletBalances(startIndex, endIndex, tokens3)
 		{
 			
-			let tokens = tokens2.slice(startIndex, endIndex);
+			let tokens = tokens3.slice(startIndex, endIndex);
 			//walletBalances(address user,  address[] tokens) constant returns (uint[]) {
 			 _util.call(
 			  _delta.web3,
@@ -1074,7 +1088,7 @@
 					{
 						let token = uniqueTokens[tokens[i]];
 						let div = divisorFromDecimals(token.decimals);
-						balances[token.name].Wallet = _util.weiToEth(returnedBalances[i], div);
+						balances[token.addr].Wallet = _util.weiToEth(returnedBalances[i], div);
 						loadedW++;
 						if(loadedW >= tokenCount)
 							finishedBalanceRequest();
@@ -1083,10 +1097,10 @@
 				else 
 				{
 					//retry only with single infura request, don't bother with multiple etherscan requests
-					if(retries < 1 && tokens2.length <= max)
+					if(retries < 1 && tokens3.length <= max)
 					{
 						retries++;
-						walletBalances(startIndex,endIndex,tokens2);
+						walletBalances(startIndex,endIndex,tokens3);
 						return;
 					}
 					else 
@@ -1410,23 +1424,16 @@
 		displayedW = loadedW >= tokenCount;
 		displayedBid = loadedBid >= 1 || loadedBid <= -1;
 		
+		let allCount = Object.keys(uniqueTokens).length;
+		let allTokens = Object.values(uniqueTokens);
+		
 		// get totals
-		for (var i = 0; i < tokenCount; i++) 
+		for (let i = 0; i < allCount; i++) 
 		{
-
-			let token = undefined;
-			if(i < _delta.config.tokens.length)
-			{
-				token = _delta.config.tokens[i];
-			}
-			else
-			{
-				token = _delta.config.customTokens[i - _delta.config.tokens.length];
-			}
-			let bal = balances[token.name];
+			let token = allTokens[i];
+			let bal = balances[token.addr];
 			if(bal)
 			{
-				
 				if(loadedBothBalances)
 					bal.Total = Number(bal.Wallet) + Number(bal.EtherDelta);
 				else if(displayedED)
@@ -1448,12 +1455,11 @@
 				}
 				if(token.name === 'ETH')
 				{
-					balances.ETH.Bid = '';
-					balances.ETH['Est. ETH'] = bal.Total;
-					sumETH = balances.ETH.Total;
+					balances["0x0000000000000000000000000000000000000000"].Bid = '';
+					balances["0x0000000000000000000000000000000000000000"]['Est. ETH'] = bal.Total;
+					sumETH = balances["0x0000000000000000000000000000000000000000"].Total;
 				}
-				balances[token.name] = bal;
-				
+				balances[token.addr] = bal;
 			}
 		}
 		
@@ -1791,7 +1797,7 @@
 					}
 					else if(head == 'Name')
 					{
-						if(! balances[cellValue].Unlisted)
+						if(! myList[i].Unlisted)
 							row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
 							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));

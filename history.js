@@ -118,19 +118,23 @@
 				return;
 			}
 			
+			tokenBlacklist = []; //blacklist only for balances
+			
 			// note all listed tokens
 			for(let i = 0; i < _delta.config.tokens.length; i++)
 			{
 				let token = _delta.config.tokens[i];
-				if(token /*&& !tokenBlacklist[token.addr]*/) {
+				if(token)
+				{
 					token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
 					token.addr = token.addr.toLowerCase();
 					token.unlisted = false;
 					_delta.config.tokens[i] = token;
-					if(!uniqueTokens[token.addr]) {
+					if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
+					{	
 						uniqueTokens[token.addr] = token;
 					}
-				}	
+				}
 			}
 			
 			//format MEW tokens like ED tokens
@@ -141,12 +145,12 @@
 																		  };
 																 });
 			//filter out custom tokens that have been listed by now
-			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr])});
 			// note custom tokens
 			for(let i = 0; i < _delta.config.customTokens.length; i++)
 			{
 				let token = _delta.config.customTokens[i];
-				if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr]) {
+				if(token && !tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) {
 					uniqueTokens[token.addr] = token;
 				}
 			}
@@ -155,19 +159,24 @@
 			if(stagingTokens && stagingTokens.tokens)
 			{
 				//filter tokens that we already know
-				let stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+				let stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr])});
 				for(let i = 0; i < stageTokens.length; i++)
 				{
 					let token = stageTokens[i];
-					if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr])
+					if(token)
 					{
 						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+						token.addr = token.addr.toLowerCase();
 						token.unlisted = true;
-						uniqueTokens[token.addr] = token;
-						_delta.config.customTokens.push(token);
+						if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
+						{	
+							uniqueTokens[token.addr] = token;
+							_delta.config.customTokens.push(token);
+						}
 					}
 				}
 			}
+			
 			if(allShitCoins)
 			{
 				//filter tokens that we already know
@@ -175,12 +184,16 @@
 				for(let i = 0; i < shitCoins.length; i++)
 				{
 					let token = shitCoins[i];
-					if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr])
+					if(token)
 					{
 						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+						token.addr = token.addr.toLowerCase();
 						token.unlisted = true;
-						uniqueTokens[token.addr] = token;
-						_delta.config.customTokens.push(token);
+						if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
+						{	
+							uniqueTokens[token.addr] = token;
+							_delta.config.customTokens.push(token);
+						}
 					}
 				}
 			}

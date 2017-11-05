@@ -41,7 +41,7 @@
 							let tok = result.tokens[i].tokenInfo;
 							if(!uniqueTokens[tok.address] && tok.symbol && result.tokens[i].balance > 1)
 							{
-								uniqueTokens[tok.address] = {addr: tok.address, name: escapeHtml(tok.symbol), decimals:tok.decimals, unlisted:true};
+								uniqueTokens[tok.address] = {addr: tok.address, name: escapeHtml(tok.symbol), decimals:tok.decimals};
 							}
 						}
 						let allTokens = Object.values(uniqueTokens);

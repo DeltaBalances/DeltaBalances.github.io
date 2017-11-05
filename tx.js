@@ -59,19 +59,23 @@
 				return;
 			}
 			
+			tokenBlacklist = []; //blacklist only for balances
+			
 			// note all listed tokens
 			for(let i = 0; i < _delta.config.tokens.length; i++)
 			{
 				let token = _delta.config.tokens[i];
-				if(token) {
+				if(token)
+				{
 					token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
 					token.addr = token.addr.toLowerCase();
 					token.unlisted = false;
 					_delta.config.tokens[i] = token;
-					if(!uniqueTokens[token.addr]) {
+					if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
+					{	
 						uniqueTokens[token.addr] = token;
 					}
-				}	
+				}
 			}
 			
 			//format MEW tokens like ED tokens
@@ -82,12 +86,12 @@
 																		  };
 																 });
 			//filter out custom tokens that have been listed by now
-			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr])});
 			// note custom tokens
 			for(let i = 0; i < _delta.config.customTokens.length; i++)
 			{
 				let token = _delta.config.customTokens[i];
-				if(token && !uniqueTokens[token.addr]) {
+				if(token && !tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) {
 					uniqueTokens[token.addr] = token;
 				}
 			}
@@ -96,16 +100,20 @@
 			if(stagingTokens && stagingTokens.tokens)
 			{
 				//filter tokens that we already know
-				let stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+				let stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr])});
 				for(let i = 0; i < stageTokens.length; i++)
 				{
 					let token = stageTokens[i];
-					if(token && !uniqueTokens[token.addr])
+					if(token)
 					{
 						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+						token.addr = token.addr.toLowerCase();
 						token.unlisted = true;
-						uniqueTokens[token.addr] = token;
-						_delta.config.customTokens.push(token);
+						if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
+						{	
+							uniqueTokens[token.addr] = token;
+							_delta.config.customTokens.push(token);
+						}
 					}
 				}
 			}
@@ -117,12 +125,16 @@
 				for(let i = 0; i < shitCoins.length; i++)
 				{
 					let token = shitCoins[i];
-					if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr])
+					if(token)
 					{
 						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+						token.addr = token.addr.toLowerCase();
 						token.unlisted = true;
-						uniqueTokens[token.addr] = token;
-						_delta.config.customTokens.push(token);
+						if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
+						{	
+							uniqueTokens[token.addr] = token;
+							_delta.config.customTokens.push(token);
+						}
 					}
 				}
 			}
@@ -316,31 +328,27 @@
 				if(lastSegment)
 					address = lastSegment;
 			}
-			
-			
+		
+			if (address.length == 66 && address.slice(0, 2) === '0x') 
 			{
-				
-				if (address.length == 66 && address.slice(0, 2) === '0x') 
+				// address is ok
+			} 
+			else if (address.length == 64 && address.slice(0, 2) !== '0x') 
+			{
+				address =  '0x'+ address;
+			} 
+			else if(address.length == 42 && address.slice(0, 2) === '0x')  //wallet addr, not transaction hash
+			{
+				window.location = window.location.origin + window.location.pathname + '/../#' + address;
+				return;
+			}
+			else 
+			{
+				if (!addr) // ignore if in url arguments
 				{
-					// address is ok
-				} 
-				else if (address.length == 64 && address.slice(0, 2) !== '0x') 
-				{
-					address =  '0x'+ address;
-				} 
-				else if(address.length == 42 && address.slice(0, 2) === '0x')  //wallet addr, not transaction hash
-				{
-					window.location = window.location.origin + window.location.pathname + '/../#' + address;
-					return;
+				   showError("Invalid transaction hash, try again");
 				}
-				else 
-				{
-					if (!addr) // ignore if in url arguments
-					{
-					   showError("Invalid transaction hash, try again");
-					}
-					return undefined;
-				}
+				return undefined;
 			}
 		}
 		

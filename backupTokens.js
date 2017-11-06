@@ -548,6 +548,12 @@ let offlineCustomTokens = [
 	"symbol":"ETT",
 	"decimal":8,
 	},
+	{
+	"address":"0x449574C69f3A658794829eD81639A7A9ECe041E1",
+	"symbol":"NEOG",
+	"decimal":0,
+	},
+	
 	
 	//MEW
 	{

@@ -23,16 +23,23 @@
 		
 	// Functions - initialisation
 	// ##########################################################################################################################################
-		
-	init();
 	
-    $(document).ready(function() 
-	{	
+	//init();
+	
+	$(document).ready(function() 
+	{
+		init();
 		readyInit();  
     });
 	
 	function init()
 	{	
+		//safari undefined compatibility
+		if(!_delta)
+			_delta = bundle.EtherDelta;
+		if(!_util)
+			_util = bundle.utility;
+		
 		notificationPermissions();
 		// borrow some ED code for compatibility
         _delta.startEtherDelta(() => 

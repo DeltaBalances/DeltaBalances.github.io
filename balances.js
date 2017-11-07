@@ -101,15 +101,22 @@
 	// Functions - initialisation
 	// ##########################################################################################################################################
 		
-	init();
+	//init();
 	
     $(document).ready(function() 
-	{	
+	{
+		init();
 		readyInit();  
     });
 	
 	function init()
 	{	
+		//safari undefined compatibility
+		if(!_delta)
+			_delta = bundle.EtherDelta;
+		if(!_util)
+			_util = bundle.utility;
+		
 		// borrow some ED code for compatibility
         _delta.startEtherDelta(() => 
 		{	
@@ -1365,7 +1372,7 @@
 					Price: price,
 					Hash: hash,
 					Date: toDateTime(timeStamp),
-					Details: window.location.origin + window.location.pathname + 'tx.html#' + hash,
+					Details: (window.location.origin + window.location.pathname).replace('index.html','') + 'tx.html#' + hash,
 					Unlisted: unlisted,
 					TokenAddr: tokenaddr,
 				};

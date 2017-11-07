@@ -1,11 +1,8 @@
 {
-	'use strict';
-	// Parameters
-	// ##########################################################################################################################################
-	
+
 	// shorthands
-	let _util = {};
-	let _delta = {};
+	let _delta = bundle.EtherDelta;
+	let	_util = bundle.utility;
 	
 	// initiation
 	let initiated = false;
@@ -33,9 +30,7 @@
 	let uniqueTokens = {};
 	let unknownToken = false;
 		
-	// Functions - initialisation
-	// ##########################################################################################################################################
-	
+
 	init();
 	
 	$(document).ready(function() 
@@ -45,9 +40,6 @@
 	
 	function init()
 	{	
-		_delta = bundle.EtherDelta;
-		_util = bundle.utility;
-		
 		// borrow some ED code for compatibility
         _delta.startEtherDelta(() => 
 		{	
@@ -191,11 +183,6 @@
 		}
 	}
 		
-
-	// Functions - input
-	// ##########################################################################################################################################
-	
-
 	
 	function disableInput(disable)
 	{
@@ -310,11 +297,6 @@
         }
 	}
 
-
-	
-	// Functions - validation
-	// ##########################################################################################################################################
-	
 	// check if input address is valid
     function getAddress(addr) 
 	{
@@ -371,10 +353,6 @@
 		if (!results[2]) return '';
 		return decodeURIComponent(results[2].replace(/\+/g, " "));
 	}
-	
-	// Functions - requests
-	// ##########################################################################################################################################
-	
 	
 
 	function getTransactions()
@@ -972,9 +950,7 @@
 		}
 	}
 	
-	// Functions - output
-	// ##########################################################################################################################################
-	
+
 	function showHint(text)
 	{
 		$('#hinttext').html(text);

@@ -1,16 +1,8 @@
 {
-	'use strict';
-	// Parameters
-	// ##########################################################################################################################################
-	
-	/*
-	let etherScanSocket = undefined;
-	let pingID = -1;
-	*/
-	
+
 	// shorthands
-	let _util = {};
-	let _delta = {};
+	let _delta = bundle.EtherDelta;
+	let _util = bundle.utility;
 	
 	// initiation
 	let initiated = false;
@@ -96,11 +88,7 @@
 		}
 	];
 		
-		
-		
-	// Functions - initialisation
-	// ##########################################################################################################################################
-		
+
 	init();
 	
     $(document).ready(function() 
@@ -109,10 +97,7 @@
     });
 	
 	function init()
-	{	
-		_delta = bundle.EtherDelta;
-		_util = bundle.utility;
-		
+	{			
 		// borrow some ED code for compatibility
         _delta.startEtherDelta(() => 
 		{	
@@ -229,15 +214,7 @@
 	}
 	
 	function readyInit()
-	{
-		/*if (!Notification) {
-			alert('Desktop notifications not available in your browser. Try Chromium.'); 
-			return;
-		}
-
-		if (Notification.permission !== "granted")
-			Notification.requestPermission(); */
-		
+	{		
 		setAddrImage('0x0000000000000000000000000000000000000000');
 		createSelect();
 		//hideError();
@@ -317,10 +294,6 @@
 		}
 	}
 		
-
-	// Functions - input
-	// ##########################################################################################################################################
-	
 	// zero balances checkbox
 	let changeZero = false;
     function checkZero() 
@@ -698,9 +671,7 @@
 		}
 	}
 
-	
-	// Functions - validation
-	// ##########################################################################################################################################
+
 	// check if input address is valid
     function getAddress(addr) 
 	{
@@ -812,8 +783,6 @@
 		return decodeURIComponent(results[2].replace(/\+/g, " "));
 	}
 	
-	// Functions - requests
-	// ##########################################################################################################################################
 	
 	function getPrices(rqid)
 	{
@@ -1149,18 +1118,7 @@
 				processTransactions();
 		});
 		
-		/*
-		//trade logs
-		// topic[0] 0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d   
-		$.getJSON('https://api.etherscan.io/api?module=logs&action=getLogs&address=' + contractAddr + '&fromBlock=' + startblock + '&toBlock=' + endblock + '&topic0=0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d&apikey=' + _delta.config.etherscanAPIKey, (result3) => {
-			if(result3 && result3.status === '1')
-				tradeLogResult = result3.result;
-			transLoaded++;
-			if(transLoaded == 3)
-				processTransactions();
-		}); */
-		
-		
+			
 		function processTransactions()
 		{
 			let myAddr = publicAddr.toLowerCase();
@@ -1382,9 +1340,7 @@
 			}
 		}
 	}
-	
-	// Functions - output
-	// ##########################################################################################################################################
+
 	
 	function showHint(text)
 	{
@@ -1989,67 +1945,4 @@
 
 		return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 	}
-	
-/*	function socketResponse(event) {
-		console.log('received socket msg');
-		if(event)
-		{
-			let resp = JSON.parse(event.data);
-			console.log(resp.event);
-			sendNotification(resp.event);
-			if(resp.event == "welcome")
-			{
-				console.log('rec welcome');
-			}
-			else if(resp.event == "pong")
-			{
-				console.log('rec pong');
-			}
-			else if(resp.event == "subscribe-txlist")
-			{
-				if( resp.status == 1)
-				{
-					console.log('ok');
-				} else 
-				{
-					console.log('notok');
-				}
-			}
-		} else {
-			console.log('empty msg');
-		}
-
-	}
-	
-	
-	function socketPing(active) {
-		if(active)
-		{
-			pingID  = setInterval(function() 
-			{
-				console.log('send ping');
-				let pingmsg = {"event": "ping"};
-				etherScanSocket.send(JSON.stringify(pingmsg));
-			}, 18000);
-			
-		} else {
-			if(pingID > -1)
-				clearInterval(pingID);
-			pingID = -1;
-		}
-	}
-	
-	function sendNotification(text){
-		if (Notification.permission !== "granted")
-			Notification.requestPermission();
-		else {
-			var notification = new Notification('Notification title', {
-			icon: 'http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png',
-			body: text,
-			});
-		}
-		//notification.onclick = function () {
-		//	window.open("http://stackoverflow.com/a/13328397/1269037");      
-		//};
-	} */
 }

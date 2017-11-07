@@ -1,16 +1,8 @@
 {
-	'use strict';
-	// Parameters
-	// ##########################################################################################################################################
-	
-	/*
-	let etherScanSocket = undefined;
-	let pingID = -1;
-	*/
-	
+
 	// shorthands
-	let _util = {};
-	let _delta = {};
+	let _delta = bundle.EtherDelta;
+	let	_util = bundle.utility;
 	
 	// initiation
 	let initiated = false;
@@ -73,10 +65,6 @@
 		}
 	];
 		
-		
-		
-	// Functions - initialisation
-	// ##########################################################################################################################################
 	
 	init();
 	
@@ -87,9 +75,6 @@
 	
 	function init()
 	{	
-		_delta = bundle.EtherDelta;
-		_util = bundle.utility;
-		
 		// borrow some ED code for compatibility
         _delta.startEtherDelta(() => 
 		{	
@@ -263,11 +248,6 @@
 		}
 	}
 		
-
-	// Functions - input
-	// ##########################################################################################################################################
-	
-
 	function disableInput(disable)
 	{
 		$('#refreshButton').prop('disabled', disable);
@@ -412,8 +392,6 @@
 		
 	}
 	
-	// Functions - validation
-	// ##########################################################################################################################################
 	// check if input address is valid
     function getAddress(addr) 
 	{
@@ -728,9 +706,7 @@
 
 	}
 	
-	// Functions - output
-	// ##########################################################################################################################################
-	
+
 	function showHint(text)
 	{
 		$('#hinttext').html(text);

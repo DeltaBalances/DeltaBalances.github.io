@@ -1,14 +1,8 @@
 {
-	'use strict';
-	// Parameters
-	// ##########################################################################################################################################
-	
-	
-	// shorthands
-	let _util = {};
-	let _delta = {};
-	
 
+	// shorthands
+	let _delta = bundle.EtherDelta;
+	let	_util = bundle.utility;
 	
 	// initiation
 	let initiated = false;
@@ -21,9 +15,6 @@
 
 	let uniqueTokens = {};
 		
-	// Functions - initialisation
-	// ##########################################################################################################################################
-	
 	init();
 	
 	$(document).ready(function() 
@@ -33,9 +24,6 @@
 	
 	function init()
 	{	
-		_delta = bundle.EtherDelta;
-		_util = bundle.utility;
-		
 		notificationPermissions();
 		// borrow some ED code for compatibility
         _delta.startEtherDelta(() => 
@@ -139,14 +127,8 @@
 			}
         });
 		
-		/*$(window).resize(function () { 
-			$("#transactionsTable").trigger("applyWidgets"); 
-		});
-		*/
-		
 		getStorage();
 
-		
 		// url parameter ?addr=0x... /#0x..
 		let addr = getParameterByName('addr');
 		if(! addr)
@@ -178,10 +160,6 @@
 		}
 	}
 		
-
-	// Functions - input
-	// ##########################################################################################################################################
-	
 
 	function disableInput(disable)
 	{
@@ -275,36 +253,33 @@
 	
 	function notificationPermissions() 
 	{
-	  // Let's check if the browser supports notifications
-	  if (!("Notification" in window)) {
-		alert("This browser does not support system notifications");
-		allowNotifications = false;
-	  }
-
-	  // Let's check whether notification permissions have already been granted
-	  else if (Notification.permission === "granted") {
-		allowNotifications = true;
-	  }
-
-	  // Otherwise, we need to ask the user for permission
-	  else if (Notification.permission !== 'denied') {
-		Notification.requestPermission(function (permission) {
-		  // If the user accepts, let's create a notification
-		  if (permission === "granted") {
+		// Let's check if the browser supports notifications
+		if (!("Notification" in window)) {
+			alert("This browser does not support system notifications");
+			allowNotifications = false;
+		}
+			// Let's check whether notification permissions have already been granted
+		else if (Notification.permission === "granted") {
 			allowNotifications = true;
-		  }
-		});
-  }
+		}
+		// Otherwise, we need to ask the user for permission
+		else if (Notification.permission !== 'denied') {
+			Notification.requestPermission(function (permission) {
+				// If the user accepts, let's create a notification
+				if (permission === "granted") {
+					allowNotifications = true;
+				}
+			});
+		}
 
-  // Finally, if the user has denied notifications and you 
-  // want to be respectful there is no need to bother them any more.
-}
+		// Finally, if the user has denied notifications and you 
+		// want to be respectful there is no need to bother them any more.
+	}
 	
 	
 	function startNotifications()
 	{
-		_delta.connectSocket(emptyCallback, updateNotifications);
-		
+		_delta.connectSocket(emptyCallback, updateNotifications);	
 	}
 	
 	function emptyCallback()
@@ -498,17 +473,14 @@
 	
 	
 	function spawnNotification(body, title) {
-	  let options = {
-		  body: body,
-		  icon: 'favicon.ico'
-	  }
-	  let n = new Notification(title,options);
-	  setTimeout(n.close.bind(n), 7000); 
+	    let options = {
+		    body: body,
+		    icon: 'favicon.ico'
+	    }
+	    let n = new Notification(title,options);
+	    setTimeout(n.close.bind(n), 7000); 
 	}
-	
-	
-	// Functions - validation
-	// ##########################################################################################################################################
+
 	// check if input address is valid
     function getAddress(addr) 
 	{
@@ -597,13 +569,7 @@
 		return decodeURIComponent(results[2].replace(/\+/g, " "));
 	}
 
-	
-	
-	
-	
-	// Functions - output
-	// ##########################################################################################################################################
-	
+
 	function showHint(text)
 	{
 		$('#hinttext').html(text);

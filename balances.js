@@ -9,8 +9,8 @@
 	*/
 	
 	// shorthands
-	let _util = bundle.utility;
-	let _delta = bundle.EtherDelta;
+	let _util = {};
+	let _delta = {};
 	
 	// initiation
 	let initiated = false;
@@ -91,7 +91,7 @@
 			Price: 0,
 			Hash: '',
 			Date: toDateTimeNow(),
-			Details: window.location.origin + window.location.pathname + 'tx.html',
+			Details: (window.location.origin + window.location.pathname).replace('index.html','') + 'tx.html',
 			Unlisted: false,
 		}
 	];
@@ -101,21 +101,17 @@
 	// Functions - initialisation
 	// ##########################################################################################################################################
 		
-	//init();
+	init();
 	
     $(document).ready(function() 
 	{
-		init();
 		readyInit();  
     });
 	
 	function init()
 	{	
-		//safari undefined compatibility
-		if(!_delta)
-			_delta = bundle.EtherDelta;
-		if(!_util)
-			_util = bundle.utility;
+		_delta = bundle.EtherDelta;
+		_util = bundle.utility;
 		
 		// borrow some ED code for compatibility
         _delta.startEtherDelta(() => 

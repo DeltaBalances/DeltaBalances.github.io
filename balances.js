@@ -569,6 +569,11 @@
 			$('#ethbalance').html('');
 			$('#tokenbalance').html('');
 			$('#totalbalance').html('');
+			
+			$('#ethbalancePrice').html('');
+			$('#tokenbalancePrice').html('');
+			$('#totalbalancePrice').html('');
+			
 			$('#downloadBalances').html('');
 			
 			trigger_1 = false;

@@ -568,7 +568,6 @@
 							  blockLoaded++;
 							  if(blockLoaded >= blockReqs)
 							  {
-								  //tradeLogResult = tradeLogResult.concat(tradesInResult);
 								  if(!running)
 									done();
 							  }

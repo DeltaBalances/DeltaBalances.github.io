@@ -55,7 +55,7 @@
 	
 	var uniqueTokens = {};
 	var balances= {};
-	
+	var etherPrice = 0;
 
 	
 	// placeholder
@@ -603,6 +603,7 @@
 				getDeltaBalances(rqid);
 				getWalletBalances(rqid);
 				getPrices(rqid);
+				getEtherPrice();
 				
 				function initBalance(tokenObj, customToken)
 				{		
@@ -619,6 +620,18 @@
 				}
 		}
 	}	
+	
+	function getEtherPrice()
+	{
+		$.getJSON('https://api.coinmarketcap.com/v1/ticker/ethereum/', result => {
+			
+			if(result && result[0].price_usd)
+			{
+				etherPrice = result[0].price_usd;
+			}	
+		});
+	
+	}
 	
 	function getTrans(rqid)
 	{
@@ -1410,8 +1423,11 @@
 		if(loadedBothBalances)
 		{
 			$('#ethbalance').html(sumETH.toFixed(fixedDecimals) + ' ETH');
+			$('#ethbalancePrice').html(" $" + (sumETH * etherPrice).toFixed(2));
 			$('#tokenbalance').html(sumToken.toFixed(fixedDecimals) + ' ETH');
+			$('#tokenbalancePrice').html(" $" + (sumToken * etherPrice).toFixed(2));
 			$('#totalbalance').html((sumETH + sumToken).toFixed(fixedDecimals) + ' ETH');
+			$('#totalbalancePrice').html(" $" + ((sumETH + sumToken)* etherPrice).toFixed(2));
 		}
 		 
 		

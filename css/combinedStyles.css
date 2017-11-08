@@ -55,8 +55,15 @@
 	border:none;
 	padding:3px;
 }
-#overviewTable td:nth-child(2) {
+#overviewTable td:nth-child(2){
 	text-align:right;
+	vertical-align: middle
+}
+#overviewTable td:nth-child(3){
+	text-align:right;
+	vertical-align: middle;
+	font-size: 65%;
+	color:gray;
 }
 
 #overviewTable tr:nth-child(3)

@@ -563,7 +563,7 @@
 							  {
 								  var unixtime = res.result.timeStamp;
 								  if(unixtime)
-									  blockDates[tradesInResult[i].Block] = toDateTime(unixtime);
+									  blockDates[res.result.blockNumber] = toDateTime(unixtime);
 							  }
 							  blockLoaded++;
 							  if(blockLoaded >= blockReqs)

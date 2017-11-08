@@ -23,7 +23,7 @@
 }
 
 #overviewTable {
-	width: 50%;
+	width: 55%;
 	border:none;
 	font-size: 125%;
 }
@@ -45,11 +45,12 @@
 }
 
 /* sm */
-@media (max-width: 650px) {
+@media (max-width: 768px) {
     #overviewTable {
 	width: 100%;
 	}
 }
+
 
 #overviewTable td {
 	border:none;

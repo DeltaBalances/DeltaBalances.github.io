@@ -48,8 +48,12 @@
 @media (max-width: 768px) {
     #overviewTable {
 	width: 100%;
+	border:none;
+	font-size: 105%;
 	}
 }
+
+
 
 
 #overviewTable td {
@@ -58,8 +62,9 @@
 }
 #overviewTable td:nth-child(2){
 	text-align:right;
-	vertical-align: middle
+	vertical-align: middle;
 }
+
 #overviewTable td:nth-child(3){
 	text-align:right;
 	vertical-align: middle;

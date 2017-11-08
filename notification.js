@@ -1,19 +1,19 @@
 {
 
 	// shorthands
-	let _delta = bundle.EtherDelta;
-	let	_util = bundle.utility;
+	var _delta = bundle.EtherDelta;
+	var	_util = bundle.utility;
 	
 	// initiation
-	let initiated = false;
-	let allowNotifications = false;
+	var initiated = false;
+	var allowNotifications = false;
 	
-	let running = false;
+	var running = false;
     // user input & data
-	let publicAddr = '';
-	let runningAddr = '';
+	var publicAddr = '';
+	var runningAddr = '';
 
-	let uniqueTokens = {};
+	var uniqueTokens = {};
 		
 	init();
 	
@@ -40,9 +40,9 @@
 			}
 			
 			// note all listed tokens
-			for(let i = 0; i < _delta.config.tokens.length; i++)
+			for(var i = 0; i < _delta.config.tokens.length; i++)
 			{
-				let token = _delta.config.tokens[i];
+				var token = _delta.config.tokens[i];
 				if(token /*&& !tokenBlacklist[token.addr]*/) {
 					token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
 					token.addr = token.addr.toLowerCase();
@@ -64,9 +64,9 @@
 			//filter out custom tokens that have been listed by now
 			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
 			// note custom tokens
-			for(let i = 0; i < _delta.config.customTokens.length; i++)
+			for(var i = 0; i < _delta.config.customTokens.length; i++)
 			{
-				let token = _delta.config.customTokens[i];
+				var token = _delta.config.customTokens[i];
 				if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr]) {
 					uniqueTokens[token.addr] = token;
 				}
@@ -76,10 +76,10 @@
 			if(stagingTokens && stagingTokens.tokens)
 			{
 				//filter tokens that we already know
-				let stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
-				for(let i = 0; i < stageTokens.length; i++)
+				var stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+				for(var i = 0; i < stageTokens.length; i++)
 				{
-					let token = stageTokens[i];
+					var token = stageTokens[i];
 					if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr])
 					{
 						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
@@ -92,10 +92,10 @@
 			if(allShitCoins)
 			{
 				//filter tokens that we already know
-				let shitCoins = allShitCoins.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
-				for(let i = 0; i < shitCoins.length; i++)
+				var shitCoins = allShitCoins.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
+				for(var i = 0; i < shitCoins.length; i++)
 				{
-					let token = shitCoins[i];
+					var token = shitCoins[i];
 					if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr])
 					{
 						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
@@ -130,10 +130,10 @@
 		getStorage();
 
 		// url parameter ?addr=0x... /#0x..
-		let addr = getParameterByName('addr');
+		var addr = getParameterByName('addr');
 		if(! addr)
 		{
-			let hash = window.location.hash;  // url parameter /#0x...
+			var hash = window.location.hash;  // url parameter /#0x...
 			if(hash)
 				addr = hash.slice(1);
 		}
@@ -300,7 +300,7 @@
 	
 	function updateNotifications(type, array)
 	{
-		let addr = publicAddr.toLowerCase();
+		var addr = publicAddr.toLowerCase();
 		
 		if(type == 'orders')
 		{
@@ -329,56 +329,56 @@
 			v:28
 			
 			*/
-			for(let i = 0; i < array.buys.length; i++)
+			for(var i = 0; i < array.buys.length; i++)
 			{
 				if(array.buys[i].user == addr)
 				{
-					let token = uniqueTokens[array.buys[i].tokenGet];
-					let amount = array.buys[i].ethAvailableVolume;
-					let price = Number(array.buys[i].price);
+					var token = uniqueTokens[array.buys[i].tokenGet];
+					var amount = array.buys[i].ethAvailableVolume;
+					var price = Number(array.buys[i].price);
 					if(!token)
 						token = {name:'???'};
 					
 					if(array.buys[i].deleted)
 					{
-						let details = "Buy " + amount + " " + token.name +" at " + price + ", filled or cancelled.";
+						var details = "Buy " + amount + " " + token.name +" at " + price + ", filled or cancelled.";
 						spawnNotification(details ,'Buy order ' + token.name + ' removed');
 		
 					} else if(array.buys[i].amountFilled)
 					{
-						let details = "Bought " + array.buys[i].amountFilled +"/" + amount + " " + token.name +" at "+ price;
+						var details = "Bought " + array.buys[i].amountFilled +"/" + amount + " " + token.name +" at "+ price;
 						spawnNotification(details ,'Buy order ' + token.name + ' updated');
 					}
 					else
 					{
-						let details = "Buy " + amount + " " + token.name +" at " + price;
+						var details = "Buy " + amount + " " + token.name +" at " + price;
 						spawnNotification(details ,'New buy order ' + token.name);
 					}
 				}
 			}
-			for(let i = 0; i < array.sells.length; i++)
+			for(var i = 0; i < array.sells.length; i++)
 			{
 				if(array.sells[i].user == addr)
 				{
-					let token = uniqueTokens[array.sells[i].tokenGet];
-					let amount = array.sells[i].ethAvailableVolume;
-					let price = Number(array.sells[i].price);
+					var token = uniqueTokens[array.sells[i].tokenGet];
+					var amount = array.sells[i].ethAvailableVolume;
+					var price = Number(array.sells[i].price);
 					if(!token)
 						token = {name:'???'};
 					
 					if(array.sells[i].deleted)
 					{
-						let details = "Sell " + amount + " " + token.name +" at " + price + ", filled or cancelled.";
+						var details = "Sell " + amount + " " + token.name +" at " + price + ", filled or cancelled.";
 						spawnNotification(details ,'Sell order ' + token.name + ' removed');
 		
 					} else if(array.sells[i].amountFilled && array.sells[i].amountFilled != "null")
 					{
-						let details = "Sold " + array.sells[i].amountFilled +"/" + amount + " " + token.name +" at "+ price;
+						var details = "Sold " + array.sells[i].amountFilled +"/" + amount + " " + token.name +" at "+ price;
 						spawnNotification(details ,'Sell order ' + token.name + ' updated');
 					}
 					else
 					{
-						let details = "Sell " + amount + " " + token.name +" at " + price;
+						var details = "Sell " + amount + " " + token.name +" at " + price;
 						spawnNotification(details ,'New sell order ' + token.name);
 					}
 				}
@@ -398,17 +398,17 @@
 			txHash:"0xaff0b6ce4d81f9188c955b37e27083588929d1ca18b6990b32b35ae5c623cdc5"
 			*/
 			
-			for(let i = 0; i < array.length; i++)
+			for(var i = 0; i < array.length; i++)
 			{
-				let details = '';
+				var details = '';
 				if(array[i].seller == addr || array[i].buyer == addr)
 				{
-					let details = '';
-					let title = '';
-					let tradeType = 'Taker ';
-					let token = uniqueTokens[array[i].tokenAddr];
-					let amount = array[i].amount;
-					let price = Number(array[i].price);
+					var details = '';
+					var title = '';
+					var tradeType = 'Taker ';
+					var token = uniqueTokens[array[i].tokenAddr];
+					var amount = array[i].amount;
+					var price = Number(array[i].price);
 					if(array[i].side == 'buy')
 					{
 						if(array[i].seller == addr)
@@ -456,14 +456,14 @@
 				txHash:"0x92b17dc40207e2930ba378c108b4c7418207fb4020b6b2dbc438867b66128559"
 				user:"0xfdc97f53d44f81f942a362a0031efd423ea307bc"
 				*/
-			for(let i = 0; i < array.length; i++)
+			for(var i = 0; i < array.length; i++)
 			{
 				if(array[i].user == addr)
 				{
-					let token = uniqueTokens[array[i].tokenAddr];
+					var token = uniqueTokens[array[i].tokenAddr];
 					if(!token)
 						token = {name:'???'};
-					let details = array[i].kind + " " + array[i].amount + " " + token.name + ", new balance: " + array[i].balance;
+					var details = array[i].kind + " " + array[i].amount + " " + token.name + ", new balance: " + array[i].balance;
 					//details += '<br> <a href="https://etherscan.io/tx/' + array[i].txHash + '">' + array[i].txHash +'</a>';
 					spawnNotification(details , array[i].kind + " " + token.name + " completed");
 				}
@@ -473,18 +473,18 @@
 	
 	
 	function spawnNotification(body, title) {
-	    let options = {
+	    var options = {
 		    body: body,
 		    icon: 'favicon.ico'
 	    }
-	    let n = new Notification(title,options);
+	    var n = new Notification(title,options);
 	    setTimeout(n.close.bind(n), 7000); 
 	}
 
 	// check if input address is valid
     function getAddress(addr) 
 	{
-        let address = '';
+        var address = '';
         address = addr ? addr : document.getElementById('address').value;
         address = address.trim();
 		
@@ -493,8 +493,8 @@
 			//check if url ending in address
 			if(address.indexOf('/0x') !== -1)
 			{
-				let parts = address.split('/');
-				let lastSegment = parts.pop() || parts.pop();  // handle potential trailing slash
+				var parts = address.split('/');
+				var lastSegment = parts.pop() || parts.pop();  // handle potential trailing slash
 				if(lastSegment)
 					address = lastSegment;
 			}
@@ -551,7 +551,7 @@
 	
 	function setAddrImage(addr)
 	{
-		let icon = document.getElementById('addrIcon');
+		var icon = document.getElementById('addrIcon');
 		icon.style.backgroundImage = 'url(' + blockies.create({ seed:addr.toLowerCase() ,size: 8,scale: 16}).toDataURL()+')';
 	}
 	
@@ -620,7 +620,7 @@
             remember = localStorage.getItem('member') && true;
             if (remember) 
 			{
-                let addr = localStorage.getItem("address");
+                var addr = localStorage.getItem("address");
 				if(addr)
 				{
 					addr = getAddress(addr);

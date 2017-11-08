@@ -1888,11 +1888,13 @@
 			allBal = allBal.filter((x) => {return x.Total > 0;});
 			
 			
-			var A = [ ['Token name', 'Wallet', 'EtherDelta', 'Total'] ];  
+			var A = [ ['Token name', 'Wallet', 'EtherDelta', 'Total', 'EtherDelta Bid (ETH)', 'Estimated value (ETH)',' ','Token contract address'] ];  
 			// initialize array of rows with header row as 1st item
 			for(var i=0;i< allBal.length;++i)
 			{ 
-				var arr = [ allBal[i].Name, allBal[i].Wallet, allBal[i].EtherDelta, allBal[i].Total];
+				var arr = [ allBal[i].Name, allBal[i].Wallet, allBal[i].EtherDelta, allBal[i].Total, allBal[i].Bid, allBal[i].Bid * allBal[i].Total ,'',allBal[i].Address,];
+				if(arr[0] === 'ETH')
+					arr[7] = 'Not a token';
 				A.push(arr); 
 			}
 			var csvRows = [];

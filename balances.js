@@ -885,7 +885,8 @@
 	}
 	
 	var maxPerRequest = 120;
-
+	var increasedMaxPerRequest = 750;
+	
 	//wallet & etherdelta balances in 1 request
 	function getAllBalances(rqid)
 	{
@@ -897,7 +898,7 @@
 		
 		var max = maxPerRequest
 		if(!etherscanFallback) //etherscan request can't hold too much data
-				max = max * 10;
+				max = increasedMaxPerRequest;
 		
 		for(var i = 0; i < tokens2.length; i+= max)
 		{
@@ -967,7 +968,7 @@
 		
 		var max = maxPerRequest
 		if(!etherscanFallback) //etherscan request can't hold too much data
-				max = max * 10;
+				max = increasedMaxPerRequest;
 		
 		for(var i = 0; i < tokens2.length; i+= max)
 		{
@@ -1033,7 +1034,7 @@
 		
 		var max = maxPerRequest
 		if(!etherscanFallback) //etherscan request can't hold too much data
-				max = max * 10;
+				max = increasedMaxPerRequest;
 		
 		for(var i = 0; i < tokens2.length; i+= max)
 		{

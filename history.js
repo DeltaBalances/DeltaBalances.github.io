@@ -25,7 +25,7 @@
 	
 	var showTransactions = true;
     var showBalances = true;	
-	var showCustomTokens = false;
+	var showCustomTokens = true;
 	
 
     // user input & data
@@ -693,7 +693,7 @@
 							Buyer: buyUser,
 							Seller: sellUser,
 							Details: window.location.origin + window.location.pathname + '/../tx.html#' + outputLogs[i].transactionHash,
-							Unlisted: false,
+							Unlisted: unlisted,
 						}
 						outputs.push(obj);
 					}
@@ -882,7 +882,7 @@
 						if( !myList[i].Unlisted)
 							row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
-							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].Token.addr + '-ETH">' + cellValue + '</a>'));
 					}
 					else if(head == 'Type')
 					{

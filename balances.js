@@ -885,7 +885,7 @@
 	}
 	
 	var maxPerRequest = 120;
-	var increasedMaxPerRequest = 750;
+	var increasedMaxPerRequest = 650;
 	
 	//wallet & etherdelta balances in 1 request
 	function getAllBalances(rqid)
@@ -946,7 +946,7 @@
 					}
 					else 
 					{
-						showError('Failed to load balances after 2 tries, try again later');
+						showError('Failed to load all balances after 2 tries, try again later');
 						loadedED = tokenCount;
 						loadedW = tokenCount;
 						finishedBalanceRequest();
@@ -1014,7 +1014,7 @@
 					}
 					else 
 					{
-						showError('Failed to load EtherDelta balances after 2 tries, try again later');
+						showError('Failed to load all EtherDelta balances after 2 tries, try again later');
 						loadedED = tokenCount;
 						finishedBalanceRequest();
 					}
@@ -1081,7 +1081,7 @@
 					}
 					else 
 					{
-						showError('Failed to load Wallet balances after 2 tries, try again later');
+						showError('Failed to load all Wallet balances after 2 tries, try again later');
 						loadedW = tokenCount;
 						finishedBalanceRequest();
 					}

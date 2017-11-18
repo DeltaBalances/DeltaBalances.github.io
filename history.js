@@ -51,17 +51,17 @@
 		{
 			Type: 'Taker',
 			Trade: 'Sell',
-			Token:  { "name": "ETH"},
+			Token:  { "name": "Placeholder", "addr":"0x00"},
 			Amount: 0,
 			Price: 0,
 			ETH: 0,
-			Hash: '',
+			Hash: '0xH4SH',
 			Block: '',
 			Date: toDateTimeNow(),
 			Buyer: '',
 			Seller: '',
 			Details: window.location.origin + window.location.pathname + '/../tx.html',
-			Unlisted: false,
+			Unlisted: true,
 		}
 	];
 		
@@ -231,6 +231,7 @@
 			if(addr)
 			{
 				publicAddr = addr;
+				$('#loadingTransactions').show();
 				//autoStart = true;
 				// auto start loading
 				//myClick();
@@ -238,9 +239,11 @@
 		} 
 		else if(publicAddr) //autoload when remember is active
 		{
+			$('#loadingTransactions').show();
 			//autoStart = true;
 			// auto start loading
 			//myClick();
+			
 		}
 		else if(!addr && !publicAddr)
 		{
@@ -356,9 +359,12 @@
 	function getTrans(rqid)
 	{
 		if(!trigger1)
+		{
+			myClick(requestID);
 			return;
+		}
 		
-		
+
 		
 		trigger1 = false;
 		loadedLogs = 0;
@@ -916,7 +922,7 @@
 					}
 					else if( head == 'Hash')
 					{
-						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/address/' + cellValue + '">'+ cellValue.substring(0,8)  + '...</a>'));
+						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/tx/' + cellValue + '">'+ cellValue.substring(0,8)  + '...</a>'));
 					}
 					else if( head == 'Buyer' || head == 'Seller')
 					{

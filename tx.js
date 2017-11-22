@@ -155,6 +155,11 @@
 			}
         });
 
+		
+		$(window).resize(function () { 
+			$("table").trigger("applyWidgets"); 
+		});
+		
 		checkStorage();
 		
 		// url parameter ?addr=0x... /#0x..
@@ -1210,6 +1215,20 @@
 		//$(id).html(html + div);
 		buildHtmlTable(id, parsedInput); 
 		
+		
+		$("table").tablesorter({
+			headers: { 0: {sorter:false}, 1: {sorter:false}, 2: {sorter:false}, 3: {sorter:false}, 4: {sorter:false}, 5: {sorter:false},6: {sorter:false}, 7: {sorter:false}},
+			widgets: [ 'scroller' ],
+			widgetOptions : {
+				scroller_barWidth : 18,
+			},
+			sortList: [[0,0]]
+        });
+		$("table thead th").data("sorter", false);
+		
+		$("table thead th").removeClass("tablesorter-headerUnSorted");
+		$("table thead th").removeClass("tablesorter-headerDesc");
+		$("table thead th").removeClass("tablesorter-headerAsc");
 	}
 	
 	function hideInput()
@@ -1368,7 +1387,7 @@
 	{
         var columnSet = {};
 		
-        var header1 = $('<thead/>');
+        var header1 = $('<thead />');
         var headerTr$ = $('<tr/>');
 		
         for (var i = 0; i < myList.length; i++) 

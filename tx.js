@@ -465,6 +465,7 @@
 				}
 				else {
 					transaction.status = 'Error: ' + txStatus.errDescription;
+					transaction.gasEth = transaction.gasLimit * transaction.gasPrice;
 				}
 			}
 			
@@ -1128,7 +1129,7 @@
 		} else if(transaction.status === 'Pending') {
 			$('#gascost').html('Pending');
 		} else {
-			$('#gascost').html('Failed');
+			$('#gascost').html(Number(transaction.gasEth).toFixed(5) + ' ETH');
 		}
 		$('#gaslimit').html(transaction.gasLimit);
 		$('#nonce').html(transaction.nonce);

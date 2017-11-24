@@ -60,6 +60,8 @@
 			Date: toDateTimeNow(),
 			Buyer: '',
 			Seller: '',
+			Fee: 0,
+			FeeToken: { "name": "Placeholder", "addr":"0x00"},
 			Details: window.location.origin + window.location.pathname + '/../tx.html',
 			Unlisted: true,
 		}
@@ -318,7 +320,8 @@
 		hideError();
 		hideHint();
 		//disableInput(true);
-		$('#downloadTrades').html('');
+		clearDownloads();
+		
 		// validate address
 		if(!autoStart)
 			publicAddr = getAddress();
@@ -655,23 +658,31 @@
 						var oppositeAmount = 0;
 						var buyUser = '';
 						var sellUser = '';
+						
+
+						
 						if(tradeType === 'Sell')
 						{
 							amount = unpacked.params[1].value;
 							oppositeAmount = unpacked.params[3].value;
 							sellUser = unpacked.params[5].value;
 							buyUser = unpacked.params[4].value;
+							
+
 						} else
 						{
 							oppositeAmount = unpacked.params[1].value;
 							amount = unpacked.params[3].value;
 							sellUser = unpacked.params[4].value;
 							buyUser = unpacked.params[5].value;
+							
+							
 						}
 						
 						var unlisted = token.unlisted;
 						var dvsr = divisorFromDecimals(token.decimals)
 						var dvsr2 = divisorFromDecimals(base.decimals)
+					
 						var val = _util.weiToEth(amount, dvsr);
 						var val2 = _util.weiToEth(oppositeAmount, dvsr2);
 						
@@ -686,6 +697,34 @@
 						else if(sellUser === myAddr)
 							tradeType = "Sell";
 					
+						let fee = 0;
+						let feeCurrency = '';
+						if(transType === 'Taker')
+						{
+							const fee03 = 3000000000000000; //0.3% fee in wei
+							const ether1 = 1000000000000000000; // 1 ether in wei
+							if(tradeType === 'Sell')
+							{
+								fee = _util.weiToEth(Math.round((Number(amount) * fee03) / ether1), dvsr);
+								feeCurrency = token;
+							}
+							else if(tradeType === 'Buy')
+							{
+								fee = _util.weiToEth(Math.round((Number(oppositeAmount) * fee03) / ether1), dvsr2);
+								feeCurrency = base;
+							}
+						} else {
+							fee = 0;
+							if(tradeType === 'Sell')
+							{
+								feeCurrency = token;
+							}
+							else if(tradeType === 'Buy')
+							{
+								feeCurrency = base;
+							}	
+						}
+					
 						var obj = {
 							Type: transType,
 							Trade: tradeType,
@@ -694,10 +733,12 @@
 							Price: price,
 							ETH: val2,
 							Hash: outputLogs[i].transactionHash,
-							Date: '??', // TODO
+							Date: '??', // retrieved by later etherscan call
 							Block: _util.hexToDec(outputLogs[i].blockNumber),
 							Buyer: buyUser,
 							Seller: sellUser,
+							Fee: fee,
+							FeeToken: feeCurrency,
 							Details: window.location.origin + window.location.pathname + '/../tx.html#' + outputLogs[i].transactionHash,
 							Unlisted: unlisted,
 						}
@@ -836,7 +877,7 @@
 			running = false;
 			requestID++;
 			buttonLoading(true);
-			downloadTrades();
+			downloadAllTrades();
 		}
 		else
 		{
@@ -867,12 +908,19 @@
                     if (cellValue === null) cellValue = "";
 
 					
-					if(head == 'Amount' || head == 'Price')
+					if(head == 'Amount' || head == 'Price' || head == 'Fee' || head == 'ETH')
 					{
+						if(head == 'Fee' && myList[i][columns[0]] == 'Maker')
+						{
+							cellValue = '';
+						}
+						
 						if(cellValue !== "" && cellValue !== undefined)
 						{
 							var dec = fixedDecimals;
 							if(head == 'Price')
+								dec += 6;
+							else if(head == 'Fee')
 								dec += 2;
 							var num = Number(cellValue).toFixed(dec);
 							row$.append($('<td/>').html(num));
@@ -882,13 +930,26 @@
 							row$.append($('<td/>').html(cellValue));
 						}
 					}
-					else if(head == 'Token')
+					else if(head == 'Token' || head == 'FeeToken')
 					{
-						cellValue = cellValue.name;
-						if( !myList[i].Unlisted)
-							row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+						if(head == 'FeeToken' && myList[i][columns[0]] == 'Maker')
+						{
+							cellValue = '';
+						}
+						
+						if(cellValue !== "" && cellValue !== undefined)
+						{
+							cellValue = cellValue.name;
+							if( !myList[i].Unlisted)
+								row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+							else
+								row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].Token.addr + '-ETH">' + cellValue + '</a>'));
+							}
 						else
-							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].Token.addr + '-ETH">' + cellValue + '</a>'));
+						{
+							row$.append($('<td/>').html(cellValue));
+						}
+						
 					}
 					else if(head == 'Type')
 					{
@@ -928,6 +989,12 @@
 					{
 						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/address/' + cellValue + '">'+ cellValue.substring(0,8)  + '...</a>'));
 					}
+					else if(head == 'Date')
+					{
+						if(cellValue !== '??')
+							cellValue = formatDate(cellValue);
+						row$.append($('<td/>').html(cellValue));
+					}
 					else if(head == 'Details')
 					{
 						
@@ -944,7 +1011,7 @@
         }
     }
 
-	var tradeHeaders = {'Type': 1, 'Trade': 1, 'Token' : 1, 'Amount':1, 'Price':1, 'ETH': 1, 'Hash':1, 'Date':1, 'Buyer':1, 'Seller' : 1, 'Details':1};
+	var tradeHeaders = {'Type': 1, 'Trade': 1, 'Token' : 1, 'Amount':1, 'Price':1, 'ETH': 1, 'Hash':1, 'Date':1, 'Buyer':1, 'Seller' : 1, 'Fee' : 1, 'FeeToken' : 1,'Details':1};
     // Adds a header row to the table and returns the set of columns.
     // Need to do union of keys from all records as some records may not contain
     // all records.
@@ -989,17 +1056,46 @@
 		var utcSeconds = secs;
 		var d = new Date(0);
 		d.setUTCSeconds(utcSeconds);
-		return formatDate(d);
+		return d; // formatDate(d);
 	}
 	
 	function toDateTimeNow(short)
 	{
 		var t = new Date();
-		return formatDate(t, short);
+		return t;
+		//return formatDate(t, short);
 	}
 
+	
+	function createUTCOffset(date) {
+		
+		function pad(value) {
+			return value < 10 ? '0' + value : value;
+		}
+		
+		var sign = (date.getTimezoneOffset() > 0) ? "-" : "+";
+		var offset = Math.abs(date.getTimezoneOffset());
+		var hours = pad(Math.floor(offset / 60));
+		var minutes = pad(offset % 60);
+		return sign + hours + ":"+ minutes;
+	}
+	
+	function formatDateOffset(d, short)
+	{
+		if(d == "??")
+			return "??";
+		
+		if(short)
+			return formatDate(d,short);
+		else
+			return formatDateT(d,short) + createUTCOffset(d);
+	}
+	
 	function formatDate(d, short)
 	{
+		if(d == "??")
+			return "??";
+		
 		var month = '' + (d.getMonth() + 1),
 			day = '' + d.getDate(),
 			year = d.getFullYear(),
@@ -1017,6 +1113,31 @@
 		else
 			return [year, month, day].join('');
 	}
+	
+	function formatDateT(d, short)
+	{
+		if(d == "??")
+			return "??";
+		
+		var month = '' + (d.getMonth() + 1),
+			day = '' + d.getDate(),
+			year = d.getFullYear(),
+			hour = d.getHours(),
+			min = d.getMinutes();
+			
+
+		if (month.length < 2) month = '0' + month;
+		if (day.length < 2) day = '0' + day;
+		if (hour < 10) hour = '0' + hour;
+		if (min < 10) min = '0' + min;
+
+		if(!short)
+			return [year, month, day].join('-') + 'T'+ [hour,min].join(':');
+		else
+			return [year, month, day].join('');
+	}
+	
+	
 
 	function divisorFromDecimals(decimals)
 	{
@@ -1028,43 +1149,154 @@
 		return new BigNumber(result);
 	}
 	
-	function downloadTrades()
+	function clearDownloads()
+	{
+		$('#downloadTrades').html('');
+		$('#downloadBitcoinTaxTrades').html('');
+		$('#downloadCointrackingTrades').html('');
+	}
+	
+	
+	function downloadAllTrades()
 	{
 		if(lastResult)
 		{
 			checkBlockDates(lastResult);
-			var allTrades = lastResult;
 			
-			var A = [ ['Type', 'Trade', 'Token', 'Amount', 'Price (ETH)', 'Total ETH', 'Date', '', 'Transaction Hash', 'Buyer', 'Seller', 'Token Contract' ] ];  
-			// initialize array of rows with header row as 1st item
-			for(var i=0;i< allTrades.length;++i)
-			{ 
-				var arr = [allTrades[i]['Type'], allTrades[i]['Trade'], allTrades[i]['Token'].name, allTrades[i]['Amount'], allTrades[i]['Price'], 
-							allTrades[i]['ETH'],  allTrades[i]['Date'], ' ', allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'], allTrades[i]['Token'].addr];
-				A.push(arr); 
-			}
-			var csvRows = [];
-			for(var i=0,l=A.length; i<l; ++i){
-				csvRows.push(A[i].join(','));   // unquoted CSV row
-			}
-			var csvString = csvRows.join("\r\n");
+			downloadTrades();
+			downloadBitcoinTaxTrades();
+			downloadCointrackingTrades();
+		}
+	
+	
+	
+	
+		function downloadTrades()
+		{
+			//if(lastResult)
+			{
+			//	checkBlockDates(lastResult);
+				var allTrades = lastResult;
+				
+				var A = [ ['Type', 'Trade', 'Token', 'Amount', 'Price (ETH)', 'Total ETH', 'Date', '', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract' ] ];  
+				// initialize array of rows with header row as 1st item
+				for(var i=0;i< allTrades.length;++i)
+				{ 
+					var arr = [allTrades[i]['Type'], allTrades[i]['Trade'], allTrades[i]['Token'].name, allTrades[i]['Amount'], allTrades[i]['Price'], 
+								allTrades[i]['ETH'],  formatDateOffset(allTrades[i]['Date']), ' ', allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'], 
+								allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr];
+					A.push(arr); 
+				}
+				var csvRows = [];
+				for(var i=0,l=A.length; i<l; ++i){
+					csvRows.push(A[i].join(','));   // unquoted CSV row
+				}
+				var csvString = csvRows.join("\r\n");
 
-			var sp = document.createElement('span');
-			sp.innerHTML = "Export trades as CSV ";
-			var a = document.createElement('a');
-			a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
-			a.href     = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
-			a.target   = '_blank';
-			a.download = toDateTimeNow(true) + '-' + publicAddr + " TradeHistory.csv";
-			sp.appendChild(a);
+				var sp = document.createElement('span');
+				sp.innerHTML = " ";
+				var a = document.createElement('a');
+				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
+				a.href     = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
+				a.target   = '_blank';
+				a.download = "TradeHistory_" + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				sp.appendChild(a);
+				
+				$('#downloadTrades').html('');
+				var parent = document.getElementById('downloadTrades');
+				parent.appendChild(sp);
+				//parent.appendCild(a);
+				
+			}
+		}
 			
-			$('#downloadTrades').html('');
-			var parent = document.getElementById('downloadTrades');
-			parent.appendChild(sp);
-			//parent.appendCild(a);
+		function downloadBitcoinTaxTrades()
+		{
+			//if(lastResult)
+			{
+				//checkBlockDates(lastResult);
+				var allTrades = lastResult;
+				
+				var A = [ ['date', 'action', 'exchange', 'exchangeid', 'volume', 'symbol', 'price', 'currency', 'fee', 'feecurrency', 'total', 'memo', 'txhash' ] ]; 
+				// initialize array of rows with header row as 1st item
+				for(var i=0;i< allTrades.length;++i)
+				{ 
+						
+						var arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Hash'], allTrades[i]['Amount'], 'ETH', allTrades[i]['Price'], allTrades[i]['Token'].name,
+								allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,  allTrades[i]['ETH'], allTrades[i]['Token'].name + " Token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash']];
+						A.push(arr); 
+				}
+				var csvRows = [];
+				for(var i=0,l=A.length; i<l; ++i){
+					csvRows.push(A[i].join(','));   // unquoted CSV row
+				}
+				var csvString = csvRows.join("\r\n");
+
+				var sp = document.createElement('span');
+				sp.innerHTML = " ";
+				var a = document.createElement('a');
+				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
+				a.href     = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
+				a.target   = '_blank';
+				a.download = 'BitcoinTax_'+ formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				sp.appendChild(a);
+				
+				$('#downloadBitcoinTaxTrades').html('');
+				var parent = document.getElementById('downloadBitcoinTaxTrades');
+				parent.appendChild(sp);
+				//parent.appendCild(a);
+				
+			}
 			
 		}
 		
+		function downloadCointrackingTrades()
+		{
+			//if(lastResult)
+			{
+				//checkBlockDates(lastResult);
+				var allTrades = lastResult;
+				
+				var A = [ ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'Group', 'Comment', 'Date'] ]; 
+				// initialize array of rows with header row as 1st item
+				for(var i=0;i< allTrades.length;++i)
+				{ 
+						var arr = [];
+						if(allTrades[i]['Trade'] === 'Buy') {
+							arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
+							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " Token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date'])];
+								
+						}
+						else {
+							arr = ['Trade', allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
+							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " Token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date'])];
+						} 
+						
+						A.push(arr); 
+				}
+				var csvRows = [];
+				for(var i=0,l=A.length; i<l; ++i){
+					csvRows.push(A[i].join(','));   // unquoted CSV row
+				}
+				var csvString = csvRows.join("\r\n");
+
+				var sp = document.createElement('span');
+				sp.innerHTML = " ";
+				var a = document.createElement('a');
+				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
+				a.href     = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
+				a.target   = '_blank';
+				a.download = 'Cointracking_'+ formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				sp.appendChild(a);
+				
+				$('#downloadCointrackingTrades').html('');
+				var parent = document.getElementById('downloadCointrackingTrades');
+				parent.appendChild(sp);
+				//parent.appendCild(a);
+				
+			}
+			
+		}
 	}
 	
 	function placeholderTable()

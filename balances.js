@@ -81,6 +81,7 @@
 			Name: 'ETH',
 			Value: 0,
 			Price: 0,
+			'ETH': 0,
 			Hash: '',
 			Date: toDateTimeNow(),
 			Details: (window.location.origin + window.location.pathname).replace('index.html','') + 'tx.html',
@@ -1143,7 +1144,7 @@
 				if(tx.from.toLowerCase() === contractAddr)
 				{	
 					var val = _util.weiToEth(Number(tx.value));
-					var trans = createOutputTransaction('Withdraw', 'ETH', val, tx.hash, tx.timeStamp, false, 0, '', tx.isError === '0');
+					var trans = createOutputTransaction('Withdraw', 'ETH', val, '',tx.hash, tx.timeStamp, false, 0, '', tx.isError === '0');
 					outputTransactions.push(trans);
 					withdrawHashes[tx.hash.toLowerCase()] = true;
 				}
@@ -1161,7 +1162,7 @@
 					if(val > 0 && txto === contractAddr) // eth deposit
 					{
 						var val2 = _util.weiToEth(val);
-						var trans = createOutputTransaction('Deposit', 'ETH', val2, tx.hash, tx.timeStamp, false, 0, '', tx.isError === '0');
+						var trans = createOutputTransaction('Deposit', 'ETH', val2, '', tx.hash, tx.timeStamp, false, 0, '', tx.isError === '0');
 						outputTransactions.push(trans);
 					}
 					else if(val == 0 && txto == contractAddr) 
@@ -1178,7 +1179,7 @@
 			for(var l = 0; l < tokens.length; l++)
 			{
 				var method = tokens[l].input.slice(0, 10);
-				if(method === '0x9e281a98' || method === '0x338b5dea') //methodids depositToken & wihdrawToken
+				if(method === '0x9e281a98' || method === '0x338b5dea') //methodids depositToken & withdrawToken
 				{
 				
 					var unpacked = _util.processInputMethod (_delta.web3, _delta.contractEtherDelta, tokens[l].input);
@@ -1199,7 +1200,7 @@
 							{
 								type = 'Deposit';
 							}
-							var trans = createOutputTransaction(type, token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, '', tokens[l].isError === '0');		
+							var trans = createOutputTransaction(type, token.name, val, '', tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, '', tokens[l].isError === '0');		
 							outputTransactions.push(trans);
 						}	
 					}
@@ -1251,7 +1252,7 @@
 								price = val2 / val;
 							}
 	
-							var trans = createOutputTransaction('Cancel ' + cancelType , token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price, tokens[l].isError === '0');		
+							var trans = createOutputTransaction('Cancel ' + cancelType , token.name, val, '', tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price, tokens[l].isError === '0');		
 							outputTransactions.push(trans);
 						}	
 					}
@@ -1285,14 +1286,15 @@
 						{
 							var amount = 0;
 							var oppositeAmount = 0;
+							var chosenAmount = Number(unpacked.params[10].value);
 							if(tradeType === 'Sell')
 							{
-								amount = unpacked.params[1].value;
-								oppositeAmount = unpacked.params[3].value;
+								amount = Number(unpacked.params[1].value);
+								oppositeAmount = Number(unpacked.params[3].value);
 							} else
 							{
-								oppositeAmount = unpacked.params[1].value;
-								amount = unpacked.params[3].value;
+								oppositeAmount = Number(unpacked.params[1].value);
+								amount = Number(unpacked.params[3].value);
 							}
 							
 							var unlisted = token.unlisted;
@@ -1301,14 +1303,38 @@
 							var val = _util.weiToEth(amount, dvsr);
 							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
 							
+							
+							var orderSize = 0;
+							
 							var price = 0;
-							if(val !== 0)
+						//	if(tradeType === 'sell')
 							{
 								price = val2 / val;
+							}	
+							
+							
+							if(tradeType === 'Buy')
+							{
+								orderSize = val;
+								if(oppositeAmount > chosenAmount)
+								{
+									val2 = _util.weiToEth(chosenAmount, dvsr2);
+									amount = (chosenAmount / ( oppositeAmount / amount));
+									val =_util.weiToEth(amount, dvsr);
+								}
+							} else
+							{
+								orderSize = val;
+								if(amount > chosenAmount)
+								{
+									val = _util.weiToEth(chosenAmount, dvsr);
+									oppositeAmount = (chosenAmount * oppositeAmount) / amount;
+									val2 = _util.weiToEth(oppositeAmount, dvsr2);
+								}
 							}
 							
 	
-							var trans = createOutputTransaction(tradeType , token.name, val, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price,  tokens[l].isError === '0');		
+							var trans = createOutputTransaction(tradeType , token.name, val, val2, tokens[l].hash, tokens[l].timeStamp, unlisted,token.addr, price,  tokens[l].isError === '0');		
 							outputTransactions.push(trans);
 						}	
 					}
@@ -1318,7 +1344,7 @@
 
 			done();
 						
-			function createOutputTransaction(type, name, val, hash, timeStamp, unlisted, tokenaddr, price, status)
+			function createOutputTransaction(type, name, val, total, hash, timeStamp, unlisted, tokenaddr, price, status)
 			{
 				if(status === undefined)
 					status = true;
@@ -1328,6 +1354,7 @@
 					Name: name,
 					Value: val,
 					Price: price,
+					'ETH':total,
 					Hash: hash,
 					Date: toDateTime(timeStamp),
 					Details: (window.location.origin + window.location.pathname).replace('index.html','') + 'tx.html#' + hash,
@@ -1624,7 +1651,7 @@
 					scroller_barWidth : 18,
 					scroller_upAfterSort: true,
 				},
-                sortList: [[6, 1]]
+                sortList: [[7, 1]]
             });
 
             table2Loaded = true;
@@ -1667,7 +1694,7 @@
                     if (cellValue == null) cellValue = "";
 					var head = columns[colIndex];
 					
-					if(head == 'Value' || head == 'Price')
+					if(head == 'Value' || head == 'Price'  || head == "ETH")
 					{
 						if(cellValue !== "" && cellValue !== undefined)
 						{
@@ -1779,7 +1806,7 @@
 
 	var balanceHeaders = {'Name': 1, 'Wallet':1, 'EtherDelta':1, 'Total':1, 'Value':1,'Bid':1, 'Est. ETH':1};
 	var depositHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1};
-	var transactionHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1, 'Price':1, 'Status':1, 'Details':1};
+	var transactionHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1, 'Price':1, 'ETH':1, 'Status':1, 'Details':1};
     // Adds a header row to the table and returns the set of columns.
     // Need to do union of keys from all records as some records may not contain
     // all records.

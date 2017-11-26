@@ -541,9 +541,10 @@
 								price = val2 / val;
 							}
 							
+							
 							var obj = {
 								'type': 'Taker '+ tradeType, 
-								'note': 'Clicked an order in the orderbook to trade.',
+								'note': addressLink(tx.from, true, true) + ' selected ' + addressLink(maker, true, true) +'\'s order in the orderbook to trade.',
 								'token': token,
 								'amount': val,
 								'price': price,
@@ -968,7 +969,7 @@
 							
 							var obj = {
 								'type': 'Taker '+ tradeType,
-								'note': 'Clicked an order in the orderbook to trade.',
+								'note': addressLink(tx.from, true, true) + ' selected ' + addressLink(unpacked.params[6].value, true, true) +'\'s order in the orderbook to trade.',
 								'token':token,
 								'amount':val,
 								'order size':orderSize,
@@ -1393,6 +1394,10 @@
 				else if(keys[i] == 'price')
 				{
 					cellValue = Number(cellValue).toFixed(5);
+				}
+				else if(keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'ETH')
+				{
+					cellValue = Number(cellValue).toFixed(3);
 				}
 				else if(keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to')
 				{

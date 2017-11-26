@@ -39,7 +39,7 @@
 						for(let i = 0; i < result.tokens.length; i++)
 						{
 							let tok = result.tokens[i].tokenInfo;
-							if(!uniqueTokens[tok.address] && tok.symbol && result.tokens[i].balance > 1)
+							if(!uniqueTokens[tok.address] && tok.symbol && result.tokens[i].balance > 1 && tok.holdersCount > 5)
 							{
 								uniqueTokens[tok.address] = {addr: tok.address, name: escapeHtml(tok.symbol), decimals:tok.decimals};
 							}

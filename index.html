@@ -144,7 +144,7 @@
 				<div class = "col-md-3" style="border-left-width: 6px; border-left-style: solid; border-left-color: black;">
 					<h3> Settings: </h3>
 					<ul class="list-unstyled">
-						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkCustom()" id="custom" ><label for="custom">Show unlisted tokens</label></li>
+						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkCustom()" id="custom" ><label for="custom">Show unlisted tokens </label><span id="tokencount"></span></li>
 						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero" ><label for="zero" >Hide zero balances</label></li>
 						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals"><label for="decimals" >Show more decimals</label></li>
 						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkRemember()" id="remember" ><label for="remember">Remember my address</label></li>
@@ -207,7 +207,7 @@
 				<div id="transactiontab" class="tab-pane">
 					<h2>Transactions <button id='loadingTransactions2' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button></h2>
 					<p>Go to the <strong><a target="_blank" href="history.html">History</a> </strong> tab for a full trade history</p>
-					<p><strong>Notes</strong> <br>This does not include maker trades, only taker. (see history for maker)</p>
+					<p><strong>Note: </strong> This page does not include maker trades, only taker. (see history for maker)</p>
 					<br>
 					<table class="tablesorter table table-striped" id="transactionsTable2">
 						<thead></thead>

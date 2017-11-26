@@ -207,7 +207,7 @@
 					}
 				}
 			}
-
+			checkCustom();
 			initiated = true;
 			if(autoStart)
 				myClick();
@@ -226,6 +226,7 @@
 		$('#zero').prop('checked', hideZero);
         $('#decimals').prop('checked', decimals);
 		$('#custom').prop('checked', showCustomTokens);
+		
 		
 		// detect enter & keypresses in input
         $('#address').keypress(function(e) 
@@ -247,6 +248,12 @@
 		
 				// tab change
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+			
+			if(lastResult )
+				makeTable(lastResult, hideZero);
+			if(lastResult2 )
+				makeTable2(lastResult2);
+			
 			// fix scroller on tab change
 			$("#transactionsTable").trigger("applyWidgets"); 
 			$("#transactionsTable2").trigger("applyWidgets"); 
@@ -351,9 +358,10 @@
 	function checkCustom()
 	{
 		showCustomTokens = $('#custom').prop('checked');
+		let maxcount = Object.keys(uniqueTokens).length;
 		if(showCustomTokens) 
 		{
-			tokenCount = Object.keys(uniqueTokens).length;
+			tokenCount = maxcount;
 			if(lastResult && lastResult2 && loadedCustom)
 			{
 
@@ -375,6 +383,7 @@
 			if(lastResult2)
 				makeTable2(lastResult2);
 		}
+		$('#tokencount').html(" " + tokenCount + "/" + maxcount);
 	}
 	
 	

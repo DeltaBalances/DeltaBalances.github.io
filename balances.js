@@ -248,11 +248,15 @@
 		
 				// tab change
 		$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+			if(!lastResult && !lastResult2)
+				placeholderTable();
+			else {
+				if(lastResult)
+					makeTable(lastResult, hideZero);
+				if(lastResult2)
+					makeTable2(lastResult2);
+			}
 			
-			if(lastResult )
-				makeTable(lastResult, hideZero);
-			if(lastResult2 )
-				makeTable2(lastResult2);
 			
 			// fix scroller on tab change
 			$("#transactionsTable").trigger("applyWidgets"); 

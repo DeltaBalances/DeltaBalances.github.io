@@ -914,14 +914,17 @@
 						{
 							var amount = 0;
 							var oppositeAmount = 0;
+							var chosenAmount = Number(unpacked.params[10].value);
 							if(tradeType === 'Sell')
 							{
-								amount = unpacked.params[1].value;
-								oppositeAmount = unpacked.params[3].value;
+								amount = Number(unpacked.params[1].value);
+								oppositeAmount = Number(unpacked.params[3].value);
+								
+								
 							} else
 							{
-								oppositeAmount = unpacked.params[1].value;
-								amount = unpacked.params[3].value;
+								oppositeAmount = Number(unpacked.params[1].value);
+								amount = Number(unpacked.params[3].value);
 							}
 							
 							var unlisted = token.unlisted;
@@ -930,17 +933,45 @@
 							var val = _util.weiToEth(amount, dvsr);
 							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
 							
+							var orderSize = 0;
+							
 							var price = 0;
 						//	if(tradeType === 'sell')
 							{
 								price = val2 / val;
 							}	
 							
+							
+							if(tradeType === 'Buy')
+							{
+								orderSize = val;
+								if(oppositeAmount > chosenAmount)
+								{
+									val2 = _util.weiToEth(chosenAmount, dvsr2);
+									amount = (chosenAmount / ( oppositeAmount / amount));
+									val =_util.weiToEth(amount, dvsr);
+								}
+								
+								
+							} else
+							{
+								orderSize = val;
+								if(amount > chosenAmount)
+								{
+									val = _util.weiToEth(chosenAmount, dvsr);
+									oppositeAmount = (chosenAmount * oppositeAmount) / amount;
+									val2 = _util.weiToEth(oppositeAmount, dvsr2);
+								}
+							}
+							
+							
+							
 							var obj = {
 								'type': 'Taker '+ tradeType,
 								'note': 'Clicked an order in the orderbook to trade.',
 								'token':token,
 								'amount':val,
+								'order size':orderSize,
 								'price': price,
 								'ETH': val2,
 								'unlisted':unlisted,
@@ -1059,7 +1090,7 @@
 			if(transaction.input && transaction.output.length == 1 && transaction.output[0].price >= 0)
 			{
 				transaction.output[0].price = transaction.input.price;
-				if(transaction.output[0].amount < transaction.input.amount)
+				if(transaction.output[0].amount < transaction.input['order size'])
 				{
 					sum += "Partial fill, ";
 				}
@@ -1122,8 +1153,10 @@
 		$('#from').html(addressLink(transaction.from, true, false));
 		$('#to').html(addressLink(transaction.to, true, false));
 		$('#cost').html('??');
-		$('#gasprice').html();
 		$('#gasgwei').html(transaction.gasGwei + ' Gwei (' + transaction.gasPrice.toFixed(10) + ' ETH)');
+		if(!transaction.gasUsed)
+			transaction.gasUsed = '???';
+		$('#gasusedlimit').html(transaction.gasUsed + " / " + transaction.gasLimit);
 		if(transaction.status === 'Completed') {
 			$('#gascost').html(Number(transaction.gasEth).toFixed(5) + ' ETH');
 		} else if(transaction.status === 'Pending') {
@@ -1131,7 +1164,6 @@
 		} else {
 			$('#gascost').html(Number(transaction.gasEth).toFixed(5) + ' ETH');
 		}
-		$('#gaslimit').html(transaction.gasLimit);
 		$('#nonce').html(transaction.nonce);
 		if(transaction.status === 'Completed')
 		{
@@ -1379,6 +1411,7 @@
 		tbody$.append(row$);
 		table$.append(tbody$);
 		$(selector).append(table$);
+		
     }
 
     // Adds a header row to the table and returns the set of columns.
@@ -1396,7 +1429,7 @@
             var key = myList[i];
             //for (var key in rowHash) 
 			{
-				if( !columnSet[key] && key !== 'unlisted' && key !=='note' ) 
+				if( !columnSet[key] && key !== 'unlisted' && key !=='note') 
 				{
 					columnSet[key] = 1;
 					headerTr$.append($('<th/>').html(capitalizeFirstLetter(key)));

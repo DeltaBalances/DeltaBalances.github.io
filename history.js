@@ -1100,16 +1100,18 @@
 			day = '' + d.getDate(),
 			year = d.getFullYear(),
 			hour = d.getHours(),
-			min = d.getMinutes();
+			min = d.getMinutes(),
+			sec = d.getSeconds();
 			
 
 		if (month.length < 2) month = '0' + month;
 		if (day.length < 2) day = '0' + day;
 		if (hour < 10) hour = '0' + hour;
 		if (min < 10) min = '0' + min;
+		if (sec < 10) sec = '0' + sec;
 
 		if(!short)
-			return [year, month, day].join('-') + ' '+ [hour,min].join(':');
+			return [year, month, day].join('-') + ' '+ [hour,min,sec].join(':');
 		else
 			return [year, month, day].join('');
 	}
@@ -1259,6 +1261,7 @@
 			
 		}
 		
+		//csv columns
 		function downloadCointrackingTrades()
 		{
 			//if(lastResult)
@@ -1266,20 +1269,25 @@
 				//checkBlockDates(lastResult);
 				var allTrades = lastResult;
 				
-				var A = [ ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'TradeID','Group', 'Comment', 'Date'] ]; 
+				var A = [ ['\"Type\"', '\"Buy\"', '\"Cur.\"', '\"Sell\"', '\"Cur.\"', '\"Fee\"', '\"Cur.\"', '\"Exchange\"','\"Group\"', '\"Comment\"', '\"Trade ID\"', '\"Date\"'] ]; 
 				// initialize array of rows with header row as 1st item
 				for(var i=0;i< allTrades.length;++i)
 				{ 
 						var arr = [];
 						if(allTrades[i]['Trade'] === 'Buy') {
 							arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
-							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash']  + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date'])];
+							'EtherDelta','', 'Hash: ' + allTrades[i]['Hash']  + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDate(allTrades[i]['Date'])];
 								
 						}
 						else {
 							arr = ['Trade', allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
-							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date'])];
+							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDate(allTrades[i]['Date'])];
 						} 
+						
+						for(let i = 0; i < arr.length; i++)
+						{
+							arr[i] = `\"${arr[i]}\"`;
+						}
 						
 						A.push(arr); 
 				}
@@ -1307,6 +1315,7 @@
 			
 		}
 		
+		//custom exchange columns
 		function downloadCointracking2Trades()
 		{
 			//if(lastResult)
@@ -1314,7 +1323,8 @@
 				//checkBlockDates(lastResult);
 				var allTrades = lastResult;
 				
-				var A = [ [ 'Date', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'TradeID', 'Comment', 'Exchange', 'Type'] ]; 
+				var A = [ [ '\"Date\"', '\"Buy\"', '\"Cur.\"', '\"Sell\"', '\"Cur.\"', '\"Fee\"', '\"Cur.\"', '\"Trade ID\"', '\"Comment\"', '\"Exchange\"', '\"Type\"'] ]; 
+				
 				// initialize array of rows with header row as 1st item
 				for(var i=0;i< allTrades.length;++i)
 				{ 
@@ -1329,6 +1339,10 @@
 							allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 'EtherDelta','Trade'];
 						} 
 						
+						for(let i = 0; i < arr.length; i++)
+						{
+							arr[i] = `\"${arr[i]}\"`;
+						}
 						A.push(arr); 
 				}
 				var csvRows = [];

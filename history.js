@@ -51,7 +51,7 @@
 		{
 			Type: 'Taker',
 			Trade: 'Sell',
-			Token:  { "name": "Placeholder", "addr":"0x00"},
+			Token:  { "name": "Token", "addr":"0x00"},
 			Amount: 0,
 			Price: 0,
 			ETH: 0,
@@ -61,7 +61,7 @@
 			Buyer: '',
 			Seller: '',
 			Fee: 0,
-			FeeToken: { "name": "Placeholder", "addr":"0x00"},
+			FeeToken: { "name": "Token", "addr":"0x00"},
 			Details: window.location.origin + window.location.pathname + '/../tx.html',
 			Unlisted: true,
 		}

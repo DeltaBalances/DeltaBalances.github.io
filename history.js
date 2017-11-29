@@ -1217,14 +1217,21 @@
 				//checkBlockDates(lastResult);
 				var allTrades = lastResult;
 				
-				var A = [ ['date', 'action', 'exchange', 'exchangeid', 'volume', 'symbol', 'price', 'currency', 'fee', 'feecurrency', 'total', 'memo', 'txhash' ] ]; 
+				var A = [ ['Date', 'Action', 'Source', 'Volume', 'Symbol', 'Price', 'Currency', 'Fee', 'FeeCurrency', 'Total', 'Memo'] ]; 
 				// initialize array of rows with header row as 1st item
 				for(var i=0;i< allTrades.length;++i)
 				{ 
-						
-						var arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Hash'], allTrades[i]['Amount'], 'ETH', allTrades[i]['Price'], allTrades[i]['Token'].name,
-								allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,  allTrades[i]['ETH'], allTrades[i]['Token'].name + " Token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash']];
+					if(allTrades[i]['Trade'] === 'Buy') {
+						var arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
+								allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,  allTrades[i]['ETH'], " Transaction Hash " + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr];
 						A.push(arr); 
+					}
+					// add token fee to total for correct balance in bitcoin tax
+					else {
+						var arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
+								allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,  allTrades[i]['ETH'], " Transaction Hash " + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr];
+						A.push(arr); 
+					}
 				}
 				var csvRows = [];
 				for(var i=0,l=A.length; i<l; ++i){

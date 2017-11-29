@@ -36,11 +36,14 @@
 	var blockLoaded = 0;
 	
 	// config
-	var blocktime = 15;
+	var blocktime = 14;
 	var blocknum = -1;
 	var startblock = 0;
-	var endblock = 'latest';	
+	var endblock = 0;	
 	var transactionDays = 1;
+	var useDaySelector = true;
+	const minBlock = 3154197; //https://etherscan.io/block/3154196  etherdelta_2 creation
+	
 	
 	var uniqueTokens = {};
 	var uniqueBlocks = {}; //date for each block
@@ -84,7 +87,7 @@
 			{
 				if(blocknum > -1)
 				{
-					startblock = getStartBlock(blocknum, transactionDays);
+					startblock = getStartBlock();
 				}
 				else {
 					_util.blockNumber(_delta.web3, (err, num) => 
@@ -92,7 +95,7 @@
 						if(!err && num)
 						{
 							blocknum = num;
-							startblock = getStartBlock(blocknum, transactionDays);
+							startblock = getStartBlock();
 						}
 					});
 				}
@@ -382,7 +385,7 @@
 		if(blocknum > 0) // blocknum also retrieved on page load, reuse it
 		{
 			console.log('blocknum re-used');
-			startblock = getStartBlock(blocknum, transactionDays);
+			startblock = getStartBlock();
 			getTransactions(rqid);
 		}
 		else 
@@ -393,7 +396,7 @@
 				if(num)
 				{
 					blocknum = num;
-					startblock = getStartBlock(blocknum, transactionDays);
+					startblock = getStartBlock();
 				}
 				getTransactions(rqid);
 			});
@@ -476,20 +479,80 @@
 	}
 	
 	
-	function getStartBlock(blcknm, days)
+	function setDaySelector()
 	{
-		startblock = Math.floor(blcknm - ((days * 24 * 60 * 60) / blocktime));
-		startblock = Math.max(startblock, 3154197);  //https://etherscan.io/block/3154196  etherdelta_2 creation
-		$('#selectedBlocks').html('Selected blocks: ' + startblock + ' - ' + blocknum);
+		useDaySelector = true;
+		validateDays();
+		$('#days').prop('disabled', false);
+		$('#blockSelect1').prop('disabled', true);
+		$('#blockSelect2').prop('disabled', true);
+	}
+	
+	function setBlockSelector()
+	{
+		useDaySelector = false;
+		$('#days').prop('disabled', true);
+		$('#blockSelect1').prop('disabled', false);
+		$('#blockSelect2').prop('disabled', false);
+		
+		$(".blockInput").attr({
+		   "max" : blocknum,      
+		   "min" : minBlock,
+		   "step" : 100,
+		});
+		
+		if(!$('#blockSelect1').val())
+			$('#blockSelect1').val(startblock);
+		if(!$('#blockSelect2').val())
+			$('#blockSelect2').val(blocknum);
+		
+		checkBlockInput();
+	}
+	
+	function checkBlockInput()
+	{
+		let block1 = Math.floor($('#blockSelect1').val());
+		let block2 = Math.floor($('#blockSelect2').val());
+		
+		if(block1 > block2) // swap if values are wrong
+		{
+			block1 = Math.floor($('#blockSelect2').val());
+			block2 = Math.floor($('#blockSelect1').val());
+		}
+		
+		startblock = Math.max(minBlock, block1);
+		endblock = Math.min(block2, blocknum);
+		
+		$('#blockSelect1').val(startblock);
+		$('#blockSelect2').val(endblock);
+		
+		if(blocknum > 0)
+		{
+			getStartBlock();
+		}
+	}
+	
+	function getStartBlock()
+	{
+		if(useDaySelector)
+		{
+			startblock = Math.floor(blocknum - ((transactionDays * 24 * 60 * 60) / blocktime));
+			startblock = Math.max(startblock, minBlock);  
+			endblock = blocknum;
+			
+		} 
+		
+		$('#selectedBlocks').html('Selected block range: <a href="https://etherscan.io/block/' + startblock + '" target="_blank">' + startblock +'</a> - <a href="https://etherscan.io/block/' + endblock + '" target="_blank">' + endblock +'</a>');
 		return startblock;
 	}
 	
-	function validateDays(input)
+	function validateDays()
 	{ 
-		input = parseInt(input);
+		let input = $('#days').val();
+		input = parseFloat(input);
 		var days = 1;
-		if(input < 1)
-			days = 1;
+		if(input < 0.25)
+			days = 0.25;
 		else if(input > 999)
 			days = 999;
 		else
@@ -498,8 +561,9 @@
 		transactionDays = days;
 		if(blocknum > 0)
 		{
-			getStartBlock(blocknum, transactionDays);
+			getStartBlock();
 		}
+		 $('#days').val(days);
 	}
 	
 	// get parameter from url
@@ -521,7 +585,7 @@
 	{
 		
 		var start = startblock;
-		var end = blocknum;
+		var end = endblock;
 		var max = 10000;
 		
 		

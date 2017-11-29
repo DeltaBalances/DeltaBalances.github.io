@@ -118,26 +118,38 @@
 						<div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;" ></div>
 						<div class="hidden-xs" style="padding-left: 3%; float:left;"> <p style ="line-height:64px;display: inline-block;"> </p> </div> <div style="float:left; white-space:nowrap;" ><p style ="line-height:64px; white-space:nowrap; display: inline-block;" id="addr">Enter your public address </p></div>
 					</div>
-					<ul class="list-unstyled">
-						<li><span>Trades from last <input type="number" id="days" onchange="validateDays(this.value)" value="1" min="1" max="999" step="1"> days (assuming 15s per block)</span> </li>
-						<li><span id="selectedBlocks"></span> </li>
-					</ul>
-					
-					<br><br>
-					Fees are calculated with 0% Maker, 0.3% Taker.
-					<br><br>
-					This is an alternative to the the official <a target="_blank" href="https://etherdelta.com/trades.html">EtherDelta trade history</a> tool.
 					<br>
-					<br>
-					Export trades :
-					<ul>
-					<li>Default (CSV) <span id="downloadTrades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
-					<li>Bitcoin.tax (CSV) <span id="downloadBitcoinTaxTrades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
-					<li>Cointracking.info (CSV) <span id="downloadCointrackingTrades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span>, (CustomExchange) <span id="downloadCointracking2Trades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
-					</ul>
 					
-					
-					
+					<div class="col-md-6" style="overflow:hidden;">
+						<p>Date range: </p>
+						<span id="selectedBlocks">Selected block range:</span><br>
+						<form  id="blockSelector" action=""> 
+						<ul class="list-unstyled">
+							
+							<li> <input type="radio" name="dayBlocks" value="0" onchange="setDaySelector()" checked><span> Trades from last <input type="number" id="days" style="text-align: center;height:85%;" onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (assuming 14s per block)</span> </li>
+							<li> <input type="radio" name="dayBlocks" value="1" onchange="setBlockSelector()"><span> Manual block range <input class="blockInput" type="number" id="blockSelect1" style="text-align: center; height:85%;width:85px;" onchange="checkBlockInput()" value="" min="3154197" step="100" disabled> - <input class="blockInput" type="number" id="blockSelect2" style="text-align: center; height:85%;width:85px;" onchange="checkBlockInput()" value="" min="3154197" step="100" disabled></span> </li></li>
+							
+						</ul>
+
+						</form> 
+					</div>
+					<div class="col-md-6" style="overflow:hidden;">
+						<p>Export trades:</p>
+						<ul>
+						<li>Default (CSV) <span id="downloadTrades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
+						<li>Bitcoin.tax (CSV) <span id="downloadBitcoinTaxTrades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
+						<li>Cointracking.info (CSV) <span id="downloadCointrackingTrades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span>, (CustomExchange) <span id="downloadCointracking2Trades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
+						</ul>
+					</div>
+					<div class="col-md-12" style="overflow:hidden;">
+						<p>Info</p>
+						This is an alternative to the the official <a target="_blank" href="https://etherdelta.com/trades.html">EtherDelta trade history</a> tool. <br>
+						Trades are retrieved from events on the blockchain, larger block ranges will take longer to load. <br>
+						<br>
+						History is limited to trades with ETH as base currency. <br>
+						Fees are 0% Maker, 0.3% Taker.
+					</div>
+
 				</div>
 		</div>
     </div>
@@ -156,7 +168,7 @@
 							<tbody></tbody>
 						</table>
 						<br>
-					Expecting to see more here? Increase the 'days' variable at the top. <br>
+					Expecting to see more here? Increase the date range at the top. <br>
 					
 					<br>
 					<div class="col-md-6">

@@ -1154,6 +1154,7 @@
 		$('#downloadTrades').html('');
 		$('#downloadBitcoinTaxTrades').html('');
 		$('#downloadCointrackingTrades').html('');
+		$('#downloadCointracking2Trades').html('');
 	}
 	
 	
@@ -1166,6 +1167,7 @@
 			downloadTrades();
 			downloadBitcoinTaxTrades();
 			downloadCointrackingTrades();
+			downloadCointracking2Trades();
 		}
 	
 	
@@ -1264,19 +1266,19 @@
 				//checkBlockDates(lastResult);
 				var allTrades = lastResult;
 				
-				var A = [ ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'Group', 'Comment', 'Date'] ]; 
+				var A = [ ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'TradeID','Group', 'Comment', 'Date'] ]; 
 				// initialize array of rows with header row as 1st item
 				for(var i=0;i< allTrades.length;++i)
 				{ 
 						var arr = [];
 						if(allTrades[i]['Trade'] === 'Buy') {
 							arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
-							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " Token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date'])];
+							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash']  + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date'])];
 								
 						}
 						else {
 							arr = ['Trade', allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
-							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " Token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date'])];
+							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date'])];
 						} 
 						
 						A.push(arr); 
@@ -1293,11 +1295,59 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href     = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target   = '_blank';
-				a.download = 'Cointracking_'+ formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = 'Cointracking_CSV_'+ formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 				
 				$('#downloadCointrackingTrades').html('');
 				var parent = document.getElementById('downloadCointrackingTrades');
+				parent.appendChild(sp);
+				//parent.appendCild(a);
+				
+			}
+			
+		}
+		
+		function downloadCointracking2Trades()
+		{
+			//if(lastResult)
+			{
+				//checkBlockDates(lastResult);
+				var allTrades = lastResult;
+				
+				var A = [ [ 'Date', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'TradeID', 'Comment', 'Exchange', 'Type'] ]; 
+				// initialize array of rows with header row as 1st item
+				for(var i=0;i< allTrades.length;++i)
+				{ 
+						var arr = [];
+						if(allTrades[i]['Trade'] === 'Buy') {
+							arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
+							allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash']  + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date']), 'EtherDelta','Trade'];
+								
+						}
+						else {
+							arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
+							allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 'EtherDelta','Trade'];
+						} 
+						
+						A.push(arr); 
+				}
+				var csvRows = [];
+				for(var i=0,l=A.length; i<l; ++i){
+					csvRows.push(A[i].join(','));   // unquoted CSV row
+				}
+				var csvString = csvRows.join("\r\n");
+
+				var sp = document.createElement('span');
+				sp.innerHTML = " ";
+				var a = document.createElement('a');
+				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
+				a.href     = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
+				a.target   = '_blank';
+				a.download = 'Cointracking_CustomExchange_'+ formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				sp.appendChild(a);
+				
+				$('#downloadCointracking2Trades').html('');
+				var parent = document.getElementById('downloadCointracking2Trades');
 				parent.appendChild(sp);
 				//parent.appendCild(a);
 				

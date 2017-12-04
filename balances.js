@@ -591,7 +591,6 @@
 			$('#totalbalancePrice').html('');
 			
 			$('#downloadBalances').html('');
-			$('#downloadDeposits').html('');
 			
 			trigger_1 = false;
 			//disableInput(true);
@@ -670,9 +669,9 @@
 				
 			$('#transactionsTable tbody').empty();
 			$('#transactionsTable2 tbody').empty();
+			
 			if(blocknum > 0) // blocknum also retrieved on page load, reuse it
 			{
-				$('#downloadDeposits').html('');
 				console.log('blocknum re-used');
 				startblock = getStartBlock(blocknum, transactionDays);
 				getTransactions(rqid);
@@ -1113,6 +1112,7 @@
 	
 	function getTransactions(rqid)
 	{
+		$('#downloadDeposits').html('');
 		var transLoaded = 0;
 		var transResult = [];
 		var inTransResult = [];
@@ -1385,8 +1385,8 @@
 			{
 				var txs = Object.values(outputTransactions);
 				lastResult2 = txs;
-				downloadDeposits();
 				makeTable2(txs);
+				downloadDeposits();
 			}
 		}
 	}
@@ -1535,6 +1535,7 @@
         buildHtmlTable('#transactionsTable', result2, loaded, 'transactions', depositHeaders);
 		buildHtmlTable('#transactionsTable2', result, loaded, 'transactions', transactionHeaders);
         trigger2();
+		
 	}
 	
 	function placeholderTable()
@@ -2033,7 +2034,7 @@
 			a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 			a.href     = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 			a.target   = '_blank';
-			a.download = toDateTimeNow(true) + '-' + publicAddr + '.csv';
+			a.download = formatDate(toDateTimeNow(true),true) + '-' + publicAddr + '.csv';
 			sp.appendChild(a);
 			
 			$('#downloadBalances').html('');
@@ -2046,11 +2047,12 @@
 	
 	function downloadDeposits()
 	{
-		if(lastResult)
+		if(lastResult2)
 		{
 			var allTrans= lastResult2;
 			allTrans = allTrans.filter((x) => {return x.Status && (x.Type == 'Deposit' || x.Type == 'Withdraw');});
-			
+			if(allTrans.length == 0)
+				return;
 			
 			var A = [ ['Type', 'Token', 'Amount', 'Transaction Hash', 'Date','Token contract address'] ];  
 			// initialize array of rows with header row as 1st item
@@ -2073,7 +2075,7 @@
 			a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 			a.href     = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 			a.target   = '_blank';
-			a.download = toDateTimeNow(true) + '-Funds-' + publicAddr + '.csv';
+			a.download = formatDate(toDateTimeNow(true),true) + '-Funds-' + publicAddr + '.csv';
 			sp.appendChild(a);
 			
 			$('#downloadDeposits').html('');

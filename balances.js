@@ -46,7 +46,7 @@
 	
 	// config
 	var tokenCount = 0; //auto loaded
-	var blocktime = 17;
+	var blocktime = 14;
 	var blocknum = -1;
 	var startblock = 0;
 	var endblock = 'latest';	
@@ -86,6 +86,7 @@
 			Date: toDateTimeNow(),
 			Details: (window.location.origin + window.location.pathname).replace('index.html','') + 'tx.html',
 			Unlisted: false,
+			TokenAddr: ''
 		}
 	];
 		
@@ -522,6 +523,7 @@
 		hideHint();
 		//disableInput(true);
 		$('#downloadBalances').html('');
+		$('#downloadDeposits').html('');
 		// validate address
 		if(!autoStart)
 			publicAddr = getAddress();
@@ -589,6 +591,7 @@
 			$('#totalbalancePrice').html('');
 			
 			$('#downloadBalances').html('');
+			$('#downloadDeposits').html('');
 			
 			trigger_1 = false;
 			//disableInput(true);
@@ -659,6 +662,7 @@
 		
 		if(showTransactions)
 		{
+			
 			trigger_2 = false;
 			//disableInput(true);
 			
@@ -668,6 +672,7 @@
 			$('#transactionsTable2 tbody').empty();
 			if(blocknum > 0) // blocknum also retrieved on page load, reuse it
 			{
+				$('#downloadDeposits').html('');
 				console.log('blocknum re-used');
 				startblock = getStartBlock(blocknum, transactionDays);
 				getTransactions(rqid);
@@ -1380,6 +1385,7 @@
 			{
 				var txs = Object.values(outputTransactions);
 				lastResult2 = txs;
+				downloadDeposits();
 				makeTable2(txs);
 			}
 		}
@@ -1480,7 +1486,9 @@
         var result = Object.values(balances);
         lastResult = result;
 		if(loadedED >= tokenCount && loadedW >= tokenCount)
+		{
 			downloadBalances();
+		}
 		if(showCustomTokens)
 			lastResult3 = result;
 
@@ -1768,6 +1776,10 @@
 						
 						row$.append($('<td/>').html('<a href="'+cellValue+'" target="_blank"> See details</a>'));
 					}
+					else if(head =='Date')
+					{
+						row$.append($('<td/>').html(formatDate(cellValue, false)));
+					}
 					else
 					{
 						row$.append($('<td/>').html(cellValue));
@@ -1807,7 +1819,12 @@
 							row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
 							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));
-					} else
+					} 
+					else if(head =='Date')
+					{
+						row$.append($('<td/>').html(formatDate(cellValue, false)));
+					}
+					else
 					{
 						row$.append($('<td/>').html(cellValue));
 					}
@@ -1903,17 +1920,39 @@
 		var utcSeconds = secs;
 		var d = new Date(0);
 		d.setUTCSeconds(utcSeconds);
-		return formatDate(d);
+		return d;
+		//return formatDate(d);
 	}
 	
 	function toDateTimeNow(short)
 	{
 		var t = new Date();
-		return formatDate(t, short);
+		return t; //formatDate(t, short);
 	}
 
-	function formatDate(d, short)
+	function createUTCOffset(date) {
+		
+		function pad(value) {
+			return value < 10 ? '0' + value : value;
+		}
+		
+		var sign = (date.getTimezoneOffset() > 0) ? "-" : "+";
+		var offset = Math.abs(date.getTimezoneOffset());
+		var hours = pad(Math.floor(offset / 60));
+		var minutes = pad(offset % 60);
+		return sign + hours + ":"+ minutes;
+	}
+	
+	function formatDateOffset(d, short)
 	{
+		if(short)
+			return formatDate(d,short);
+		else
+			return formatDateT(d,short) + createUTCOffset(d);
+	}
+	
+	function formatDate(d, short)
+	{	
 		var month = '' + (d.getMonth() + 1),
 			day = '' + d.getDate(),
 			year = d.getFullYear(),
@@ -1928,6 +1967,29 @@
 
 		if(!short)
 			return [year, month, day].join('-') + ' '+ [hour,min].join(':');
+		else
+			return [year, month, day].join('');
+	}
+	
+	function formatDateT(d, short)
+	{
+		if(d == "??")
+			return "??";
+		
+		var month = '' + (d.getMonth() + 1),
+			day = '' + d.getDate(),
+			year = d.getFullYear(),
+			hour = d.getHours(),
+			min = d.getMinutes();
+			
+
+		if (month.length < 2) month = '0' + month;
+		if (day.length < 2) day = '0' + day;
+		if (hour < 10) hour = '0' + hour;
+		if (min < 10) min = '0' + min;
+
+		if(!short)
+			return [year, month, day].join('-') + 'T'+ [hour,min].join(':');
 		else
 			return [year, month, day].join('');
 	}
@@ -1950,11 +2012,11 @@
 			allBal = allBal.filter((x) => {return x.Total > 0;});
 			
 			
-			var A = [ ['Token name', 'Wallet', 'EtherDelta', 'Total', 'EtherDelta Bid (ETH)', 'Estimated value (ETH)',' ','Token contract address'] ];  
+			var A = [ ['Token', 'Wallet', 'EtherDelta', 'Total', 'EtherDelta Bid (ETH)', 'Estimated value (ETH)','Token contract address'] ];  
 			// initialize array of rows with header row as 1st item
 			for(var i=0;i< allBal.length;++i)
 			{ 
-				var arr = [ allBal[i].Name, allBal[i].Wallet, allBal[i].EtherDelta, allBal[i].Total, allBal[i].Bid, allBal[i].Bid * allBal[i].Total ,'',allBal[i].Address,];
+				var arr = [ allBal[i].Name, allBal[i].Wallet, allBal[i].EtherDelta, allBal[i].Total, allBal[i].Bid, allBal[i].Bid * allBal[i].Total ,allBal[i].Address,];
 				if(arr[0] === 'ETH')
 					arr[7] = 'Not a token';
 				A.push(arr); 
@@ -1976,6 +2038,46 @@
 			
 			$('#downloadBalances').html('');
 			var parent = document.getElementById('downloadBalances');
+			parent.appendChild(sp);
+			//parent.appendCild(a);
+		}
+		
+	}
+	
+	function downloadDeposits()
+	{
+		if(lastResult)
+		{
+			var allTrans= lastResult2;
+			allTrans = allTrans.filter((x) => {return x.Status && (x.Type == 'Deposit' || x.Type == 'Withdraw');});
+			
+			
+			var A = [ ['Type', 'Token', 'Amount', 'Transaction Hash', 'Date','Token contract address'] ];  
+			// initialize array of rows with header row as 1st item
+			for(var i=0;i< allTrans.length;++i)
+			{ 
+				var arr = [ allTrans[i].Type, allTrans[i].Name, allTrans[i].Value, allTrans[i].Hash, formatDateOffset(allTrans[i].Date),allTrans[i].TokenAddr];
+				if(arr[1] === 'ETH')
+					arr[5] = 'Not a token';
+				A.push(arr); 
+			}
+			var csvRows = [];
+			for(var i=0,l=A.length; i<l; ++i){
+				csvRows.push(A[i].join(','));   // unquoted CSV row
+			}
+			var csvString = csvRows.join("\r\n");
+
+			var sp = document.createElement('span');
+			sp.innerHTML = "Export Depost/Withdraw as CSV ";
+			var a = document.createElement('a');
+			a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
+			a.href     = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
+			a.target   = '_blank';
+			a.download = toDateTimeNow(true) + '-Funds-' + publicAddr + '.csv';
+			sp.appendChild(a);
+			
+			$('#downloadDeposits').html('');
+			var parent = document.getElementById('downloadDeposits');
 			parent.appendChild(sp);
 			//parent.appendCild(a);
 		}

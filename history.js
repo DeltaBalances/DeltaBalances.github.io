@@ -59,8 +59,8 @@
 			Price: 0,
 			ETH: 0,
 			Hash: '0xH4SH',
-			Block: '',
 			Date: toDateTimeNow(),
+			Block: '',
 			Buyer: '',
 			Seller: '',
 			Fee: 0,
@@ -925,7 +925,7 @@
 				widgetOptions : {
 				  scroller_height : 500,
 				},
-                sortList: [[7, 1]]
+                sortList: [[7, 8]]
             });
 
             tableLoaded = true;
@@ -1049,6 +1049,10 @@
 					{
 						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/tx/' + cellValue + '">'+ cellValue.substring(0,8)  + '...</a>'));
 					}
+					else if( head == 'Block')
+					{
+						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/block/' + cellValue + '">'+ cellValue  + '</a>'));
+					}
 					else if( head == 'Buyer' || head == 'Seller')
 					{
 						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/address/' + cellValue + '">'+ cellValue.substring(0,8)  + '...</a>'));
@@ -1075,7 +1079,7 @@
         }
     }
 
-	var tradeHeaders = {'Type': 1, 'Trade': 1, 'Token' : 1, 'Amount':1, 'Price':1, 'ETH': 1, 'Hash':1, 'Date':1, 'Buyer':1, 'Seller' : 1, 'Fee' : 1, 'FeeToken' : 1,'Details':1};
+	var tradeHeaders = {'Type': 1, 'Trade': 1, 'Token' : 1, 'Amount':1, 'Price':1, 'ETH': 1, 'Hash':1, 'Date':1, 'Buyer':1, 'Seller' : 1, 'Fee' : 1, 'FeeToken' : 1, 'Block':1,'Details':1};
     // Adds a header row to the table and returns the set of columns.
     // Need to do union of keys from all records as some records may not contain
     // all records.

@@ -925,7 +925,7 @@
 				widgetOptions : {
 				  scroller_height : 500,
 				},
-                sortList: [[7, 8]]
+                sortList: [[8, "d"]]
             });
 
             tableLoaded = true;

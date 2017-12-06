@@ -1047,7 +1047,7 @@
 					}
 					else if( head == 'Hash')
 					{
-						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/tx/' + cellValue + '">'+ cellValue.substring(0,8)  + '...</a>'));
+						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/tx/' + cellValue + '">'+ cellValue.substring(0,8)  + '..</a>'));
 					}
 					else if( head == 'Block')
 					{
@@ -1055,18 +1055,18 @@
 					}
 					else if( head == 'Buyer' || head == 'Seller')
 					{
-						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/address/' + cellValue + '">'+ cellValue.substring(0,8)  + '...</a>'));
+						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/address/' + cellValue + '">'+ cellValue.substring(0,8)  + '..</a>'));
 					}
 					else if(head == 'Date')
 					{
 						if(cellValue !== '??')
-							cellValue = formatDate(cellValue);
+							cellValue = formatDate(cellValue, false, true);
 						row$.append($('<td/>').html(cellValue));
 					}
 					else if(head == 'Details')
 					{
 						
-						row$.append($('<td/>').html('<a href="'+cellValue+'" target="_blank"> See details</a>'));
+						row$.append($('<td/>').html('<a href="'+cellValue+'" target="_blank">details</a>'));
 					}
 					else
 					{
@@ -1159,7 +1159,7 @@
 			return formatDateT(d,short) + createUTCOffset(d);
 	}
 	
-	function formatDate(d, short)
+	function formatDate(d, short, removeSeconds)
 	{
 		if(d == "??")
 			return "??";
@@ -1179,7 +1179,10 @@
 		if (sec < 10) sec = '0' + sec;
 
 		if(!short)
-			return [year, month, day].join('-') + ' '+ [hour,min,sec].join(':');
+			if(!removeSeconds)
+				return [year, month, day].join('-') + ' '+ [hour,min,sec].join(':');
+			else
+				return [year, month, day].join('-') + ' '+ [hour,min].join(':');
 		else
 			return [year, month, day].join('');
 	}

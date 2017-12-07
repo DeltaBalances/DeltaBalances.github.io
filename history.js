@@ -1196,16 +1196,18 @@
 			day = '' + d.getDate(),
 			year = d.getFullYear(),
 			hour = d.getHours(),
-			min = d.getMinutes();
+			min = d.getMinutes(),
+			sec = d.getSeconds();
 			
 
 		if (month.length < 2) month = '0' + month;
 		if (day.length < 2) day = '0' + day;
 		if (hour < 10) hour = '0' + hour;
 		if (min < 10) min = '0' + min;
+		if (sec < 10) sec = '0' + sec;
 
 		if(!short)
-			return [year, month, day].join('-') + 'T'+ [hour,min].join(':');
+			return [year, month, day].join('-') + 'T'+ [hour,min,sec].join(':');
 		else
 			return [year, month, day].join('');
 	}
@@ -1253,12 +1255,12 @@
 			//	checkBlockDates(lastResult);
 				var allTrades = lastResult;
 				
-				var A = [ ['Type', 'Trade', 'Token', 'Amount', 'Price (ETH)', 'Total ETH', 'Date', '', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract' ] ];  
+				var A = [ ['Type', 'Trade', 'Token', 'Amount', 'Price (ETH)', 'Total ETH', 'Date', 'Block', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract' ] ];  
 				// initialize array of rows with header row as 1st item
 				for(var i=0;i< allTrades.length;++i)
 				{ 
 					var arr = [allTrades[i]['Type'], allTrades[i]['Trade'], allTrades[i]['Token'].name, allTrades[i]['Amount'], allTrades[i]['Price'], 
-								allTrades[i]['ETH'],  formatDateOffset(allTrades[i]['Date']), ' ', allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'], 
+								allTrades[i]['ETH'],  formatDateOffset(allTrades[i]['Date']), allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'], 
 								allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr];
 					A.push(arr); 
 				}

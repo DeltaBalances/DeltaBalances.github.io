@@ -16,9 +16,9 @@ List of tokens from 3 sources
 //tokens that somehow break the balanceOf contract call, temporarily blacklisted
 // 2017-12-04
 let tokenBlacklist = {
-	"0x2df8286c9396f52e17dfee75d2e41e52609cf897" : "SNTR" //contract selfdestructed
+	"0x2df8286c9396f52e17dfee75d2e41e52609cf897" : "SNTR", //contract selfdestructed
+	"0x3a0181e8f2dd081ace83eac027eec2e0c2255ed5" : "BCV" //selfdestructed
 }
-
 
 // offline backup of EtherDelta tokens
 // from EtherDelta 2017-12-04

@@ -902,8 +902,8 @@
 		}		
 	}
 	
-	var maxPerRequest = 120;
-	var increasedMaxPerRequest = 650;
+	var maxPerRequest = 75; //was 120
+	var increasedMaxPerRequest = 75; //was 650
 	
 	//wallet & etherdelta balances in 1 request
 	function getAllBalances(rqid)
@@ -956,7 +956,7 @@
 				else 
 				{
 					//retry only with single infura request, don't bother with multiple etherscan requests
-					if(retries < 1 &&  tokens3.length <= max)
+					if(retries < 2 &&  tokens3.length <= max)
 					{
 						retries++;
 						allBalances(startIndex,endIndex,tokens3);
@@ -964,7 +964,7 @@
 					}
 					else 
 					{
-						showError('Failed to load all balances after 2 tries, try again later');
+						showError('Failed to load all balances after 3 tries, try again later');
 						loadedED = tokenCount;
 						loadedW = tokenCount;
 						finishedBalanceRequest();
@@ -1024,7 +1024,7 @@
 				else 
 				{
 					//retry only with single infura request, don't bother with multiple etherscan requests
-					if(retries < 1 &&  tokens3.length <= max)
+					if(retries < 2 &&  tokens3.length <= max)
 					{
 						retries++;
 						deltaBalances(startIndex,endIndex,tokens3);
@@ -1032,7 +1032,7 @@
 					}
 					else 
 					{
-						showError('Failed to load all EtherDelta balances after 2 tries, try again later');
+						showError('Failed to load all EtherDelta balances after 3 tries, try again later');
 						loadedED = tokenCount;
 						finishedBalanceRequest();
 					}
@@ -1091,7 +1091,7 @@
 				else 
 				{
 					//retry only with single infura request, don't bother with multiple etherscan requests
-					if(retries < 1 && tokens3.length <= max)
+					if(retries < 2 && tokens3.length <= max)
 					{
 						retries++;
 						walletBalances(startIndex,endIndex,tokens3);
@@ -1099,7 +1099,7 @@
 					}
 					else 
 					{
-						showError('Failed to load all Wallet balances after 2 tries, try again later');
+						showError('Failed to load all Wallet balances after 3 tries, try again later');
 						loadedW = tokenCount;
 						finishedBalanceRequest();
 					}

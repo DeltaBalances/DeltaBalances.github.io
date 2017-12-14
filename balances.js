@@ -2079,9 +2079,22 @@
 				let estimate = '';
 				if(bid)
 					estimate = bid * allBal[i].Total 
-				var arr = [ allBal[i].Name, allBal[i].Wallet, allBal[i].EtherDelta, allBal[i].Total, bid, estimate ,allBal[i].Address,];
+				var arr = [ allBal[i].Name, allBal[i].Wallet, allBal[i].EtherDelta, allBal[i].Total, bid, estimate ,allBal[i].Address];
 				if(arr[0] === 'ETH')
 					arr[7] = 'Not a token';
+				
+				for(let j = 0; j < arr.length; j++)
+				{
+					//remove exponential notation
+					if(A[0][j] == 'Wallet' ||  A[0][j] == 'EtherDelta' || A[0][j] == 'Total' || A[0][j] == 'Estimated value (ETH)' || A[0][j] == 'EtherDelta Bid (ETH)' || A[0][j] == 'EtherDelta Ask (ETH)')
+					{
+						arr[j] = exportNotation(arr[j]);
+					}
+					
+					// add quotes
+					//arr[j] = `\"${arr[j]}\"`;
+				}
+				
 				A.push(arr); 
 			}
 			var csvRows = [];
@@ -2123,6 +2136,19 @@
 				var arr = [ allTrans[i].Type, allTrans[i].Name, allTrans[i].Value, allTrans[i].Hash, formatDateOffset(allTrans[i].Date),allTrans[i].TokenAddr];
 				if(arr[1] === 'ETH')
 					arr[5] = 'Not a token';
+				
+				for(let j = 0; j < arr.length; j++)
+				{
+					//remove exponential notation
+					if(A[0][j] == 'Amount' )
+					{
+						arr[j] = exportNotation(arr[j]);
+					}
+					
+					// add quotes
+					//arr[j] = `\"${arr[j]}\"`;
+				}
+				
 				A.push(arr); 
 			}
 			var csvRows = [];
@@ -2159,5 +2185,12 @@
 	  };
 
 		return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+	}
+	
+	
+	//remove exponential notation 1e-8  etc.
+	function exportNotation(num)
+	{
+		return Number(num).toFixed(25).replace(/\.?0+$/,""); // rounded to 25 decimals, no trailing 0
 	}
 }

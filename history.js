@@ -1262,8 +1262,23 @@
 					var arr = [allTrades[i]['Type'], allTrades[i]['Trade'], allTrades[i]['Token'].name, allTrades[i]['Amount'], allTrades[i]['Price'], 
 								allTrades[i]['ETH'],  formatDateOffset(allTrades[i]['Date']), allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'], 
 								allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr];
+								
+
+					for(let j = 0; j < arr.length; j++)
+					{
+						//remove exponential notation
+						if(A[0][j] == 'Amount' ||  A[0][j] == 'Price (ETH)' || A[0][j] == 'Total ETH' || A[0][j] == 'Fee')
+						{
+							arr[j] = exportNotation(arr[j]);
+						}
+						
+						// add quotes
+						//arr[j] = `\"${arr[j]}\"`;
+					}
 					A.push(arr); 
 				}
+				
+				
 				var csvRows = [];
 				for(var i=0,l=A.length; i<l; ++i){
 					csvRows.push(A[i].join(','));   // unquoted CSV row
@@ -1298,17 +1313,29 @@
 				// initialize array of rows with header row as 1st item
 				for(var i=0;i< allTrades.length;++i)
 				{ 
+					var arr = undefined;
 					if(allTrades[i]['Trade'] === 'Buy') {
-						var arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
+						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
 								allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,  allTrades[i]['ETH'], " Transaction Hash " + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr];
-						A.push(arr); 
 					}
 					// add token fee to total for correct balance in bitcoin tax
 					else {
-						var arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
+						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
 								allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,  allTrades[i]['ETH'], " Transaction Hash " + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr];
-						A.push(arr); 
 					}
+					
+					for(let j = 0; j < arr.length; j++)
+					{
+						//remove exponential notation
+						if(A[0][j] == 'Volume' ||  A[0][j] == 'Price' || A[0][j] == 'Fee' || A[0][j] == 'Total')
+						{
+							arr[j] = exportNotation(arr[j]);
+						}
+						
+						// add quotes
+						//arr[j] = `\"${arr[j]}\"`;
+					}
+					A.push(arr); 
 				}
 				var csvRows = [];
 				for(var i=0,l=A.length; i<l; ++i){
@@ -1357,9 +1384,16 @@
 							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDate(allTrades[i]['Date'])];
 						} 
 						
-						for(let i = 0; i < arr.length; i++)
+						for(let j = 0; j < arr.length; j++)
 						{
-							arr[i] = `\"${arr[i]}\"`;
+							//remove exponential notation
+							if(A[0][j] == '\"Buy\"' ||  A[0][j] == '\"Sell\"' || A[0][j] == '\"Fee\"')
+							{
+								arr[j] = exportNotation(arr[j]);
+							}
+							
+							// add quotes
+							arr[j] = `\"${arr[j]}\"`;
 						}
 						
 						A.push(arr); 
@@ -1412,9 +1446,16 @@
 							allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 'EtherDelta','Trade'];
 						} 
 						
-						for(let i = 0; i < arr.length; i++)
+						for(let j = 0; j < arr.length; j++)
 						{
-							arr[i] = `\"${arr[i]}\"`;
+							//remove exponential notation
+							if(A[0][j] == '\"Buy\"' ||  A[0][j] == '\"Sell\"' || A[0][j] == '\"Fee\"')
+							{
+								arr[j] = exportNotation(arr[j]);
+							}
+							
+							// add quotes
+							arr[j] = `\"${arr[j]}\"`;
 						}
 						A.push(arr); 
 				}
@@ -1441,6 +1482,12 @@
 			}
 			
 		}
+	}
+	
+	//remove exponential notation 1e-8  etc.
+	function exportNotation(num)
+	{
+		return Number(num).toFixed(25).replace(/\.?0+$/,""); // rounded to 25 decimals, no trailing 0
 	}
 	
 	function placeholderTable()

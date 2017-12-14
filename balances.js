@@ -32,6 +32,7 @@
     var decimals = false;
 	var fixedDecimals = 3; 
     var remember = false;
+	var useAsk = false;
 	
 	var showTransactions = true;
     var showBalances = true;	
@@ -69,6 +70,7 @@
 			Unlisted: false,
 			Address:'',
 			Bid: '',
+			Ask: '',
 			'Est. ETH': '',
         },
     };
@@ -319,6 +321,23 @@
         } 
 		changeZero = false;
     }
+	
+	function checkAsk()
+	{
+		useAsk = $('#ask').prop('checked');
+
+		$("#resultTable").trigger("destroy");
+		 $('#resultTable tbody').html('');
+		 $('#resultTable thead').html('');
+		table1Loaded = false;
+		
+		if (lastResult) {
+			finishedBalanceRequest();
+			makeTable(lastResult, hideZero);
+		} else {
+			placeholderTable();
+		}
+	}
 
 	// remember me checkbox
     function checkRemember()
@@ -634,6 +653,7 @@
 						EtherDelta: '',
 						Total: 0,
 						Bid: '',
+						Ask: '',
 						'Est. ETH': '',
 						Unlisted: tokenObj.unlisted,
 						Address: tokenObj.addr,
@@ -825,6 +845,7 @@
 							if(token && balances[token.addr])
 							{
 								balances[token.addr].Bid = Number(results[i].bid);
+								balances[token.addr].Ask = Number(results[i].ask);
 							}
 						}
 						loadedBid = 1;
@@ -859,6 +880,7 @@
 							if(token && balances[token.addr])
 							{
 								balances[token.addr].Bid = Number(results[i].bid);
+								balances[token.addr].Ask = Number(results[i].ask);
 							}
 						}
 						loadedBid = 1;
@@ -1451,16 +1473,25 @@
 					bal.Total = bal.Wallet;
 					
 				bal['Est. ETH'] = '';
-				if(bal.Bid && bal.Total)
+				if( (bal.Bid || (useAsk && bal.Ask)) && bal.Total)
 				{
 					if(token.name !== 'ETH')
 					{
-						var val = Number(bal.Bid) * Number(bal.Total);
+						var val; 
+						if(!useAsk)
+							val = Number(bal.Bid) * Number(bal.Total);
+						else
+							val = Number(bal.Ask) * Number(bal.Total);
 						bal['Est. ETH'] = val;
 						sumToken += val;
 					}
-				} else if(! bal.bid) {
-					bal.bid = '';
+				}
+				
+				if(! bal.Bid) {
+					bal.Bid = '';
+				}
+				if(! bal.Ask) {
+					bal.Ask = '';
 				}
 				if(token.name === 'ETH')
 				{
@@ -1480,6 +1511,21 @@
 			$('#tokenbalancePrice').html(" $" + (sumToken * etherPrice).toFixed(2));
 			$('#totalbalance').html((sumETH + sumToken).toFixed(fixedDecimals) + ' ETH');
 			$('#totalbalancePrice').html(" $" + ((sumETH + sumToken)* etherPrice).toFixed(2));
+			
+			$('#downloadBalances').html('');
+			downloadBalances();
+			
+		} else {
+			
+			$('#ethbalance').html('');
+			$('#tokenbalance').html('');
+			$('#totalbalance').html('');
+			
+			$('#ethbalancePrice').html('');
+			$('#tokenbalancePrice').html('');
+			$('#totalbalancePrice').html('');
+			
+			$('#downloadBalances').html('');
 		}
 		 
 		
@@ -1494,6 +1540,8 @@
 
 		makeTable(result, hideZero);
     }
+	
+	
 
 	//balances table
 	function makeTable(result, hideZeros)
@@ -1519,7 +1567,12 @@
             });
 		} */
         
-		buildHtmlTable('#resultTable', filtered, loaded, 'balances', balanceHeaders);
+		if(useAsk)
+		{
+			buildHtmlTable('#resultTable', filtered, loaded, 'balances', balanceHeaders2);
+		} else {
+			buildHtmlTable('#resultTable', filtered, loaded, 'balances', balanceHeaders);
+		}
         trigger();
 	}
 
@@ -1797,12 +1850,12 @@
                     if (cellValue == null) cellValue = "";
 					var head = columns[colIndex];
 					
-					if(head == 'Total' || head == 'EtherDelta' || head == 'Wallet' || head == 'Bid' || head == 'Est. ETH')
+					if(head == 'Total' || head == 'EtherDelta' || head == 'Wallet' || head == 'Bid' || head =='Ask' || head == 'Est. ETH')
 					{
 						if(cellValue !== "" && cellValue !== undefined)
 						{
 							var dec = fixedDecimals;
-							if(head == 'Bid' )
+							if(head == 'Bid' || head == 'Ask' )
 							{
 								dec +=2;
 							}
@@ -1835,9 +1888,10 @@
         }
     }
 
-	var balanceHeaders = {'Name': 1, 'Wallet':1, 'EtherDelta':1, 'Total':1, 'Value':1,'Bid':1, 'Est. ETH':1};
-	var depositHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1};
-	var transactionHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1, 'Price':1, 'ETH':1, 'Status':1, 'Details':1};
+	const balanceHeaders = {'Name': 1, 'Wallet':1, 'EtherDelta':1, 'Total':1, 'Value':1,'Bid':1, 'Est. ETH':1};
+	const balanceHeaders2 = {'Name': 1, 'Wallet':1, 'EtherDelta':1, 'Total':1, 'Value':1,'Ask':1, 'Est. ETH':1};
+	const depositHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1};
+	const transactionHeaders = {'Name': 1,'Value':1,'Type':1, 'Hash':1, 'Date':1, 'Price':1, 'ETH':1, 'Status':1, 'Details':1};
     // Adds a header row to the table and returns the set of columns.
     // Need to do union of keys from all records as some records may not contain
     // all records.
@@ -2012,12 +2066,20 @@
 			var allBal = lastResult;
 			allBal = allBal.filter((x) => {return x.Total > 0;});
 			
-			
-			var A = [ ['Token', 'Wallet', 'EtherDelta', 'Total', 'EtherDelta Bid (ETH)', 'Estimated value (ETH)','Token contract address'] ];  
+			let bidText = 'EtherDelta Bid (ETH)';
+			if(useAsk)
+				bidText = 'EtherDelta Ask (ETH)'
+			const A = [ ['Token', 'Wallet', 'EtherDelta', 'Total', bidText , 'Estimated value (ETH)','Token contract address'] ];  
 			// initialize array of rows with header row as 1st item
 			for(var i=0;i< allBal.length;++i)
 			{ 
-				var arr = [ allBal[i].Name, allBal[i].Wallet, allBal[i].EtherDelta, allBal[i].Total, allBal[i].Bid, allBal[i].Bid * allBal[i].Total ,allBal[i].Address,];
+				let bid = allBal[i].Bid;
+				if(useAsk)
+					bid = allBal[i].Ask;
+				let estimate = '';
+				if(bid)
+					estimate = bid * allBal[i].Total 
+				var arr = [ allBal[i].Name, allBal[i].Wallet, allBal[i].EtherDelta, allBal[i].Total, bid, estimate ,allBal[i].Address,];
 				if(arr[0] === 'ETH')
 					arr[7] = 'Not a token';
 				A.push(arr); 
@@ -2054,7 +2116,7 @@
 			if(allTrans.length == 0)
 				return;
 			
-			var A = [ ['Type', 'Token', 'Amount', 'Transaction Hash', 'Date','Token contract address'] ];  
+			const A = [ ['Type', 'Token', 'Amount', 'Transaction Hash', 'Date','Token contract address'] ];  
 			// initialize array of rows with header row as 1st item
 			for(var i=0;i< allTrans.length;++i)
 			{ 

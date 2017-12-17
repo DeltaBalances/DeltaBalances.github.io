@@ -117,6 +117,24 @@ module.exports = (config) => {
 		}
 	  
   };
+  
+  utility.detectInputMethod = function detectInputMethod(web3In, contract, data)
+  {
+	  
+	   if(!bundle.EtherDelta.config.solFunc)
+	  {
+		   let depositAbi = bundle.EtherDelta.contractEtherDelta.abi.find(element => element.name === 'Deposit');
+			depositAbi.outputs = []; // error avoidance
+			let solFunc = new SolidityFunction(web3In.eth, depositAbi, '');
+	  }
+	  
+	 
+	  let result = bundle.EtherDelta.config.solFunc.decodeMethod(data, bundle.EtherDelta.config.methodIDS);
+	  
+	  return result;
+	  
+	  
+  };
     
   utility.processOutputMethod = function getOutput(web3In, contract, data)
   {
@@ -358,6 +376,33 @@ module.exports = (config) => {
     });
   };
 
+  
+    utility.getBlockDate = function getBlockDate(web3, decBlocknr, callback) {
+		function proxy() {
+			
+			var url = 'https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + decBlocknr + '&apikey='+_delta.config.etherscanAPIKey;
+			$.getJSON( url, function( res ) {
+				  if(res && res.status == "1" && res.result && res.result.timeStamp)
+				  {
+						callback(undefined,res.result.timeStamp, res.result.blockNumber);	
+				  } else {
+					callback('failed to get date', undefined);
+				  }
+			});
+		}
+    if (web3.currentProvider) {
+      web3.eth.getBlock(decBlocknr,(err, result) => {
+        if (!err && result && result.timestamp) {
+          callback(undefined, result.timestamp, decBlocknr );
+        } else {
+          proxy();
+        }
+      });
+    } else {
+      proxy();
+    }
+  };
+  
   utility.blockNumber = function blockNumber(web3, callback) {
     function proxy() {
       let url =

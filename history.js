@@ -80,6 +80,9 @@
 	
 	function init()
 	{	
+	
+		getBlockStorage(); // get cached block dates
+		
 		// borrow some ED code for compatibility
         _delta.startEtherDelta(() => 
 		{	
@@ -586,13 +589,13 @@
 		
 		var start = startblock;
 		var end = endblock;
-		var max = 10000;
+		const max = 7500;
 		
 		
 		loadedLogs = 0;
 		
 		var tradeLogResult = [];
-		var contractAddr =_delta.config.contractEtherDeltaAddr.toLowerCase();
+		const contractAddr =_delta.config.contractEtherDeltaAddr.toLowerCase();
 
 		var reqAmount = 0;
 		for(var i = start; i <= end; i+= (max +1))
@@ -631,19 +634,21 @@
 							doneBlocks[tradesInResult[i].Block] = true;
 							var url = 'https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + tradesInResult[i].Block + '&apikey='+_delta.config.etherscanAPIKey;
 							blockReqs++;
-							$.getJSON( url, function( res ) {
-							  if(res && res.status == "1" && res.result)
-							  {
-								  var unixtime = res.result.timeStamp;
-								  if(unixtime)
-									  blockDates[res.result.blockNumber] = toDateTime(unixtime);
-							  }
-							  blockLoaded++;
-							  if(blockLoaded >= blockReqs)
-							  {
-								  if(!running)
-									done();
-							  }
+							
+							_util.getBlockDate(_delta.web3, tradesInResult[i].Block, (err, unixtimestamp, nr) => {
+								if(!err && unixtimestamp)
+								{
+									blockDates[nr] = toDateTime(unixtimestamp);
+								}
+								
+								blockLoaded++;
+							    if(blockLoaded >= blockReqs)
+							    {
+									setBlockStorage(); // update cached block dates
+								    if(!running)
+									    done();
+							    }
+								
 							});
 						}
 					}
@@ -898,12 +903,47 @@
 						document.getElementById('address').value = addr;
 					}
 				}
-				$('#remember').prop('checked', true);
+				//$('#remember').prop('checked', true);
             }
         } 
     }
 
 
+	
+	function getBlockStorage()
+	{
+        if (typeof(Storage) !== "undefined") 
+		{
+			let dates = localStorage.getItem("blockdates");
+			if(dates)
+			{
+				dates = JSON.parse(dates);
+				if(dates)
+				{
+					// map date strings to objects & get count
+					let dateCount = Object.keys(dates).map( x => blockDates[x] = new Date(dates[x])).length;
+					console.log('retrieved ' + dateCount + ' block dates from cache');
+				}
+				
+			}
+        } 
+    }
+	
+	function setBlockStorage() 
+	{
+        if (typeof(Storage) !== "undefined")
+		{
+			if(blockDates)
+			{
+				let dateCount = Object.keys(blockDates).length;
+				if(dateCount > 0)
+				{
+					console.log('saved ' + dateCount + ' block dates in cache');
+					localStorage.setItem("blockdates", JSON.stringify(blockDates));
+				}
+            } 
+        } 
+    }
 
     // final callback to sort table
     function trigger() 

@@ -699,7 +699,7 @@
 			
 			function parseInput(tx, input)
 			{
-				console.log('parsing output');
+				console.log('parsing input');
 				// transfer 0xa9059cbb adress to, uint value
 				
 				var method = input.slice(0, 10);
@@ -1203,7 +1203,7 @@
 			}
 		}
 		else if(transaction.status === 'Pending')
-			$('#outputdata').html('Transaction is pending,no output available yet.');
+			$('#outputdata').html('Transaction is pending, no output available yet.');
 		else
 			$('#outputdata').html('');
 		

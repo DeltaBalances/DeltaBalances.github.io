@@ -1656,9 +1656,6 @@
 		{
             $("#resultTable thead th").data("sorter", true);
             $("#resultTable").tablesorter({
-				textExtraction: {
-					0: function(node, table, cellIndex){ return $(node).find("a").text(); },
-				},
 				widgets: [ 'scroller' ],
 				widgetOptions : {
 				  scroller_height : 500,

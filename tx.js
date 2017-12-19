@@ -1287,9 +1287,12 @@
 		var url = 'https://etherscan.io/address/' + addr;
 		if(!html)
 			return url
-		var displayText = addressName(addr);
+		var displayText = addr;
 		if(short)
 			displayText = displayText.slice(0,6) + '..';
+		else {
+			displayText = addressName(addr);
+		}
 		return '<a target="_blank" href="' + url + '">'+ displayText +' </a>';
 	}
 	
@@ -1399,7 +1402,7 @@
 				{
 					cellValue = Number(cellValue).toFixed(3);
 				}
-				else if(keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to')
+				else if(keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender')
 				{
 					cellValue = addressLink(cellValue, true, true);
 				}

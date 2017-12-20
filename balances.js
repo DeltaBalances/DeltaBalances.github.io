@@ -239,6 +239,7 @@
                 return false;
             } else {
 				hideError();
+				showError('<strong>WARNING</strong> The EtherDelta website is compromised. DO NOT USE IT.  <a href="https://twitter.com/etherdelta">Twitter for updates</a>');
 				return true;
 			}
         });
@@ -307,6 +308,7 @@
 			_delta.connectSocket();
 			$('#address').focus();
 		}
+		showError('<strong>WARNING</strong> The EtherDelta website is compromised. DO NOT USE IT.  <a href="https://twitter.com/etherdelta">Twitter for updates</a>');
 	}
 		
 	// zero balances checkbox
@@ -540,6 +542,7 @@
 		
 		hideError();
 		hideHint();
+		showError('<strong>WARNING</strong> The EtherDelta website is compromised. DO NOT USE IT.  <a href="https://twitter.com/etherdelta">Twitter for updates</a>');
 		//disableInput(true);
 		$('#downloadBalances').html('');
 		$('#downloadDeposits').html('');

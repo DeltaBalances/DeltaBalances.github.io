@@ -151,6 +151,7 @@
                 return false;
             } else {
 				hideError();
+				showError('<strong>WARNING</strong> The EtherDelta website is compromised. DO NOT USE IT.  <a href="https://twitter.com/etherdelta">Twitter for updates</a>');
 				return true;
 			}
         });
@@ -186,6 +187,7 @@
 		{
 			$('#address').focus();
 		}
+		showError('<strong>WARNING</strong> The EtherDelta website is compromised. DO NOT USE IT.  <a href="https://twitter.com/etherdelta">Twitter for updates</a>');
 	}
 		
 	

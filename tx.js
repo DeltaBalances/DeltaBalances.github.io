@@ -1068,11 +1068,11 @@
 		{
 			if(uniqueTokens[transaction.input.to]) 
 			{
-				sum += 'Warning, you sent tokens to a token contract, this is usually a mistake. <br>';
+				sum += '<strong>Warning</strong>, you sent tokens to a token contract. These tokens are most likely lost forever. <br>';
 			}
 			else if(transaction.input.to === _delta.config.contractEtherDeltaAddr)
 			{
-				sum += 'Warning, you sent tokens to the EtherDelta contract without a deposit, you can no longer access these tokens. <br>';
+				sum += '<strong>Warning</strong>, you sent tokens to the EtherDelta contract without a deposit. Nobody can access these tokens anymore, they are most likely lost forever. <br>';
 			}
 		}
 		if(!transaction.input && (!transaction.output || transaction.output.length == 0))

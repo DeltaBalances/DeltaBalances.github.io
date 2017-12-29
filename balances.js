@@ -276,7 +276,8 @@
 		// contract change
 		$('#contractSelect').change(e => {
 			_delta.changeContract(e.target.selectedIndex);
-			myClick();
+			if(document.getElementById('address').value !== '')
+				myClick();
 		});
 		
 		

@@ -549,6 +549,9 @@ module.exports = {
     { addr: '0x4aea7cf559f67cedcad07e12ae6bc00f07e8cf65'},
     { addr: '0x2136bbba2edca21afdddee838fff19ea70d10f03'},
     { addr: '0xc6b330df38d6ef288c953f1f2835723531073ce2'},
+	//decentrex (closed website)
+	{ addr: '0xbf29685856fae1e228878dfb35b280c0adcc3b05'},
+	
   ],
   ethProvider: 'http://localhost:8545',
   ethGasPrice: 4000000000,

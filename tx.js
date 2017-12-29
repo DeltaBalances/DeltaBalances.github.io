@@ -1311,10 +1311,17 @@
 		{
 			if(lcAddr == _delta.config.contractEtherDeltaAddrs[i].addr)
 			{
-				var resp = 'EtherDelta Contract ' + addr.slice(0,4) + '..';
-				if(i > 0)
-					resp = 'Outdated ' + resp;
-				return resp;
+				if(lcAddr == '0xbf29685856fae1e228878dfb35b280c0adcc3b05')
+				{
+					return  'Decentrex Contract ' + addr.slice(0,4) + '..';
+				} 
+				else
+				{
+					var resp = 'EtherDelta Contract ' + addr.slice(0,4) + '..';
+					if(i > 0)
+						resp = 'Outdated ' + resp;
+					return resp;
+				}
 			}
 		}
 		return addr;

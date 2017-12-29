@@ -276,6 +276,7 @@
 		// contract change
 		$('#contractSelect').change(e => {
 			_delta.changeContract(e.target.selectedIndex);
+			myClick();
 		});
 		
 		
@@ -1948,14 +1949,18 @@
 		
 		//Create array of options to be added
 		var array =_delta.config.contractEtherDeltaAddrs.map(x => { return x.addr;});
-
+		
 		//Create and append select list
 		var selectList = document.createElement("select");
 		selectList.id = "contractSelect";
 		var liveGroup = document.createElement("optgroup");
-		liveGroup.label = "Active";
+		liveGroup.label = "EtherDelta - Active";
 		var oldGroup = document.createElement("optgroup");
-		oldGroup.label = "Outdated - withdraw funds";
+		oldGroup.label = "EtherDelta - Outdated - withdraw funds";
+		var oldGroup2 = document.createElement("optgroup");
+		oldGroup2.label = "Decentrex - Shut down - withdraw using MEW";
+		
+		
 		
 		//Create and append the options
 		for (var i = 0; i < array.length; i++) 
@@ -1967,13 +1972,18 @@
 			{
 				liveGroup.appendChild(option);
 			}
-			else 
+			else if(i == array.length - 1)
+				oldGroup2.appendChild(option);
+			else
 			{
 				oldGroup.appendChild(option);
 			}
 		}
+		
+		
 		selectList.appendChild(liveGroup);
 		selectList.appendChild(oldGroup);
+		selectList.appendChild(oldGroup2);
 		div.appendChild(selectList);
 		selectList.selectedIndex = 0;
 	}

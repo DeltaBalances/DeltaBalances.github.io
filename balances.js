@@ -37,6 +37,7 @@
 	var showTransactions = true;
     var showBalances = true;	
 	var showCustomTokens = false;
+	var showDollars = true;
 	
 
     // user input & data
@@ -221,6 +222,7 @@
 	
 	function readyInit()
 	{		
+			getStorage();
 		setAddrImage('0x0000000000000000000000000000000000000000');
 		createSelect();
 		//hideError();
@@ -231,7 +233,8 @@
 		$('#zero').prop('checked', hideZero);
         $('#decimals').prop('checked', decimals);
 		$('#custom').prop('checked', showCustomTokens);
-		
+		$('#remember').prop('checked', remember);
+		$('#dollars').prop('checked', showDollars);
 		
 		// detect enter & keypresses in input
         $('#address').keypress(function(e) 
@@ -275,7 +278,7 @@
 			_delta.changeContract(e.target.selectedIndex);
 		});
 		
-		getStorage();
+		
 
         placeholderTable();
 		
@@ -339,6 +342,21 @@
 		} else {
 			placeholderTable();
 		}
+	}
+	
+	function checkDollars()
+	{
+		showDollars = $('#dollars').prop('checked');
+
+		$('#ethbalancePrice').html('');
+		$('#tokenbalancePrice').html('');
+		$('#totalbalancePrice').html('');
+		
+		if(showDollars && lastResult)
+		{
+			finishedBalanceRequest();
+		}
+		 setStorage();
 	}
 
 	// remember me checkbox
@@ -1487,11 +1505,16 @@
 		if(loadedBothBalances)
 		{
 			$('#ethbalance').html(sumETH.toFixed(fixedDecimals) + ' ETH');
-			$('#ethbalancePrice').html(" $" + (sumETH * etherPrice).toFixed(2));
 			$('#tokenbalance').html(sumToken.toFixed(fixedDecimals) + ' ETH');
-			$('#tokenbalancePrice').html(" $" + (sumToken * etherPrice).toFixed(2));
 			$('#totalbalance').html((sumETH + sumToken).toFixed(fixedDecimals) + ' ETH');
-			$('#totalbalancePrice').html(" $" + ((sumETH + sumToken)* etherPrice).toFixed(2));
+		
+			if(showDollars)
+			{
+				$('#ethbalancePrice').html(" $" + (sumETH * etherPrice).toFixed(2));
+				$('#tokenbalancePrice').html(" $" + (sumToken * etherPrice).toFixed(2));
+				$('#totalbalancePrice').html(" $" + ((sumETH + sumToken)* etherPrice).toFixed(2));
+			}
+			
 			
 			$('#downloadBalances').html('');
 			downloadBalances();
@@ -1589,7 +1612,7 @@
 		{
             if (remember)
 			{
-                localStorage.setItem("member", 'true');
+                localStorage.setItem("member", 1);
                 if (publicAddr)
                     localStorage.setItem("address", publicAddr);
             } else
@@ -1597,6 +1620,8 @@
                 localStorage.removeItem('member');
                 localStorage.removeItem('address');
             }
+			
+			localStorage.setItem('usd', showDollars);
         } 
     }
 
@@ -1604,11 +1629,24 @@
 	{
         if (typeof(Storage) !== "undefined") 
 		{
-            remember = localStorage.getItem('member') && true;
+			if (localStorage.getItem("member") === null) {
+				remember = false;
+			} else {
+				remember = localStorage.getItem('member');
+			}
+			
+			if (localStorage.getItem("usd") === null) {
+				showDollars = true;
+			} else {
+				showDollars = localStorage.getItem('usd');
+				if(showDollars === "false" )
+					showDollars = false;
+			}
+			
             if (remember) 
 			{
                 var addr = localStorage.getItem("address");
-				if(addr)
+				if(addr && addr.length == 42 )
 				{
 					addr = getAddress(addr);
 					if (addr) 
@@ -1617,7 +1655,6 @@
 						document.getElementById('address').value = addr;
 					}
 				}
-				$('#remember').prop('checked', true);
             }
         } 
     }

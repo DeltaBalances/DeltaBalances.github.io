@@ -1414,13 +1414,13 @@
 				for(var i=0;i< allTrades.length;++i)
 				{ 
 						var arr = [];
-						if(allTrades[i]['Trade'] === 'Buy') {
-							arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
+						if(allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
+							arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'] + allTrades[i]['Fee'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
 							'EtherDelta','', 'Hash: ' + allTrades[i]['Hash']  + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDate(allTrades[i]['Date'])];
 								
 						}
-						else {
-							arr = ['Trade', allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
+						else {  //sell add fee to token total
+							arr = ['Trade', allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
 							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDate(allTrades[i]['Date'])];
 						} 
 						
@@ -1476,13 +1476,13 @@
 				for(var i=0;i< allTrades.length;++i)
 				{ 
 						var arr = [];
-						if(allTrades[i]['Trade'] === 'Buy') {
-							arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
+						if(allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
+							arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'] + allTrades[i]['Fee'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
 							allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash']  + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date']), 'EtherDelta','Trade'];
 								
 						}
-						else {
-							arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
+						else { //sell add fee to token total
+							arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, 
 							allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 'EtherDelta','Trade'];
 						} 
 						

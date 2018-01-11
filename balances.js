@@ -161,7 +161,7 @@
 																		  };
 																 });
 			//filter out custom tokens that have been listed by now
-			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr])});
+			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr] && !(tokenBlacklist[x.addr]))});
 			// note custom tokens
 			for(var i = 0; i < _delta.config.customTokens.length; i++)
 			{

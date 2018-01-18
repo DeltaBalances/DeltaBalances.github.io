@@ -392,9 +392,10 @@
 		$.getJSON('https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
 			if(result )
 			{
-				transResult = result.result;
-				if(transResult.blockNumber)
+				
+				if(result.result && result.result.blockNumber)
 				{
+					transResult = result.result;
 					$.getJSON( 'https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + _util.hexToDec(transResult.blockNumber) + '&apikey='+_delta.config.etherscanAPIKey, ( res ) => {
 						if(res && res.status == "1" && res.result)
 						{

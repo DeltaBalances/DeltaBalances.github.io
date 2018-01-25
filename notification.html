@@ -43,6 +43,14 @@
 						}
 					});
 				} catch (err) {}
+			var forkDeltaConfig = forkOfflineTokens;
+			try {
+					$.getJSON('https://forkdelta.github.io/config/main.json', function(jsonData) {
+						if(jsonData && jsonData.tokens) {
+							forkDeltaConfig = jsonData;
+						}
+					});
+				} catch (err){}
 		</script>
 		<script type="text/javascript" src="bundle.min.js"></script>
 		

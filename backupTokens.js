@@ -739,6 +739,8 @@ let offlineStagingTokens = {
 };
 
 
+let forkOfflineTokens = [];
+
 
 /* 
 Offline backup of tokens from MyEtherWallet

@@ -173,6 +173,33 @@
 				}
 			}
 			
+			// check for unlisted tokens at forkdelta
+			let forkTokens = [];
+			if(forkDeltaConfig && forkDeltaConfig.tokens)
+			{
+				forkTokens = forkDeltaConfig.tokens;
+			} else {
+				forkTokens = forkOfflineTokens;
+			}
+			
+			
+			forkTokens = forkTokens.filter((x) => {return !(uniqueTokens[x.addr])});
+			for(var i = 0; i < forkTokens.length; i++)
+			{
+				var token = forkTokens[i];
+				if(token)
+				{
+					token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
+					token.addr = token.addr.toLowerCase();
+					token.unlisted = true;
+					if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
+					{	
+						uniqueTokens[token.addr] = token;
+						_delta.config.customTokens.push(token);
+					}
+				}
+			}
+			
 			if(allShitCoins)
 			{
 				//filter tokens that we already know
@@ -1527,7 +1554,9 @@
 	//remove exponential notation 1e-8  etc.
 	function exportNotation(num)
 	{
-		return Number(num).toFixed(25).replace(/\.?0+$/,""); // rounded to 25 decimals, no trailing 0
+		//return Number(num).toFixed(25).replace(/\.?0+$/,""); // rounded to 25 decimals, no trailing 0
+		//https://stackoverflow.com/questions/3612744/remove-insignificant-trailing-zeros-from-a-number
+		return Number(num).toFixed(25).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1')
 	}
 	
 	function placeholderTable()

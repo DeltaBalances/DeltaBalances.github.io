@@ -13,15 +13,14 @@ List of tokens from 3 sources
 */
 
 
-//tokens that somehow break the balanceOf contract call, temporarily blacklisted
-// 2017-01-11
+
+//2017-01-26
+// smart contract v2 doesn't error anymore on invalid tokens, but it can't hurt to send less requests
 let tokenBlacklist = {
 	"0x2df8286c9396f52e17dfee75d2e41e52609cf897" : "SNTR", //contract selfdestructed
 	"0x3a0181e8f2dd081ace83eac027eec2e0c2255ed5" : "BCV", //selfdestructed
 	"0x52903256dd18d85c2dc4a6c999907c9793ea61e3" : "INSP", //selfdestructed 
-	
-	"0x41f615e24fabd2b097a320e9e6c1f448cb40521c" : "RVL",  // not a contract?
-	"0x2a3aa9eca41e720ed46b5a70d6c37efa47f768ac" : "RCT", // not a contract?
+
 }
 
 // offline backup of EtherDelta tokens

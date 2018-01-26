@@ -542,7 +542,7 @@ module.exports = {
   contractEtherDelta: 'smart_contract/etherdelta.sol',
   contractToken: 'smart_contract/token.sol',
   contractDeltaBalance: 'smart_contract/deltabalances.sol',
-  contractDeltaBalanceAddr: '0xbe7B696Ce8789bD278F85583cFcdBbA1d7666aAf',
+  contractDeltaBalanceAddr: '0x3150954EAE1a8a5e5EE1F1B8E8444Fe16EA9F94C',
   contractEtherDeltaAddrs: [
     { addr: '0x8d12a197cb00d4747a1fe03395095ce2a5cc6819'},
     { addr: '0x373c55c277b866a69dc047cad488154ab9759466'},

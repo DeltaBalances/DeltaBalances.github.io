@@ -2,223 +2,102 @@
 
 	// shorthands
 	var _delta = bundle.EtherDelta;
-	var	_util = bundle.utility;
-	
+	var _util = bundle.utility;
+
 	// initiation
 	var initiated = false;
 	var allowNotifications = false;
-	
+
 	var running = false;
-    // user input & data
+	// user input & data
 	var publicAddr = '';
 	var runningAddr = '';
 
-	var uniqueTokens = {};
-		
+	var _delta.uniqueTokens = {};
+
 	init();
-	
-	$(document).ready(function() 
-	{
-		readyInit();  
-    });
-	
-	function init()
-	{	
+
+	$(document).ready(function () {
+		readyInit();
+	});
+
+	function init() {
 		notificationPermissions();
 		// borrow some ED code for compatibility
-        _delta.startEtherDelta(() => 
-		{	
-			//import of etherdelta config
-			if(etherDeltaConfig && etherDeltaConfig.tokens)
-			{
-				_delta.config.tokens = etherDeltaConfig.tokens;
-			}
-			else 
-			{
-				showError('failed to load token data');
-				return;
-			}
-			
-			// note all listed tokens
-			for(var i = 0; i < _delta.config.tokens.length; i++)
-			{
-				var token = _delta.config.tokens[i];
-				if(token /*&& !tokenBlacklist[token.addr]*/) {
-					token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
-					token.addr = token.addr.toLowerCase();
-					token.unlisted = false;
-					_delta.config.tokens[i] = token;
-					if(!uniqueTokens[token.addr]) {
-						uniqueTokens[token.addr] = token;
-					}
-				}	
-			}
-			
-			//format MEW tokens like ED tokens
-			offlineCustomTokens = offlineCustomTokens.map((x) => { return {"name": escapeHtml(x.symbol),
-																		   "addr": x.address.toLowerCase(),
-																		   "unlisted": true,
-																		   "decimals":x.decimal,
-																		  };
-																 });
-			//filter out custom tokens that have been listed by now
-			_delta.config.customTokens = offlineCustomTokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
-			// note custom tokens
-			for(var i = 0; i < _delta.config.customTokens.length; i++)
-			{
-				var token = _delta.config.customTokens[i];
-				if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr]) {
-					uniqueTokens[token.addr] = token;
-				}
-			}
-			
-			// treat tokens listed as staging as unlisted custom tokens
-			if(stagingTokens && stagingTokens.tokens)
-			{
-				//filter tokens that we already know
-				var stageTokens = stagingTokens.tokens.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
-				for(var i = 0; i < stageTokens.length; i++)
-				{
-					var token = stageTokens[i];
-					if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr])
-					{
-						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
-						token.unlisted = true;
-						uniqueTokens[token.addr] = token;
-						_delta.config.customTokens.push(token);
-					}
-				}
-			}
-			
-			// check for unlisted tokens at forkdelta
-			let forkTokens = [];
-			if(forkDeltaConfig && forkDeltaConfig.tokens)
-			{
-				forkTokens = forkDeltaConfig.tokens;
-			} else {
-				forkTokens = forkOfflineTokens;
-			}
-			
-			
-			forkTokens = forkTokens.filter((x) => {return !(uniqueTokens[x.addr])});
-			for(var i = 0; i < forkTokens.length; i++)
-			{
-				var token = forkTokens[i];
-				if(token)
-				{
-					token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
-					token.addr = token.addr.toLowerCase();
-					token.unlisted = true;
-					if(!tokenBlacklist[token.addr] && !uniqueTokens[token.addr]) 
-					{	
-						uniqueTokens[token.addr] = token;
-						_delta.config.customTokens.push(token);
-					}
-				}
-			}
-			
-			if(allShitCoins)
-			{
-				//filter tokens that we already know
-				var shitCoins = allShitCoins.filter((x) => {return !(uniqueTokens[x.addr]) && true;});
-				for(var i = 0; i < shitCoins.length; i++)
-				{
-					var token = shitCoins[i];
-					if(token /*&& !tokenBlacklist[token.addr]*/ && !uniqueTokens[token.addr])
-					{
-						token.name = escapeHtml(token.name); // escape nasty stuff in token symbol/name
-						token.unlisted = true;
-						uniqueTokens[token.addr] = token;
-						_delta.config.customTokens.push(token);
-					}
-				}
-			}
-			
-			
+		_delta.startEtherDelta(() => {
+			_delta.initTokens(false);
 			initiated = true;
 		});
 	}
-	
-	function readyInit()
-	{	
+
+	function readyInit() {
 		setAddrImage('0x0000000000000000000000000000000000000000');
 
 		// detect enter & keypresses in input
-        $('#address').keypress(function(e) 
-		{
-            if (e.keyCode == 13) {
-                $('#refreshButton').click();
-                return false;
-            } else {
+		$('#address').keypress(function (e) {
+			if (e.keyCode == 13) {
+				$('#refreshButton').click();
+				return false;
+			} else {
 				hideError();
 				return true;
 			}
-        });
-		
+		});
+
 		getStorage();
 
 		// url parameter ?addr=0x... /#0x..
 		var addr = getParameterByName('addr');
-		if(! addr)
-		{
+		if (!addr) {
 			var hash = window.location.hash;  // url parameter /#0x...
-			if(hash)
+			if (hash)
 				addr = hash.slice(1);
 		}
-		if(addr)
-		{
+		if (addr) {
 			addr = getAddress(addr);
-			if(addr)
-			{
+			if (addr) {
 				publicAddr = addr;
 				//autoStart = true;
 				// auto start loading
 				//myClick();
 			}
-		} 
-		else if(publicAddr) //autoload when remember is active
+		}
+		else if (publicAddr) //autoload when remember is active
 		{
 			//autoStart = true;
 			// auto start loading
 			//myClick();
 		}
-		else if(!addr && !publicAddr)
-		{
+		else if (!addr && !publicAddr) {
 			$('#address').focus();
 		}
 	}
-		
 
-	function disableInput(disable)
-	{
+
+	function disableInput(disable) {
 		$('#refreshButton').prop('disabled', disable);
-       // $("#address").prop("disabled", disable);
+		// $("#address").prop("disabled", disable);
 		$('#loadingTransactions').addClass('dim');
 		$("#loadingTransactions").prop("disabled", disable);
 	}
-	
-	function showLoading(trans)
-	{
-		if(trans)
-		{
+
+	function showLoading(trans) {
+		if (trans) {
 			$('#loadingTransactions').addClass('fa-spin');
 			$('#loadingTransactions').addClass('dim');
 			$('#loadingTransactions').prop('disabled', true);
 			$('#loadingTransactions').show();
 			$('#refreshButtonLoading').show();
 			$('#refreshButtonSearch').hide();
-		} 
+		}
 	}
-	
-	function buttonLoading(trans)
-	{
-		if(!publicAddr)
-		{			
+
+	function buttonLoading(trans) {
+		if (!publicAddr) {
 			hideLoading(trans);
 			return;
 		}
-		if(trans)
-		{
+		if (trans) {
 			$('#loadingTransactions').removeClass('fa-spin');
 			$('#loadingTransactions').removeClass('dim');
 			$('#loadingTransactions').prop('disabled', false);
@@ -228,65 +107,56 @@
 		}
 	}
 
-	function hideLoading(trans)
-	{
-		if(!publicAddr)
-		{			
+	function hideLoading(trans) {
+		if (!publicAddr) {
 			trans = true;
 		}
 
-		if(trans) 
-		{
+		if (trans) {
 			$('#loadingTransactions').hide();
 			$('#refreshButtonLoading').hide();
 			$('#refreshButtonSearch').show();
 		}
 	}
-	
-	function myClick()
-	{
-		if(!initiated)
-		{
+
+	function myClick() {
+		if (!initiated) {
 			//autoStart = true;
 			return;
 		}
-		
-		if(!allowNotifications)
-		{
+
+		if (!allowNotifications) {
 			showError("no permission for notifications");
 			return;
 		}
-		
+
 		hideError();
 		hideHint();
 		//disableInput(true);
 		// validate address
 		publicAddr = getAddress();
 
-		if(publicAddr)
-		{
+		if (publicAddr) {
 			window.location.hash = publicAddr;
-			if(!running)
+			if (!running)
 				startNotifications();
 			else
 				emptyCallback();
 		}
-		else
-		{
+		else {
 			console.log('invalid input');
 		}
 	}
 
-	
-	
-	function notificationPermissions() 
-	{
+
+
+	function notificationPermissions() {
 		// Let's check if the browser supports notifications
 		if (!("Notification" in window)) {
 			alert("This browser does not support system notifications");
 			allowNotifications = false;
 		}
-			// Let's check whether notification permissions have already been granted
+		// Let's check whether notification permissions have already been granted
 		else if (Notification.permission === "granted") {
 			allowNotifications = true;
 		}
@@ -303,35 +173,29 @@
 		// Finally, if the user has denied notifications and you 
 		// want to be respectful there is no need to bother them any more.
 	}
-	
-	
-	function startNotifications()
-	{
-		_delta.connectSocket(emptyCallback, updateNotifications);	
+
+
+	function startNotifications() {
+		_delta.connectSocket(emptyCallback, updateNotifications);
 	}
-	
-	function emptyCallback()
-	{
-		if(!running)
-		{
+
+	function emptyCallback() {
+		if (!running) {
 			$('#status').html('On');
 			running = true;
 			runningAddr = publicAddr;
-			spawnNotification('Notifications will now appear for ' + runningAddr ,'Notifications active');
-		} else if(publicAddr !== runningAddr)
-		{
-			runningAddr = publicAddr;	
-			spawnNotification('Notifications changed to ' + runningAddr ,'Notifications new address');
+			spawnNotification('Notifications will now appear for ' + runningAddr, 'Notifications active');
+		} else if (publicAddr !== runningAddr) {
+			runningAddr = publicAddr;
+			spawnNotification('Notifications changed to ' + runningAddr, 'Notifications new address');
 		}
 	}
-	
-	
-	function updateNotifications(type, array)
-	{
+
+
+	function updateNotifications(type, array) {
 		var addr = publicAddr.toLowerCase();
-		
-		if(type == 'orders')
-		{
+
+		if (type == 'orders') {
 			/*
 			buys[], sells[]
 			
@@ -357,63 +221,52 @@
 			v:28
 			
 			*/
-			for(var i = 0; i < array.buys.length; i++)
-			{
-				if(array.buys[i].user == addr)
-				{
-					var token = uniqueTokens[array.buys[i].tokenGet];
+			for (var i = 0; i < array.buys.length; i++) {
+				if (array.buys[i].user == addr) {
+					var token = _delta.uniqueTokens[array.buys[i].tokenGet];
 					var amount = array.buys[i].ethAvailableVolume;
 					var price = Number(array.buys[i].price);
-					if(!token)
-						token = {name:'???'};
-					
-					if(array.buys[i].deleted)
-					{
-						var details = "Buy " + amount + " " + token.name +" at " + price + ", filled or cancelled.";
-						spawnNotification(details ,'Buy order ' + token.name + ' removed');
-		
-					} else if(array.buys[i].amountFilled)
-					{
-						var details = "Bought " + array.buys[i].amountFilled +"/" + amount + " " + token.name +" at "+ price;
-						spawnNotification(details ,'Buy order ' + token.name + ' updated');
+					if (!token)
+						token = { name: '???' };
+
+					if (array.buys[i].deleted) {
+						var details = "Buy " + amount + " " + token.name + " at " + price + ", filled or cancelled.";
+						spawnNotification(details, 'Buy order ' + token.name + ' removed');
+
+					} else if (array.buys[i].amountFilled) {
+						var details = "Bought " + array.buys[i].amountFilled + "/" + amount + " " + token.name + " at " + price;
+						spawnNotification(details, 'Buy order ' + token.name + ' updated');
 					}
-					else
-					{
-						var details = "Buy " + amount + " " + token.name +" at " + price;
-						spawnNotification(details ,'New buy order ' + token.name);
+					else {
+						var details = "Buy " + amount + " " + token.name + " at " + price;
+						spawnNotification(details, 'New buy order ' + token.name);
 					}
 				}
 			}
-			for(var i = 0; i < array.sells.length; i++)
-			{
-				if(array.sells[i].user == addr)
-				{
-					var token = uniqueTokens[array.sells[i].tokenGet];
+			for (var i = 0; i < array.sells.length; i++) {
+				if (array.sells[i].user == addr) {
+					var token = _delta.uniqueTokens[array.sells[i].tokenGet];
 					var amount = array.sells[i].ethAvailableVolume;
 					var price = Number(array.sells[i].price);
-					if(!token)
-						token = {name:'???'};
-					
-					if(array.sells[i].deleted)
-					{
-						var details = "Sell " + amount + " " + token.name +" at " + price + ", filled or cancelled.";
-						spawnNotification(details ,'Sell order ' + token.name + ' removed');
-		
-					} else if(array.sells[i].amountFilled && array.sells[i].amountFilled != "null")
-					{
-						var details = "Sold " + array.sells[i].amountFilled +"/" + amount + " " + token.name +" at "+ price;
-						spawnNotification(details ,'Sell order ' + token.name + ' updated');
+					if (!token)
+						token = { name: '???' };
+
+					if (array.sells[i].deleted) {
+						var details = "Sell " + amount + " " + token.name + " at " + price + ", filled or cancelled.";
+						spawnNotification(details, 'Sell order ' + token.name + ' removed');
+
+					} else if (array.sells[i].amountFilled && array.sells[i].amountFilled != "null") {
+						var details = "Sold " + array.sells[i].amountFilled + "/" + amount + " " + token.name + " at " + price;
+						spawnNotification(details, 'Sell order ' + token.name + ' updated');
 					}
-					else
-					{
-						var details = "Sell " + amount + " " + token.name +" at " + price;
-						spawnNotification(details ,'New sell order ' + token.name);
+					else {
+						var details = "Sell " + amount + " " + token.name + " at " + price;
+						spawnNotification(details, 'New sell order ' + token.name);
 					}
 				}
 			}
 		}
-		else if (type == 'trades')
-		{
+		else if (type == 'trades') {
 			/*
 			amount:"7.2"
 			amountBase:"1.2276"
@@ -425,47 +278,39 @@
 			tokenAddr:"0x8f3470a7388c05ee4e7af3d01d8c722b0ff52374"
 			txHash:"0xaff0b6ce4d81f9188c955b37e27083588929d1ca18b6990b32b35ae5c623cdc5"
 			*/
-			
-			for(var i = 0; i < array.length; i++)
-			{
+
+			for (var i = 0; i < array.length; i++) {
 				var details = '';
-				if(array[i].seller == addr || array[i].buyer == addr)
-				{
+				if (array[i].seller == addr || array[i].buyer == addr) {
 					var details = '';
 					var title = '';
 					var tradeType = 'Taker ';
-					var token = uniqueTokens[array[i].tokenAddr];
+					var token = _delta.uniqueTokens[array[i].tokenAddr];
 					var amount = array[i].amount;
 					var price = Number(array[i].price);
-					if(array[i].side == 'buy')
-					{
-						if(array[i].seller == addr)
-						{
+					if (array[i].side == 'buy') {
+						if (array[i].seller == addr) {
 							tradeType = 'Maker ';
 							details += 'Sold ';
 							title += 'sell ';
-						} else 
-						{
+						} else {
 							details += 'Bought ';
 							title += 'buy ';
 						}
-						
+
 					}
-					else if(array[i].side == 'sell')
-					{
-						if(array[i].buyer == addr)
-						{
+					else if (array[i].side == 'sell') {
+						if (array[i].buyer == addr) {
 							tradeType = 'Maker ';
 							details += 'Bought ';
 							title += 'buy ';
-						} 
-						else 
-						{
+						}
+						else {
 							details += 'Sold ';
 							title += 'sell ';
 						}
 					}
-					
+
 					title += token.name;
 					details += amount + " " + token.name + " at " + price + ', total ' + array[i].amountBase + ' ETH';
 					//details += '<br> <a href="https://etherscan.io/tx/' + array[i].txHash + '">' + array[i].txHash +'</a>';
@@ -474,8 +319,7 @@
 				}
 			}
 		}
-		else if(type == 'funds' )
-		{
+		else if (type == 'funds') {
 			/*	amount: "0.018873952"
 				balance:"0.018899373659816986"
 				date:"2017-10-29T01:26:21.000Z"
@@ -484,110 +328,97 @@
 				txHash:"0x92b17dc40207e2930ba378c108b4c7418207fb4020b6b2dbc438867b66128559"
 				user:"0xfdc97f53d44f81f942a362a0031efd423ea307bc"
 				*/
-			for(var i = 0; i < array.length; i++)
-			{
-				if(array[i].user == addr)
-				{
-					var token = uniqueTokens[array[i].tokenAddr];
-					if(!token)
-						token = {name:'???'};
+			for (var i = 0; i < array.length; i++) {
+				if (array[i].user == addr) {
+					var token = _delta.uniqueTokens[array[i].tokenAddr];
+					if (!token)
+						token = { name: '???' };
 					var details = array[i].kind + " " + array[i].amount + " " + token.name + ", new balance: " + array[i].balance;
 					//details += '<br> <a href="https://etherscan.io/tx/' + array[i].txHash + '">' + array[i].txHash +'</a>';
-					spawnNotification(details , array[i].kind + " " + token.name + " completed");
+					spawnNotification(details, array[i].kind + " " + token.name + " completed");
 				}
 			}
 		}
 	}
-	
-	
+
+
 	function spawnNotification(body, title) {
-	    var options = {
-		    body: body,
-		    icon: 'favicon.ico'
-	    }
-	    var n = new Notification(title,options);
-	    setTimeout(n.close.bind(n), 7000); 
+		var options = {
+			body: body,
+			icon: 'favicon.ico'
+		}
+		var n = new Notification(title, options);
+		setTimeout(n.close.bind(n), 7000);
 	}
 
 	// check if input address is valid
-    function getAddress(addr) 
-	{
-        var address = '';
-        address = addr ? addr : document.getElementById('address').value;
-        address = address.trim();
-		
-		if ( ! _delta.web3.isAddress(address))
-		{
+	function getAddress(addr) {
+		var address = '';
+		address = addr ? addr : document.getElementById('address').value;
+		address = address.trim();
+
+		if (!_delta.web3.isAddress(address)) {
 			//check if url ending in address
-			if(address.indexOf('/0x') !== -1)
-			{
+			if (address.indexOf('/0x') !== -1) {
 				var parts = address.split('/');
 				var lastSegment = parts.pop() || parts.pop();  // handle potential trailing slash
-				if(lastSegment)
+				if (lastSegment)
 					address = lastSegment;
 			}
-			
-			if(! _delta.web3.isAddress(address)) 
-			{
-				if (address.length == 66 && address.slice(0, 2) === '0x') 
-				{
+
+			if (!_delta.web3.isAddress(address)) {
+				if (address.length == 66 && address.slice(0, 2) === '0x') {
 					// transaction hash, go to transaction details
 					window.location = window.location.origin + window.location.pathname + '/../tx.html#' + address;
 					return;
-				} 
+				}
 
 				// possible private key, show warning   (private key, or tx without 0x)
-				if (address.length == 64 && address.slice(0, 2) !== '0x') 
-				{
+				if (address.length == 64 && address.slice(0, 2) !== '0x') {
 					if (!addr) // ignore if in url arguments
 					{
 						showError("You likely entered your private key, NEVER do that again");
 						// be nice and try generate the address
 						address = _util.generateAddress(address);
 					}
-				} 
-				else if (address.length == 40 && address.slice(0, 2) !== '0x') 
-				{
+				}
+				else if (address.length == 40 && address.slice(0, 2) !== '0x') {
 					address = `0x${addr}`;
-					
-				} 
-				else 
-				{
+
+				}
+				else {
 					if (!addr) // ignore if in url arguments
 					{
-					   showError("Invalid address, try again");
+						showError("Invalid address, try again");
 					}
 					return undefined;
 				}
-				if(! _delta.web3.isAddress(address))
-				{
+				if (!_delta.web3.isAddress(address)) {
 					if (!addr) // ignore if in url arguments
 					{
-					   showError("Invalid address, try again");
+						showError("Invalid address, try again");
 					}
 					return undefined;
 				}
 			}
 		}
-		
+
 		document.getElementById('address').value = address;
 		document.getElementById('addr').innerHTML = 'Address: <a target="_blank" href="' + _delta.addressLink(address) + '">' + address + '</a>';
 		$('#overviewNav').attr("href", "index.html#" + address);
 		setAddrImage(address);
 		return address;
-    }
-	
-	function setAddrImage(addr)
-	{
-		var icon = document.getElementById('addrIcon');
-		icon.style.backgroundImage = 'url(' + blockies.create({ seed:addr.toLowerCase() ,size: 8,scale: 16}).toDataURL()+')';
 	}
-	
-	
-	
+
+	function setAddrImage(addr) {
+		var icon = document.getElementById('addrIcon');
+		icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 16 }).toDataURL() + ')';
+	}
+
+
+
 	// get parameter from url
-	function getParameterByName(name, url) 
-	{
+	function getParameterByName(name, url) {
 		if (!url) url = window.location.href;
 		name = name.replace(/[\[\]]/g, "\\$&");
 		var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
@@ -598,81 +429,56 @@
 	}
 
 
-	function showHint(text)
-	{
+	function showHint(text) {
 		$('#hinttext').html(text);
 		$('#hint').show();
 	}
-	
-	function hideHint()
-	{
+
+	function hideHint() {
 		$('#hint').hide();
 	}
-	
-	function showError(text)
-	{
+
+	function showError(text) {
 		$('#errortext').html(text);
 		$('#error').show();
 	}
-	
-	function hideError()
-	{
+
+	function hideError() {
 		$('#error').hide();
 	}
-	
+
 
 
 
 	// save address for next time
-    function setStorage() 
-	{
-        if (typeof(Storage) !== "undefined")
-		{
-            if (remember)
-			{
-                localStorage.setItem("member", 'true');
-                if (publicAddr)
-                    localStorage.setItem("address", publicAddr);
-            } else
-			{
-                localStorage.removeItem('member');
-                localStorage.removeItem('address');
-            }
-        } 
-    }
+	function setStorage() {
+		if (typeof (Storage) !== "undefined") {
+			if (remember) {
+				localStorage.setItem("member", 'true');
+				if (publicAddr)
+					localStorage.setItem("address", publicAddr);
+			} else {
+				localStorage.removeItem('member');
+				localStorage.removeItem('address');
+			}
+		}
+	}
 
-    function getStorage() 
-	{
-        if (typeof(Storage) !== "undefined") 
-		{
-            remember = localStorage.getItem('member') && true;
-            if (remember) 
-			{
-                var addr = localStorage.getItem("address");
-				if(addr)
-				{
+	function getStorage() {
+		if (typeof (Storage) !== "undefined") {
+			remember = localStorage.getItem('member') && true;
+			if (remember) {
+				var addr = localStorage.getItem("address");
+				if (addr) {
 					addr = getAddress(addr);
-					if (addr) 
-					{
+					if (addr) {
 						publicAddr = addr;
 						document.getElementById('address').value = addr;
 					}
 				}
 				$('#remember').prop('checked', true);
-            }
-        } 
-    }
-
-	function escapeHtml(text) {
-	  var map = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#039;'
-	  };
-
-		return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+			}
+		}
 	}
 
 }

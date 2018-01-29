@@ -13,8 +13,6 @@
 	var publicAddr = '';
 	var runningAddr = '';
 
-	var _delta.uniqueTokens = {};
-
 	init();
 
 	$(document).ready(function () {

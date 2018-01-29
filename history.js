@@ -44,8 +44,6 @@
 	var useDaySelector = true;
 	const minBlock = 3154197; //https://etherscan.io/block/3154196  etherdelta_2 creation
 
-
-	var _delta.uniqueTokens = {};
 	var uniqueBlocks = {}; //date for each block
 	var blockDates = {};
 

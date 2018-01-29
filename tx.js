@@ -27,7 +27,6 @@
 	var lastTxLog = undefined;
 	var txDate = "??";
 
-	var _delta.uniqueTokens = {};
 	var unknownToken = false;
 
 

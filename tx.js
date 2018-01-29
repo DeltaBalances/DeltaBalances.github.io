@@ -398,8 +398,8 @@
 							}
 
 							var unlisted = token.unlisted;
-							var dvsr = divisorFromDecimals(token.decimals)
-							var dvsr2 = divisorFromDecimals(base.decimals)
+							var dvsr = _delta.divisorFromDecimals(token.decimals)
+							var dvsr2 = _delta.divisorFromDecimals(base.decimals)
 							var val = _util.weiToEth(amount, dvsr);
 							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
 
@@ -433,7 +433,7 @@
 
 						if (token && token.addr) {
 							var unlisted = token.unlisted;
-							var dvsr = divisorFromDecimals(token.decimals)
+							var dvsr = _delta.divisorFromDecimals(token.decimals)
 							var val = _util.weiToEth(rawAmount, dvsr);
 							var balance = _util.weiToEth(rawBalance, dvsr);
 							if (unpacked.name === 'Withdraw') {
@@ -484,8 +484,8 @@
 							}
 
 							var unlisted = token.unlisted;
-							var dvsr = divisorFromDecimals(token.decimals)
-							var dvsr2 = divisorFromDecimals(token2.decimals)
+							var dvsr = _delta.divisorFromDecimals(token.decimals)
+							var dvsr2 = _delta.divisorFromDecimals(token2.decimals)
 							var val = _util.weiToEth(amount, dvsr);
 							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
 							var price = 0;
@@ -513,7 +513,7 @@
 						var rawAmount = unpacked.params[0].value;
 						var token = setToken(outputLogs[i].address);
 
-						var dvsr = divisorFromDecimals(token.decimals)
+						var dvsr = _delta.divisorFromDecimals(token.decimals)
 						var val = _util.weiToEth(rawAmount, dvsr);
 						var unlisted = token.unlisted;
 
@@ -534,7 +534,7 @@
 						to = '0x' + to.slice(to.length - 40);
 						var rawAmount = unpacked.params[0].value;
 						var token = setToken(outputLogs[i].address);
-						var dvsr = divisorFromDecimals(token.decimals)
+						var dvsr = _delta.divisorFromDecimals(token.decimals)
 						var val = _util.weiToEth(rawAmount, dvsr);
 						var unlisted = token.unlisted;
 
@@ -570,7 +570,7 @@
 						var token = setToken(tx.to);
 						var unlisted = true;
 						if (token && token.addr) {
-							var dvsr = divisorFromDecimals(token.decimals);
+							var dvsr = _delta.divisorFromDecimals(token.decimals);
 							amount = _util.weiToEth(rawAmount, dvsr);
 							unlisted = token.unlisted;
 						}
@@ -597,7 +597,7 @@
 						var token = setToken(tx.to);
 						var unlisted = true;
 						if (token && token.addr) {
-							var dvsr = divisorFromDecimals(token.decimals);
+							var dvsr = _delta.divisorFromDecimals(token.decimals);
 							amount = _util.weiToEth(rawAmount, dvsr);
 							unlisted = token.unlisted;
 						}
@@ -653,7 +653,7 @@
 						var token = setToken(unpacked.params[0].value);
 						if (token && token.addr) {
 							var unlisted = token.unlisted;
-							var dvsr = divisorFromDecimals(token.decimals)
+							var dvsr = _delta.divisorFromDecimals(token.decimals)
 							var val = _util.weiToEth(unpacked.params[1].value, dvsr);
 							var type = '';
 							var note = '';
@@ -710,8 +710,8 @@
 							}
 
 							var unlisted = token.unlisted;
-							var dvsr = divisorFromDecimals(token.decimals)
-							var dvsr2 = divisorFromDecimals(token2.decimals)
+							var dvsr = _delta.divisorFromDecimals(token.decimals)
+							var dvsr2 = _delta.divisorFromDecimals(token2.decimals)
 							var val = _util.weiToEth(amount, dvsr);
 							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
 							var price = 0;
@@ -768,8 +768,8 @@
 							}
 
 							var unlisted = token.unlisted;
-							var dvsr = divisorFromDecimals(token.decimals)
-							var dvsr2 = divisorFromDecimals(token2.decimals)
+							var dvsr = _delta.divisorFromDecimals(token.decimals)
+							var dvsr2 = _delta.divisorFromDecimals(token2.decimals)
 							var val = _util.weiToEth(amount, dvsr);
 							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
 
@@ -1155,14 +1155,6 @@
 		if (min < 10) min = '0' + min;
 
 		return [year, month, day].join('-') + ' ' + [hour, min].join(':');
-	}
-
-	function divisorFromDecimals(decimals) {
-		var result = 1000000000000000000;
-		if (decimals !== undefined) {
-			result = Math.pow(10, decimals);
-		}
-		return new BigNumber(result);
 	}
 
 	// Builds the HTML Table out of myList.

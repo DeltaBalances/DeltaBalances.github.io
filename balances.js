@@ -834,7 +834,7 @@
 						loadedCustom = showCustomTokens;
 						for (var i = 0; i < tokens.length; i++) {
 							var token = _delta.uniqueTokens[tokens[i]];
-							var div = divisorFromDecimals(token.decimals);
+							var div = _delta.divisorFromDecimals(token.decimals);
 
 							if (mode == 'Wallet') {
 								balances[token.addr].Wallet = _util.weiToEth(returnedBalances[i], div);
@@ -1029,7 +1029,7 @@
 						var token = _delta.uniqueTokens[unpacked.params[0].value];
 						if (token && token.addr) {
 							var unlisted = token.unlisted;
-							var dvsr = divisorFromDecimals(token.decimals)
+							var dvsr = _delta.divisorFromDecimals(token.decimals)
 							var val = _util.weiToEth(unpacked.params[1].value, dvsr);
 							var type = '';
 							if (unpacked.name === 'withdrawToken') {
@@ -1076,8 +1076,8 @@
 							}
 
 							var unlisted = token.unlisted;
-							var dvsr = divisorFromDecimals(token.decimals)
-							var dvsr2 = divisorFromDecimals(token2.decimals)
+							var dvsr = _delta.divisorFromDecimals(token.decimals)
+							var dvsr2 = _delta.divisorFromDecimals(token2.decimals)
 							var val = _util.weiToEth(amount, dvsr);
 							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
 							var price = 0;
@@ -1127,8 +1127,8 @@
 							}
 
 							var unlisted = token.unlisted;
-							var dvsr = divisorFromDecimals(token.decimals)
-							var dvsr2 = divisorFromDecimals(token2.decimals)
+							var dvsr = _delta.divisorFromDecimals(token.decimals)
+							var dvsr2 = _delta.divisorFromDecimals(token2.decimals)
 							var val = _util.weiToEth(amount, dvsr);
 							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
 
@@ -1781,13 +1781,6 @@
 			return [year, month, day].join('');
 	}
 
-	function divisorFromDecimals(decimals) {
-		var result = 1000000000000000000;
-		if (decimals !== undefined) {
-			result = Math.pow(10, decimals);
-		}
-		return new BigNumber(result);
-	}
 
 	function downloadBalances() {
 		if (lastResult) {

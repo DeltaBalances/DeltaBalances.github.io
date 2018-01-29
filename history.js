@@ -587,8 +587,8 @@
 						}
 
 						var unlisted = token.unlisted;
-						var dvsr = divisorFromDecimals(token.decimals)
-						var dvsr2 = divisorFromDecimals(base.decimals)
+						var dvsr = _delta.divisorFromDecimals(token.decimals)
+						var dvsr2 = _delta.divisorFromDecimals(base.decimals)
 
 						var val = _util.weiToEth(amount, dvsr);
 						var val2 = _util.weiToEth(oppositeAmount, dvsr2);
@@ -1017,16 +1017,6 @@
 			return [year, month, day].join('-') + 'T' + [hour, min, sec].join(':');
 		else
 			return [year, month, day].join('');
-	}
-
-
-
-	function divisorFromDecimals(decimals) {
-		var result = 1000000000000000000;
-		if (decimals !== undefined) {
-			result = Math.pow(10, decimals);
-		}
-		return new BigNumber(result);
 	}
 
 	function clearDownloads() {

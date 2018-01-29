@@ -22448,6 +22448,14 @@ EtherDelta.prototype.getDivisor = function getDivisor(tokenOrAddress) {
 	return new BigNumber(result);
 };
 
+EtherDelta.prototype.divisorFromDecimals = function(decimals) {
+	var result = 1000000000000000000;
+	if (decimals !== undefined) {
+		result = Math.pow(10, decimals);
+	}
+	return new BigNumber(result);
+}
+
 EtherDelta.prototype.getToken = function getToken(addrOrToken, name, decimals) {
 	let result;
 	const lowerAddrOrToken = typeof addrOrToken === 'string' ? addrOrToken.toLowerCase() : addrOrToken;

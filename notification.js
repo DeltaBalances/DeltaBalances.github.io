@@ -376,8 +376,6 @@
 					if (!addr) // ignore if in url arguments
 					{
 						showError("You likely entered your private key, NEVER do that again");
-						// be nice and try generate the address
-						address = _util.generateAddress(address);
 					}
 				}
 				else if (address.length == 40 && address.slice(0, 2) !== '0x') {
@@ -402,7 +400,7 @@
 		}
 
 		document.getElementById('address').value = address;
-		document.getElementById('addr').innerHTML = 'Address: <a target="_blank" href="' + _delta.addressLink(address) + '">' + address + '</a>';
+		document.getElementById('addr').innerHTML = 'Address: ' + _util.addressLink(address, true, false);
 		$('#overviewNav').attr("href", "index.html#" + address);
 		setAddrImage(address);
 		return address;

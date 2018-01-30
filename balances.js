@@ -117,9 +117,9 @@
 					});
 				}
 			}
-			
+
 			_delta.initTokens(true);
-			
+
 			checkCustom();
 			initiated = true;
 			if (autoStart)
@@ -620,7 +620,7 @@
 			if (!_delta.web3.isAddress(address)) {
 				if (address.length == 66 && address.slice(0, 2) === '0x') {
 					// transaction hash, go to transaction details
-					window.location = window.location.origin + window.location.pathname + 'tx.html#' + address;
+					window.location = (window.location.origin + window.location.pathname).replace('index.html', '') + 'tx.html#' + address;
 					return;
 				}
 
@@ -629,8 +629,6 @@
 					if (!addr) // ignore if in url arguments
 					{
 						showError("You likely entered your private key, NEVER do that again");
-						// be nice and try generate the address
-						address = _util.generateAddress(address);
 					}
 				}
 				else if (address.length == 40 && address.slice(0, 2) !== '0x') {
@@ -655,7 +653,7 @@
 		}
 
 		document.getElementById('address').value = address;
-		document.getElementById('addr').innerHTML = 'Address: <a target="_blank" href="' + _delta.addressLink(address) + '">' + address + '</a>';
+		document.getElementById('addr').innerHTML = 'Address: ' + _util.addressLink(address, true, false);
 		$('#historyNav').attr("href", "history.html#" + address);
 		setAddrImage(address);
 		return address;
@@ -984,6 +982,7 @@
 			var logs = tradeLogResult;
 
 
+
 			// internal tx, withdraws
 			for (var i = 0; i < itxs.length; i++) {
 				var tx = itxs[i];
@@ -1020,150 +1019,25 @@
 
 
 			for (var l = 0; l < tokens.length; l++) {
-				var method = tokens[l].input.slice(0, 10);
-				if (method === '0x9e281a98' || method === '0x338b5dea') //methodids depositToken & withdrawToken
-				{
+				var unpacked = _util.processInput(tokens[l].input);
+				if (unpacked && unpacked.name) {
+					let obj = _delta.processUnpackedInput(tokens[l], unpacked);
+					if (obj) {
+						let trans = undefined;
+						if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken') {
+							obj.type = obj.type.replace('Token ', '');
+							trans = createOutputTransaction(obj.type, obj.token.name, obj.amount, '', tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.token.addr, '', tokens[l].isError === '0');
+						}
+						else if (unpacked.name === 'cancelOrder') {
+							trans = createOutputTransaction(obj.cancelType, obj.token.name, obj.amount, '', tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.token.addr, obj.price, tokens[l].isError === '0');
+						}
+						else if (unpacked.name === 'trade') {
+							trans = createOutputTransaction(obj.type, obj.token.name, obj.amount, obj.ETH, tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.token.addr, obj.price, tokens[l].isError === '0');
+						}
 
-					var unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, tokens[l].input);
-					if (unpacked && (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken')) {
-						var token = _delta.uniqueTokens[unpacked.params[0].value];
-						if (token && token.addr) {
-							var unlisted = token.unlisted;
-							var dvsr = _delta.divisorFromDecimals(token.decimals)
-							var val = _util.weiToEth(unpacked.params[1].value, dvsr);
-							var type = '';
-							if (unpacked.name === 'withdrawToken') {
-								type = 'Withdraw';
-							}
-							else {
-								type = 'Deposit';
-							}
-							var trans = createOutputTransaction(type, token.name, val, '', tokens[l].hash, tokens[l].timeStamp, unlisted, token.addr, '', tokens[l].isError === '0');
+						if (trans)
 							outputTransactions.push(trans);
-						}
 					}
-				} else if (method === '0x278b8c0e') // cancel
-				{
-					//Function: cancelOrder(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, uint8 v, bytes32 r, bytes32 s)
-					//MethodID: 0x278b8c0e
-
-					var unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, tokens[l].input);
-					if (unpacked && (unpacked.name === 'cancelOrder')) {
-						var cancelType = 'sell';
-						var token = undefined;
-						var token2 = undefined;
-						if (unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
-						{
-							cancelType = 'buy';
-							token = _delta.uniqueTokens[unpacked.params[2].value];
-							token2 = _delta.uniqueTokens[unpacked.params[0].value];
-						}
-						else // buy
-						{
-							token = _delta.uniqueTokens[unpacked.params[0].value];
-							token2 = _delta.uniqueTokens[unpacked.params[2].value];
-						}
-
-						if (token && token2 && token.addr && token2.addr) {
-							var amount = 0;
-							var oppositeAmount = 0;
-							if (cancelType === 'sell') {
-								amount = unpacked.params[1].value;
-								oppositeAmount = unpacked.params[3].value;
-							} else {
-								oppositeAmount = unpacked.params[1].value;
-								amount = unpacked.params[3].value;
-							}
-
-							var unlisted = token.unlisted;
-							var dvsr = _delta.divisorFromDecimals(token.decimals)
-							var dvsr2 = _delta.divisorFromDecimals(token2.decimals)
-							var val = _util.weiToEth(amount, dvsr);
-							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
-							var price = 0;
-							if (val !== 0) {
-								price = val2 / val;
-							}
-
-							var trans = createOutputTransaction('Cancel ' + cancelType, token.name, val, '', tokens[l].hash, tokens[l].timeStamp, unlisted, token.addr, price, tokens[l].isError === '0');
-							outputTransactions.push(trans);
-						}
-					}
-
-
-				} else if (method === '0x0a19b14a') // trade
-				{
-
-					//Function: trade(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, address user, uint8 v, bytes32 r, bytes32 s, uint256 amount)
-					//MethodID: 0x0a19b14a
-
-					var unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, tokens[l].input);
-					if (unpacked && (unpacked.name === 'trade')) {
-						var tradeType = 'Sell';
-						var token = undefined;
-						var token2 = undefined;
-						if (unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
-						{
-							tradeType = 'Buy';
-							token = _delta.uniqueTokens[unpacked.params[2].value];
-							token2 = _delta.uniqueTokens[unpacked.params[0].value];
-						}
-						else // buy
-						{
-							token = _delta.uniqueTokens[unpacked.params[0].value];
-							token2 = _delta.uniqueTokens[unpacked.params[2].value];
-						}
-
-						if (token && token2 && token.addr && token2.addr) {
-							var amount = 0;
-							var oppositeAmount = 0;
-							var chosenAmount = Number(unpacked.params[10].value);
-							if (tradeType === 'Sell') {
-								amount = Number(unpacked.params[1].value);
-								oppositeAmount = Number(unpacked.params[3].value);
-							} else {
-								oppositeAmount = Number(unpacked.params[1].value);
-								amount = Number(unpacked.params[3].value);
-							}
-
-							var unlisted = token.unlisted;
-							var dvsr = _delta.divisorFromDecimals(token.decimals)
-							var dvsr2 = _delta.divisorFromDecimals(token2.decimals)
-							var val = _util.weiToEth(amount, dvsr);
-							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
-
-
-							var orderSize = 0;
-
-							var price = 0;
-							//	if(tradeType === 'sell')
-							{
-								price = val2 / val;
-							}
-
-
-							if (tradeType === 'Buy') {
-								orderSize = val;
-								if (oppositeAmount > chosenAmount) {
-									val2 = _util.weiToEth(chosenAmount, dvsr2);
-									amount = (chosenAmount / (oppositeAmount / amount));
-									val = _util.weiToEth(amount, dvsr);
-								}
-							} else {
-								orderSize = val;
-								if (amount > chosenAmount) {
-									val = _util.weiToEth(chosenAmount, dvsr);
-									oppositeAmount = (chosenAmount * oppositeAmount) / amount;
-									val2 = _util.weiToEth(oppositeAmount, dvsr2);
-								}
-							}
-
-
-							var trans = createOutputTransaction(tradeType, token.name, val, val2, tokens[l].hash, tokens[l].timeStamp, unlisted, token.addr, price, tokens[l].isError === '0');
-							outputTransactions.push(trans);
-						}
-					}
-
 				}
 			}
 
@@ -1559,15 +1433,15 @@
 						else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy') {
 							row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
 						}
-						else if (cellValue == 'Buy') {
-							row$.append($('<td/>').html('<span class="label label-info" >Trade</span><span class="label label-success" >' + cellValue + '</span>'));
+						else if (cellValue == 'Taker Buy') {
+							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
 						}
 						else {
-							row$.append($('<td/>').html('<span class="label label-info" >Trade</span><span class="label label-danger" >' + cellValue + '</span>'));
+							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
 						}
 					}
 					else if (head == 'Hash') {
-						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/tx/' + cellValue + '">' + cellValue.substring(0, 8) + '...</a>'));
+						row$.append($('<td/>').html(_util.hashLink(cellValue, true, true)));
 					}
 					else if (head == 'Status') {
 						if (cellValue)
@@ -1888,7 +1762,7 @@
 	}
 
 
-	
+
 
 
 	//remove exponential notation 1e-8  etc.

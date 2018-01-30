@@ -22349,71 +22349,71 @@ const BigNumber = require('bignumber.js');
 
 function EtherDelta() {
 
-	this.uniqueTokens = {};
-	this.connection = undefined;
-	this.contractEtherDelta = undefined;
-	this.contractToken = undefined;
-	this.secondsPerBlock = 15;
-	this.selectedContract = undefined;
-	this.web3 = undefined; this.minGas = 0.005;
-	this.contractDeltaBalance = undefined;
-	this.socket = null;
-	this.socketConnected = false;
+    this.uniqueTokens = {};
+    this.connection = undefined;
+    this.contractEtherDelta = undefined;
+    this.contractToken = undefined;
+    this.secondsPerBlock = 15;
+    this.selectedContract = undefined;
+    this.web3 = undefined; this.minGas = 0.005;
+    this.contractDeltaBalance = undefined;
+    this.socket = null;
+    this.socketConnected = false;
 }
 
 EtherDelta.prototype.socketTicker = function socketTicker(callback, rqid) {
 
-	if (!bundle.EtherDelta.socketConnected) {
-		bundle.EtherDelta.connectSocket(() => {
-			getMarket();
-		});
-	}
-	else {
-		getMarket();
-	}
+    if (!bundle.EtherDelta.socketConnected) {
+        bundle.EtherDelta.connectSocket(() => {
+            getMarket();
+        });
+    }
+    else {
+        getMarket();
+    }
 
-	function getMarket() {
-		bundle.EtherDelta.socket.emit('getMarket', {});
-		bundle.EtherDelta.socket.once('market', (market) => {
-			callback(null, market.returnTicker, rqid);
-		});
-	}
+    function getMarket() {
+        bundle.EtherDelta.socket.emit('getMarket', {});
+        bundle.EtherDelta.socket.once('market', (market) => {
+            callback(null, market.returnTicker, rqid);
+        });
+    }
 };
 
 EtherDelta.prototype.connectSocket = function connectSocket(callbackConnect, callBackNotifications) {
-	let socketURL = 'https://socket.etherdelta.com';
-	bundle.EtherDelta.socket = io.connect(socketURL, {
-		transports: ['websocket'],
-		'reconnection': true,
-		'reconnectionDelay': 250,
-		'reconnectionAttempts': 5
-	});
+    let socketURL = 'https://socket.etherdelta.com';
+    bundle.EtherDelta.socket = io.connect(socketURL, {
+        transports: ['websocket'],
+        'reconnection': true,
+        'reconnectionDelay': 250,
+        'reconnectionAttempts': 5
+    });
 
-	bundle.EtherDelta.socket.on('connect', () => {
-		console.log('socket connected');
-		bundle.EtherDelta.socketConnected = true;
-		if (callbackConnect) {
-			callbackConnect();
-		}
-	});
+    bundle.EtherDelta.socket.on('connect', () => {
+        console.log('socket connected');
+        bundle.EtherDelta.socketConnected = true;
+        if (callbackConnect) {
+            callbackConnect();
+        }
+    });
 
-	bundle.EtherDelta.socket.on('disconnect', () => {
-		bundle.EtherDelta.socketConnected = false;
-		console.log('socket disconnected');
-	});
+    bundle.EtherDelta.socket.on('disconnect', () => {
+        bundle.EtherDelta.socketConnected = false;
+        console.log('socket disconnected');
+    });
 
 
-	if (callBackNotifications) {
-		bundle.EtherDelta.socket.on('orders', (orders) => {
-			callBackNotifications('orders', orders);
-		});
-		bundle.EtherDelta.socket.on('funds', (funds) => {
-			callBackNotifications('funds', funds);
-		});
-		bundle.EtherDelta.socket.on('trades', (trades) => {
-			callBackNotifications('trades', trades);
-		});
-	}
+    if (callBackNotifications) {
+        bundle.EtherDelta.socket.on('orders', (orders) => {
+            callBackNotifications('orders', orders);
+        });
+        bundle.EtherDelta.socket.on('funds', (funds) => {
+            callBackNotifications('funds', funds);
+        });
+        bundle.EtherDelta.socket.on('trades', (trades) => {
+            callBackNotifications('trades', trades);
+        });
+    }
 
 	/*	setTimeout(() => {
 			if(!bundle.EtherDelta.socketConnected)
@@ -22423,258 +22423,764 @@ EtherDelta.prototype.connectSocket = function connectSocket(callbackConnect, cal
 }
 
 EtherDelta.prototype.dialogInfo = function dialogInfo(message) {
-	console.log(message);
+    console.log(message);
 };
 
 EtherDelta.prototype.dialogError = function dialogError(message) {
-	console.log(message);
+    console.log(message);
 };
 EtherDelta.prototype.alertSuccess = function alertSuccess(message) {
-	console.log(message);
+    console.log(message);
 };
 
 
 EtherDelta.prototype.addressLink = function addressLink(address) {
-	return `https://etherscan.io/address/${address}`;
+    return utility.addressLink(address, false, false);
 };
 
 
 EtherDelta.prototype.getDivisor = function getDivisor(tokenOrAddress) {
-	let result = 1000000000000000000;
-	const token = this.getToken(tokenOrAddress);
-	if (token && token.decimals !== undefined) {
-		result = Math.pow(10, token.decimals);
-	}
-	return new BigNumber(result);
+    let result = 1000000000000000000;
+    const token = this.getToken(tokenOrAddress);
+    if (token && token.decimals !== undefined) {
+        result = Math.pow(10, token.decimals);
+    }
+    return new BigNumber(result);
 };
 
-EtherDelta.prototype.divisorFromDecimals = function(decimals) {
-	var result = 1000000000000000000;
-	if (decimals !== undefined) {
-		result = Math.pow(10, decimals);
-	}
-	return new BigNumber(result);
+EtherDelta.prototype.divisorFromDecimals = function (decimals) {
+    var result = 1000000000000000000;
+    if (decimals !== undefined) {
+        result = Math.pow(10, decimals);
+    }
+    return new BigNumber(result);
 }
 
 EtherDelta.prototype.getToken = function getToken(addrOrToken, name, decimals) {
-	let result;
-	const lowerAddrOrToken = typeof addrOrToken === 'string' ? addrOrToken.toLowerCase() : addrOrToken;
-	const matchingTokens = this.config.tokens.filter(
-		x => x.addr.toLowerCase() === lowerAddrOrToken ||
-			x.name === addrOrToken);
-	const expectedKeys = JSON.stringify([
-		'addr',
-		'decimals',
-		'name',
-	]);
-	if (matchingTokens.length > 0) {
-		result = matchingTokens[0];
-	} else if (addrOrToken && addrOrToken.addr &&
-		JSON.stringify(Object.keys(addrOrToken).sort()) === expectedKeys) {
-		result = addrOrToken;
-	} else if (typeof addrOrToken === 'string' && addrOrToken.slice(0, 2) === '0x' && name && decimals >= 0) {
-		result = JSON.parse(JSON.stringify(this.config.tokens[0]));
-		result.addr = lowerAddrOrToken;
-		result.name = name;
-		result.decimals = decimals;
-	}
-	return result;
+    let result;
+    const lowerAddrOrToken = typeof addrOrToken === 'string' ? addrOrToken.toLowerCase() : addrOrToken;
+    const matchingTokens = this.config.tokens.filter(
+        x => x.addr.toLowerCase() === lowerAddrOrToken ||
+            x.name === addrOrToken);
+    const expectedKeys = JSON.stringify([
+        'addr',
+        'decimals',
+        'name',
+    ]);
+    if (matchingTokens.length > 0) {
+        result = matchingTokens[0];
+    } else if (addrOrToken && addrOrToken.addr &&
+        JSON.stringify(Object.keys(addrOrToken).sort()) === expectedKeys) {
+        result = addrOrToken;
+    } else if (typeof addrOrToken === 'string' && addrOrToken.slice(0, 2) === '0x' && name && decimals >= 0) {
+        result = JSON.parse(JSON.stringify(this.config.tokens[0]));
+        result.addr = lowerAddrOrToken;
+        result.name = name;
+        result.decimals = decimals;
+    }
+    return result;
 };
 
 
 EtherDelta.prototype.loadWeb3 = function loadWeb3(callback) {
-	this.config = config;
+    this.config = config;
 
-	let provider = 'https://mainnet.infura.io/DeltaBalances ';
+    let provider = 'https://mainnet.infura.io/DeltaBalances ';
 
-	if (true) {
-		// mist/geth/parity situation
-		this.web3 = new Web3(new Web3.providers.HttpProvider(provider));
-		try {
-			this.connection = { connection: 'RPC', provider: provider, testnet: this.config.ethTestnet };
-			const block = this.web3.eth.blockNumber;
-			if (block === undefined)
-				throw 'fuck';
-			blocknum = block;
-			console.log(`block: ${block}`);
-		} catch (err) {
-			etherscanFallback = true;
-			console.log('catch, fallback etherscan');
-			this.connection = {
-				connection: 'Proxy',
-				provider: `https://${this.config.ethTestnet ? `${this.config.ethTestnet}.` : ''}etherscan.io`,
-				testnet: this.config.ethTestnet,
-			};
-			this.web3.setProvider(undefined);
-		}
-		callback();
-	}
+    if (true) {
+        // mist/geth/parity situation
+        this.web3 = new Web3(new Web3.providers.HttpProvider(provider));
+        try {
+            this.connection = { connection: 'RPC', provider: provider, testnet: this.config.ethTestnet };
+            const block = this.web3.eth.blockNumber;
+            if (block === undefined)
+                throw 'fuck';
+            blocknum = block;
+            console.log(`block: ${block}`);
+        } catch (err) {
+            etherscanFallback = true;
+            console.log('catch, fallback etherscan');
+            this.connection = {
+                connection: 'Proxy',
+                provider: `https://${this.config.ethTestnet ? `${this.config.ethTestnet}.` : ''}etherscan.io`,
+                testnet: this.config.ethTestnet,
+            };
+            this.web3.setProvider(undefined);
+        }
+        callback();
+    }
 };
 
 EtherDelta.prototype.changeContract = function changeContract(index) {
 
-	if (index < 0 || index > this.config.contractEtherDeltaAddrs.length)
-		index = 0;
+    if (index < 0 || index > this.config.contractEtherDeltaAddrs.length)
+        index = 0;
 
-	this.config.contractEtherDeltaAddr = this.config.contractEtherDeltaAddrs[index].addr;
+    this.config.contractEtherDeltaAddr = this.config.contractEtherDeltaAddrs[index].addr;
 }
 
 EtherDelta.prototype.initContracts = function initContracts(callback) {
-	this.web3.version.getNetwork((error, version) => {
-		if (!error && version && Number(version) !== 1) {
-			this.dialogError('You are connected to the Ethereum testnet. Please connect to the Ethereum mainnet.');
-		}
-	});
+    this.web3.version.getNetwork((error, version) => {
+        if (!error && version && Number(version) !== 1) {
+            this.dialogError('You are connected to the Ethereum testnet. Please connect to the Ethereum mainnet.');
+        }
+    });
 
-	this.config = config;
-	this.config.contractEtherDeltaAddr = this.config.contractEtherDeltaAddrs[0].addr;
+    this.config = config;
+    this.config.contractEtherDeltaAddr = this.config.contractEtherDeltaAddrs[0].addr;
 
-	if (Array.isArray(this.config.apiServers)) {
-		this.config.apiServer = this.config.apiServers[
-			Math.floor(Math.random() * this.config.apiServers.length)];
-		console.log('Selected API', this.config.apiServer);
-	}
+    if (Array.isArray(this.config.apiServers)) {
+        this.config.apiServer = this.config.apiServers[
+            Math.floor(Math.random() * this.config.apiServers.length)];
+        console.log('Selected API', this.config.apiServer);
+    }
 
-	// load contract
-	utility.loadContract(
-		this.web3,
-		this.config.etherDeltaAbi,
-		this.config.contractEtherDeltaAddr,
-		(err, contractEtherDelta) => {
+    // load contract
+    utility.loadContract(
+        this.web3,
+        this.config.etherDeltaAbi,
+        this.config.contractEtherDeltaAddr,
+        (err, contractEtherDelta) => {
 
-			this.contractEtherDelta = contractEtherDelta;
-			utility.loadContract(
-				this.web3,
-				this.config.tokenAbi,
-				'0x0000000000000000000000000000000000000000',
-				(errLoadContract, contractToken) => {
-					this.contractToken = contractToken;
+            this.contractEtherDelta = contractEtherDelta;
+            utility.loadContract(
+                this.web3,
+                this.config.tokenAbi,
+                '0x0000000000000000000000000000000000000000',
+                (errLoadContract, contractToken) => {
+                    this.contractToken = contractToken;
 
-					utility.loadContract(
-						this.web3,
-						this.config.deltaBalancesAbi,
-						this.config.contractDeltaBalanceAddr,
-						(err, contractDeltaBalance) => {
-							this.contractDeltaBalance = contractDeltaBalance;
-							callback();
-						});
-				});
-		});
+                    utility.loadContract(
+                        this.web3,
+                        this.config.deltaBalancesAbi,
+                        this.config.contractDeltaBalanceAddr,
+                        (err, contractDeltaBalance) => {
+                            this.contractDeltaBalance = contractDeltaBalance;
+                            callback();
+                        });
+                });
+        });
 };
 
-EtherDelta.prototype.initTokens = function(useBlacklist) {
-	//import of etherdelta config
-	if (etherDeltaConfig && etherDeltaConfig.tokens) {
-		this.config.tokens = etherDeltaConfig.tokens;
-	}
-	else {
-		showError('failed to load token data');
-		return;
-	}
+EtherDelta.prototype.initTokens = function (useBlacklist) {
+    //import of etherdelta config
+    if (etherDeltaConfig && etherDeltaConfig.tokens) {
+        this.config.tokens = etherDeltaConfig.tokens;
+    }
+    else {
+        showError('failed to load token data');
+        return;
+    }
 
-	// note all listed tokens
-	for (var i = 0; i < this.config.tokens.length; i++) {
-		var token = this.config.tokens[i];
-		if (token) {
-			token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
-			token.addr = token.addr.toLowerCase();
-			token.unlisted = false;
-			this.config.tokens[i] = token;
-			if ((!useBlacklist || (!useBlacklist || !tokenBlacklist[token.addr])) && !this.uniqueTokens[token.addr]) {
-				this.uniqueTokens[token.addr] = token;
-			}
-		}
-	}
+    // note all listed tokens
+    for (var i = 0; i < this.config.tokens.length; i++) {
+        var token = this.config.tokens[i];
+        if (token) {
+            token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
+            token.addr = token.addr.toLowerCase();
+            token.unlisted = false;
+            this.config.tokens[i] = token;
+            if ((!useBlacklist || (!useBlacklist || !tokenBlacklist[token.addr])) && !this.uniqueTokens[token.addr]) {
+                this.uniqueTokens[token.addr] = token;
+            }
+        }
+    }
 
-	//format MEW tokens like ED tokens
-	offlineCustomTokens = offlineCustomTokens.map((x) => {
-		return {
-			"name": utility.escapeHtml(x.symbol),
-			"addr": x.address.toLowerCase(),
-			"unlisted": true,
-			"decimals": x.decimal,
-		};
-	});
-	//filter out custom tokens that have been listed by now
-	this.config.customTokens = offlineCustomTokens.filter((x) => { return !(this.uniqueTokens[x.addr] && !(tokenBlacklist[x.addr])) });
-	// note custom tokens
-	for (var i = 0; i < this.config.customTokens.length; i++) {
-		var token = this.config.customTokens[i];
-		if (token && (!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
-			this.uniqueTokens[token.addr] = token;
-		}
-	}
+    //format MEW tokens like ED tokens
+    offlineCustomTokens = offlineCustomTokens.map((x) => {
+        return {
+            "name": utility.escapeHtml(x.symbol),
+            "addr": x.address.toLowerCase(),
+            "unlisted": true,
+            "decimals": x.decimal,
+        };
+    });
+    //filter out custom tokens that have been listed by now
+    this.config.customTokens = offlineCustomTokens.filter((x) => { return !(this.uniqueTokens[x.addr] && !(tokenBlacklist[x.addr])) });
+    // note custom tokens
+    for (var i = 0; i < this.config.customTokens.length; i++) {
+        var token = this.config.customTokens[i];
+        if (token && (!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
+            this.uniqueTokens[token.addr] = token;
+        }
+    }
 
-	// treat tokens listed as staging as unlisted custom tokens
-	if (stagingTokens && stagingTokens.tokens) {
-		//filter tokens that we already know
-		var stageTokens = stagingTokens.tokens.filter((x) => { return !(this.uniqueTokens[x.addr]) });
-		for (var i = 0; i < stageTokens.length; i++) {
-			var token = stageTokens[i];
-			if (token) {
-				token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
-				token.addr = token.addr.toLowerCase();
-				token.unlisted = true;
-				if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
-					this.uniqueTokens[token.addr] = token;
-					this.config.customTokens.push(token);
-				}
-			}
-		}
-	}
-
-
-	// check for unlisted tokens at forkdelta
-	let forkTokens = [];
-	if (forkDeltaConfig && forkDeltaConfig.tokens) {
-		forkTokens = forkDeltaConfig.tokens;
-	} else {
-		forkTokens = forkOfflineTokens;
-	}
+    // treat tokens listed as staging as unlisted custom tokens
+    if (stagingTokens && stagingTokens.tokens) {
+        //filter tokens that we already know
+        var stageTokens = stagingTokens.tokens.filter((x) => { return !(this.uniqueTokens[x.addr]) });
+        for (var i = 0; i < stageTokens.length; i++) {
+            var token = stageTokens[i];
+            if (token) {
+                token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
+                token.addr = token.addr.toLowerCase();
+                token.unlisted = true;
+                if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
+                    this.uniqueTokens[token.addr] = token;
+                    this.config.customTokens.push(token);
+                }
+            }
+        }
+    }
 
 
-	forkTokens = forkTokens.filter((x) => { return !(this.uniqueTokens[x.addr]) });
-	for (var i = 0; i < forkTokens.length; i++) {
-		var token = forkTokens[i];
-		if (token) {
-			token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
-			token.addr = token.addr.toLowerCase();
-			token.unlisted = true;
-			if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
-				this.uniqueTokens[token.addr] = token;
-				this.config.customTokens.push(token);
-			}
-		}
-	}
+    // check for unlisted tokens at forkdelta
+    let forkTokens = [];
+    if (forkDeltaConfig && forkDeltaConfig.tokens) {
+        forkTokens = forkDeltaConfig.tokens;
+    } else {
+        forkTokens = forkOfflineTokens;
+    }
 
 
-	if (allShitCoins) {
-		//filter tokens that we already know
-		var shitCoins = allShitCoins.filter((x) => { return !(this.uniqueTokens[x.addr]) && true; });
-		for (var i = 0; i < shitCoins.length; i++) {
-			var token = shitCoins[i];
-			if (token) {
-				token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
-				token.addr = token.addr.toLowerCase();
-				token.unlisted = true;
-				if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
-					this.uniqueTokens[token.addr] = token;
-					this.config.customTokens.push(token);
-				}
-			}
-		}
-	}
+    forkTokens = forkTokens.filter((x) => { return !(this.uniqueTokens[x.addr]) });
+    for (var i = 0; i < forkTokens.length; i++) {
+        var token = forkTokens[i];
+        if (token) {
+            token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
+            token.addr = token.addr.toLowerCase();
+            token.unlisted = true;
+            if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
+                this.uniqueTokens[token.addr] = token;
+                this.config.customTokens.push(token);
+            }
+        }
+    }
+
+
+    if (allShitCoins) {
+        //filter tokens that we already know
+        var shitCoins = allShitCoins.filter((x) => { return !(this.uniqueTokens[x.addr]) && true; });
+        for (var i = 0; i < shitCoins.length; i++) {
+            var token = shitCoins[i];
+            if (token) {
+                token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
+                token.addr = token.addr.toLowerCase();
+                token.unlisted = true;
+                if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
+                    this.uniqueTokens[token.addr] = token;
+                    this.config.customTokens.push(token);
+                }
+            }
+        }
+    }
 }
 
+EtherDelta.prototype.setToken = function (address) {
+    if (this.uniqueTokens[address]) {
+        return this.uniqueTokens[address];
+    } else {
+        //unknownToken = true;
+        //TODO get decimals get symbol
+        return { addr: address, name: '???', decimals: 18 };
+    }
+};
+
+EtherDelta.prototype.processUnpackedInput = function (tx, unpacked) {
+    if (unpacked && unpacked.name) {
+        if (unpacked.name === 'transfer') {
+            var to = unpacked.params[0].value;
+            var rawAmount = unpacked.params[1].value;
+            var amount = 0;
+            var token = this.setToken(unpacked.address);
+            var unlisted = true;
+            if (token && token.addr) {
+                var dvsr = this.divisorFromDecimals(token.decimals);
+                amount = utility.weiToEth(rawAmount, dvsr);
+                unlisted = token.unlisted;
+            }
+            var obj =
+                {
+                    'type': 'Transfer',
+                    'note': 'Give the token contract the order to transfer your tokens',
+                    'token': token,
+                    'to': to,
+                    'amount': amount,
+                    'unlisted': unlisted,
+                };
+            return obj;
+        }
+        //sender, //amount  /to is contractAddr
+        else if (unpacked.name === 'approve') {
+            var sender = unpacked.params[0].value;
+            var rawAmount = unpacked.params[1].value;
+            var amount = 0;
+            var token = this.setToken(tx.to.toLowerCase());
+            var unlisted = true;
+            if (token && token.addr) {
+                var dvsr = this.divisorFromDecimals(token.decimals);
+                amount = utility.weiToEth(rawAmount, dvsr);
+                unlisted = token.unlisted;
+            }
+            var obj =
+                {
+                    'type': 'Approve',
+                    'note': 'Transaction (1/2) of a deposit. Approve EtherDelta to move tokens for you.',
+                    'token': token,
+                    'sender': sender,
+                    'amount': amount,
+                    'unlisted': unlisted,
+                };
+            return obj;
+        }
+        else if (unpacked.name === 'deposit' || unpacked.name === 'withdraw') {
+            var type = '';
+            var note = '';
+            var rawVal = 0;
+            if (unpacked.name === 'deposit') {
+                rawVal = tx.value;
+                type = 'Deposit';
+                note = 'Deposit ETH into EtherDelta contract';
+            } else {
+                rawVal = unpacked.params[0].value;
+                type = 'Withdraw';
+                note = 'Request EtherDelta to withdraw ETH';
+            }
+            var val = utility.weiToEth(rawVal);
+
+            var obj = {
+                'type': type,
+                'note': note,
+                'amount': val,
+            };
+            return obj;
+        }
+        else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken') {
+            var token = this.setToken(unpacked.params[0].value);
+            if (token && token.addr) {
+                var unlisted = token.unlisted;
+                var dvsr = this.divisorFromDecimals(token.decimals)
+                var val = utility.weiToEth(unpacked.params[1].value, dvsr);
+                var type = '';
+                var note = '';
+                if (unpacked.name === 'withdrawToken') {
+                    type = 'Withdraw';
+                    note = 'Request EtherDelta to withdraw tokens';
+                }
+                else {
+                    type = 'Deposit';
+                    note = 'Transaction (2/2) of a deposit, request EtherDelta to deposit tokens';
+                }
+
+                var obj = {
+                    'type': 'Token ' + type,
+                    'note': note,
+                    'token': token,
+                    'amount': val,
+                    'unlisted': unlisted,
+                };
+                return obj;
+            }
+        }
+        else if (unpacked.name === 'cancelOrder') {
+            var cancelType = 'sell';
+            var token = undefined;
+            var token2 = undefined;
+            if (unpacked.params[0].value === this.config.tokens[0].addr) // get eth  -> sell
+            {
+                cancelType = 'buy';
+                token = this.setToken(unpacked.params[2].value);
+                token2 = this.setToken(unpacked.params[0].value);
+            }
+            else // buy
+            {
+                token = this.setToken(unpacked.params[0].value);
+                token2 = this.setToken(unpacked.params[2].value);
+            }
+
+            if (token && token2 && token.addr && token2.addr) {
+                var amount = 0;
+                var oppositeAmount = 0;
+                if (cancelType === 'sell') {
+                    amount = unpacked.params[1].value;
+                    oppositeAmount = unpacked.params[3].value;
+                } else {
+                    oppositeAmount = unpacked.params[1].value;
+                    amount = unpacked.params[3].value;
+                }
+
+                var unlisted = token.unlisted;
+                var dvsr = this.divisorFromDecimals(token.decimals)
+                var dvsr2 = this.divisorFromDecimals(token2.decimals)
+                var val = utility.weiToEth(amount, dvsr);
+                var val2 = utility.weiToEth(oppositeAmount, dvsr2);
+                var price = 0;
+                //if(cancelType === 'sell')
+                {
+                    price = val2 / val;
+                }
+                var obj = {
+                    'type': 'Cancel ' + cancelType,
+                    'note': 'Cancel an open order on EtherDelta',
+                    'token': token,
+                    'amount': val,
+                    'price': price,
+                    'unlisted': unlisted,
+                };
+                return obj;
+            }
+        }
+        else if (unpacked.name === 'trade') {
+            var tradeType = 'Sell';
+            var token = undefined;
+            var token2 = undefined;
+            if (unpacked.params[0].value === this.config.tokens[0].addr) // get eth  -> sell
+            {
+                tradeType = 'Buy';
+                token = this.setToken(unpacked.params[2].value);
+                token2 = this.setToken(unpacked.params[0].value);
+            }
+            else // buy
+            {
+                token = this.setToken(unpacked.params[0].value);
+                token2 = this.setToken(unpacked.params[2].value);
+            }
+
+            if (token && token2 && token.addr && token2.addr) {
+                var amount = 0;
+                var oppositeAmount = 0;
+                var chosenAmount = Number(unpacked.params[10].value);
+                if (tradeType === 'Sell') {
+                    amount = Number(unpacked.params[1].value);
+                    oppositeAmount = Number(unpacked.params[3].value);
+
+
+                } else {
+                    oppositeAmount = Number(unpacked.params[1].value);
+                    amount = Number(unpacked.params[3].value);
+                }
+
+                var unlisted = token.unlisted;
+                var dvsr = this.divisorFromDecimals(token.decimals)
+                var dvsr2 = this.divisorFromDecimals(token2.decimals)
+                var val = utility.weiToEth(amount, dvsr);
+                var val2 = utility.weiToEth(oppositeAmount, dvsr2);
+
+                var orderSize = 0;
+
+                var price = 0;
+                //	if(tradeType === 'sell')
+                {
+                    price = val2 / val;
+                }
+
+                if (tradeType === 'Buy') {
+                    orderSize = val;
+                    if (oppositeAmount > chosenAmount) {
+                        val2 = utility.weiToEth(chosenAmount, dvsr2);
+                        amount = (chosenAmount / (oppositeAmount / amount));
+                        val = utility.weiToEth(amount, dvsr);
+                    }
+                } else {
+                    orderSize = val;
+                    if (amount > chosenAmount) {
+                        val = utility.weiToEth(chosenAmount, dvsr);
+                        oppositeAmount = (chosenAmount * oppositeAmount) / amount;
+                        val2 = utility.weiToEth(oppositeAmount, dvsr2);
+                    }
+                }
+
+                var obj = {
+                    'type': 'Taker ' + tradeType,
+                    'note': utility.addressLink(tx.from, true, true) + ' selected ' + utility.addressLink(unpacked.params[6].value, true, true) + '\'s order in the orderbook to trade.',
+                    'token': token,
+                    'amount': val,
+                    'order size': orderSize,
+                    'price': price,
+                    'ETH': val2,
+                    'unlisted': unlisted,
+                };
+                return obj;
+            }
+        }
+    } else {
+        return undefined;
+    }
+
+    return undefined;
+};
+
+EtherDelta.prototype.addressName = function (addr) {
+    var lcAddr = addr.toLowerCase();
+    if (this.uniqueTokens[addr]) {
+        return this.uniqueTokens[addr].name + " Contract";
+    }
+    else if (this.uniqueTokens[lcAddr]) {
+        return this.uniqueTokens[lcAddr].name + " Contract";
+    }
+
+    for (var i = 0; i < this.config.contractEtherDeltaAddrs.length; i++) {
+        if (lcAddr == this.config.contractEtherDeltaAddrs[i].addr) {
+            if (lcAddr == '0xbf29685856fae1e228878dfb35b280c0adcc3b05') {
+                return 'Decentrex Contract ' + addr.slice(0, 4) + '..';
+            }
+            else {
+                var resp = 'EtherDelta Contract ' + addr.slice(0, 4) + '..';
+                if (i > 0)
+                    resp = 'Outdated ' + resp;
+                return resp;
+            }
+        }
+    }
+    return addr;
+};
+
+EtherDelta.prototype.processUnpackedEvent = function (unpacked, myAddr) {
+
+    if (unpacked && unpacked.events) {
+
+        if (unpacked.name == 'Trade') {
+            var tradeType = 'Sell';
+            var token = undefined;
+            var base = undefined;
+            var maker = unpacked.events[4].value.toLowerCase();
+            var taker = unpacked.events[5].value.toLowerCase();
+
+            var transType = '';
+
+            if (taker === myAddr)
+                transType = 'Taker';
+            else if (maker === myAddr)
+                transType = 'Maker';
+
+            if (unpacked.events[0].value === this.config.tokens[0].addr) // send get eth  -> buy form sell order
+            {
+                tradeType = 'Buy';
+                token = this.setToken(unpacked.events[2].value);
+                base = this.uniqueTokens[unpacked.events[0].value];
+            } else if (unpacked.events[2].value === _delta.config.tokens[0].addr)// taker sell
+            {
+                tradeType = 'Sell';
+                token = this.setToken(unpacked.events[0].value);
+                base = this.uniqueTokens[unpacked.events[2].value];
+            }
+            else { // TODO break on non ETH trades
+                return { 'error': 'unknown token in trade event' };
+                // tradeType = 'Sell';
+                // token = this.setToken(unpacked.events[0].value);
+                // base = this.setToken[unpacked.events[2].value];
+            }
+
+            if (token && base && token.addr && base.addr) {
+                var amount = 0;
+                var oppositeAmount = 0;
+                var buyUser = '';
+                var sellUser = '';
+                if (tradeType === 'Sell') {
+                    amount = unpacked.events[1].value;
+                    oppositeAmount = unpacked.events[3].value;
+                    sellUser = unpacked.events[5].value;
+                    buyUser = unpacked.events[4].value;
+                } else {
+                    oppositeAmount = unpacked.events[1].value;
+                    amount = unpacked.events[3].value;
+                    sellUser = unpacked.events[4].value;
+                    buyUser = unpacked.events[5].value;
+                }
+
+                var unlisted = token.unlisted;
+                var dvsr = this.divisorFromDecimals(token.decimals)
+                var dvsr2 = this.divisorFromDecimals(base.decimals)
+                var val = utility.weiToEth(amount, dvsr);
+                var val2 = utility.weiToEth(oppositeAmount, dvsr2);
+
+                var price = 0;
+                if (val !== 0) {
+                    price = val2 / val;
+                }
+
+                // history only??
+                if (buyUser === myAddr)
+                    tradeType = "Buy";
+                else if (sellUser === myAddr)
+                    tradeType = "Sell";
+
+
+                let fee = 0;
+                let feeCurrency = '';
+                if (transType === 'Taker') {
+                    const fee03 = 3000000000000000; //0.3% fee in wei
+                    const ether1 = 1000000000000000000; // 1 ether in wei
+                    if (tradeType === 'Sell') {
+                        fee = utility.weiToEth(Math.round((Number(amount) * fee03) / ether1), dvsr);
+                        feeCurrency = token;
+                    }
+                    else if (tradeType === 'Buy') {
+                        fee = utility.weiToEth(Math.round((Number(oppositeAmount) * fee03) / ether1), dvsr2);
+                        feeCurrency = base;
+                    }
+                } else if (transType === 'Maker') {
+                    fee = 0;
+                    if (tradeType === 'Sell') {
+                        feeCurrency = token;
+                    }
+                    else if (tradeType === 'Buy') {
+                        feeCurrency = base;
+                    }
+                }
+
+
+
+                var obj = {
+                    'type': transType + ' ' + tradeType,
+                    // myAddr works in tx.js , history doesn't show note anyway
+                    'note': utility.addressLink(myAddr, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
+                    'token': token,
+                    'amount': val,
+                    'price': price,
+                    'ETH': val2,
+                    'unlisted': unlisted,
+                    'buyer': buyUser,
+                    'seller': sellUser,
+                    'fee': fee,
+                    'feeCurrency': feeCurrency,
+                    'transType': transType,
+                    'tradeType': tradeType,
+                };
+                return obj;
+            }
+
+        }
+        else if (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw') {
+            var type = unpacked.name;
+            var token = this.setToken(unpacked.events[0].value);
+            var user = unpacked.events[1].value;
+            var rawAmount = unpacked.events[2].value;
+            var rawBalance = unpacked.events[3].value;
+
+            if (token && token.addr) {
+                var unlisted = token.unlisted;
+                var dvsr = this.divisorFromDecimals(token.decimals)
+                var val = utility.weiToEth(rawAmount, dvsr);
+                var balance = utility.weiToEth(rawBalance, dvsr);
+                if (unpacked.name === 'Withdraw') {
+                    note = 'Withdrawn from EtherDelta';
+                }
+                else {
+                    note = 'Deposited into EtherDelta';
+                }
+
+                if (token.addr !== '0x0000000000000000000000000000000000000000')
+                    type = 'Token ' + type;
+                var obj = {
+                    'type': type,
+                    'note': note,
+                    'token': token,
+                    'amount': val,
+                    'balance': balance,
+                    'unlisted': unlisted,
+                };
+                return obj;
+            }
+        }
+        else if (unpacked.name == 'Cancel') {
+            var cancelType = 'sell';
+            var token = undefined;
+            var token2 = undefined;
+            if (unpacked.events[0].value === this.config.tokens[0].addr) // get eth  -> sell
+            {
+                cancelType = 'buy';
+                token = this.setToken(unpacked.events[2].value);
+                token2 = this.setToken(unpacked.events[0].value);
+            }
+            else // buy
+            {
+                token = this.setToken(unpacked.events[0].value);
+                token2 = this.setToken(unpacked.events[2].value);
+            }
+
+            if (token && token2 && token.addr && token2.addr) {
+                var amount = 0;
+                var oppositeAmount = 0;
+                if (cancelType === 'sell') {
+                    amount = unpacked.events[1].value;
+                    oppositeAmount = unpacked.events[3].value;
+                } else {
+                    oppositeAmount = unpacked.events[1].value;
+                    amount = unpacked.events[3].value;
+                }
+
+                var unlisted = token.unlisted;
+                var dvsr = this.divisorFromDecimals(token.decimals)
+                var dvsr2 = this.divisorFromDecimals(token2.decimals)
+                var val = utility.weiToEth(amount, dvsr);
+                var val2 = utility.weiToEth(oppositeAmount, dvsr2);
+                var price = 0;
+                //if(cancelType === 'sell')
+                {
+                    price = val2 / val;
+                }
+                var obj = {
+                    'type': 'Cancel ' + cancelType,
+                    'note': 'Cancelled an open order on EtherDelta',
+                    'token': token,
+                    'amount': val,
+                    'price': price,
+                    'unlisted': unlisted,
+                };
+                return obj;
+            }
+
+        }
+        else if (unpacked.name == 'Transfer') {
+
+            var from = unpacked.events[0].value;
+            var to = unpacked.events[1].value;
+            var rawAmount = unpacked.events[2].value;
+            var token = this.setToken(unpacked.address);
+
+            var dvsr = this.divisorFromDecimals(token.decimals)
+            var val = utility.weiToEth(rawAmount, dvsr);
+            var unlisted = token.unlisted;
+
+            var obj = {
+                'type': 'Transfer',
+                'note': 'Tokens transferred',
+                'token': token,
+                'to': to,
+                'amount': val,
+                'unlisted': unlisted,
+            };
+            return obj;
+        }
+        else if (unpacked.name == 'Approval') {
+            var sender = unpacked.events[0].value;
+            var to = unpacked.events[1].value;
+            var rawAmount = unpacked.events[2].value;
+            var token = this.setToken(unpacked.address);
+
+            var dvsr = this.divisorFromDecimals(token.decimals)
+            var val = utility.weiToEth(rawAmount, dvsr);
+            var unlisted = token.unlisted;
+
+            var obj = {
+                'type': 'Approve',
+                'note': 'Now allows tokens to be transferred by deposit transaction (2/2)',
+                'sender': sender,
+                'token': token,
+                'to': to,
+                'amount': val,
+                'unlisted': unlisted,
+            };
+            return obj;
+        }
+        // Order ?
+    } else {
+        return { 'error': 'unknown event output' };
+    }
+    return { 'error': 'unknown event output' };
+};
+
+
 EtherDelta.prototype.startEtherDelta = function startEtherDelta(callback) {
-	console.log('Beginning init', new Date());
-	this.loadWeb3(() => {
-		console.log('Web3 done', new Date());
-		this.initContracts(() => {
-			console.log('Init contracts done', new Date());
-			callback();
-		});
-	});
+    console.log('Beginning init', new Date());
+    this.loadWeb3(() => {
+        console.log('Web3 done', new Date());
+        this.initContracts(() => {
+            console.log('Init contracts done', new Date());
+            callback();
+        });
+    });
 };
 
 const etherDelta = new EtherDelta();
@@ -45153,10 +45659,10 @@ module.exports = (config) => {
   utility.getURL = function getURL(url, callback) {
 
     jQuery.get(url).done((result) => {
-		if(result)
-			callback(undefined, result);
-		else 
-			callback('error retriving url', undefined);
+      if (result)
+        callback(undefined, result);
+      else
+        callback('error retriving url', undefined);
     }).fail((xhr, status, error) => {
       callback(error, undefined);
     });
@@ -45171,16 +45677,16 @@ module.exports = (config) => {
   };
 
   utility.escapeHtml = function (text) {
-		const map = {
-			'&': '&amp;',
-			'<': '&lt;',
-			'>': '&gt;',
-			'"': '&quot;',
-			"'": '&#039;'
-		};
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
 
-		return text.replace(/[&<>"']/g, function (m) { return map[m]; });
-	}
+    return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+  }
 
   utility.readFile = function readFile(filename, callback) {
     if (callback) {
@@ -45200,46 +45706,72 @@ module.exports = (config) => {
     }
   };
 
-  utility.processInputMethod = function getInputMethod(web3In, contract, data) {
-    if (!bundle.EtherDelta.config.methodIDS) {
-      Decoder.addABI(bundle.EtherDelta.contractEtherDelta.abi);
-      Decoder.addABI(bundle.EtherDelta.contractToken.abi);
-      bundle.EtherDelta.config.methodIDS = true;
-    }
-
-    let result = Decoder.decodeMethod(data);
-
-    return result;
-  };
-
-
-  utility.processOutputMethod = function getOutput(web3In, contract, data) {
+  utility.processLogs = function (data) {
 
     if (!bundle.EtherDelta.config.methodIDS) {
       Decoder.addABI(bundle.EtherDelta.contractEtherDelta.abi);
       Decoder.addABI(bundle.EtherDelta.contractToken.abi);
       bundle.EtherDelta.config.methodIDS = true;
     }
+
 
     if (data) {
       if (data.constructor !== Array) {
         data = [data];
         let result = Decoder.decodeLogs(data);
-        if (result) {
-          result = result[0];
-          result.params = result.events; // legacy
-        }
         return result;
       } else {
         let result = Decoder.decodeLogs(data);
-        if (result)
-          result.map((x) => { x.params = x.events }); // legacy
         return result;
       }
     } else {
       return undefined;
     }
   };
+
+  utility.processInput = function (data) {
+
+    if (!bundle.EtherDelta.config.methodIDS) {
+      Decoder.addABI(bundle.EtherDelta.contractEtherDelta.abi);
+      Decoder.addABI(bundle.EtherDelta.contractToken.abi);
+      bundle.EtherDelta.config.methodIDS = true;
+    }
+
+
+    if (data) {
+      let result = Decoder.decodeMethod(data);
+      return result;
+    } else {
+      return undefined;
+    }
+  };
+
+
+  utility.hashLink = function (hash, html, short) {
+    var url = 'https://etherscan.io/tx/' + hash;
+    if (!html)
+      return url
+
+    let displayHash = hash;
+    if (short)
+      displayHash = displayHash.slice(0, 8) + '..';
+    return '<a target = "_blank" href="' + url + '">' + displayHash + ' </a>';
+  };
+
+  utility.addressLink = function (addr, html, short) {
+    var url = 'https://etherscan.io/address/' + addr;
+    if (!html)
+      return url
+    var displayText = addr;
+    if (short)
+      displayText = displayText.slice(0, 6) + '..';
+    else {
+      displayText = bundle.EtherDelta.addressName(addr);
+    }
+    return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
+  };
+
+
 
   utility.call = function call(web3In, contract, address, functionName, args, callback) {
     function proxy(retries) {

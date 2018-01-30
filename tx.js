@@ -39,7 +39,7 @@
 	function init() {
 		// borrow some ED code for compatibility
 		_delta.startEtherDelta(() => {
-			
+
 			_delta.initTokens(false);
 
 			initiated = true;
@@ -131,14 +131,7 @@
 		$('#refreshButtonSearch').show();
 	}
 
-	function setToken(address) {
-		if (_delta.uniqueTokens[address])
-			return _delta.uniqueTokens[address];
-		else {
-			unknownToken = true;
-			return { addr: address, name: '???', decimals: 18 };
-		}
-	}
+
 
 	function myClick() {
 		if (running)
@@ -351,472 +344,52 @@
 			// internal from >0 withdraw
 
 			function parseOutput(tx, outputLogs) {
-				console.log('parsing input');
 				var outputs = [];
-				for (i = 0; i < outputLogs.length; i++) {
-					var unpacked = _util.processOutputMethod(_delta.web3, tx.to, outputLogs[i]);
+
+				var unpackedLogs = _util.processLogs(outputLogs);
+
+				for (i = 0; i < unpackedLogs.length; i++) {
+
+					let unpacked = unpackedLogs[i];
 
 					if (!unpacked) {
 						outputs.push({ 'error': 'unknown output' });
 						continue;
-					}
+					} else {
 
-					if (unpacked.name == 'Trade') {
-						var tradeType = 'Sell';
-						var token = undefined;
-						var base = undefined;
-						var maker = unpacked.params[4].value;
-						var taker = unpacked.params[5].value;
-
-						if (unpacked.params[0].value === _delta.config.tokens[0].addr) // send get eth  -> buy form sell order
-						{
-							tradeType = 'Buy';
-							token = setToken(unpacked.params[2].value);
-							base = _delta.uniqueTokens[unpacked.params[0].value];
-						}
-						else // taker sell
-						{
-							token = setToken(unpacked.params[0].value);
-							base = _delta.uniqueTokens[unpacked.params[2].value];
-						}
-
-						if (token && base && token.addr && base.addr) {
-							var amount = 0;
-							var oppositeAmount = 0;
-							var buyUser = '';
-							var sellUser = '';
-							if (tradeType === 'Sell') {
-								amount = unpacked.params[1].value;
-								oppositeAmount = unpacked.params[3].value;
-								sellUser = unpacked.params[5].value;
-								buyUser = unpacked.params[4].value;
-							} else {
-								oppositeAmount = unpacked.params[1].value;
-								amount = unpacked.params[3].value;
-								sellUser = unpacked.params[4].value;
-								buyUser = unpacked.params[5].value;
+						let myAddr = tx.from;
+						if (tx.to.toLowerCase() !== unpacked.address.toLowerCase() && unpacked.name !== 'Transfer' && unpacked.name !== 'Approve')
+							myAddr = tx.to.toLowerCase();
+						let obj = _delta.processUnpackedEvent(unpacked, myAddr);
+						if (obj) {
+							if (obj && obj.token && obj.token.name === "???" && token.decimals === 18)
+								unknownToken = true;
+							if (unpacked.name === 'Trade') {
+								delete obj.fee;
+								delete obj.feeCurrency;
+								delete obj.transType;
+								delete obj.tradeType;
 							}
-
-							var unlisted = token.unlisted;
-							var dvsr = _delta.divisorFromDecimals(token.decimals)
-							var dvsr2 = _delta.divisorFromDecimals(base.decimals)
-							var val = _util.weiToEth(amount, dvsr);
-							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
-
-							var price = 0;
-							if (val !== 0) {
-								price = val2 / val;
-							}
-
-
-							var obj = {
-								'type': 'Taker ' + tradeType,
-								'note': addressLink(tx.from, true, true) + ' selected ' + addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
-								'token': token,
-								'amount': val,
-								'price': price,
-								'ETH': val2,
-								'unlisted': unlisted,
-								'buyer': buyUser,
-								'seller': sellUser,
-							};
 							outputs.push(obj);
-						}
-
-					}
-					else if (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw') {
-						var type = unpacked.name;
-						var token = setToken(unpacked.params[0].value);
-						var user = unpacked.params[1].value;
-						var rawAmount = unpacked.params[2].value;
-						var rawBalance = unpacked.params[3].value;
-
-						if (token && token.addr) {
-							var unlisted = token.unlisted;
-							var dvsr = _delta.divisorFromDecimals(token.decimals)
-							var val = _util.weiToEth(rawAmount, dvsr);
-							var balance = _util.weiToEth(rawBalance, dvsr);
-							if (unpacked.name === 'Withdraw') {
-								note = 'Withdrawn from EtherDelta';
-							}
-							else {
-								note = 'Deposited into EtherDelta';
-							}
-
-							if (token.addr !== '0x0000000000000000000000000000000000000000')
-								type = 'Token ' + type;
-							var obj = {
-								'type': type,
-								'note': note,
-								'token': token,
-								'amount': val,
-								'balance': balance,
-								'unlisted': unlisted,
-							};
-							outputs.push(obj);
+						} else {
+							outputs.push({ 'error': 'unknown output' });
 						}
 					}
-					else if (unpacked.name == 'Cancel') {
-						var cancelType = 'sell';
-						var token = undefined;
-						var token2 = undefined;
-						if (unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
-						{
-							cancelType = 'buy';
-							token = setToken(unpacked.params[2].value);
-							token2 = setToken(unpacked.params[0].value);
-						}
-						else // buy
-						{
-							token = setToken(unpacked.params[0].value);
-							token2 = setToken(unpacked.params[2].value);
-						}
-
-						if (token && token2 && token.addr && token2.addr) {
-							var amount = 0;
-							var oppositeAmount = 0;
-							if (cancelType === 'sell') {
-								amount = unpacked.params[1].value;
-								oppositeAmount = unpacked.params[3].value;
-							} else {
-								oppositeAmount = unpacked.params[1].value;
-								amount = unpacked.params[3].value;
-							}
-
-							var unlisted = token.unlisted;
-							var dvsr = _delta.divisorFromDecimals(token.decimals)
-							var dvsr2 = _delta.divisorFromDecimals(token2.decimals)
-							var val = _util.weiToEth(amount, dvsr);
-							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
-							var price = 0;
-							//if(cancelType === 'sell')
-							{
-								price = val2 / val;
-							}
-							var obj = {
-								'type': 'Cancel ' + cancelType,
-								'note': 'Cancelled an open order on EtherDelta',
-								'token': token,
-								'amount': val,
-								'price': price,
-								'unlisted': unlisted,
-							};
-							outputs.push(obj);
-						}
-
-					}
-					else if (unpacked.name == 'Transfer') {
-						var from = outputLogs[i].topics[1];
-						from = '0x' + from.slice(from.length - 40);
-						var to = outputLogs[i].topics[2];
-						to = '0x' + to.slice(to.length - 40);
-						var rawAmount = unpacked.params[0].value;
-						var token = setToken(outputLogs[i].address);
-
-						var dvsr = _delta.divisorFromDecimals(token.decimals)
-						var val = _util.weiToEth(rawAmount, dvsr);
-						var unlisted = token.unlisted;
-
-						var obj = {
-							'type': 'Transfer',
-							'note': 'Tokens transferred',
-							'token': token,
-							'to': to,
-							'amount': val,
-							'unlisted': unlisted,
-						};
-						outputs.push(obj);
-					}
-					else if (unpacked.name == 'Approval') {
-						var sender = outputLogs[i].topics[1];
-						sender = '0x' + sender.slice(sender.length - 40);
-						var to = outputLogs[i].topics[2];
-						to = '0x' + to.slice(to.length - 40);
-						var rawAmount = unpacked.params[0].value;
-						var token = setToken(outputLogs[i].address);
-						var dvsr = _delta.divisorFromDecimals(token.decimals)
-						var val = _util.weiToEth(rawAmount, dvsr);
-						var unlisted = token.unlisted;
-
-						var obj = {
-							'type': 'Approve',
-							'note': 'Now allows tokens to be transferred by deposit transaction (2/2)',
-							'sender': sender,
-							'token': token,
-							'to': to,
-							'amount': val,
-							'unlisted': unlisted,
-						};
-						outputs.push(obj);
-					}
-					// Order
 				}
 				return outputs;
 			}
 
 			function parseInput(tx, input) {
-				console.log('parsing input');
-				// transfer 0xa9059cbb adress to, uint value
 
-				var method = input.slice(0, 10);
+				var unpacked = _util.processInput(input);
+				if (!unpacked)
+					return undefined;
 
-				if (method === '0xa9059cbb') // token transfer
-				{
-					var unpacked = _util.processInputMethod(_delta.web3, tx.to, input);
-					if (unpacked && unpacked.name === 'transfer') {
-						var to = unpacked.params[0].value;
-						var rawAmount = unpacked.params[1].value;
-						var amount = 0;
-						var token = setToken(tx.to);
-						var unlisted = true;
-						if (token && token.addr) {
-							var dvsr = _delta.divisorFromDecimals(token.decimals);
-							amount = _util.weiToEth(rawAmount, dvsr);
-							unlisted = token.unlisted;
-						}
-						var obj =
-							{
-								'type': 'Transfer',
-								'note': 'Give the token contract the order to transfer your tokens',
-								'token': token,
-								'to': to,
-								'amount': amount,
-								'unlisted': unlisted,
-							};
-						return obj;
-					}
-				}
-				else if (method === '0x095ea7b3') // approve 
-				{
-					//sender, //amount  /to is contractAddr
-					var unpacked = _util.processInputMethod(_delta.web3, tx.to, input); // contractEtherDelta contractToken
-					if (unpacked && unpacked.name === 'approve') {
-						var sender = unpacked.params[0].value;
-						var rawAmount = unpacked.params[1].value;
-						var amount = 0;
-						var token = setToken(tx.to);
-						var unlisted = true;
-						if (token && token.addr) {
-							var dvsr = _delta.divisorFromDecimals(token.decimals);
-							amount = _util.weiToEth(rawAmount, dvsr);
-							unlisted = token.unlisted;
-						}
-						var obj =
-							{
-								'type': 'Approve',
-								'note': 'Transaction (1/2) of a deposit. Approve EtherDelta to move tokens for you.',
-								'token': token,
-								'sender': sender,
-								'amount': amount,
-								'unlisted': unlisted,
-							};
-						return obj;
-					}
+				let obj = _delta.processUnpackedInput(tx, unpacked);
+				if (obj && obj.token && obj.token.name === "???" && token.decimals === 18)
+					unknownToken = true;
+				return obj;
 
-				}
-				else if (method === '0xd0e30db0' || method === '0x2e1a7d4d') // deposit /withdraw ETH
-				{
-					var unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, input);
-					if (unpacked && (unpacked.name === 'deposit' || unpacked.name === 'withdraw')) {
-						var type = '';
-						var note = '';
-						var rawVal = 0;
-						if (unpacked.name === 'deposit') {
-							rawVal = tx.value;
-							type = 'Deposit';
-							note = 'Deposit ETH into EtherDelta contract';
-						} else {
-							rawVal = unpacked.params[0].value;
-							type = 'Withdraw';
-							note = 'Request EtherDelta to withdraw ETH';
-						}
-						var val = _util.weiToEth(rawVal);
-
-						var obj = {
-							'type': type,
-							'note': note,
-							'amount': val,
-						};
-						return obj;
-					}
-				}
-
-				//deposit 0xd0e30db0
-				//withdraw 0x2e1a7d4d
-				//approve 0x095ea7b3
-
-
-				else if (method === '0x9e281a98' || method === '0x338b5dea') //methodIDs depositToken & wihdrawToken
-				{
-					var unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, input);
-					if (unpacked && (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken')) {
-						var token = setToken(unpacked.params[0].value);
-						if (token && token.addr) {
-							var unlisted = token.unlisted;
-							var dvsr = _delta.divisorFromDecimals(token.decimals)
-							var val = _util.weiToEth(unpacked.params[1].value, dvsr);
-							var type = '';
-							var note = '';
-							if (unpacked.name === 'withdrawToken') {
-								type = 'Withdraw';
-								note = 'Request EtherDelta to withdraw tokens';
-							}
-							else {
-								type = 'Deposit';
-								note = 'Transaction (2/2) of a deposit, request EtherDelta to deposit tokens';
-							}
-
-							var obj = {
-								'type': 'Token ' + type,
-								'note': note,
-								'token': token,
-								'amount': val,
-								'unlisted': unlisted,
-							};
-							return obj;
-						}
-					}
-				} else if (method === '0x278b8c0e') // cancel
-				{
-					//Function: cancelOrder(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, uint8 v, bytes32 r, bytes32 s)
-					//MethodID: 0x278b8c0e
-
-					var unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, input);
-					if (unpacked && (unpacked.name === 'cancelOrder')) {
-						var cancelType = 'sell';
-						var token = undefined;
-						var token2 = undefined;
-						if (unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
-						{
-							cancelType = 'buy';
-							token = setToken(unpacked.params[2].value);
-							token2 = setToken(unpacked.params[0].value);
-						}
-						else // buy
-						{
-							token = setToken(unpacked.params[0].value);
-							token2 = setToken(unpacked.params[2].value);
-						}
-
-						if (token && token2 && token.addr && token2.addr) {
-							var amount = 0;
-							var oppositeAmount = 0;
-							if (cancelType === 'sell') {
-								amount = unpacked.params[1].value;
-								oppositeAmount = unpacked.params[3].value;
-							} else {
-								oppositeAmount = unpacked.params[1].value;
-								amount = unpacked.params[3].value;
-							}
-
-							var unlisted = token.unlisted;
-							var dvsr = _delta.divisorFromDecimals(token.decimals)
-							var dvsr2 = _delta.divisorFromDecimals(token2.decimals)
-							var val = _util.weiToEth(amount, dvsr);
-							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
-							var price = 0;
-							//if(cancelType === 'sell')
-							{
-								price = val2 / val;
-							}
-							var obj = {
-								'type': 'Cancel ' + cancelType,
-								'note': 'Cancel an open order on EtherDelta',
-								'token': token,
-								'amount': val,
-								'price': price,
-								'unlisted': unlisted,
-							};
-							return obj;
-						}
-					}
-				} else if (method === '0x0a19b14a') // trade
-				{
-
-					//Function: trade(address tokenGet, uint256 amountGet, address tokenGive, uint256 amountGive, uint256 expires, uint256 nonce, address user, uint8 v, bytes32 r, bytes32 s, uint256 amount)
-					//MethodID: 0x0a19b14a
-
-					var unpacked = _util.processInputMethod(_delta.web3, _delta.contractEtherDelta, input);
-					if (unpacked && (unpacked.name === 'trade')) {
-						var tradeType = 'Sell';
-						var token = undefined;
-						var token2 = undefined;
-						if (unpacked.params[0].value === _delta.config.tokens[0].addr) // get eth  -> sell
-						{
-							tradeType = 'Buy';
-							token = setToken(unpacked.params[2].value);
-							token2 = setToken(unpacked.params[0].value);
-						}
-						else // buy
-						{
-							token = setToken(unpacked.params[0].value);
-							token2 = setToken(unpacked.params[2].value);
-						}
-
-						if (token && token2 && token.addr && token2.addr) {
-							var amount = 0;
-							var oppositeAmount = 0;
-							var chosenAmount = Number(unpacked.params[10].value);
-							if (tradeType === 'Sell') {
-								amount = Number(unpacked.params[1].value);
-								oppositeAmount = Number(unpacked.params[3].value);
-
-
-							} else {
-								oppositeAmount = Number(unpacked.params[1].value);
-								amount = Number(unpacked.params[3].value);
-							}
-
-							var unlisted = token.unlisted;
-							var dvsr = _delta.divisorFromDecimals(token.decimals)
-							var dvsr2 = _delta.divisorFromDecimals(token2.decimals)
-							var val = _util.weiToEth(amount, dvsr);
-							var val2 = _util.weiToEth(oppositeAmount, dvsr2);
-
-							var orderSize = 0;
-
-							var price = 0;
-							//	if(tradeType === 'sell')
-							{
-								price = val2 / val;
-							}
-
-
-							if (tradeType === 'Buy') {
-								orderSize = val;
-								if (oppositeAmount > chosenAmount) {
-									val2 = _util.weiToEth(chosenAmount, dvsr2);
-									amount = (chosenAmount / (oppositeAmount / amount));
-									val = _util.weiToEth(amount, dvsr);
-								}
-
-
-							} else {
-								orderSize = val;
-								if (amount > chosenAmount) {
-									val = _util.weiToEth(chosenAmount, dvsr);
-									oppositeAmount = (chosenAmount * oppositeAmount) / amount;
-									val2 = _util.weiToEth(oppositeAmount, dvsr2);
-								}
-							}
-
-
-
-							var obj = {
-								'type': 'Taker ' + tradeType,
-								'note': addressLink(tx.from, true, true) + ' selected ' + addressLink(unpacked.params[6].value, true, true) + '\'s order in the orderbook to trade.',
-								'token': token,
-								'amount': val,
-								'order size': orderSize,
-								'price': price,
-								'ETH': val2,
-								'unlisted': unlisted,
-							};
-							return obj;
-						}
-					}
-
-				}
 			}
 
 
@@ -961,9 +534,9 @@
 
 		$('#summary').html(sum);
 
-		$('#hash').html(hashLink(transaction.hash, true));
-		$('#from').html(addressLink(transaction.from, true, false));
-		$('#to').html(addressLink(transaction.to, true, false));
+		$('#hash').html(_util.hashLink(transaction.hash, true));
+		$('#from').html(_util.addressLink(transaction.from, true, false));
+		$('#to').html(_util.addressLink(transaction.to, true, false));
 		$('#cost').html('??');
 		$('#gasgwei').html(transaction.gasGwei + ' Gwei (' + transaction.gasPrice.toFixed(10) + ' ETH)');
 		if (!transaction.gasUsed)
@@ -1078,51 +651,6 @@
 		$('#inputTo').hide();
 	}
 
-	function hashLink(hash, html) {
-		var url = 'https://etherscan.io/tx/' + hash;
-		if (!html)
-			return url
-		return '<a target = "_blank" href="' + url + '">' + hash + ' </a>';
-	}
-
-	function addressLink(addr, html, short) {
-		var url = 'https://etherscan.io/address/' + addr;
-		if (!html)
-			return url
-		var displayText = addr;
-		if (short)
-			displayText = displayText.slice(0, 6) + '..';
-		else {
-			displayText = addressName(addr);
-		}
-		return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
-	}
-
-	function addressName(addr) {
-		var lcAddr = addr.toLowerCase();
-		if (_delta.uniqueTokens[addr]) {
-			return _delta.uniqueTokens[addr].name + " Contract";
-		}
-		else if (_delta.uniqueTokens[lcAddr]) {
-			return _delta.uniqueTokens[lcAddr].name + " Contract";
-		}
-
-		for (var i = 0; i < _delta.config.contractEtherDeltaAddrs.length; i++) {
-			if (lcAddr == _delta.config.contractEtherDeltaAddrs[i].addr) {
-				if (lcAddr == '0xbf29685856fae1e228878dfb35b280c0adcc3b05') {
-					return 'Decentrex Contract ' + addr.slice(0, 4) + '..';
-				}
-				else {
-					var resp = 'EtherDelta Contract ' + addr.slice(0, 4) + '..';
-					if (i > 0)
-						resp = 'Outdated ' + resp;
-					return resp;
-				}
-			}
-		}
-		return addr;
-	}
-
 	function checkOldED(addr) {
 		var lcAddr = addr.toLowerCase();
 		for (var i = 0; i < _delta.config.contractEtherDeltaAddrs.length; i++) {
@@ -1185,7 +713,7 @@
 					cellValue = Number(cellValue).toFixed(3);
 				}
 				else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender') {
-					cellValue = addressLink(cellValue, true, true);
+					cellValue = _util.addressLink(cellValue, true, true);
 				}
 
 				if (cellValue == null) cellValue = "";

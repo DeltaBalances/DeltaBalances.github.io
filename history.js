@@ -63,6 +63,7 @@
 			Seller: '',
 			Fee: 0,
 			FeeToken: { "name": "Token", "addr": "0x00" },
+			'Fee in': { "name": "Token", "addr": "0x00" }, //shorter name feetoken
 			Details: window.location.origin + window.location.pathname + '/../tx.html',
 			Unlisted: true,
 		}
@@ -95,7 +96,7 @@
 					});
 				}
 			}
-			
+
 			_delta.initTokens(false);
 
 
@@ -312,8 +313,6 @@
 					if (!addr) // ignore if in url arguments
 					{
 						showError("You likely entered your private key, NEVER do that again");
-						// be nice and try generate the address
-						address = _util.generateAddress(address);
 					}
 				}
 				else if (address.length == 40 && address.slice(0, 2) !== '0x') {
@@ -338,7 +337,7 @@
 		}
 
 		document.getElementById('address').value = address;
-		document.getElementById('addr').innerHTML = 'Address: <a target="_blank" href="' + _delta.addressLink(address) + '">' + address + '</a>';
+		document.getElementById('addr').innerHTML = 'Address: ' + _util.addressLink(address, true, false);
 		$('#overviewNav').attr("href", "index.html#" + address);
 		setAddrImage(address);
 		return address;
@@ -524,133 +523,43 @@
 			var myAddr = publicAddr.toLowerCase();
 			var addrrr = myAddr.slice(2);
 
-			for (i = 0; i < outputLogs.length; i++) {
-				//quicker check, instead of decoding hex data
-				if (outputLogs[i].data.indexOf(addrrr) === -1)
-					continue;
-				var unpacked = _util.processOutputMethod(_delta.web3, contractAddr, outputLogs[i]);
+			let filteredLogs = outputLogs.filter((log) => {
+				return log.data.indexOf(addrrr) !== -1;
+			});
+			let unpackedLogs = _util.processLogs(filteredLogs);
 
-				if (!unpacked || unpacked.params.length < 6 || unpacked.name != 'Trade') {
+			for (i = 0; i < unpackedLogs.length; i++) {
+
+				let unpacked = unpackedLogs[i];
+				if (!unpacked || unpacked.events.length < 6 || unpacked.name != 'Trade') {
 					continue;
 				}
 
-				var maker = unpacked.params[4].value.toLowerCase();
-				var taker = unpacked.params[5].value.toLowerCase();
-
-				var transType = '';
-
-				if (taker === myAddr)
-					transType = 'Taker';
-				else if (maker === myAddr)
-					transType = 'Maker';
-
-				if (transType) {
-					var tradeType = '';
-					var token = undefined;
-					var base = undefined;
-
-					if (unpacked.params[0].value === _delta.config.tokens[0].addr) // send get eth  -> buy form sell order
-					{
-						tradeType = 'Buy';
-						token = _delta.uniqueTokens[unpacked.params[2].value];
-						base = _delta.uniqueTokens[unpacked.params[0].value];
+				let obj = _delta.processUnpackedEvent(unpacked, myAddr);
+				if (obj && !obj.error) {
+					var obj2 = {
+						Type: obj.transType,
+						Trade: obj.tradeType,
+						Token: obj.token,
+						Amount: obj.amount,
+						Price: obj.price,
+						ETH: obj.ETH,
+						Hash: filteredLogs[i].transactionHash,
+						Date: '??', // retrieved by later etherscan call
+						Block: _util.hexToDec(filteredLogs[i].blockNumber),
+						Buyer: obj.buyer,
+						Seller: obj.seller,
+						Fee: obj.fee,
+						FeeToken: obj.feeCurrency,
+						'Fee in': obj.feeCurrency,
+						Details: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
+						Unlisted: obj.unlisted,
 					}
-					else // taker sell
-					{
-						tradeType = 'Sell';
-						token = _delta.uniqueTokens[unpacked.params[0].value];
-						base = _delta.uniqueTokens[unpacked.params[2].value];
-					}
-
-					if (token && base && token.addr && base.addr) {
-						var amount = 0;
-						var oppositeAmount = 0;
-						var buyUser = '';
-						var sellUser = '';
-
-
-
-						if (tradeType === 'Sell') {
-							amount = unpacked.params[1].value;
-							oppositeAmount = unpacked.params[3].value;
-							sellUser = unpacked.params[5].value;
-							buyUser = unpacked.params[4].value;
-
-
-						} else {
-							oppositeAmount = unpacked.params[1].value;
-							amount = unpacked.params[3].value;
-							sellUser = unpacked.params[4].value;
-							buyUser = unpacked.params[5].value;
-
-
-						}
-
-						var unlisted = token.unlisted;
-						var dvsr = _delta.divisorFromDecimals(token.decimals)
-						var dvsr2 = _delta.divisorFromDecimals(base.decimals)
-
-						var val = _util.weiToEth(amount, dvsr);
-						var val2 = _util.weiToEth(oppositeAmount, dvsr2);
-
-						var price = 0;
-						if (val !== 0) {
-							price = val2 / val;
-						}
-
-						if (buyUser === myAddr)
-							tradeType = "Buy";
-						else if (sellUser === myAddr)
-							tradeType = "Sell";
-
-						let fee = 0;
-						let feeCurrency = '';
-						if (transType === 'Taker') {
-							const fee03 = 3000000000000000; //0.3% fee in wei
-							const ether1 = 1000000000000000000; // 1 ether in wei
-							if (tradeType === 'Sell') {
-								fee = _util.weiToEth(Math.round((Number(amount) * fee03) / ether1), dvsr);
-								feeCurrency = token;
-							}
-							else if (tradeType === 'Buy') {
-								fee = _util.weiToEth(Math.round((Number(oppositeAmount) * fee03) / ether1), dvsr2);
-								feeCurrency = base;
-							}
-						} else {
-							fee = 0;
-							if (tradeType === 'Sell') {
-								feeCurrency = token;
-							}
-							else if (tradeType === 'Buy') {
-								feeCurrency = base;
-							}
-						}
-
-						var obj = {
-							Type: transType,
-							Trade: tradeType,
-							Token: token,
-							Amount: val,
-							Price: price,
-							ETH: val2,
-							Hash: outputLogs[i].transactionHash,
-							Date: '??', // retrieved by later etherscan call
-							Block: _util.hexToDec(outputLogs[i].blockNumber),
-							Buyer: buyUser,
-							Seller: sellUser,
-							Fee: fee,
-							FeeToken: feeCurrency,
-							Details: window.location.origin + window.location.pathname + '/../tx.html#' + outputLogs[i].transactionHash,
-							Unlisted: unlisted,
-						}
-						outputs.push(obj);
-					}
+					outputs.push(obj2);
 				}
-				// if
 			} // for
 			return outputs;
 		}
-
 	}
 
 
@@ -830,8 +739,8 @@
 							row$.append($('<td/>').html(cellValue));
 						}
 					}
-					else if (head == 'Token' || head == 'FeeToken') {
-						if (head == 'FeeToken' && myList[i][columns[0]] == 'Maker') {
+					else if (head == 'Token' || head == 'Fee in') {
+						if ((head == 'Fee in') && myList[i][columns[0]] == 'Maker') {
 							cellValue = '';
 						}
 
@@ -849,10 +758,10 @@
 					}
 					else if (head == 'Type') {
 						if (cellValue == 'Taker') {
-							row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
+							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
 						}
 						else if (cellValue == 'Maker') {
-							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
+							row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
 						}
 						else {
 							row$.append($('<td/>').html('<span class="" >' + cellValue + '</span>'));
@@ -870,13 +779,13 @@
 						}
 					}
 					else if (head == 'Hash') {
-						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/tx/' + cellValue + '">' + cellValue.substring(0, 8) + '..</a>'));
+						row$.append($('<td/>').html(_util.hashLink(cellValue, true, true)));
 					}
 					else if (head == 'Block') {
 						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/block/' + cellValue + '">' + cellValue + '</a>'));
 					}
 					else if (head == 'Buyer' || head == 'Seller') {
-						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/address/' + cellValue + '">' + cellValue.substring(0, 8) + '..</a>'));
+						row$.append($('<td/>').html(_util.addressLink(cellValue, true, true)));
 					}
 					else if (head == 'Date') {
 						if (cellValue !== '??')
@@ -897,7 +806,7 @@
 		}
 	}
 
-	var tradeHeaders = { 'Type': 1, 'Trade': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'ETH': 1, 'Hash': 1, 'Date': 1, 'Buyer': 1, 'Seller': 1, 'Fee': 1, 'FeeToken': 1, 'Block': 1, 'Details': 1 };
+	var tradeHeaders = { 'Type': 1, 'Trade': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'ETH': 1, 'Hash': 1, 'Date': 1, 'Buyer': 1, 'Seller': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Details': 1 };
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.

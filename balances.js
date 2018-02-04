@@ -536,9 +536,9 @@
 					initBalance(token);
 			}
 
-			//getAllBalances(rqid);
-			getAllBalances(rqid, 'EtherDelta');
-			getAllBalances(rqid, 'Wallet');
+			getAllBalances(rqid, 'All');
+			//getAllBalances(rqid, 'EtherDelta');
+			//getAllBalances(rqid, 'Wallet');
 			getPrices(rqid);
 			getEtherPrice();
 
@@ -699,78 +699,51 @@
 
 
 	function getPrices(rqid) {
-		var retries = 0;
-		retry2();
+		var socketRetries = 0;
+		var urlRetries = 0;
+		var pricesLoaded = false;
+		var numRetries = 4;
+		retrySocket();
+		retryURL();
 
-		function retry2() {
-			if (true) {
-				_delta.socketTicker((err, result, rid) => {
+		function retrySocket() {
+			_delta.socketTicker((err, result, rid) => {
+				if (requestID <= rqid) {
 					if (!err && result) {
-						var results = Object.values(result);
-						for (var i = 0; i < results.length; i++) {
-							var token = _delta.uniqueTokens[results[i].tokenAddr];
-
-							if (token && balances[token.addr]) {
-								balances[token.addr].Bid = Number(results[i].bid);
-								balances[token.addr].Ask = Number(results[i].ask);
-							}
-						}
-						loadedBid = 1;
+						parsePrices(result);
+					} else if (loadedBid < 1 && socketRetries < numRetries) {
+						socketRetries++;
+						retrySocket();
+					} else if (socketRetries >= numRetries && urlRetries >= numRetries) {
+						showError("Failed to retrieve EtherDelta Prices after 5 tries. Try again (later)");
+						loadedBid = -1;
 						finishedBalanceRequest();
-						return;
-					} else {
-						retries++;
-						loadedBid = 0;
-						retry();
-						return;
 					}
-
-				}, rqid)
-			} else {
-				retry();
-			}
+				}
+			}, rqid);
 		}
 
-		function retry() {
+		function retryURL() {
 			$.getJSON(_delta.config.apiServer + '/nonce/' + Date.now() + '/returnTicker/').done((result) => {
 				if (requestID <= rqid) {
 					if (result) {
-						var results = Object.values(result);
-						for (var i = 0; i < results.length; i++) {
-							var token = _delta.uniqueTokens[results[i].tokenAddr];
-
-							if (token && balances[token.addr]) {
-								balances[token.addr].Bid = Number(results[i].bid);
-								balances[token.addr].Ask = Number(results[i].ask);
-							}
-						}
-						loadedBid = 1;
-						finishedBalanceRequest();
-						return;
-					} else {
+						parsePrices(result);
+					} else if (loadedBid < 1 && urlRetries < numRetries) {
+						urlRetries++;
+						retryURL();
+					} else if (socketRetries >= numRetries && urlRetries >= numRetries) {
+						showError("Failed to retrieve EtherDelta Prices after 5 tries. Try again (later)");
 						loadedBid = -1;
 						finishedBalanceRequest();
-						return;
 					}
-
-
 				}
-
-
 			}).fail((result) => {
 				if (requestID <= rqid) {
-					if (retries < 4) {
-
-						retries++;
-						loadedBid = 0;
-						if (_delta.socketConnected) {
-							retry2();
-						} else {
-							retry();
-						}
-						return;
+					if (loadedBid < 1 && urlRetries < numRetries) {
+						urlRetries++;
+						retryURL();
 					}
-					else {
+					else if (socketRetries >= numRetries && urlRetries >= numRetries) {
 						showError("Failed to retrieve EtherDelta Prices after 5 tries. Try again (later)");
 						loadedBid = -1;
 						finishedBalanceRequest();
@@ -778,36 +751,47 @@
 				}
 			});
 		}
+
+		function parsePrices(result) {
+			var results = Object.values(result);
+			for (var i = 0; i < results.length; i++) {
+				var token = _delta.uniqueTokens[results[i].tokenAddr];
+
+				if (token && balances[token.addr]) {
+					balances[token.addr].Bid = Number(results[i].bid);
+					balances[token.addr].Ask = Number(results[i].ask);
+				}
+			}
+			loadedBid = 1;
+			finishedBalanceRequest();
+			return;
+		}
 	}
 
-	var maxPerRequest = 120; //max for etherscan (hard limit)
-	var increasedMaxPerRequest = 480; // max for infura (more possible)
 
+	var maxPerRequest = 500;   // don't make the web3 requests too large
 	// mode = 'All' or ''  is all balances in 1 request
 	// 'Wallet' is only wallet balances
 	// 'EtherDelta' is only Etherdelta balances
 	function getAllBalances(rqid, mode) {
+
+		// select which tokens to be requested
 		var tokens2 = Object.keys(_delta.uniqueTokens);
 		if (!showCustomTokens) {
 			tokens2 = tokens2.filter((x) => { return !_delta.uniqueTokens[x].unlisted });
 		}
 
-
-
-		var max = maxPerRequest;
-		if (!etherscanFallback)  // no Infura web3 endpoint, use etherscan url endpoints, (limited to 120 per request)
-			max = increasedMaxPerRequest;
-
-		//split in separate requests
-		for (var i = 0; i < tokens2.length; i += max) {
-			allBalances(i, i + max, tokens2, 0, false);
+		//split in separate requests to match maxPerRequest
+		for (var i = 0; i < tokens2.length; i += maxPerRequest) {
+			allBalances(i, i + maxPerRequest, tokens2, i);
 		}
 
-		function allBalances(startIndex, endIndex, tokens3, retries, retryEtherScan) {
+		// make the call to get balances for a (sub)section of tokens
+		function allBalances(startIndex, endIndex, tokens3, balanceRequestIndex) {
 
 			var tokens = tokens3.slice(startIndex, endIndex);
 
-			var functionName = ' allBalances';
+			var functionName = 'allBalances';
 			var arguments = [_delta.config.contractEtherDeltaAddr, publicAddr, tokens];
 			if (mode == 'Wallet') {
 				functionName = 'walletBalances';
@@ -818,88 +802,94 @@
 				arguments = [_delta.config.contractEtherDeltaAddr, publicAddr, tokens];
 			}
 
-			_util.call(
-				retryEtherScan ? undefined : _delta.web3, // switch between Infura and Etherscan upon retries
-				_delta.contractDeltaBalance,
-				_delta.config.contractDeltaBalanceAddr,
-				functionName,
-				arguments,
-				(err, result) => {
-					if (requestID > rqid)
-						return;
-					const returnedBalances = result;
-					if (returnedBalances && returnedBalances.length > 0) {
-						loadedCustom = showCustomTokens;
-						for (var i = 0; i < tokens.length; i++) {
-							var token = _delta.uniqueTokens[tokens[i]];
-							var div = _delta.divisorFromDecimals(token.decimals);
+			var oneCompleted = false;
+			var totalTries = 0;
 
-							if (mode == 'Wallet') {
-								balances[token.addr].Wallet = _util.weiToEth(returnedBalances[i], div);
-								loadedW++;
-								if (loadedW >= tokenCount)
-									finishedBalanceRequest();
-							}
-							else if (mode == 'EtherDelta') {
-								balances[token.addr].EtherDelta = _util.weiToEth(returnedBalances[i], div);
-								loadedED++;
-								if (loadedED >= tokenCount)
-									finishedBalanceRequest();
-							}
-							else //both wallet & etherdelta
-							{
-								var j = i * 2;
-								balances[token.addr].EtherDelta = _util.weiToEth(returnedBalances[j], div);
-								balances[token.addr].Wallet = _util.weiToEth(returnedBalances[j + 1], div);
-								loadedW++;
-								loadedED++;
-								if (loadedED >= tokenCount && loadedW >= tokenCount)
-									finishedBalanceRequest();
-							}
-						}
-					}
-					else  //request returned worng/empty
-					{
-						if (retries < 2) //retry with different provider (infura or etherscan)
-						{
-							if (!retryEtherScan && tokens.length > maxPerRequest)  // next retry using etherscan and too many tokens
-							{
-								var max2 = maxPerRequest;
-								//split in separate retry requests if requests too large for etherscan
-								for (var i = 0; i < tokens.length; i += max2) {
-									allBalances(startIndex + i, startIndex + i + max2, tokens2, retries + 1, !retryEtherScan);
+			//get balances from both metamask and etherscan, go on with the fastest one
+			makeCall(_delta.web3, functionName, arguments, 0); //Infura
+			makeCall(undefined, functionName, arguments, 0); // etherscan
+
+
+
+
+			function makeCall(web3Provider, funcName, args, retried) {
+				_util.call(
+					web3Provider,
+					_delta.contractDeltaBalance,
+					_delta.config.contractDeltaBalanceAddr,
+					funcName,
+					args,
+					(err, result) => {
+						if (requestID > rqid)
+							return;
+						if (oneCompleted)
+							return;
+
+						const returnedBalances = result;
+						if (returnedBalances && returnedBalances.length > 0) {
+
+							oneCompleted = true;
+							loadedCustom = showCustomTokens;
+							for (var i = 0; i < tokens.length; i++) {
+								var token = _delta.uniqueTokens[tokens[i]];
+								var div = _delta.divisorFromDecimals(token.decimals);
+
+								if (funcName == 'walletBalances') {
+									balances[token.addr].Wallet = _util.weiToEth(returnedBalances[i], div);
+									loadedW++;
+									if (loadedW >= tokenCount)
+										finishedBalanceRequest();
 								}
-								return;
-							} else //retry the same request
-							{
-								allBalances(startIndex, endIndex, tokens3, retries + 1, !retryEtherScan);
-								return;
+								else if (funcName == 'deltaBalances') {
+									balances[token.addr].EtherDelta = _util.weiToEth(returnedBalances[i], div);
+									loadedED++;
+									if (loadedED >= tokenCount)
+										finishedBalanceRequest();
+								}
+								else //both wallet & etherdelta
+								{
+									var j = i * 2;
+									balances[token.addr].EtherDelta = _util.weiToEth(returnedBalances[j], div);
+									balances[token.addr].Wallet = _util.weiToEth(returnedBalances[j + 1], div);
+									loadedW++;
+									loadedED++;
+									if (loadedED >= tokenCount && loadedW >= tokenCount)
+										finishedBalanceRequest();
+								}
 							}
-
 						}
-						else {
-
-							if (mode == 'Wallet') {
-								showError('Failed to load all Wallet balances after 3 tries, try again later');
-								loadedW = tokenCount;
-								finishedBalanceRequest();
-							}
-							else if (mode == 'EtherDelta') {
-								showError('Failed to load all EtherDelta balances after 3 tries, try again later');
-								loadedED = tokenCount;
-								finishedBalanceRequest();
-							}
-							else //both wallet & etherdelta
+						else if (!oneCompleted) //request returned wrong/empty and other hasn't completed yet
+						{
+							const retryAmount = 3;
+							if (retried < retryAmount) //retry both etherscan and infura 3 times
 							{
-								showError('Failed to load all balances after 3 tries, try again later');
-								loadedED = tokenCount;
-								loadedW = tokenCount;
-								finishedBalanceRequest();
+								totalTries++;
+								makeCall(web3Provider, funcName, args, retried + 1);
+								return;
 							}
+							else if (totalTries >= retryAmount * 2) {
 
+								if (funcName == 'walletBalances') {
+									showError('Failed to load all Wallet balances after 3 tries, try again later');
+									loadedW = tokenCount;
+									finishedBalanceRequest();
+								}
+								else if (funcName == 'deltaBalances') {
+									showError('Failed to load all EtherDelta balances after 3 tries, try again later');
+									loadedED = tokenCount;
+									finishedBalanceRequest();
+								}
+								else //both wallet & etherdelta
+								{
+									showError('Failed to load all balances after 3 tries, try again later');
+									loadedED = tokenCount;
+									loadedW = tokenCount;
+									finishedBalanceRequest();
+								}
+							}
 						}
-					}
-				});
+					});
+			}
 		}
 	}
 

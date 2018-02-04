@@ -45662,9 +45662,9 @@ module.exports = (config) => {
       if (result)
         callback(undefined, result);
       else
-        callback('error retriving url', undefined);
+        callback('error retrieving url', undefined);
     }).fail((xhr, status, error) => {
-      callback(error, undefined);
+        callback(error, undefined);
     });
     /* 
      request.get(url, options, (err, httpResponse, body) => {
@@ -45674,6 +45674,18 @@ module.exports = (config) => {
          callback(undefined, body);
        }
      }); */
+  };
+
+  utility.postURL = function postURL(url, contents, callback) {
+
+    jQuery.post( url, contents).done((result) => {
+      if (result)
+        callback(undefined, result);
+      else
+        callback('error post url', undefined);
+    }).fail((xhr, status, error) => {
+       callback(error, undefined);
+    });
   };
 
   utility.escapeHtml = function (text) {
@@ -45780,15 +45792,18 @@ module.exports = (config) => {
       let url =
         `https://${
         config.ethTestnet ? config.ethTestnet : 'api'
-        }.etherscan.io/api?module=proxy&action=eth_Call&to=${
-        address
-        }&data=${
-        data}`;
-      if (config.etherscanAPIKey) url += `&apikey=${config.etherscanAPIKey}`;
-      utility.getURL(url, (err, body) => {
-        if (!err) {
+        }.etherscan.io/api`;
+      let postContents = {
+        module :'proxy',
+        action :'eth_Call',
+        to : address,
+        data : data,
+      }
+      if (config.etherscanAPIKey) { postContents.apiKey = config.etherscanAPIKey };
+      utility.postURL(url, postContents, (err, body) => {
+        if (!err && body) {
           try {
-            const result = JSON.parse(body);
+            const result = body;//JSON.parse(body);
             const functionAbi = contract.abi.find(element => element.name === functionName);
             const solidityFunction = new SolidityFunction(web3.Eth, functionAbi, address);
             const resultUnpacked = solidityFunction.unpackOutput(result.result);
@@ -45887,8 +45902,8 @@ module.exports = (config) => {
         txHash}`;
       if (config.etherscanAPIKey) url += `&apikey=${config.etherscanAPIKey}`;
       utility.getURL(url, (err, body) => {
-        if (!err) {
-          const result = JSON.parse(body);
+        if (!err && body ) {
+          const result = body;//JSON.parse(body);
           callback(undefined, result.result, index);
         } else {
           callback(err, undefined, index);
@@ -45942,8 +45957,8 @@ module.exports = (config) => {
         }.etherscan.io/api?module=proxy&action=eth_BlockNumber`;
       if (config.etherscanAPIKey) url += `&apikey=${config.etherscanAPIKey}`;
       utility.getURL(url, (err, body) => {
-        if (!err) {
-          const result = JSON.parse(body);
+        if (!err && body) {
+          const result = body;//JSON.parse(body);
           callback(undefined, Number(utility.hexToDec(result.result)));
         } else {
           callback(err, undefined);

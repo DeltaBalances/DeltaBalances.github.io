@@ -745,11 +745,11 @@
 						}
 
 						if (cellValue !== "" && cellValue !== undefined) {
-							cellValue = cellValue.name;
-							if (!myList[i].Unlisted)
-								row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+							
+							if (!cellValue.unlisted)
+								row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue.name + '-ETH">' + cellValue.name + '</a>'));
 							else
-								row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].Token.addr + '-ETH">' + cellValue + '</a>'));
+								row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + cellValue.addr + '-ETH">' + cellValue.name + '</a>'));
 						}
 						else {
 							row$.append($('<td/>').html(cellValue));

@@ -36,7 +36,7 @@
 
 	var showTransactions = true;
 	var showBalances = true;
-	var showCustomTokens = false;
+	var showCustomTokens = true;
 	var showDollars = true;
 
 
@@ -120,7 +120,7 @@
 
 			_delta.initTokens(true);
 
-			checkCustom();
+			showTokenCount();//checkCustom();
 			initiated = true;
 			if (autoStart)
 				myClick();

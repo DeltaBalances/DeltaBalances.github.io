@@ -1,63 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<!-- Bootstrap meta tags -->
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="description" content="Doesn't look like anything to me... "/>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<title>Delta Balances</title>
+<head>
+	<!-- Bootstrap meta tags -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="description" content="Doesn't look like anything to me... " />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<!-- Bootstrap js -->
-		<script type="text/javascript" src="js/jquery.tablesorter.combined.min.js"></script>
-		<script src="js/bootstrap.min.js"></script>
-		
-		<!-- Bootstrap, bootstrap-theme, fontawesome & custom css -->
-		<link href="css/combinedStyles.css" rel="stylesheet">
+	<title>Delta Balances</title>
 
-		
-	
-		
-		
+	<!-- Bootstrap js -->
+	<script type="text/javascript" src="js/jquery.tablesorter.combined.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
 
-	
-		
-	</head>
-	<body >
+	<!-- Bootstrap, bootstrap-theme, fontawesome & custom css -->
+	<link href="css/combinedStyles.css" rel="stylesheet">
+
+</head>
+
+<body>
 	A quick script to get all different tokens currently in the etherdelta contract with the Ethplorer api.
-		<script>
-			
-			
-			function GetTokens()
-			{
-				uniqueTokens = {};
-				$('#output').html('loading from ethplorer api (slow)');
-				$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey=freekey', (result) => {
-				
-					if(result && result.tokens)
-					{
-						for(let i = 0; i < result.tokens.length; i++)
-						{
-							let tok = result.tokens[i].tokenInfo;
-							if(!uniqueTokens[tok.address] && tok.symbol && result.tokens[i].balance > 1 && tok.holdersCount > 5)
-							{
-								uniqueTokens[tok.address] = {addr: tok.address, name: escapeHtml(tok.symbol), decimals:tok.decimals};
-							}
+	Filter tokens on >=10 deposited and >=5 token holders.
+	<script>
+
+		//check 2 contracts for compatible tokens (etherdelta, idex)
+
+		function GetTokens() {
+			var uniqueTokens = {};
+			var loaded = 0;
+			var failed = false;
+
+			$('#output').html('loading from ethplorer api (slow)');
+
+			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey=freekey', (result) => {
+
+				if (result && result.tokens) {
+					for (let i = 0; i < result.tokens.length; i++) {
+						let tok = result.tokens[i].tokenInfo;
+						let addr = tok.address.toLowerCase();
+						if (!uniqueTokens[addr] && tok.symbol && result.tokens[i].balance > 10 && tok.holdersCount > 5) {
+							uniqueTokens[addr] = { addr: addr, name: escapeHtml(tok.symbol), decimals: tok.decimals };
 						}
+					}
+
+					loaded++;
+
+					if (loaded >= 2) {
 						let allTokens = Object.values(uniqueTokens);
 						let jsonString = JSON.stringify(allTokens);
 						$('#output').html(jsonString);
-					} else {
-						$('#output').html('loading failed');
+					} else if (!failed) {
+						$('#output').html('loaded 1/2');
 					}
-				
-				});
-			}
-			
-			
-			function escapeHtml(text) {
-			  var map = {
+				} else {
+					failed = true;
+					$('#output').html('loading failed');
+				}
+
+			});
+
+			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208?apiKey=freekey', (result) => {
+
+				if (result && result.tokens) {
+					for (let i = 0; i < result.tokens.length; i++) {
+						let tok = result.tokens[i].tokenInfo;
+						let addr = tok.address.toLowerCase();
+						if (!uniqueTokens[addr] && tok.symbol && result.tokens[i].balance > 10 && tok.holdersCount > 5) {
+							uniqueTokens[addr] = { addr: addr, name: escapeHtml(tok.symbol), decimals: tok.decimals };
+						}
+					}
+
+					loaded++;
+
+					if (loaded >= 2) {
+						let allTokens = Object.values(uniqueTokens);
+						let jsonString = JSON.stringify(allTokens);
+						$('#output').html(jsonString);
+					} else if (!failed) {
+						$('#output').html('loaded 1/2');
+					}
+				} else {
+					failed = true;
+					$('#output').html('loading failed');
+				}
+
+			});
+
+		}
+
+
+		function escapeHtml(text) {
+			var map = {
 				'&': '&amp;',
 				'<': '&lt;',
 				'>': '&gt;',
@@ -65,20 +99,21 @@
 				"'": '&#039;',
 				"{": '',
 				"}": '',
-			  };
+			};
 
-				return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-			}
-		
-		</script>
-		
-		
-		<button  id ="getbutton" onclick="GetTokens()">GetTokens</button> 
-		
-		<div id="output">
-		
-		
-		</div>
-		
-	</body>
+			return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+		}
+
+	</script>
+
+
+	<button id="getbutton" onclick="GetTokens()">GetTokens</button>
+
+	<div id="output">
+
+
+	</div>
+
+</body>
+
 </html>

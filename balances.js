@@ -703,9 +703,16 @@
 		var urlRetries = 0;
 		var pricesLoaded = false;
 		var numRetries = 4;
-		retrySocket();
-		retryURL();
+		
+		/*disable price request due to ED server issues */
+		{ 
+			loadedBid = -1;
+			finishedBalanceRequest();
+		}
+		//retrySocket();
+		//retryURL();
 
+		
 		function retrySocket() {
 			_delta.socketTicker((err, result, rid) => {
 				if (requestID <= rqid) {

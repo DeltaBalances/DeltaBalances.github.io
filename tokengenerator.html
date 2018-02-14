@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<!-- Bootstrap meta tags -->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="description" content="Doesn't look like anything to me... " />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>Delta Balances</title>
+
+	<!-- Bootstrap js -->
+	<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+	<!--<script src="js/bootstrap.min.js"></script> -->
+	
+	<script src="backupTokens.js"></script>
+
+	<!-- Bootstrap, bootstrap-theme, fontawesome & custom css -->
+	<!--<link href="css/combinedStyles.css" rel="stylesheet">-->
+
+</head>
+
+<body>
+	A quick script to get a big list of tokens
+	<ul> 
+	<li> myetherwallet's ethTokens</li>
+	<li> myCrypto's ethTokens</li>
+	<li> Tokens deposited in exchange contracts accoring to ethplorer.io (Filter tokens on >=10 deposited and >=5 token holders.)</li>
+
+	</ul>
+	
+	
+	<script>
+		var customTokens = {};
+		
+		function parseMewTokens(array) {
+			for (var i = 0; i < array.length; i++) {
+				var customToken = array[i];
+				if (customToken) {
+					customToken.symbol = escapeHtml(customToken.symbol);
+					if(customToken.type)
+						delete customToken.type;	
+					customToken.address = customToken.address.toLowerCase();		
+					if (!customTokens[customToken.address]) {
+						customTokens[customToken.address] = customToken;
+					}
+				}			
+			}
+		}
+		
+		function parseEthplorer(response) {
+			for (let i = 0; i < response.tokens.length; i++) {
+				let tok = response.tokens[i].tokenInfo;
+				let addr = tok.address.toLowerCase();
+				if (!customTokens[addr] && tok.symbol && response.tokens[i].balance > 10 && tok.holdersCount > 5) {
+					customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: tok.decimals };
+				}
+			}
+		}
+		
+		//parse existing custom tokens from offlineCustomTokens (backupTokens.js)
+		parseMewTokens(offlineCustomTokens);
+		
+		
+		//get list of tokens from myetherwallet & mycrypto
+		function getCustomTokens() {
+		
+			$('#output').html('loading.... (slow)');
+			let mewTokens = undefined;
+			let mcTokens = undefined;
+			let ethplorerED = undefined;
+			let ethploredIdex = undefined;
+			let loaded = 0;
+			
+			function done() {
+			
+				if(loaded >= 4)
+				{
+					if(mewTokens && mcTokens && ethplorerED && ethploredIdex) {
+						parseMewTokens(mewTokens);
+						parseMewTokens(mcTokens);
+						parseEthplorer(ethplorerED);
+						parseEthplorer(ethploredIdex);	
+
+						let customTokensList = Object.values(customTokens);
+						
+						customTokensList = customTokensList.sort(function(a,b){
+							return a.symbol.localeCompare(b.symbol);
+						})
+						
+						let outputString = "[<br>";
+						for(let i = 0; i<customTokensList.length; i++) {
+							let str = JSON.stringify(customTokensList[i]);
+							outputString += str + ",<br>";
+						}
+						outputString += "]";
+						
+						
+						
+						$('#output').html(outputString);
+						
+					} else {
+						$('#output').html('something went wrong');
+					}
+				} else {
+					$('#output').html('loading... , loaded ' + loaded + '/4');
+				}
+			}
+			
+			
+			$.getJSON('https://rawgit.com/kvhnuke/etherwallet/mercury/app/scripts/tokens/ethTokens.json').done(function(data) {
+				loaded++;
+				mewTokens = data;
+				done();
+			}).fail(function() {
+				loaded++;
+				done();
+			});
+		
+			$.getJSON('https://rawgit.com/MyCryptoHQ/mycrypto.com/master/app/scripts/tokens/ethTokens.json').done(function(data) {		
+				loaded++;
+				mcTokens = data;
+				done();
+			}).fail(function() {
+				loaded++;
+				done();
+			});
+			
+			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey=freekey').done(function(data) {		
+				loaded++;
+				if(data && data.tokens)
+					ethplorerED = data;
+				done();
+			}).fail(function() {
+				loaded++;
+				done();
+			});
+
+			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208?apiKey=freekey').done(function(data) {		
+				loaded++;
+				if(data && data.tokens)
+					ethploredIdex = data;
+				done();
+			}).fail(function() {
+				loaded++;
+				done();
+			});
+
+			
+			
+		
+		}
+		
+
+		function escapeHtml(text) {
+			var map = {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;',
+				"{": '',
+				"}": '',
+			};
+
+			return text.replace(/[&<>"']/g, function (m) { return map[m]; }).trim();
+		}
+
+	</script>
+
+
+	<button id="getbutton" onclick="getCustomTokens()">Load tokens!</button>
+
+	<div id="output">
+
+
+	</div>
+
+</body>
+
+</html>

@@ -728,10 +728,10 @@
 		/*	{ 
 				loadedBid = -1;
 				finishedBalanceRequest();
-			} */
-		urlRetries = numRetries; //disable url request for now;
+			} 
+		*/
 		retrySocket();
-
+		//retryURL();  //temporarily disabled, prices only from socket for now
 
 
 		function retrySocket() {

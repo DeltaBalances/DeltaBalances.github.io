@@ -22329,7 +22329,7 @@ module.exports = {
   ethGasPrice: 4000000000,
   ethAddr: '0x0000000000000000000000000000000000000000',
   apiServer: '',
-  apiServers: ['api.forkdelta.com', /*'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/],
+  apiServers: ['https://api.forkdelta.com', /*'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/],
   etherscanAPIKey: 'YHBUWV6P5B5ITKMI91JIRZZYBP1CG1V65R',
   tokens: [
     // get them live from config.js

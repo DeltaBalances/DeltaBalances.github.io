@@ -419,7 +419,7 @@
 	function finish(transaction) {
 		console.log('outputting data');
 		/*
-		
+
 		var transaction = {
 			hash: ,
 			from: ,
@@ -431,7 +431,7 @@
 			gas: ,
 			gasUsed: ,
 			error: ,
-			errorText: ,  
+			errorText: ,
 			input: ,
 			output: '',
 		}
@@ -482,7 +482,7 @@
 		var tradeCount = 0;
 		var zeroDecWarning = '';
 		if (transaction.output) {
-			// output price can get wrong decimals if trading like 15e-10, so get price from input if possible. 
+			// output price can get wrong decimals if trading like 15e-10, so get price from input if possible.
 			if (transaction.input && transaction.output.length == 1 && transaction.output[0].price >= 0) {
 				transaction.output[0].price = transaction.input.price;
 				if (transaction.output[0].amount < transaction.input['order size']) {
@@ -702,9 +702,9 @@
 				if (keys[i] == 'token') {
 					var name = myList[i].name;
 					if (!myList[i].unlisted && !unknownToken)
-						cellValue = '<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + name + '-ETH">' + name + '</a>';
+						cellValue = '<a  target="_blank" class="label label-primary" href="https://forkdelta.github.io/#' + name + '-ETH">' + name + '</a>';
 					else
-						cellValue = '<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].addr + '-ETH">' + name + '</a>';
+						cellValue = '<a target="_blank" class="label label-warning" href="https://forkdelta.github.io/#' + myList[i].addr + '-ETH">' + name + '</a>';
 				}
 				else if (keys[i] == 'price') {
 					cellValue = Number(cellValue).toFixed(5);
@@ -742,7 +742,7 @@
 
 		for (var i = 0; i < myList.length; i++) {
 			var key = myList[i];
-			//for (var key in rowHash) 
+			//for (var key in rowHash)
 			{
 				if (!columnSet[key] && key !== 'unlisted' && key !== 'note') {
 					columnSet[key] = 1;

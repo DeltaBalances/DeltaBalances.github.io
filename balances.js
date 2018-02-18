@@ -102,6 +102,8 @@
 	});
 
 	function init() {
+
+
 		// borrow some ED code for compatibility
 		_delta.startEtherDelta(() => {
 			if (!autoStart) {
@@ -158,6 +160,24 @@
 			$("#transactionsTable").trigger("applyWidgets");
 			$("#transactionsTable2").trigger("applyWidgets");
 			$("#resultTable").trigger("applyWidgets");
+
+			//hide popovers
+			$('[data-toggle="popover"]').each(function () {
+				$(this).popover('hide');
+				$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+			});
+		});
+
+		//dismiss popovers on click outside
+		$('body').on('click', function (e) {
+			$('[data-toggle="popover"]').each(function () {
+				//the 'is' for buttons that trigger popups
+				//the 'has' for icons within a button that triggers a popup
+				if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+					$(this).popover('hide');
+					$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+				}
+			});
 		});
 
 		// tab change
@@ -712,7 +732,6 @@
 		urlRetries = numRetries; //disable url request for now;
 		retrySocket();
 
-		retryURL();
 
 
 		function retrySocket() {
@@ -1417,10 +1436,21 @@
 						}
 					}
 					else if (head == 'Name') {
+
+						let token = _delta.uniqueTokens[myList[i].TokenAddr];
+						let popoverContents = "Placeholder";
+						if (cellValue !== 'ETH') {
+							if (token)
+								popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + '<br> Trade on ' + _util.etherDeltaURL(token, true) + '<br> Trade on ' + _util.forkDeltaURL(token, true);
+						} else {
+							popoverContents = "Ether (not a token)<br> Decimals: 18";
+						}
+						let labelClass = 'label-warning';
 						if (!myList[i].Unlisted)
-							row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
-						else
-							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
+							labelClass = 'label-primary';
+
+						row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + cellValue + '" data-container="body" data-content=\'' + popoverContents + '\'>' + cellValue + ' <i class="fa fa-external-link"></i></a>'));
+
 					}
 					else if (head == 'Type') {
 						if (cellValue == 'Deposit') {
@@ -1482,10 +1512,19 @@
 
 					}
 					else if (head == 'Name') {
+						let token = _delta.uniqueTokens[myList[i].Address];
+						let popoverContents = "Placeholder";
+						if (cellValue !== 'ETH') {
+							if (token)
+								popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + '<br> Trade on ' + _util.etherDeltaURL(token, true) + '<br> Trade on ' + _util.forkDeltaURL(token, true);
+						} else {
+							popoverContents = "Ether (not a token)<br> Decimals: 18";
+						}
+						let labelClass = 'label-warning';
 						if (!myList[i].Unlisted)
-							row$.append($('<td/>').html('<a target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
-						else
-							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].Address + '-ETH">' + cellValue + '</a>'));
+							labelClass = 'label-primary';
+
+						row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + cellValue + '" data-container="body" data-content=\'' + popoverContents + '\'>' + cellValue + ' <i class="fa fa-external-link"></i></a>'));
 					}
 					else if (head == 'Date') {
 						row$.append($('<td/>').html(formatDate(cellValue, false)));
@@ -1496,6 +1535,7 @@
 				}
 			}
 			body.append(row$);
+			$("[data-toggle=popover]").popover();
 		}
 	}
 

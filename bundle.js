@@ -45741,6 +45741,42 @@ module.exports = (config) => {
   };
 
 
+  utility.etherDeltaURL = function (tokenObj, html) {
+    if (tokenObj) {
+      var url = "https://etherdelta.com/#";
+      if (tokenObj.unlisted) {
+        url += tokenObj.addr + "-ETH";
+      } else {
+        url += tokenObj.name + "-ETH";
+      }
+
+    } else {
+      url = '';
+    }
+
+    if (html) {
+      url = '<a href="' + url + '" target="_blank"> EtherDelta </a>';
+    }
+    return url;
+  }
+
+  utility.forkDeltaURL = function (tokenObj, html) {
+    var url = "https://forkdelta.github.io/#!/trade/";
+    if (tokenObj) {
+
+      url += tokenObj.addr + "-ETH";
+
+    } else {
+      url = '';
+    }
+
+    if (html) {
+      url = '<a href="' + url + '" target="_blank"> ForkDelta </a>';
+    }
+    return url;
+  }
+
+
   utility.hashLink = function (hash, html, short) {
     var url = 'https://etherscan.io/tx/' + hash;
     if (!html)

@@ -122,6 +122,24 @@
 
 		$(window).resize(function () {
 			$("#transactionsTable").trigger("applyWidgets");
+
+			//hide popovers
+			$('[data-toggle="popover"]').each(function () {
+				$(this).popover('hide');
+				$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+			});
+		});
+
+		//dismiss popovers on click outside
+		$('body').on('click', function (e) {
+			$('[data-toggle="popover"]').each(function () {
+				//the 'is' for buttons that trigger popups
+				//the 'has' for icons within a button that triggers a popup
+				if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+					$(this).popover('hide');
+					$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+				}
+			});
 		});
 
 		getStorage();
@@ -745,11 +763,23 @@
 						}
 
 						if (cellValue !== "" && cellValue !== undefined) {
-							
-							if (!cellValue.unlisted)
-								row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue.name + '-ETH">' + cellValue.name + '</a>'));
-							else
-								row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + cellValue.addr + '-ETH">' + cellValue.name + '</a>'));
+
+							let token = cellValue;
+							let popoverContents = "Placeholder";
+							if (cellValue) {
+								if (cellValue.name != 'Token') {
+									if (cellValue.name !== 'ETH') {
+										popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + '<br> Trade on ' + _util.etherDeltaURL(token, true) + '<br> Trade on ' + _util.forkDeltaURL(token, true);
+									} else {
+										popoverContents = "Ether (not a token)<br> Decimals: 18";
+									}
+								}
+								let labelClass = 'label-warning';
+								if (!token.unlisted)
+									labelClass = 'label-primary';
+
+								row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + ' <i class="fa fa-external-link"></i></a>'));
+							}
 						}
 						else {
 							row$.append($('<td/>').html(cellValue));
@@ -803,6 +833,7 @@
 			}
 
 			body.append(row$);
+			$("[data-toggle=popover]").popover();
 		}
 	}
 

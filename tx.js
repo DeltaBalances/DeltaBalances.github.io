@@ -64,6 +64,24 @@
 
 		$(window).resize(function () {
 			$("table").trigger("applyWidgets");
+
+			//hide popovers
+			$('[data-toggle="popover"]').each(function () {
+				$(this).popover('hide');
+				$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+			});
+		});
+
+		//dismiss popovers on click outside
+		$('body').on('click', function (e) {
+			$('[data-toggle="popover"]').each(function () {
+				//the 'is' for buttons that trigger popups
+				//the 'has' for icons within a button that triggers a popup
+				if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+					$(this).popover('hide');
+					$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+				}
+			});
 		});
 
 		checkStorage();
@@ -700,11 +718,22 @@
 
 				var cellValue = myList[i];
 				if (keys[i] == 'token') {
-					var name = myList[i].name;
-					if (!myList[i].unlisted && !unknownToken)
-						cellValue = '<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + name + '-ETH">' + name + '</a>';
-					else
-						cellValue = '<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].addr + '-ETH">' + name + '</a>';
+
+					let token = myList[i];
+					let popoverContents = "Placeholder";
+					if (token && token.name !== 'ETH' && !unknownToken) {
+						popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + '<br> Trade on ' + _util.etherDeltaURL(token, true) + '<br> Trade on ' + _util.forkDeltaURL(token, true);
+					} else {
+						if (unknownToken)
+							popoverContents = "Token unknown to deltabalances <br> Decimals: (assumed to be) 18";
+						else
+							popoverContents = "Ether (not a token)<br> Decimals: 18";
+					}
+					let labelClass = 'label-warning';
+					if (!token.unlisted && !unknownToken)
+						labelClass = 'label-primary';
+
+					cellValue = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + ' <i class="fa fa-external-link"></i></a>';
 				}
 				else if (keys[i] == 'price') {
 					cellValue = Number(cellValue).toFixed(5);
@@ -728,7 +757,7 @@
 		tbody$.append(row$);
 		table$.append(tbody$);
 		$(selector).append(table$);
-
+		$("[data-toggle=popover]").popover();
 	}
 
 	// Adds a header row to the table and returns the set of columns.

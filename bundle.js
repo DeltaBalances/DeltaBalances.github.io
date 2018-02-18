@@ -22311,7 +22311,7 @@ exports.createContext = Script.createContext = function (context) {
 },{"indexof":100}],156:[function(require,module,exports){
 module.exports = {
   homeURL: 'https://deltabalances.github.io',
-  socketURL: 'https://socket.etherdelta.com',
+  socketURL: 'https://api.forkdelta.com', //'https://socket.etherdelta.com';
   contractEtherDelta: 'smart_contract/etherdelta.sol',
   contractToken: 'smart_contract/token.sol',
   contractDeltaBalance: 'smart_contract/deltabalances.sol',
@@ -22329,7 +22329,7 @@ module.exports = {
   ethGasPrice: 4000000000,
   ethAddr: '0x0000000000000000000000000000000000000000',
   apiServer: '',
-  apiServers: ['https://cache.etherdelta.com', /*'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/],
+  apiServers: ['api.forkdelta.com', /*'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/],
   etherscanAPIKey: 'YHBUWV6P5B5ITKMI91JIRZZYBP1CG1V65R',
   tokens: [
     // get them live from config.js
@@ -22381,7 +22381,7 @@ EtherDelta.prototype.socketTicker = function socketTicker(callback, rqid) {
 };
 
 EtherDelta.prototype.connectSocket = function connectSocket(callbackConnect, callBackNotifications) {
-    let socketURL = 'https://socket.etherdelta.com';
+    let socketURL = bundle.EtherDelta.config.socketURL;
     bundle.EtherDelta.socket = io.connect(socketURL, {
         transports: ['websocket'],
         'reconnection': true,
@@ -22643,24 +22643,6 @@ EtherDelta.prototype.initTokens = function (useBlacklist) {
             if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
                 this.uniqueTokens[token.addr] = token;
                 this.config.customTokens.push(token);
-            }
-        }
-    }
-
-
-    if (allShitCoins) {
-        //filter tokens that we already know
-        var shitCoins = allShitCoins.filter((x) => { return !(this.uniqueTokens[x.addr]) && true; });
-        for (var i = 0; i < shitCoins.length; i++) {
-            var token = shitCoins[i];
-            if (token) {
-                token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
-                token.addr = token.addr.toLowerCase();
-                token.unlisted = true;
-                if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
-                    this.uniqueTokens[token.addr] = token;
-                    this.config.customTokens.push(token);
-                }
             }
         }
     }
@@ -45664,7 +45646,7 @@ module.exports = (config) => {
       else
         callback('error retrieving url', undefined);
     }).fail((xhr, status, error) => {
-        callback(error, undefined);
+      callback(error, undefined);
     });
     /* 
      request.get(url, options, (err, httpResponse, body) => {
@@ -45678,13 +45660,13 @@ module.exports = (config) => {
 
   utility.postURL = function postURL(url, contents, callback) {
 
-    jQuery.post( url, contents).done((result) => {
+    jQuery.post(url, contents).done((result) => {
       if (result)
         callback(undefined, result);
       else
         callback('error post url', undefined);
     }).fail((xhr, status, error) => {
-       callback(error, undefined);
+      callback(error, undefined);
     });
   };
 
@@ -45794,10 +45776,10 @@ module.exports = (config) => {
         config.ethTestnet ? config.ethTestnet : 'api'
         }.etherscan.io/api`;
       let postContents = {
-        module :'proxy',
-        action :'eth_Call',
-        to : address,
-        data : data,
+        module: 'proxy',
+        action: 'eth_Call',
+        to: address,
+        data: data,
       }
       if (config.etherscanAPIKey) { postContents.apiKey = config.etherscanAPIKey };
       utility.postURL(url, postContents, (err, body) => {
@@ -45902,7 +45884,7 @@ module.exports = (config) => {
         txHash}`;
       if (config.etherscanAPIKey) url += `&apikey=${config.etherscanAPIKey}`;
       utility.getURL(url, (err, body) => {
-        if (!err && body ) {
+        if (!err && body) {
           const result = body;//JSON.parse(body);
           callback(undefined, result.result, index);
         } else {

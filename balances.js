@@ -703,16 +703,18 @@
 		var urlRetries = 0;
 		var pricesLoaded = false;
 		var numRetries = 4;
-		
-		/*disable price request due to ED server issues */
-		{ 
-			loadedBid = -1;
-			finishedBalanceRequest();
-		}
-		//retrySocket();
-		//retryURL();
 
-		
+		/*disable price request due to ED server issues */
+		/*	{ 
+				loadedBid = -1;
+				finishedBalanceRequest();
+			} */
+		urlRetries = numRetries; //disable url request for now;
+		retrySocket();
+
+		retryURL();
+
+
 		function retrySocket() {
 			_delta.socketTicker((err, result, rid) => {
 				if (requestID <= rqid) {
@@ -731,7 +733,7 @@
 		}
 
 		function retryURL() {
-			$.getJSON(_delta.config.apiServer + '/nonce/' + Date.now() + '/returnTicker/').done((result) => {
+			$.getJSON(_delta.config.apiServer + '/returnTicker').done((result) => {
 				if (requestID <= rqid) {
 					if (result) {
 						parsePrices(result);

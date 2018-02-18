@@ -705,7 +705,7 @@
 		var numRetries = 4;
 
 		/*disable price request due to ED server issues */
-		/*	{ 
+		/*	{
 				loadedBid = -1;
 				finishedBalanceRequest();
 			} */
@@ -1418,9 +1418,9 @@
 					}
 					else if (head == 'Name') {
 						if (!myList[i].Unlisted)
-							row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://etherdelta.com/#' + cellValue + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<a  target="_blank" class="label label-primary" href="https://forkdelta.github.io/#' + cellValue + '-ETH">' + cellValue + '</a>'));
 						else
-							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://etherdelta.com/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
+							row$.append($('<td/>').html('<a target="_blank" class="label label-warning" href="https://forkdelta.github.io/#' + myList[i].TokenAddr + '-ETH">' + cellValue + '</a>'));
 					}
 					else if (head == 'Type') {
 						if (cellValue == 'Deposit') {

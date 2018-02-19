@@ -22649,12 +22649,13 @@ EtherDelta.prototype.initTokens = function (useBlacklist) {
 }
 
 EtherDelta.prototype.setToken = function (address) {
+    address = address.toLowerCase();
     if (this.uniqueTokens[address]) {
         return this.uniqueTokens[address];
     } else {
         //unknownToken = true;
         //TODO get decimals get symbol
-        return { addr: address, name: '???', decimals: 18 };
+        return { addr: address, name: '???', unknown: true, decimals: 18, unlisted:true };
     }
 };
 
@@ -22687,7 +22688,7 @@ EtherDelta.prototype.processUnpackedInput = function (tx, unpacked) {
             var sender = unpacked.params[0].value;
             var rawAmount = unpacked.params[1].value;
             var amount = 0;
-            var token = this.setToken(tx.to.toLowerCase());
+            var token = this.setToken(tx.to);
             var unlisted = true;
             if (token && token.addr) {
                 var dvsr = this.divisorFromDecimals(token.decimals);
@@ -22929,12 +22930,12 @@ EtherDelta.prototype.processUnpackedEvent = function (unpacked, myAddr) {
             {
                 tradeType = 'Buy';
                 token = this.setToken(unpacked.events[2].value);
-                base = this.uniqueTokens[unpacked.events[0].value];
+                base = this.setToken(unpacked.events[0].value);
             } else if (unpacked.events[2].value === _delta.config.tokens[0].addr)// taker sell
             {
                 tradeType = 'Sell';
                 token = this.setToken(unpacked.events[0].value);
-                base = this.uniqueTokens[unpacked.events[2].value];
+                base = this.setToken(unpacked.events[2].value);
             }
             else { // TODO break on non ETH trades
                 return { 'error': 'unknown token in trade event' };
@@ -45830,7 +45831,7 @@ module.exports = (config) => {
             if (retries > 0) {
               setTimeout(() => {
                 proxy(retries - 1);
-              }, 1000);
+              }, 5000);
             } else {
               callback(err, undefined);
             }
@@ -45840,8 +45841,9 @@ module.exports = (config) => {
         }
       });
     }
-    try {
-      if (web3In.currentProvider) {
+
+    if (web3In && web3In.currentProvider) {
+      try {
         const data = contract[functionName].getData.apply(null, args);
         web3In.eth.call({ to: address, data }, (err, result) => {
           if (!err) {
@@ -45851,18 +45853,19 @@ module.exports = (config) => {
               const resultUnpacked = solidityFunction.unpackOutput(result);
               callback(undefined, resultUnpacked);
             } catch (errJson) {
-              proxy(1);
+              proxy(0);
             }
           } else {
             proxy(1);
           }
         });
-      } else {
+      } catch (err) {
         proxy(1);
       }
-    } catch (err) {
-      proxy(1);
+    } else {
+      proxy(0);
     }
+
   };
 
 

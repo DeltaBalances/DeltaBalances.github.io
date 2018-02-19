@@ -797,7 +797,7 @@
 	}
 
 
-	var maxPerRequest = 500;   // don't make the web3 requests too large
+	var maxPerRequest = 400;   // don't make the web3 requests too large
 	// mode = 'All' or ''  is all balances in 1 request
 	// 'Wallet' is only wallet balances
 	// 'EtherDelta' is only Etherdelta balances
@@ -888,7 +888,7 @@
 						}
 						else if (!oneCompleted) //request returned wrong/empty and other hasn't completed yet
 						{
-							const retryAmount = 3;
+							const retryAmount = 2;
 							if (retried < retryAmount) //retry both etherscan and infura 3 times
 							{
 								totalTries++;

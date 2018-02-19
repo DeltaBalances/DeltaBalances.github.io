@@ -380,7 +380,7 @@
 							myAddr = tx.to.toLowerCase();
 						let obj = _delta.processUnpackedEvent(unpacked, myAddr);
 						if (obj) {
-							if (obj && obj.token && obj.token.name === "???" && token.decimals === 18)
+							if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 								unknownToken = true;
 							if (unpacked.name === 'Trade') {
 								delete obj.fee;
@@ -404,7 +404,7 @@
 					return undefined;
 
 				let obj = _delta.processUnpackedInput(tx, unpacked);
-				if (obj && obj.token && obj.token.name === "???" && token.decimals === 18)
+				if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 					unknownToken = true;
 				return obj;
 
@@ -721,16 +721,16 @@
 
 					let token = myList[i];
 					let popoverContents = "Placeholder";
-					if (token && token.name !== 'ETH' && !unknownToken) {
+					if (token && token.name !== 'ETH' && _delta.uniqueTokens[token.addr]) {
 						popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + '<br> Trade on ' + _util.etherDeltaURL(token, true) + '<br> Trade on ' + _util.forkDeltaURL(token, true);
 					} else {
-						if (unknownToken)
-							popoverContents = "Token unknown to deltabalances <br> Decimals: (assumed to be) 18";
+						if (! _delta.uniqueTokens[token.addr])
+							popoverContents = "Token unknown to deltabalances <br> Contract: " + _util.addressLink(token.addr, true, true);
 						else
 							popoverContents = "Ether (not a token)<br> Decimals: 18";
 					}
 					let labelClass = 'label-warning';
-					if (!token.unlisted && !unknownToken)
+					if (!token.unlisted && !token.unknown)
 						labelClass = 'label-primary';
 
 					cellValue = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + ' <i class="fa fa-external-link"></i></a>';

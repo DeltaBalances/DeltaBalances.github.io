@@ -556,9 +556,9 @@
 					initBalance(token);
 			}
 
-			getAllBalances(rqid, 'All');
-			//getAllBalances(rqid, 'EtherDelta');
-			//getAllBalances(rqid, 'Wallet');
+			//getAllBalances(rqid, 'All');
+			getAllBalances(rqid, 'EtherDelta');
+			getAllBalances(rqid, 'Wallet');
 			getPrices(rqid);
 			getEtherPrice();
 
@@ -728,10 +728,11 @@
 		/*	{ 
 				loadedBid = -1;
 				finishedBalanceRequest();
-			} 
-		*/
+				urlRetries = numRetries; //disable url request for now;
+		}*/
+
 		retrySocket();
-		//retryURL();  //temporarily disabled, prices only from socket for now
+		retryURL();
 
 
 		function retrySocket() {
@@ -797,7 +798,7 @@
 	}
 
 
-	var maxPerRequest = 400;   // don't make the web3 requests too large
+	var maxPerRequest = 500;   // don't make the web3 requests too large
 	// mode = 'All' or ''  is all balances in 1 request
 	// 'Wallet' is only wallet balances
 	// 'EtherDelta' is only Etherdelta balances

@@ -101,31 +101,35 @@
 					
 					<div class="col-md-6" style="overflow:hidden;">
 						<p>Date range: </p>
-						<span id="selectedBlocks">Selected block range:</span><br>
-						<form  id="blockSelector" action=""> 
-						<ul class="list-unstyled">
-							
-							<li> <input type="radio" name="dayBlocks" value="0" onchange="setDaySelector()" checked><span> Trades from last <input type="number" id="days" style="text-align: center;height:85%;" onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (assuming 14s per block)</span> </li>
-							<li> <input type="radio" name="dayBlocks" value="1" onchange="setBlockSelector()"><span> Manual block range <input class="blockInput" type="number" id="blockSelect1" style="text-align: center; height:85%;width:85px;" onchange="checkBlockInput()" value="" min="3154197" step="100" disabled> - <input class="blockInput" type="number" id="blockSelect2" style="text-align: center; height:85%;width:85px;" onchange="checkBlockInput()" value="" min="3154197" step="100" disabled></span> </li></li>
-							
-						</ul>
+                        <span id="selectedBlocks">Selected block range:</span><br>
+                             <ul class="list-group">
+                            <li class="list-group-item" style="background-color:inherit; border:none;">
+                                <form  id="blockSelector" action=""> 
+                                <ul class="list-unstyled">
+                                    
+                                    <li> <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" checked><label for="r0"> Trades from last <input type="number" id="days" style="text-align: center;height:85%;" onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (assuming 14s per block)</label></li>
+                                    <li> <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()"><label for="r1">  Select Month  <select id="monthSelect" onChange="checkMonthInput()" disabled></select></span> </li>
+                                    <li> <input type="radio" id="r2" name="dayBlocks" value="1" onchange="setBlockSelector()"><label for="r2">  Manual block range <input class="blockInput" type="number" id="blockSelect1" style="text-align: center; height:85%;width:85px;" onchange="checkBlockInput()" value="" min="3154197" step="100" disabled> - <input class="blockInput" type="number" id="blockSelect2" style="text-align: center; height:85%;width:85px;" onchange="checkBlockInput()" value="" min="3154197" step="100" disabled></label></li></li>
+                                    
+                                </ul>
 
-						</form> 
+                                </form> 
+                            </li>
+                        </ul>
 					</div>
 					<div class="col-md-6" style="overflow:hidden;">
 						<p>Export trades:</p>
 						<ul>
-						<li>Default (CSV) <span id="downloadTrades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
-						<li>Bitcoin.tax (CSV) <span id="downloadBitcoinTaxTrades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
-						<li>Cointracking.info (CSV) <span id="downloadCointrackingTrades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span>, (CustomExchange) <span id="downloadCointracking2Trades"><i class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
+						<li>Default (CSV) <span id="downloadTrades"><i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
+						<li>Bitcoin.tax (CSV) <span id="downloadBitcoinTaxTrades"><i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
+						<li>Cointracking.info (CSV) <span id="downloadCointrackingTrades"><i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i></span>, (CustomExchange) <span id="downloadCointracking2Trades"><i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i></span></li>
 						</ul>
 					</div>
 					<div class="col-md-12" style="overflow:hidden;">
 						<p>Info</p>
-						This is an alternative to the the official <a target="_blank" href="https://etherdelta.com/trades.html">EtherDelta trade history</a> tool. <br>
-						Trades are retrieved from events on the blockchain, larger block ranges will take longer to load. <br>
+						Trades are retrieved from the blockchain using Infura, larger block ranges will take longer to load. <br>
 						<br>
-						History is limited to trades with ETH as base currency. <br>
+						History is limited to trades with ETH as base currency, starting at block <a href="https://etherscan.io/tx/0xc10fc67499a037b6c2f14ae0c63b659b05bd7b553378202f96e777dd4843130f" target="_blank">3154196</a> <br>
 						Fees are 0% Maker, 0.3% Taker.
 						<br>
 						<br>
@@ -170,7 +174,7 @@
       <hr>
 
        <footer style="overflow:hidden;">
-			<p> Powered by <a target="_blank" href="https://forkdelta.github.io/">ForkDelta</a>, <a target="_blank" href="https://etherscan.io/">Etherscan</a> and <a target="_blank" href="https://infura.io/">Infura</a></p>
+			<p> Powered by <a target="_blank" href="https://etherscan.io/">Etherscan</a> and <a target="_blank" href="https://infura.io/">Infura</a></p>
 			<p> Any questions or suggestions? Make an issue/request on <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">Github</a> or send a message on <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a></p>
 			<p> If you enjoy the site, you are always welcome to buy me a beer:  <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank" >0xf6E914D07d12636759868a61E52973d17ED7111B</a> </p>
       </footer>

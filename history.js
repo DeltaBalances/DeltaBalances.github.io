@@ -109,6 +109,9 @@
 	function readyInit() {
 		setAddrImage('0x0000000000000000000000000000000000000000');
 
+        fillMonthSelect();
+        setDaySelector();
+        
 		// detect enter & keypresses in input
 		$('#address').keypress(function (e) {
 			if (e.keyCode == 13) {
@@ -373,6 +376,17 @@
 		$('#days').prop('disabled', false);
 		$('#blockSelect1').prop('disabled', true);
 		$('#blockSelect2').prop('disabled', true);
+        $('#monthSelect').prop('disabled', true);
+        
+	}
+    
+    function setMonthSelector() {
+		useDaySelector = false;
+        checkMonthInput();
+        $('#monthSelect').prop('disabled', false);
+		$('#days').prop('disabled', true);
+		$('#blockSelect1').prop('disabled', true);
+		$('#blockSelect2').prop('disabled', true);
 	}
 
 	function setBlockSelector() {
@@ -380,6 +394,7 @@
 		$('#days').prop('disabled', true);
 		$('#blockSelect1').prop('disabled', false);
 		$('#blockSelect2').prop('disabled', false);
+        $('#monthSelect').prop('disabled', true);
 
 		$(".blockInput").attr({
 			"max": blocknum,
@@ -395,6 +410,19 @@
 		checkBlockInput();
 	}
 
+    
+    function checkMonthInput() {
+        let val = Number($('#monthSelect').val());
+        
+        if(val < 0) val =0;
+        if( val > _delta.config.blockMonths.length -1) val = _delta.blockMonths.length -1;
+        
+        startblock = _delta.config.blockMonths[val].blockFrom;
+		endblock = _delta.config.blockMonths[val].blockTo;
+        
+        getStartBlock();
+    }
+    
 	function checkBlockInput() {
 		let block1 = Math.floor($('#blockSelect1').val());
 		let block2 = Math.floor($('#blockSelect2').val());
@@ -408,12 +436,7 @@
 		startblock = Math.max(minBlock, block1);
 		endblock = Math.min(block2, blocknum);
 
-		$('#blockSelect1').val(startblock);
-		$('#blockSelect2').val(endblock);
-
-		if (blocknum > 0) {
-			getStartBlock();
-		}
+		getStartBlock();
 	}
 
 	function getStartBlock() {
@@ -424,6 +447,9 @@
 
 		}
 
+        $('#blockSelect1').val(startblock);
+		$('#blockSelect2').val(endblock);
+        
 		$('#selectedBlocks').html('Selected block range: <a href="https://etherscan.io/block/' + startblock + '" target="_blank">' + startblock + '</a> - <a href="https://etherscan.io/block/' + endblock + '" target="_blank">' + endblock + '</a>');
 		return startblock;
 	}
@@ -434,15 +460,13 @@
 		var days = 1;
 		if (input < 0.25)
 			days = 0.25;
-		else if (input > 999)
-			days = 999;
+		else if (input > 50)
+			days = 50;
 		else
 			days = input;
 
 		transactionDays = days;
-		if (blocknum > 0) {
-			getStartBlock();
-		}
+		getStartBlock();
 		$('#days').val(days);
 	}
 
@@ -871,6 +895,26 @@
 		return columnSet;
 	}
 
+    
+    function fillMonthSelect() {
+		var select = document.getElementById("monthSelect");
+
+		//Create array of options to be added
+		var array = _delta.config.blockMonths;
+
+            
+		//Create and append the options
+		for (var i = 0; i < array.length; i++) {
+			var option = document.createElement("option");
+			option.value = i;
+			option.text = array[i].m;
+			select.appendChild(option);
+		}
+		select.selectedIndex = array.length - 1;
+	}
+    
+    
+    
 	function toDateTime(secs) {
 		var utcSeconds = secs;
 		var d = new Date(0);

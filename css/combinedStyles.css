@@ -281,13 +281,22 @@ box-shadow: inset 0 0 0 transparent,0 0 0 transparent !important;
 }
 
 @media (max-width: 768px) {
-    .customWidth1
-{
-	width:100%;
+        .customWidth1
+    {
+        width:100%;
+    }
+
+        .customWidth2
+    {
+        width:100%;
+    }
 }
 
-    .customWidth2
-{
-	width:100%;
+li > label {
+    font-weight: 100;
 }
-}
+
+select:disabled{
+  
+    background-color: inherit;
+ }

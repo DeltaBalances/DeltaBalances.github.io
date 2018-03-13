@@ -249,6 +249,13 @@ box-shadow: inset 0 0 0 transparent,0 0 0 transparent !important;
 
 @media (max-width: 768px) {
     
+    .jumbotron p {
+        font-weight: 200;
+    }
+
+    .jumbotron label {
+        font-weight:100;
+    }
 
     .navbar-nav {
         text-align: center;
@@ -257,36 +264,36 @@ box-shadow: inset 0 0 0 transparent,0 0 0 transparent !important;
 
 @media (max-width: 1200px) {
     .customWidth1
-{
-	width:60%;
-}
+    {
+        width:60%;
+    }
 
     .customWidth2
-{
-	width:63%;
-}
+    {
+        width:63%;
+    }
 }
 
 
 @media (max-width: 995px) {
     .customWidth1
-{
-	width:60%;
-}
+    {
+        width:60%;
+    }
 
     .customWidth2
-{
-	width:52%;
-}
+    {
+        width:52%;
+    }
 }
 
 @media (max-width: 768px) {
-        .customWidth1
+    .customWidth1
     {
         width:100%;
     }
 
-        .customWidth2
+    .customWidth2
     {
         width:100%;
     }
@@ -297,6 +304,5 @@ li > label {
 }
 
 select:disabled{
-  
     background-color: inherit;
- }
+}

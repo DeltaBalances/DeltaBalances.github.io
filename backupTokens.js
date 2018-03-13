@@ -3310,4 +3310,5 @@ let offlineCustomTokens = [
 	{ "address": "0xddf525b5a87e8fb809db54ff172c0858a8a11c9d", "symbol": "ZWORK", "decimal": "18" },
 	{ "address": "0x529713e843ea6bff64a29494e89cd083d2dc5dff", "symbol": "АВΤ", "decimal": "18" },
 	{ "address": "0x81d26c79c2acca248ef240ac28e763f9a3e06a4f", "symbol": "草泥马币", "decimal": "2" },
+	{ "address": "0x5c743a35e903f6c584514ec617acee0611cf44f3", "symbol": "Experty", "decimal":18},
 ];

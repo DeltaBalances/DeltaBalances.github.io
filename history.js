@@ -1200,7 +1200,7 @@
 					var arr = [];
 					if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
 						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'] + allTrades[i]['Fee'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, formatDateOffset(allTrades[i]['Date']), 'EtherDelta', 'Trade'];
+						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 'EtherDelta', 'Trade'];
 
 					}
 					else { //sell add fee to token total

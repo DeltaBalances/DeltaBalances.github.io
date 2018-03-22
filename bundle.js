@@ -45884,8 +45884,8 @@ module.exports = (config) => {
 
   };
 
-
-
+//get etherdelta history logs for a certain block range
+//inclusive for start and end
   utility.getTradeLogs = function getTradeLogs(web3In, contractAddress, startblock, endblock, rpcID, callback) {
 
     const filterObj = JSON.stringify([{
@@ -45911,7 +45911,9 @@ module.exports = (config) => {
         'dataType': 'json',
       }).done((result) => {
         if (result.result && result.result.length > 0) {
-          callback(result.result);
+          callback(result.result, (endblock - startblock) + 1); 
+        } else {
+          callback(undefined, (endblock - startblock) + 1); 
         }
       }).fail((result) => {
         if (retries < 1) {
@@ -45920,7 +45922,7 @@ module.exports = (config) => {
           return;
         }
         else {
-          callback(undefined);
+          callback(undefined, 0);
         }
       });
     }

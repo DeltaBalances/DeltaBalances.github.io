@@ -112,6 +112,8 @@
         fillMonthSelect();
         setDaySelector();
         
+        setBlockProgress(0,0,0,0,0);
+        
 		// detect enter & keypresses in input
 		$('#address').keypress(function (e) {
 			if (e.keyCode == 13) {
@@ -275,8 +277,6 @@
 			myClick(requestID);
 			return;
 		}
-
-
 
 		trigger1 = false;
 		loadedLogs = 0;
@@ -482,7 +482,12 @@
 	}
 
 
-
+    function setBlockProgress(loaded, max, trades, start, end) {
+        let progressString = 'Loaded '+ loaded + '/' + max + ' blocks, found ' + trades + ' trade';
+        if(trades < 1 || trades > 1) progressString += 's';
+        $('#blockProgress').html(progressString);
+    }
+    
 
 	function getTransactions(rqid) {
 
@@ -490,9 +495,12 @@
 		var end = endblock;
 		const max = 7500;
 
+        let totalBlocks = end-start + 1; //block 5-10 (inclusive) gives you 6 blocks
 
 		loadedLogs = 0;
-
+        let downloadedBlocks = 0;
+        setBlockProgress(downloadedBlocks, totalBlocks, 0);
+        
 		var tradeLogResult = [];
 		const contractAddr = _delta.config.contractEtherDeltaAddr.toLowerCase();
 
@@ -510,8 +518,9 @@
 			_util.getTradeLogs(_delta.web3, contractAddr, startNum, endNum, rpcID, receiveLogs);
 		}
 
-		function receiveLogs(logs) {
+		function receiveLogs(logs, blockCount) {
 			if (rqid <= requestID) {
+                downloadedBlocks += blockCount;
 				if (logs) {
 					loadedLogs++;
 					var tradesInResult = parseOutput(logs);
@@ -550,6 +559,7 @@
 		}
 
 		function done() {
+            setBlockProgress(downloadedBlocks, totalBlocks, tradeLogResult.length);
 			if (loadedLogs < reqAmount) {
 				makeTable(tradeLogResult);
 				return;

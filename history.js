@@ -1090,19 +1090,22 @@
 				//checkBlockDates(lastResult);
 				var allTrades = lastResult;
 
-				var A = [['Date', 'Action', 'Source', 'Volume', 'Symbol', 'Price', 'Currency', 'Fee', 'FeeCurrency', 'Total', 'Memo']];
+				var A = [['Date', 'Action', 'Source', 'Volume', 'Symbol', 'Price', 'Currency', 'Fee', 'FeeCurrency', 'Memo']];
+
 				// initialize array of rows with header row as 1st item
 				for (var i = 0; i < allTrades.length; ++i) {
 					var arr = undefined;
-					if (allTrades[i]['Trade'] === 'Buy') {
+					var memoString = '"Transaction Hash ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr + '"';
+
+					//if (allTrades[i]['Trade'] === 'Buy') {
 						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
-						allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['ETH'], " Transaction Hash " + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr];
-					}
+					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
+					//	}
 					// add token fee to total for correct balance in bitcoin tax
-					else {
-						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
-						allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['ETH'], " Transaction Hash " + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr];
-					}
+					//	else {
+					//		arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
+					//		allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
+					//	}
 
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation

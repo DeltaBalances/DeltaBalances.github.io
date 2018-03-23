@@ -86,7 +86,7 @@
 						let customTokensList = Object.values(customTokens);
 						
 						customTokensList = customTokensList.sort(function(a,b){
-							return a.symbol.localeCompare(b.symbol);
+							return (a.symbol + a.address).localeCompare(b.symbol + b.address);
 						})
 						
 						let outputString = "[<br>";

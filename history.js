@@ -109,11 +109,11 @@
 	function readyInit() {
 		setAddrImage('0x0000000000000000000000000000000000000000');
 
-        fillMonthSelect();
-        setDaySelector();
-        
-        setBlockProgress(0,0,0,0,0);
-        
+		fillMonthSelect();
+		setDaySelector();
+
+		setBlockProgress(0, 0, 0, 0, 0);
+
 		// detect enter & keypresses in input
 		$('#address').keypress(function (e) {
 			if (e.keyCode == 13) {
@@ -376,14 +376,14 @@
 		$('#days').prop('disabled', false);
 		$('#blockSelect1').prop('disabled', true);
 		$('#blockSelect2').prop('disabled', true);
-        $('#monthSelect').prop('disabled', true);
-        
+		$('#monthSelect').prop('disabled', true);
+
 	}
-    
-    function setMonthSelector() {
+
+	function setMonthSelector() {
 		useDaySelector = false;
-        checkMonthInput();
-        $('#monthSelect').prop('disabled', false);
+		checkMonthInput();
+		$('#monthSelect').prop('disabled', false);
 		$('#days').prop('disabled', true);
 		$('#blockSelect1').prop('disabled', true);
 		$('#blockSelect2').prop('disabled', true);
@@ -394,7 +394,7 @@
 		$('#days').prop('disabled', true);
 		$('#blockSelect1').prop('disabled', false);
 		$('#blockSelect2').prop('disabled', false);
-        $('#monthSelect').prop('disabled', true);
+		$('#monthSelect').prop('disabled', true);
 
 		$(".blockInput").attr({
 			"max": blocknum,
@@ -410,19 +410,19 @@
 		checkBlockInput();
 	}
 
-    
-    function checkMonthInput() {
-        let val = Number($('#monthSelect').val());
-        
-        if(val < 0) val =0;
-        if( val > _delta.config.blockMonths.length -1) val = _delta.blockMonths.length -1;
-        
-        startblock = _delta.config.blockMonths[val].blockFrom;
+
+	function checkMonthInput() {
+		let val = Number($('#monthSelect').val());
+
+		if (val < 0) val = 0;
+		if (val > _delta.config.blockMonths.length - 1) val = _delta.blockMonths.length - 1;
+
+		startblock = _delta.config.blockMonths[val].blockFrom;
 		endblock = _delta.config.blockMonths[val].blockTo;
-        
-        getStartBlock();
-    }
-    
+
+		getStartBlock();
+	}
+
 	function checkBlockInput() {
 		let block1 = Math.floor($('#blockSelect1').val());
 		let block2 = Math.floor($('#blockSelect2').val());
@@ -447,9 +447,9 @@
 
 		}
 
-        $('#blockSelect1').val(startblock);
+		$('#blockSelect1').val(startblock);
 		$('#blockSelect2').val(endblock);
-        
+
 		$('#selectedBlocks').html('Selected block range: <a href="https://etherscan.io/block/' + startblock + '" target="_blank">' + startblock + '</a> - <a href="https://etherscan.io/block/' + endblock + '" target="_blank">' + endblock + '</a>');
 		return startblock;
 	}
@@ -482,25 +482,25 @@
 	}
 
 
-    function setBlockProgress(loaded, max, trades, start, end) {
-        let progressString = 'Loaded '+ loaded + '/' + max + ' blocks, found ' + trades + ' trade';
-        if(trades < 1 || trades > 1) progressString += 's';
-        $('#blockProgress').html(progressString);
-    }
-    
+	function setBlockProgress(loaded, max, trades, start, end) {
+		let progressString = 'Loaded ' + loaded + '/' + max + ' blocks, found ' + trades + ' trade';
+		if (trades < 1 || trades > 1) progressString += 's';
+		$('#blockProgress').html(progressString);
+	}
+
 
 	function getTransactions(rqid) {
 
 		var start = startblock;
 		var end = endblock;
-		const max = 7500;
+		const max = 5000;
 
-        let totalBlocks = end-start + 1; //block 5-10 (inclusive) gives you 6 blocks
+		let totalBlocks = end - start + 1; //block 5-10 (inclusive) gives you 6 blocks
 
 		loadedLogs = 0;
-        let downloadedBlocks = 0;
-        setBlockProgress(downloadedBlocks, totalBlocks, 0);
-        
+		let downloadedBlocks = 0;
+		setBlockProgress(downloadedBlocks, totalBlocks, 0);
+
 		var tradeLogResult = [];
 		const contractAddr = _delta.config.contractEtherDeltaAddr.toLowerCase();
 
@@ -509,18 +509,51 @@
 			reqAmount++;
 		}
 		var rpcId = 6;
-		for (var i = start; i <= end; i += (max + 1)) {
-			getLogsInRange(i, Math.min(i + max, end), rpcId);
-			rpcId++;
+
+		var activeRequests = 0;
+		const maxRequests = 12;
+		var activeStart = start;
+
+		// repeat func until it returns false
+		for (var i = 0; i < maxRequests; i++) {
+			getBatchedLogs();
 		}
 
-		function getLogsInRange(startNum, endNum, rpcID) {
-			_util.getTradeLogs(_delta.web3, contractAddr, startNum, endNum, rpcID, receiveLogs);
+		function getBatchedLogs() {
+			if (activeRequests < maxRequests && activeStart <= end) {
+				activeRequests++;
+				let tempStart = activeStart;
+				activeStart = tempStart + max + 1;
+				getLogsInRange(tempStart, Math.min(tempStart + max, end), rpcId);
+				rpcId++;
+				return true;
+			} else {
+				return false;
+			}
+
+			function getLogsInRange(startNum, endNum, rpcID) {
+				_util.getTradeLogs(_delta.web3, contractAddr, startNum, endNum, rpcID, receiveLogs);
+			}
 		}
+
+		/*	for (var i = start; i <= end; i += (max + 1)) {
+				getLogsInRange(i, Math.min(i + max, end), rpcId);
+				rpcId++;
+			}
+	
+			function getLogsInRange(startNum, endNum, rpcID) {
+				_util.getTradeLogs(_delta.web3, contractAddr, startNum, endNum, rpcID, receiveLogs);
+			}
+			*/
 
 		function receiveLogs(logs, blockCount) {
+
+			activeRequests--;
+			getBatchedLogs();
+
+
 			if (rqid <= requestID) {
-                downloadedBlocks += blockCount;
+				downloadedBlocks += blockCount;
 				if (logs) {
 					loadedLogs++;
 					var tradesInResult = parseOutput(logs);
@@ -532,7 +565,6 @@
 						if (!blockDates[tradesInResult[i].Block] && !doneBlocks[tradesInResult[i].Block]) {
 							uniqueBlocks[tradesInResult[i].Block] = 1;
 							doneBlocks[tradesInResult[i].Block] = true;
-							var url = 'https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + tradesInResult[i].Block + '&apikey=' + _delta.config.etherscanAPIKey;
 							blockReqs++;
 
 							_util.getBlockDate(_delta.web3, tradesInResult[i].Block, (err, unixtimestamp, nr) => {
@@ -548,6 +580,7 @@
 								}
 
 							});
+
 						}
 					}
 					tradeLogResult = tradeLogResult.concat(tradesInResult);
@@ -559,7 +592,7 @@
 		}
 
 		function done() {
-            setBlockProgress(downloadedBlocks, totalBlocks, tradeLogResult.length);
+			setBlockProgress(downloadedBlocks, totalBlocks, tradeLogResult.length);
 			if (loadedLogs < reqAmount) {
 				makeTable(tradeLogResult);
 				return;
@@ -578,6 +611,18 @@
 			let filteredLogs = outputLogs.filter((log) => {
 				return log.data.indexOf(addrrr) !== -1;
 			});
+
+			//if from etherscan, timestamp is included
+			// from web3/infura, no timestamp
+			if (filteredLogs.length > 0 && filteredLogs[0].timeStamp && filteredLogs[0].blockNumber) {
+				for (i = 0; i < filteredLogs.length; i++) {
+					let num = Number(filteredLogs[i].blockNumber);
+					if (!blockDates[num]) {
+						blockDates[num] = toDateTime(filteredLogs[0].timeStamp);
+					}
+				}
+			}
+
 			let unpackedLogs = _util.processLogs(filteredLogs);
 
 			for (i = 0; i < unpackedLogs.length; i++) {
@@ -905,14 +950,14 @@
 		return columnSet;
 	}
 
-    
-    function fillMonthSelect() {
+
+	function fillMonthSelect() {
 		var select = document.getElementById("monthSelect");
 
 		//Create array of options to be added
 		var array = _delta.config.blockMonths;
 
-            
+
 		//Create and append the options
 		for (var i = 0; i < array.length; i++) {
 			var option = document.createElement("option");
@@ -922,9 +967,9 @@
 		}
 		select.selectedIndex = array.length - 1;
 	}
-    
-    
-    
+
+
+
 	function toDateTime(secs) {
 		var utcSeconds = secs;
 		var d = new Date(0);
@@ -1098,7 +1143,7 @@
 					var memoString = '"Transaction Hash ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr + '"';
 
 					//if (allTrades[i]['Trade'] === 'Buy') {
-						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
+					arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
 					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
 					//	}
 					// add token fee to total for correct balance in bitcoin tax

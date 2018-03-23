@@ -45884,8 +45884,9 @@ module.exports = (config) => {
 
   };
 
-//get etherdelta history logs for a certain block range
-//inclusive for start and end
+  //get etherdelta history logs from INFURA
+  //inclusive for start and end
+  // can handle ranges of 5k-10k blocks
   utility.getTradeLogs = function getTradeLogs(web3In, contractAddress, startblock, endblock, rpcID, callback) {
 
     const filterObj = JSON.stringify([{
@@ -45911,9 +45912,9 @@ module.exports = (config) => {
         'dataType': 'json',
       }).done((result) => {
         if (result.result && result.result.length > 0) {
-          callback(result.result, (endblock - startblock) + 1); 
+          callback(result.result, (endblock - startblock) + 1);
         } else {
-          callback(undefined, (endblock - startblock) + 1); 
+          callback(undefined, (endblock - startblock) + 1);
         }
       }).fail((result) => {
         if (retries < 1) {
@@ -45927,6 +45928,37 @@ module.exports = (config) => {
       });
     }
 
+  };
+
+
+  //get etherdelta history logs from ETHERSCAN
+  //inclusive for start and end
+  // can handle up to 1000 results. (worst case, like 10 blocks?)
+  utility.getTradeLogs2 = function getTradeLogs(web3In, contractAddress, startblock, endblock, rpcID, callback) {
+
+
+    let retries = 0;
+    retry2();
+
+    function retry2() {
+      jQuery.get('https://api.etherscan.io/api?module=logs&action=getLogs&fromBlock=' + startblock + '&toBlock=' + endblock + '&address=0x8d12a197cb00d4747a1fe03395095ce2a5cc6819&topic0=0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d'//&apikey=' + config.etherscanAPIKey,
+      ).done((result) => {
+        if (result.status === '1' && result.result && result.result.length > 0) {
+          callback(result.result, (endblock - startblock) + 1);
+        } else {
+          callback(undefined, (endblock - startblock) + 1);
+        }
+      }).fail((result) => {
+        if (retries < 1) {
+          retries++;
+          retry2();
+          return;
+        }
+        else {
+          callback(undefined, 0);
+        }
+      });
+    }
   };
 
 

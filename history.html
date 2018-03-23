@@ -110,7 +110,7 @@
                                     
                                     <li> <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" checked><label for="r0"> The last <input type="number" id="days" style="text-align: center;height:85%;" onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (14s per block)</label></li>
                                     <li> <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()"><label for="r1">  Specifc month <select id="monthSelect" onChange="checkMonthInput()" disabled></select></span> </li>
-                                    <li> <input type="radio" id="r2" name="dayBlocks" value="1" onchange="setBlockSelector()"><label  for="r2">  Manual block range <input class="blockInput" type="number" id="blockSelect1" style="text-align: center; height:85%;width:85px;" onchange="checkBlockInput()" value="" step="1" disabled> - <input class="blockInput" type="number" id="blockSelect2" style="text-align: center; height:85%;width:85px;" onchange="checkBlockInput()" value="" step="1" disabled></label></li></li>
+                                    <li> <input type="radio" id="r2" name="dayBlocks" value="1" onchange="setBlockSelector()"><label  for="r2">  Manual block range <input class="blockInput" type="number" id="blockSelect1" style="text-align: center; height:85%;width:85px;" onchange="checkBlockInput()" value="" min="315419" step="1" disabled> - <input class="blockInput" type="number" id="blockSelect2" style="text-align: center; height:85%;width:85px;" onchange="checkBlockInput()" value="" min="3154196" step="1" disabled></label></li></li>
                                     
                                 </ul>
 
@@ -120,14 +120,16 @@
 					</div>
                     <div class="col-md-7" style="overflow:hidden;">
 						<h4>Info</h4>
+                        <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
+                        <br>
+                        <br>
 						Trades are retrieved from the blockchain using Infura. 
                         <br>Large block ranges will take a long time to load. <br>
 						<br>
 						History is limited to trades including ETH, starting at block <a href="https://etherscan.io/tx/0xc10fc67499a037b6c2f14ae0c63b659b05bd7b553378202f96e777dd4843130f" target="_blank">3154196</a> <br>
 						Fees are 0% Maker, 0.3% Taker.
 						<br>
-						<br>
-						Dates showing as '??' means Etherscan might be unresponsive, try again later.
+
 					</div>
 					<div class="col-md-12" style="overflow:hidden;">
 						<h4>Export trades:</h4>
@@ -151,7 +153,9 @@
 			
 				<div id="" >
 					<h2>Trades<button id='loadingTransactions' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button>   <span style="padding-left:20px; vertical-align: middle;font-weight: 400; font-size: 0.5em;"id="blockProgress"></span> </h2>
+                      
                         <br>
+                        
 						<table class="tablesorter table table-striped" id="transactionsTable">
 							<thead></thead>
 							<tbody></tbody>

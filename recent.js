@@ -899,7 +899,7 @@
 	}
 
 
-	const transactionHeaders = { 'Name': 1, 'Value': 1, 'Type': 1, 'Hash': 1, 'Date': 1, 'Price': 1, 'ETH': 1, 'Status': 1, 'Details': 1, 'Exchange': 1 };
+	var transactionHeaders = { 'Name': 1, 'Value': 1, 'Type': 1, 'Hash': 1, 'Date': 1, 'Price': 1, 'ETH': 1, 'Status': 1, 'Details': 1, 'Exchange': 1 };
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.

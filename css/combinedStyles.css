@@ -473,6 +473,23 @@ table.tablesorter th.tablesorter-headerUnSorted {
 	color: white;
 }
 
+#homeLinkHeader {
+  display:none;
+  padding:0;
+}
+
+.homeLink3
+{
+  font-size:150%;
+	color: #0066cc;
+}
+
+.homeLink4
+{
+  font-size:150%;
+	color: white;
+}
+
 #logo1 {
   /*  transform: translateX(-375%) translateY(-15%); */
     max-height: 30px;
@@ -570,6 +587,10 @@ table.tablesorter th.tablesorter-headerUnSorted {
     .homeLink2.tiny
     {
         display:inline;
+    }
+
+    #homeLinkHeader {
+      display:block;
     }
 }
 

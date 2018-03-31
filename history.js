@@ -410,7 +410,7 @@
 		}
 
 		$('#etherscan').attr("href", _util.addressLink(address, false, false))
-		document.getElementById('addr').innerHTML = 'Address: ' + _util.addressLink(address, true, false);
+		document.getElementById('addr').innerHTML = _util.addressLink(address, true, false);
 		setAddrImage(address);
 
 		return address;

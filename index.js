@@ -376,6 +376,7 @@
 
 	function checkCustom() {
 		showCustomTokens = $('#custom').prop('checked');
+		$('#customMessage').prop('hidden', showCustomTokens);
         setStorage();
 		let maxcount = Object.keys(_delta.uniqueTokens).length;
 		if (showCustomTokens) {

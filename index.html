@@ -126,6 +126,12 @@
 
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu" data-widget="tree">
+	    <li id="homeLinkHeader" class="header"> 
+		  <a href="index.html">
+            <span class="homeLink3">Delta</span>
+            <span class="homeLink4">Balances</span> 
+		  </a>
+        </li>
         <li class="header">Multi Exchange</li>
         <!-- Optionally, you can add icons to the links -->
         <li class="active">
@@ -288,7 +294,7 @@
                     <input class="checkbox checkbox-info" type="checkbox" onclick="checkCustom()" id="custom">
                     <label for="custom">Show unlisted tokens </label>
                     <span id="tokencount"></span>
-                    <i class="fa fa-question" title="Unlisted tokens are not officially known on an exchange"></i>
+                    <i class="hidden-xs fa fa-question" title="Unlisted tokens are not officially known on an exchange"></i>
                   </li>
                   <li>
                     <input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero">
@@ -375,11 +381,10 @@
                 </table>
                 <br>
                 <span id="downloadBalances"></span>
-                <p> Token not in the list? Select 'show unlisted tokens' to show more.</p>
-                <p>Price estimates come from the ForkDelta orderbook
-                </p>
+                <p id="customMessage"> Check 'show unlisted tokens' to show more tokens</p>
+                <p> Price estimates come from the ForkDelta orderbook </p>
 
-                <span class="label label-primary">Name</span> Listed on one or more supported exchanges.
+                <span class="label label-primary">Name</span> Listed on one or more <span class="hidden-xs">supported</span> exchanges.
                 <br>
                 <span class="label label-warning">Name</span> Not listed, trades by address only.
               </div>
@@ -408,10 +413,8 @@
       <p> Powered by
         <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
         <a target="_blank" href="https://infura.io/">Infura</a>
-        <br> Any questions or suggestions? Make an issue/request on
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">Github</a> or send a message on
-        <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
-        <br> If you enjoy the site, you are always welcome to buy me a beer:
+        <br> Contact: issue on <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">Github</a> or message on <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+        <br> Buy me a beer:
         <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
       </p>
     </footer>

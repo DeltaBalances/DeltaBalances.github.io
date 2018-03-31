@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Bootstrap meta tags -->
+		<meta charset="utf-8">
+		<meta name="description" content="A tool to view EtherDelta token balances, transaction details and trading history."/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Delta Balances</title>
+
+		<!-- Bootstrap js -->
+		<script type="text/javascript" src="js/jquery.tablesorter.combined.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		
+		<!-- Bootstrap, bootstrap-theme, fontawesome & custom css -->
+		<link href="css/combinedStyles.css" rel="stylesheet">
+
+		<!-- Blockies (eth address image) -->
+		<script type="text/javascript" src="js/blockies.min.js"></script>
+		<script type="text/javascript" src="js/socket.io.js"></script>		
+	
+		<!-- common tools -->
+		<script type="text/javascript" src="backupTokens.js"></script>
+		<script type="text/javascript" src="loadTokens.js"></script>
+		<script type="text/javascript" src="bundle.min.js"></script>
+		
+		<!-- Main script -->
+		<script type="text/javascript" src="balances.js"></script>
+		
+		
+
+	
+		
+	</head>
+	<body >
+	
+		<div class="alert alert-danger alert-top " style="display:none;" onclick="hideError()" id='error' role="alert" >
+			<strong>Error</strong> <span id="errortext"></span>
+			<button type="button" class="close"  aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="alert alert-warning alert-top alert-dismissible"  onclick="hideHint()" style = "display:none;" role="alert" id='hint'>
+			<strong>Hint</strong> <span id="hinttext"></span>
+			<button type="button" class="close"  aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		
+		<div class="navbar navbar-inverse navbar-fixed-top">
+		  <div class="container">
+			
+			<div class="navbar-header customWidth1">
+			
+				<div class="pull-left" >
+				  <a class="navbar-brand "  href="."><img id="logo2" align="right" src="logo-white.png" alt="logo"></a>
+				  <a class="navbar-brand hidden-xs" style="padding-left: 25px;" href="."><span id="homeLink1">Delta</span><span id="homeLink2">Balances</span></a>
+				</div>
+				
+                <button type="button" class="navbar-toggle collapsed pull-right" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+				
+				<div id="form"  class="navbar-form collapsed navbar-left customWidth2" >	
+					<div class="input-group add-on" style="display:table;" class="input-group">
+						<input class="form-control" type="text" autocomplete="off"  id="address" placeholder="Ethereum address 0x...    Transaction hash 0x....       etherscan url  /tx/   /address/">
+						<div class="input-group-btn" style="width: 1%;" class="input-group-addon">
+							<button class="btn btn-default" id="refreshButton" onClick="myClick()"><i id="refreshButtonSearch" class="fa fa-search" aria-hidden="true"></i><i id="refreshButtonLoading" style="display:none" class="fa fa-refresh fa-spin" aria-hidden="true"></i></button>
+						</div>
+					</div>
+				</div>
+            </div> <!-- navbar-header -->
+			
+            <div class="collapse navbar-collapse navbar-right" id="navbar-collapse">
+                <ul class="nav navbar-nav navbar-left">
+                    <li class="active"><a id="overviewNav" href="#">Overview</a></li>
+                    <li><a id="transactionNav" href="tx.html">Transaction</a></li>
+					<li><a id="historyNav" href="history.html">History</a></li>
+                </ul>
+         
+            </div>
+	
+		  </div>
+		</div>
+		
+	
+		 <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+		<div class="container" > 
+				<div class="col-md-9" style="overflow:hidden;">
+					<h2>EtherDelta overview</h2>
+					
+					<div style="white-space:nowrap; overflow:hidden;">
+						<div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;" ></div>
+						<div class="hidden-xs" style="padding-left: 3%; float:left;"> <p style ="line-height:64px;display: inline-block;"> </p> </div> <div style="float:left; white-space:nowrap;" ><p style ="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;" id="addr">Enter your public address </p></div>
+					</div>
+
+					<table class="table table-sm" cellspacing="0" cellpadding="0" id="overviewTable">
+					  <tr>
+						<td><span class=" hidden-xs">Total ETH balance:</span><span class=" visible-xs">Total ETH:</span></td>
+						<td id = 'ethbalance'></td>
+						<td id = 'ethbalancePrice'></td>
+					  </tr>
+					  <tr>
+						<td><span class=" hidden-xs">Estimated token value:</span><span class=" visible-xs">Token value:</span></td>
+						<td id = 'tokenbalance'></td>
+						<td id = 'tokenbalancePrice'></td>
+					  </tr>
+					   <tr>
+						<td><span class=" hidden-xs">Estimated total value:</span><span class=" visible-xs">Total value:</span></td>
+						<td id = 'totalbalance'></td>
+						<td id = 'totalbalancePrice'></td>
+					  </tr>
+					</table>
+					
+					<br>
+					<br> Need help with EtherDelta? Read the <a href="https://www.reddit.com/r/EtherDelta/comments/6hrxjw/etherdelta_guides_for_first_time_users/" > guides</a> or use the <a href="https://gitter.im/etherdelta/etherdelta.github.io" >support chat</a>.
+				</div>
+				
+				
+				<div class = "col-md-3" style="border-left-width: 6px; border-left-style: solid; border-left-color: black;">
+					<h3> Settings: </h3>
+					<ul class="list-unstyled">
+						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkCustom()" id="custom" ><label for="custom">Show unlisted tokens </label><span id="tokencount"></span></li>
+						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero" ><label for="zero" >Hide zero balances</label></li>
+						<li><input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals"><label for="decimals" >Show more decimals</label></li>
+						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkRemember()" id="remember" ><label for="remember">Remember my address</label></li>
+						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkDollars()" id="dollars" ><label for="dollars">Show $ price</label></li>
+						<li><input class="checkbox checkbox-info" type="checkbox"  onclick="checkAsk()" id="ask" ><label for="ask">Ask price for estimate</label></li>
+						<li><label>Transactions from last <input type="number" id="days" onchange="validateDays(this.value)" value="1" min="1" max="999" step="1"> days</label></li>
+					</ul>
+						
+				</div>
+
+			
+		</div>
+    </div>
+
+    <div class="container">
+	
+	
+	<div class="row">
+        <div class="col-md-12">
+			
+			<ul class="nav nav-tabs">
+				<li class="active"><a data-toggle="tab" href="#balancetab">Balances</a></li>
+				<li><a data-toggle="tab" href="#transactiontab">Recent Transactions</a></li>
+			</ul>
+
+			<div class="tab-content">
+				<div id="balancetab" class="tab-pane active">
+				  <div class="row">
+					<div  class="col-md-7">
+						<h2>Balances <button id='loadingBalances' onclick ="getBalances()" class="fa fa-refresh" style="display:none;"></button></h2>
+						<br>
+						<table  class="tablesorter table table-striped" id="resultTable">
+							<thead></thead>
+							<tbody></tbody>
+						</table>
+						<br>
+						<span id="downloadBalances"></span>
+						<p> Token not in the list? Select 'show unlisted tokens' to show more.</p>
+						<p>Price estimates come directly from the orderbook
+						</p>
+						<br>
+						<br>
+						<span class="label label-primary">Name</span> Officially listed on EtherDelta. <br>
+						<span class="label label-warning">Name</span> Trades on EtherDelta without listing.
+						<p id = "contract"> </p>
+					</div>
+					<div  class="col-md-5">				
+						<h2>Deposit & Withdraw <button id='loadingTransactions' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button></h2>
+						<br>
+						<table class="tablesorter table table-striped" id="transactionsTable">
+							<thead></thead>
+							<tbody></tbody>
+						</table>
+						
+						<br>
+						<span id="downloadDeposits"></span>
+						<br>
+						Expecting to see more here? Increase the 'days' variable in the top right. <br>
+						Maximum of 1000 entries.<br>
+						<br>
+						<span class="label label-success">Type</span> Deposit into EtherDelta <br>
+						<span class="label label-danger">Type</span> Withdraw to Wallet <br>
+						
+					</div>	
+				  </div>
+				</div>
+				<div id="transactiontab" class="tab-pane">
+					<h2>Transactions <button id='loadingTransactions2' onclick ="getTrans()"  class="fa fa-refresh" style="display:none;"></button></h2>
+					<p>Go to the <strong><a target="_blank" href="history.html">History</a> </strong> tab for a full trade history</p>
+					<p><strong>Note: </strong> This page does not include maker trades, only taker. (see history for maker)</p>
+					<br>
+					<table class="tablesorter table table-striped" id="transactionsTable2">
+						<thead></thead>
+						<tbody></tbody>
+					</table>
+					<br>
+					Expecting to see more here? Increase the 'days' variable in the top right. <br>
+					Maximum of 1000 entries.<br>
+					<br>
+					<span class="label label-success">Type</span> Deposit into EtherDelta <br>
+					<span class="label label-danger">Type</span> Withdraw to Wallet <br>
+					<span class="label label-default" >Type</span> Cancelled order <br>
+					<span class="label label-info" >Type</span> Taker trade (clicked on an order) <br>
+				</div>
+			</div>
+			
+			
+			  
+			
+		</div>
+    </div><!-- /row -->
+
+      <hr>
+
+      <footer style="overflow:hidden;">
+			<div class="form-group" id="selectDiv"><label for="contactSelect">Select exchange contract version: </label></div>
+			<p> Powered by <a target="_blank" href="https://forkdelta.github.io/">ForkDelta</a>, <a target="_blank" href="https://etherscan.io/">Etherscan</a> and <a target="_blank" href="https://infura.io/">Infura</a></p>
+			<p> Any questions or suggestions? Make an issue/request on <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">Github</a> or send a message on <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a></p>
+			<p> If you enjoy the site, you are always welcome to buy me a beer:  <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank" >0xf6E914D07d12636759868a61E52973d17ED7111B</a> </p>
+      </footer>
+    </div> <!-- /container -->
+	
+
+	</body>
+</html>

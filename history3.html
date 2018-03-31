@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="A tool to view EtherDelta trade history." />
+  <meta name="description" content="A tool to view Decentrex trade history." />
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
 
@@ -28,7 +28,7 @@
   <!-- JS  Main functionality -->
   <script src="bundle.min.js"></script>
   <script> 
-    var historyConfig = bundle.DeltaBalances.config.historyEtherDelta;
+    var historyConfig = bundle.DeltaBalances.config.historyDecentrex;
   </script>
   <script src="history.js"></script>
 
@@ -154,7 +154,7 @@
 
         <li class="header">Exchange Trade History</li>
 
-        <li class="active">
+        <li>
           <a id="historyNav" href="history.html">
             <i class="fa fa-book"></i>
             <span>EtherDelta</span>
@@ -166,7 +166,7 @@
             <span>Token store</span>
           </a>
         </li>
-        <li>
+        <li class="active">
           <a id="historyNav3" href="history3.html">
             <i class="fa fa-book"></i>
             <span>Decentrex</span>
@@ -213,7 +213,7 @@
               <div class="box-body">
 
                 <div class="col-md-9" style="overflow:hidden;">
-                  <h2>EtherDelta Trade History</h2>
+                  <h2>Decentrex Trade History</h2>
 
                   <div style="white-space:nowrap; overflow:hidden;">
                     <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
@@ -236,14 +236,14 @@
                         <form id="blockSelector">
                           <ul class="list-unstyled">
 
-                            <li>
-                              <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" checked>
+                            <li style="display:none;">
+                              <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" disabled>
                               <label for="r0"> The last
-                                <input class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;"
+                                <input disabled class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;"
                                   onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (14s per block)</label>
                             </li>
                             <li>
-                              <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()">
+                              <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()" checked>
                               <label for="r1"> Month
                                 <select style="display:inline; width: 60%; height:25px; padding-top:2px;" class="form-control" id="monthSelect" onChange="checkMonthInput()"
                                   disabled></select>
@@ -268,11 +268,14 @@
                         </form>
                       </li>
                     </ul>
-                    <button id='findTransactions' onclick="myClick()" class="btn" style="display:none;" hidden> Retrieve trades  <i class="fa fa-search" aria-hidden="true"></i></button>
+                      <button id='findTransactions' onclick="myClick()" class="btn" style="display:none;" hidden> Retrieve trades  <i class="fa fa-search" aria-hidden="true"></i></button>
                   </div>
                   <div class="col-md-7" style="overflow:hidden;">
                     <h4>Info</h4>
-                    <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
+                    <h4>
+                      <strong>Decentrex was shut down in December 2017</strong>
+                    </h4>
+                    This page is to retrieve historical trade data.
                     <br>
                     <br> Trades are retrieved from the blockchain using Infura.
                     <br>Large block ranges will take a long time to load.

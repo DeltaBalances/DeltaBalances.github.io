@@ -1,9 +1,7 @@
 {
 
-	//set var historyConfig in html
-
 	// shorthands
-	var _delta = bundle.DeltaBalances;
+	var _delta = bundle.EtherDelta;
 	var _util = bundle.utility;
 
 	// initiation
@@ -32,7 +30,6 @@
 
 	// user input & data
 	var publicAddr = '';
-	var savedAddr = '';
 	var lastResult = undefined;
 
 	var blockReqs = 0;
@@ -45,11 +42,7 @@
 	var endblock = 0;
 	var transactionDays = 1;
 	var useDaySelector = true;
-	var minBlock = historyConfig.minBlock;
-
-	//3154197; //https://etherscan.io/block/3154196  etherdelta_2 creation
-	//const minBlock tokenstore 4097028
-	//minblock decentrex 3767901 
+	const minBlock = 3154197; //https://etherscan.io/block/3154196  etherdelta_2 creation
 
 	var uniqueBlocks = {}; //date for each block
 	var blockDates = {};
@@ -88,7 +81,7 @@
 		getBlockStorage(); // get cached block dates
 
 		// borrow some ED code for compatibility
-		_delta.startDeltaBalances(() => {
+		_delta.startEtherDelta(() => {
 			//if(!autoStart)
 			{
 				if (blocknum > -1) {
@@ -114,23 +107,17 @@
 	}
 
 	function readyInit() {
-
-
-		$('#minBlockLink').html('<a href="https://etherscan.io/tx/' + historyConfig.createTx + '" target="_blank">' + minBlock + '</a>');
+		setAddrImage('0x0000000000000000000000000000000000000000');
 
 		fillMonthSelect();
-		let daysDisabled = $('#days').prop('disabled');
-		if (!daysDisabled)
-			setDaySelector();
-		else
-			setMonthSelector();
+		setDaySelector();
 
 		setBlockProgress(0, 0, 0, 0, 0);
 
 		// detect enter & keypresses in input
 		$('#address').keypress(function (e) {
 			if (e.keyCode == 13) {
-				myClick();
+				$('#refreshButton').click();
 				return false;
 			} else {
 				hideError();
@@ -158,9 +145,6 @@
 					$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
 				}
 			});
-			if (!$('#refreshButtonSearch').is(e.target)) {
-				hideError();
-			}
 		});
 
 		getStorage();
@@ -178,24 +162,19 @@
 			addr = getAddress(addr);
 			if (addr) {
 				publicAddr = addr;
-                $("#findTransactions").show();
 				$('#loadingTransactions').show();
 				//autoStart = true;
 				// auto start loading
 				//myClick();
 			}
 		}
-		else if (publicAddr) {
-			//autoStart = true;
-			//myClick();
+		else if (publicAddr) //autoload when remember is active
+		{
 			$('#loadingTransactions').show();
-            $("#findTransactions").show();
-		} else if (savedAddr) {//autoload when remember is active
-			publicAddr = savedAddr;
-            $("#findTransactions").show();
 			//autoStart = true;
 			// auto start loading
-			loadSaved();
+			//myClick();
+
 		}
 		else if (!addr && !publicAddr) {
 			$('#address').focus();
@@ -207,7 +186,6 @@
 		// $("#address").prop("disabled", disable);
 		$('#loadingTransactions').addClass('dim');
 		$("#loadingTransactions").prop("disabled", disable);
-        $("#findTransactions").prop("disabled", disable);
 	}
 
 	function showLoading(trans) {
@@ -218,7 +196,6 @@
 			$('#loadingTransactions').show();
 			$('#refreshButtonLoading').show();
 			$('#refreshButtonSearch').hide();
-            $("#findTransactions").hide();
 		}
 	}
 
@@ -231,9 +208,6 @@
 			$('#loadingTransactions').removeClass('fa-spin');
 			$('#loadingTransactions').removeClass('dim');
 			$('#loadingTransactions').prop('disabled', false);
-            if(publicAddr) {
-                $("#findTransactions").show();
-            }
 			$('#loadingTransactions').show();
 			$('#refreshButtonLoading').hide();
 			$('#refreshButtonSearch').show();
@@ -249,9 +223,6 @@
 			$('#loadingTransactions').hide();
 			$('#refreshButtonLoading').hide();
 			$('#refreshButtonSearch').show();
-            if(publicAddr) {
-                $("#findTransactions").show();
-            }
 		}
 	}
 
@@ -302,8 +273,6 @@
 
 
 	function getTrans(rqid) {
-
-
 		if (!trigger1) {
 			myClick(requestID);
 			return;
@@ -340,12 +309,6 @@
 
 	// check if input address is valid
 	function getAddress(addr) {
-
-		setAddrImage('');
-		document.getElementById('currentAddr').innerHTML = '0x......'; // side menu
-		document.getElementById('currentAddr2').innerHTML = '0x......'; //top bar
-		document.getElementById('currentAddrDescr').innerHTML = 'Input address';
-
 		var address = '';
 		address = addr ? addr : document.getElementById('address').value;
 		address = address.trim();
@@ -395,51 +358,15 @@
 		}
 
 		document.getElementById('address').value = address;
-		document.getElementById('currentAddr').innerHTML = address.slice(0, 16); // side menu
-		document.getElementById('currentAddr2').innerHTML = address.slice(0, 8); //top bar
-		$('#walletInfo').removeClass('hidden');
-		if (!savedAddr || address.toLowerCase() !== savedAddr.toLowerCase()) {
-			$('#save').removeClass('hidden');
-			if (savedAddr) {
-				$('#savedSection').removeClass('hidden');
-			}
-		} else if (savedAddr && address.toLowerCase() === savedAddr.toLowerCase()) {
-			$('#save').addClass('hidden');
-			$('#savedSection').addClass('hidden');
-			document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
-		}
-
-		$('#etherscan').attr("href", _util.addressLink(address, false, false))
 		document.getElementById('addr').innerHTML = 'Address: ' + _util.addressLink(address, true, false);
+		$('#overviewNav').attr("href", "index.html#" + address);
 		setAddrImage(address);
-
 		return address;
 	}
 
 	function setAddrImage(addr) {
-
 		var icon = document.getElementById('addrIcon');
-		var icon2 = document.getElementById('currentAddrImg');
-		var icon3 = document.getElementById('userImage');
-
-		if (addr) {
-			icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 16 }).toDataURL() + ')';
-			var smallImg = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-			icon2.style.backgroundImage = smallImg;
-			icon3.style.backgroundImage = smallImg;
-		} else {
-			icon.style.backgroundImage = '';
-			icon2.style.backgroundImage = '';
-			icon3.style.backgroundImage = '';
-		}
-	}
-
-	function setSavedImage(addr) {
-		var icon = document.getElementById('savedImage');
-		if (addr)
-			icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-		else
-			icon.style.backgroundImage = '';
+		icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 16 }).toDataURL() + ')';
 	}
 
 
@@ -472,7 +399,7 @@
 		$(".blockInput").attr({
 			"max": blocknum,
 			"min": minBlock,
-			"step": 1,
+			"step": 100,
 		});
 
 		if (!$('#blockSelect1').val())
@@ -575,7 +502,7 @@
 		setBlockProgress(downloadedBlocks, totalBlocks, 0);
 
 		var tradeLogResult = [];
-		const contractAddr = _delta.config[historyConfig.exchangeAddr]; //_delta.config.contractEtherDeltaAddr.toLowerCase();
+		const contractAddr = _delta.config.contractEtherDeltaAddr.toLowerCase();
 
 		var reqAmount = 0;
 		for (var i = start; i <= end; i += (max + 1)) {
@@ -605,7 +532,7 @@
 			}
 
 			function getLogsInRange(startNum, endNum, rpcID) {
-				_util.getTradeLogs(_delta.web3, contractAddr, historyConfig.topic, startNum, endNum, rpcID, receiveLogs);
+				_util.getTradeLogs(_delta.web3, contractAddr, startNum, endNum, rpcID, receiveLogs);
 			}
 		}
 
@@ -774,50 +701,30 @@
 	// save address for next time
 	function setStorage() {
 		if (typeof (Storage) !== "undefined") {
-			if (publicAddr) {
-				sessionStorage.setItem('address', publicAddr);
+			if (remember) {
+				localStorage.setItem("member", 'true');
+				if (publicAddr)
+					localStorage.setItem("address", publicAddr);
 			} else {
-				sessionStorage.removeItem('address');
-			}
-			if (savedAddr) {
-				localStorage.setItem("address", savedAddr);
-			} else {
+				localStorage.removeItem('member');
 				localStorage.removeItem('address');
 			}
-
 		}
 	}
 
 	function getStorage() {
 		if (typeof (Storage) !== "undefined") {
-
-			// check for saved address
-			if (localStorage.getItem("address") !== null) {
+			remember = localStorage.getItem('member') && true;
+			if (remember) {
 				var addr = localStorage.getItem("address");
-				if (addr && addr.length == 42) {
-					savedAddr = addr;
-					addr = getAddress(addr);
-					if (addr) {
-						savedAddr = addr;
-						setSavedImage(savedAddr);
-						$('#savedAddress').html(addr.slice(0, 16));
-					}
-				} else {
-					localStorage.removeItem("address");
-				}
-			}
-
-			// check for session address between pages
-			if (sessionStorage.getItem("address") !== null) {
-				var addr = sessionStorage.getItem("address");
-				if (addr && addr.length == 42) {
+				if (addr) {
 					addr = getAddress(addr);
 					if (addr) {
 						publicAddr = addr;
+						document.getElementById('address').value = addr;
 					}
-				} else {
-					sessionStorage.removeItem("address");
 				}
+				//$('#remember').prop('checked', true);
 			}
 		}
 	}
@@ -941,16 +848,7 @@
 							if (cellValue) {
 								if (cellValue.name != 'Token') {
 									if (cellValue.name !== 'ETH') {
-										if (token) {
-											popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
-												+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
-												+ '</li><li>' + _util.forkDeltaURL(token, true)
-												+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
-											if (token.IDEX) {
-												popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
-											}
-											popoverContents += '</ul>';
-										}
+										popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + '<br> Trade on ' + _util.etherDeltaURL(token, true) + '<br> Trade on ' + _util.forkDeltaURL(token, true);
 									} else {
 										popoverContents = "Ether (not a token)<br> Decimals: 18";
 									}
@@ -1059,18 +957,15 @@
 		//Create array of options to be added
 		var array = _delta.config.blockMonths;
 
-		var count = 0;
+
 		//Create and append the options
 		for (var i = 0; i < array.length; i++) {
-			if (array[i].blockTo >= minBlock && (!historyConfig.maxBlock || array[i].blockFrom <= historyConfig.maxBlock)) {
-				count++;
-				var option = document.createElement("option");
-				option.value = i;
-				option.text = array[i].m;
-				select.appendChild(option);
-			}
+			var option = document.createElement("option");
+			option.value = i;
+			option.text = array[i].m;
+			select.appendChild(option);
 		}
-		select.selectedIndex = count - 1;
+		select.selectedIndex = array.length - 1;
 	}
 
 
@@ -1190,12 +1085,12 @@
 				//	checkBlockDates(lastResult);
 				var allTrades = lastResult;
 
-				var A = [['Type', 'Trade', 'Token', 'Amount', 'Price (ETH)', 'Total ETH', 'Date', 'Block', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract', 'Exchange']];
+				var A = [['Type', 'Trade', 'Token', 'Amount', 'Price (ETH)', 'Total ETH', 'Date', 'Block', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract']];
 				// initialize array of rows with header row as 1st item
 				for (var i = 0; i < allTrades.length; ++i) {
 					var arr = [allTrades[i]['Type'], allTrades[i]['Trade'], allTrades[i]['Token'].name, allTrades[i]['Amount'], allTrades[i]['Price'],
 					allTrades[i]['ETH'], formatDateOffset(allTrades[i]['Date']), allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'],
-					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr, historyConfig.exchange];
+					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr];
 
 
 					for (let j = 0; j < arr.length; j++) {
@@ -1223,7 +1118,7 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target = '_blank';
-				a.download = historyConfig.exchange + "_Trades_" + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = "TradeHistory_" + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 
 				$('#downloadTrades').html('');
@@ -1248,12 +1143,12 @@
 					var memoString = '"Transaction Hash ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr + '"';
 
 					//if (allTrades[i]['Trade'] === 'Buy') {
-					arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), historyConfig.exchange, allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
+					arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
 					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
 					//	}
 					// add token fee to total for correct balance in bitcoin tax
 					//	else {
-					//		arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), historyConfig.exchange, allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
+					//		arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), 'EtherDelta', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
 					//		allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
 					//	}
 
@@ -1280,7 +1175,7 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target = '_blank';
-				a.download = 'BitcoinTax_' + historyConfig.exchange + '_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = 'BitcoinTax_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 
 				$('#downloadBitcoinTaxTrades').html('');
@@ -1305,12 +1200,12 @@
 					var arr = [];
 					if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
 						arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'] + allTrades[i]['Fee'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
+							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
 
 					}
 					else {  //sell add fee to token total
 						arr = ['Trade', allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
+							'EtherDelta', '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
 					}
 
 					for (let j = 0; j < arr.length; j++) {
@@ -1337,7 +1232,7 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target = '_blank';
-				a.download = 'Cointracking_CSV_' + historyConfig.exchange + '_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = 'Cointracking_CSV_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 
 				$('#downloadCointrackingTrades').html('');
@@ -1363,12 +1258,12 @@
 					var arr = [];
 					if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
 						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'] + allTrades[i]['Fee'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, historyConfig.exchange, 'Trade'];
+						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 'EtherDelta', 'Trade'];
 
 					}
 					else { //sell add fee to token total
 						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, historyConfig.exchange, 'Trade'];
+						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 'EtherDelta', 'Trade'];
 					}
 
 					for (let j = 0; j < arr.length; j++) {
@@ -1394,7 +1289,7 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target = '_blank';
-				a.download = 'Cointracking_CustomExchange_' + historyConfig.exchange + '_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = 'Cointracking_CustomExchange_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 
 				$('#downloadCointracking2Trades').html('');
@@ -1417,48 +1312,6 @@
 	function placeholderTable() {
 		var result = transactionsPlaceholder;
 		makeTable(result);
-	}
-
-	function forget() {
-		if (publicAddr) {
-			if (publicAddr.toLowerCase() === savedAddr.toLowerCase()) {
-				savedAddr = '';
-				$('#savedSection').addClass('hidden');
-			}
-		}
-		$('#address').val('');
-		publicAddr = getAddress('');
-		setStorage();
-		window.location.hash = "";
-		$('#walletInfo').addClass('hidden');
-		//myClick();
-
-		return false;
-	}
-
-	function save() {
-		savedAddr = publicAddr;
-		publicAddr = getAddress(savedAddr);
-
-		$('#savedAddress').html(savedAddr.slice(0, 16));
-		$('#savedSection').addClass('hidden');
-		$('#save').addClass('hidden');
-		setSavedImage(savedAddr);
-		setStorage();
-
-		return false;
-	}
-
-	function loadSaved() {
-		if (savedAddr) {
-
-			publicAddr = savedAddr;
-			publicAddr = getAddress(savedAddr);
-			//$('#save').addClass('hidden');
-			//$('#savedSection').addClass('hidden');
-			//myClick();
-		}
-		return false;
 	}
 
 }

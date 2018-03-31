@@ -1,7 +1,7 @@
 {
 
 	// shorthands
-	var _delta = bundle.EtherDelta;
+	var _delta = bundle.DeltaBalances;
 	var _util = bundle.utility;
 
 	// initiation
@@ -27,6 +27,9 @@
 	var lastTxLog = undefined;
 	var txDate = "??";
 
+	var publicAddr = '';
+	var savedAddr = '';
+
 	var unknownToken = false;
 
 
@@ -38,7 +41,7 @@
 
 	function init() {
 		// borrow some ED code for compatibility
-		_delta.startEtherDelta(() => {
+		_delta.startDeltaBalances(() => {
 
 			_delta.initTokens(false);
 
@@ -50,10 +53,44 @@
 
 	function readyInit() {
 		hideLoading();
+		checkStorage();
+
+		if (!publicAddr && !savedAddr) {
+			document.getElementById('currentAddr').innerHTML = '0x......'; // side menu
+			document.getElementById('currentAddr2').innerHTML = '0x......'; //top bar
+			document.getElementById('currentAddrDescr').innerHTML = 'Input address';
+			setAddrImage('');
+		} else if (publicAddr) {
+			document.getElementById('currentAddr').innerHTML = publicAddr.slice(0, 16); // side menu
+			document.getElementById('currentAddr2').innerHTML = publicAddr.slice(0, 8); //top bar
+			document.getElementById('currentAddrDescr').innerHTML = 'Input address';
+			setAddrImage(publicAddr);
+			$('#etherscan').attr("href", _util.addressLink(publicAddr, false, false));
+			$('#walletInfo').removeClass('hidden');
+			if (savedAddr) {
+				$('#savedSection').removeClass('hidden');
+			}
+		} else {
+			document.getElementById('currentAddr').innerHTML = savedAddr.slice(0, 16); // side menu
+			document.getElementById('currentAddr2').innerHTML = savedAddr.slice(0, 8); //top bar
+
+			$('#walletInfo').removeClass('hidden');
+			$('#save').addClass('hidden');
+			$('#savedSection').addClass('hidden');
+			document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
+
+			$('#etherscan').attr("href", _util.addressLink(savedAddr, false, false));
+			setAddrImage(savedAddr);
+		}
+
+
+
+
+
 		// detect enter & keypresses in input
 		$('#address').keypress(function (e) {
 			if (e.keyCode == 13) {
-				$('#refreshButton').click();
+				myClick();
 				return false;
 			} else {
 				hideError();
@@ -82,9 +119,11 @@
 					$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
 				}
 			});
+			if (!$('#refreshButtonSearch').is(e.target)) {
+				hideError();
+			}
 		});
 
-		checkStorage();
 
 		// url parameter ?addr=0x... /#0x..
 		var trans = getParameterByName('trans');
@@ -225,8 +264,8 @@
 			}
 			else if (address.length == 42 && address.slice(0, 2) === '0x')  //wallet addr, not transaction hash
 			{
-				window.location = window.location.origin + window.location.pathname + '/../#' + address;
-				return;
+                window.location = window.location.origin + window.location.pathname + '/../index.html#' + address;
+                return;
 			}
 			else {
 				if (!addr) // ignore if in url arguments
@@ -486,12 +525,12 @@
 			if (_delta.uniqueTokens[transaction.input.to]) {
 				sum += '<strong>Warning</strong>, you sent tokens to a token contract. These tokens are most likely lost forever. <br>';
 			}
-			else if (transaction.input.to === _delta.config.contractEtherDeltaAddr) {
-				sum += '<strong>Warning</strong>, you sent tokens to the EtherDelta contract without a deposit. Nobody can access these tokens anymore, they are most likely lost forever. <br>';
+			else if (_delta.isExchangeAddress(transaction.input.to)) {
+				sum += '<strong>Warning</strong>, you sent tokens to the Exchange contract without a deposit. Nobody can access these tokens anymore, they are most likely lost forever. <br>';
 			}
 		}
 		if (!transaction.input && (!transaction.output || transaction.output.length == 0)) {
-			sum += 'This does not seem to be an EtherDelta transaction <br>';
+			sum += 'This does not seem to be an exchange (EtherDelta, Decentrex, Token.store, Idex) transaction <br>';
 		}
 		if (checkOldED(transaction.to)) {
 			sum += 'This transaction is to an outdated EtherDelta contract, only use these to withdraw old funds.<br>';
@@ -529,10 +568,10 @@
 					received += transaction.output[i].ETH;
 				}
 				else if (transaction.output[i].type == "Deposit" || transaction.output[i].type == "Token Deposit") {
-					sum += "Deposited " + transaction.output[i].amount + " " + transaction.output[i].token.name + ", new balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name + '<br>';
+					sum += "Deposited " + transaction.output[i].amount + " " + transaction.output[i].token.name + ", new exchange balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name + '<br>';
 				}
 				else if (transaction.output[i].type == "Withdraw" || transaction.output[i].type == "Token Withdraw") {
-					sum += "Withdrew " + transaction.output[i].amount + " " + transaction.output[i].token.name + ", new balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name + '<br>';
+					sum += "Withdrew " + transaction.output[i].amount + " " + transaction.output[i].token.name + ", new exchange balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name + '<br>';
 				}
 			}
 
@@ -541,7 +580,7 @@
 				// sum up what a custom cotract did in multiple trades
 				sum += "ETH gain over these trades: " + (received - spent - Number(transaction.gasEth)) + " (incl. gas cost). <br>";
 			}
-			else if (tradeCount > 0 && transaction.to !== _delta.config.contractEtherDeltaAddr) {
+			else if (tradeCount > 0 && !_delta.isExchangeAddress(transaction.to)) {
 				sum += 'This transaction was made by a contract instead of a user. <br>';
 			}
 
@@ -635,7 +674,7 @@
 
 	function displayParse(parsedInput, id) {
 		if (!parsedInput) {
-			$(id).html('No familiair EtherDelta input recognized');
+			$(id).html('No familiar Exchange input recognized');
 			console.log('fuck');
 			return;
 		}
@@ -717,14 +756,23 @@
 			if (columns[keys[i]]) {
 
 				var cellValue = myList[i];
-				if (keys[i] == 'token') {
+				if (keys[i] == 'token' || keys[i] == 'feeToken') {
 
 					let token = myList[i];
 					let popoverContents = "Placeholder";
 					if (token && token.name !== 'ETH' && _delta.uniqueTokens[token.addr]) {
-						popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + '<br> Trade on ' + _util.etherDeltaURL(token, true) + '<br> Trade on ' + _util.forkDeltaURL(token, true);
+						if(token) {
+							popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals 
+												+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true) 
+												+ '</li><li>' + _util.forkDeltaURL(token, true) 
+												+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
+							if(token.IDEX) {
+								popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
+							}
+							popoverContents += '</ul>';
+						}
 					} else {
-						if (! _delta.uniqueTokens[token.addr])
+						if (!_delta.uniqueTokens[token.addr])
 							popoverContents = "Token unknown to deltabalances <br> Contract: " + _util.addressLink(token.addr, true, true);
 						else
 							popoverContents = "Ether (not a token)<br> Decimals: 18";
@@ -738,7 +786,7 @@
 				else if (keys[i] == 'price') {
 					cellValue = Number(cellValue).toFixed(5);
 				}
-				else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'ETH') {
+				else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'ETH' || keys[i] == 'fee') {
 					cellValue = Number(cellValue).toFixed(3);
 				}
 				else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender') {
@@ -792,12 +840,114 @@
 
 	function checkStorage() {
 		if (typeof (Storage) !== "undefined") {
-			var addr = localStorage.getItem("address");
-			if (addr) {
-				$('#overviewNav').attr("href", "index.html#" + addr);
-				$('#historyNav').attr("href", "history.html#" + addr);
+			if (localStorage.getItem("address") !== null) {
+				var addr = localStorage.getItem("address");
+				if (addr && addr.length == 42) {
+					savedAddr = addr;
+					setSavedImage(savedAddr);
+					$('#savedAddress').html(addr.slice(0, 16));
+				} else {
+					localStorage.removeItem("address");
+				}
 			}
 		}
+		if (sessionStorage.getItem("address") !== null) {
+			var addr = sessionStorage.getItem("address");
+			if (addr && addr.length == 42) {
+				publicAddr = addr;
+			} else {
+				sessionStorage.removeItem("address");
+			}
+		}
+	}
+
+	// save address for next time
+	function setStorage() {
+		if (typeof (Storage) !== "undefined") {
+			if (publicAddr) {
+				sessionStorage.setItem('address', publicAddr);
+			} else {
+				sessionStorage.removeItem('address');
+			}
+			if (savedAddr) {
+				localStorage.setItem("address", savedAddr);
+			} else {
+				localStorage.removeItem('address');
+			}
+		}
+	}
+
+
+	function setAddrImage(addr) {
+
+		var icon2 = document.getElementById('currentAddrImg');
+		var icon3 = document.getElementById('userImage');
+
+		if (addr) {
+			var smallImg = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
+			icon2.style.backgroundImage = smallImg;
+			icon3.style.backgroundImage = smallImg;
+		} else {
+			icon2.style.backgroundImage = '';
+			icon3.style.backgroundImage = '';
+		}
+	}
+
+	function setSavedImage(addr) {
+		var icon = document.getElementById('savedImage');
+		if (addr)
+			icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
+		else
+			icon.style.backgroundImage = '';
+	}
+
+	function forget() {
+		if (publicAddr) {
+			if (publicAddr.toLowerCase() === savedAddr.toLowerCase()) {
+				savedAddr = '';
+				$('#savedSection').addClass('hidden');
+			}
+		}
+		publicAddr = '';
+		setAddrImage('');
+		document.getElementById('currentAddr').innerHTML = '0x......'; // side menu
+		document.getElementById('currentAddr2').innerHTML = '0x......'; //top bar
+		setStorage();
+		window.location.hash = "";
+		$('#walletInfo').addClass('hidden');
+		//myClick();
+
+		return false;
+	}
+
+	function save() {
+		savedAddr = publicAddr;
+
+		$('#savedAddress').html(savedAddr.slice(0, 16));
+		$('#savedSection').addClass('hidden');
+		$('#save').addClass('hidden');
+		setSavedImage(savedAddr);
+		setStorage();
+
+		return false;
+	}
+
+	function loadSaved() {
+		if (savedAddr) {
+
+			publicAddr = savedAddr;
+			document.getElementById('currentAddr').innerHTML = savedAddr.slice(0, 16); // side menu
+			document.getElementById('currentAddr2').innerHTML = savedAddr.slice(0, 8); //top bar
+
+			$('#walletInfo').removeClass('hidden');
+			$('#save').addClass('hidden');
+			$('#savedSection').addClass('hidden');
+			document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
+
+			$('#etherscan').attr("href", _util.addressLink(savedAddr, false, false));
+			setAddrImage(savedAddr);
+		}
+		return false;
 	}
 
 }

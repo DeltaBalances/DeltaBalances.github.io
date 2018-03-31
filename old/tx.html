@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Bootstrap meta tags -->
+		<meta charset="utf-8">
+		<meta name="description" content="A tool to view EtherDelta transaction details."/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Delta Balances</title>
+
+		<!-- Bootstrap, jQuery & tablesorter js -->
+		<script type="text/javascript" src="js/jquery.tablesorter.combined.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		
+		<!-- Bootstrap, bootstrap-theme, fontawesome & custom css -->
+		<link href="css/combinedStyles.css" rel="stylesheet">
+	
+		
+		<!-- common tools -->
+		<script type="text/javascript" src="backupTokens.js"></script>
+		<script type="text/javascript" src="loadTokens.js"></script>
+		<script type="text/javascript" src="bundle.min.js"></script>
+		
+		<!-- Main script -->
+		<script type="text/javascript" src="tx.js"></script>
+		
+		
+
+	
+		
+	</head>
+	<body >
+	
+		<div class="alert alert-danger alert-top " style="display:none;" onclick="hideError()" id='error' role="alert" >
+			<strong>Error</strong> <span id="errortext"></span>
+			<button type="button" class="close"  aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="alert alert-warning alert-top alert-dismissible"  onclick="hideHint()" style = "display:none;" role="alert" id='hint'>
+			<strong>Hint</strong> <span id="hinttext"></span>
+			<button type="button" class="close"  aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		
+		
+		<div class="navbar navbar-inverse navbar-fixed-top">
+		  <div class="container">
+			
+			<div class="navbar-header customWidth1">
+			
+				<div class="pull-left" >
+				  <a class="navbar-brand "  href="."><img id="logo2" align="right" src="logo-white.png" alt="logo"></a>
+				  <a class="navbar-brand hidden-xs" style="padding-left: 25px;" href="."><span id="homeLink1">Delta</span><span id="homeLink2">Balances</span></a>
+				</div>
+				
+                <button type="button" class="navbar-toggle collapsed pull-right" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+				
+				<div id="form"  class="navbar-form collapsed navbar-left customWidth2" >	
+					<div class="input-group add-on" style="display:table;" class="input-group">
+						<input class="form-control" type="text" autocomplete="off"  id="address" placeholder="Transaction hash 0x....    Ethereum address 0x...       etherscan url  /tx/   /address/">
+						<div class="input-group-btn" style="width: 1%;" class="input-group-addon">
+							<button class="btn btn-default" id="refreshButton" onClick="myClick()"><i id="refreshButtonSearch" class="fa fa-search" aria-hidden="true"></i><i id="refreshButtonLoading" style="display:none" class="fa fa-refresh fa-spin" aria-hidden="true"></i></button>
+						</div>
+					</div>
+				</div>
+            </div> <!-- navbar-header -->
+			
+            <div class="collapse navbar-collapse navbar-right" id="navbar-collapse">
+                <ul class="nav navbar-nav navbar-left">
+                    <li><a id="overviewNav"  href="index.html">Overview</a></li>
+                    <li class="active"><a id="transactionNav" href="#">Transaction</a></li>
+					<li><a id="historyNav" href="history.html">History</a></li>
+                </ul>
+         
+            </div>
+	
+		  </div>
+		</div>
+	
+	
+		 <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+		<div class="container" > 
+				<div class="col-md-12" style="overflow:hidden;">
+					<h2>EtherDelta Transaction <button id='loading' onclick ="myClick()" class="fa fa-refresh" style="display:none;"></button></h2>
+					
+					<table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
+					  <tr>
+						<td>Type</td>
+						<td id = 'inputtype'></td>
+					  </tr>
+					  <tr>
+						<td> Hash</td>
+						<td id = 'hash'> Enter your transaction hash</td>
+					  </tr>
+					  <tr>
+						<td> Status</td>
+						<td id = 'status'></td>
+					  </tr>
+					   <tr>
+						<td>Date </td>
+						<td id = 'time'></td>
+					  </tr>
+					  <tr>
+						<td> From</td>
+						<td id = 'from'></td>
+					  </tr>
+					  <tr>
+						<td>To </td>
+						<td id = 'to'></td>
+					  </tr>
+					  
+					  <tr>
+						<td>ETH value </td>
+						<td id = 'ethval'></td>
+					  </tr>
+					  
+					  <tr>
+						<td>Gas Price </td>
+						<td id = 'gasgwei'></td>
+					  </tr>
+					   <tr>
+						<td>Gas Used </td>
+						<td id = 'gasusedlimit'></td>
+					  </tr>
+					  <tr>
+						<td>Gas Cost </td>
+						<td id = 'gascost'></td>
+					  </tr>
+					  <tr>
+						<td>Nonce </td>
+						<td id = 'nonce'></td>
+					  </tr>
+					   
+					</table>
+					
+					<h2>Summary</h2>
+					<span id="summary" ></span>
+				</div>
+
+			
+		</div>
+    </div>
+
+    <div class="container">
+	
+	
+	<div class="row">
+        <div class="col-md-12">
+			
+
+			<div class="tab-content">
+				<div id="balancetab" class="tab-pane active">
+				  <div class="row">
+					<div  class="col-md-5">
+						<h2>Input data </h2>
+						<p> Transaction input sent to the blockchain, what you attempted to do.</p> <br>
+						<div id="inputdata"></div>
+					</div>
+					<div  class="col-md-7">				
+						<h2>Output data </h2>
+						<p>Transaction event logs on the blockchain, what actually happened. </p> <br>
+						<div id="outputdata"></div>
+					</div>	
+				  </div>
+				</div>
+			</div>
+			
+			
+			  
+			
+		</div>
+    </div><!-- /row -->
+
+      <hr>
+
+      <footer style="overflow:hidden;">
+			<p> Powered by <a target="_blank" href="https://etherscan.io/">Etherscan</a> and <a target="_blank" href="https://infura.io/">Infura</a></p>
+			<p> Any questions or suggestions? Make an issue/request on <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">Github</a> or send a message on <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a></p>
+			<p> If you enjoy the site, you are always welcome to buy me a beer:  <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank" >0xf6E914D07d12636759868a61E52973d17ED7111B</a> </p>
+      </footer>
+    </div> <!-- /container -->
+	
+
+	</body>
+</html>

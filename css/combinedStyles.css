@@ -536,9 +536,23 @@ table.tablesorter th.tablesorter-headerUnSorted {
   margin-left:10px;
 }
 
+.slink {
+  width:80%;
+}
+
+@media (max-width: 1000px) {
+  .slink {
+    width:75%;
+  }
+}
+
 @media (max-width: 767px) {
     .navbar-nav {
         text-align: center;
+    }
+
+    .slink {
+      width:100%;
     }
 }
 
@@ -599,6 +613,10 @@ table.tablesorter th.tablesorter-headerUnSorted {
   .customWidth1
   {
       width:50%;
+  }
+
+  .slink2 {
+    display:none;
   }
 }
 

@@ -207,14 +207,16 @@
 
         <div class="row">
 
-          <!--  <div class="col-md-12 col-lg-10">
+          <div class="col-md-12 col-lg-10">
             <div class="box box-warning">
               <div class="box-header with-border">
-                <strong> Trade at
-                  <a href="https://token.store" target="_blank">token store</a> for 0.03% fees!</strong>
-
+                <div class="slink">
+                  <strong> The Token Store:</strong>
+                  <br class="visible-xs">Trade any ERC20 token by address, 10x cheaper fees than ED/IDEX!
+                  <a onclick="linkEvent()" href="https://token.store?a" target="_blank">https://token.store</a>
+                </div>
                 <div class="box-tools pull-right">
-                  <small class="hidden-xs">Sponsored link</small>
+                  <small class="slink2">Sponsored link</small>
                   <button type="button" class="btn btn-box-tool" data-widget="remove">
                     <i class="fa fa-times"></i>
                   </button>
@@ -222,7 +224,7 @@
               </div>
             </div>
           </div>
-		  -->
+
 
           <div class="col-sm-12 col-md-8 col-lg-7" style="overflow:hidden;">
             <div class="box box-default">
@@ -499,17 +501,25 @@
     <div class="control-sidebar-bg"></div>
   </div>
   <!-- ./wrapper -->
-      <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116708935-1"></script>
-    <script>
-       // track amount of visits, only when hosted on github
-      if(window.location.origin.indexOf('.github.io') !== -1) {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'UA-116708935-1');
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116708935-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+
+    // track amount of visits, only when hosted on github
+    if (window.location.origin.indexOf('.github.io') !== -1) {
+      gtag('js', new Date());
+      gtag('config', 'UA-116708935-1');
+    }
+
+    function linkEvent() {
+      if (window.location.origin.indexOf('.github.io') !== -1) {
+        gtag('event', 'tokenstore10');
       }
-    </script>
+      return true;
+    }
+  </script>
 </body>
 
 </html>

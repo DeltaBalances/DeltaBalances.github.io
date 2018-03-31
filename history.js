@@ -1,5 +1,4 @@
 {
-
 	//set var historyConfig in html
 
 	// shorthands
@@ -178,7 +177,7 @@
 			addr = getAddress(addr);
 			if (addr) {
 				publicAddr = addr;
-                $("#findTransactions").show();
+				$("#findTransactions").show();
 				$('#loadingTransactions').show();
 				//autoStart = true;
 				// auto start loading
@@ -189,10 +188,10 @@
 			//autoStart = true;
 			//myClick();
 			$('#loadingTransactions').show();
-            $("#findTransactions").show();
+			$("#findTransactions").show();
 		} else if (savedAddr) {//autoload when remember is active
 			publicAddr = savedAddr;
-            $("#findTransactions").show();
+			$("#findTransactions").show();
 			//autoStart = true;
 			// auto start loading
 			loadSaved();
@@ -207,7 +206,7 @@
 		// $("#address").prop("disabled", disable);
 		$('#loadingTransactions').addClass('dim');
 		$("#loadingTransactions").prop("disabled", disable);
-        $("#findTransactions").prop("disabled", disable);
+		$("#findTransactions").prop("disabled", disable);
 	}
 
 	function showLoading(trans) {
@@ -218,7 +217,7 @@
 			$('#loadingTransactions').show();
 			$('#refreshButtonLoading').show();
 			$('#refreshButtonSearch').hide();
-            $("#findTransactions").hide();
+			$("#findTransactions").hide();
 		}
 	}
 
@@ -231,9 +230,9 @@
 			$('#loadingTransactions').removeClass('fa-spin');
 			$('#loadingTransactions').removeClass('dim');
 			$('#loadingTransactions').prop('disabled', false);
-            if(publicAddr) {
-                $("#findTransactions").show();
-            }
+			if (publicAddr) {
+				$("#findTransactions").show();
+			}
 			$('#loadingTransactions').show();
 			$('#refreshButtonLoading').hide();
 			$('#refreshButtonSearch').show();
@@ -249,9 +248,9 @@
 			$('#loadingTransactions').hide();
 			$('#refreshButtonLoading').hide();
 			$('#refreshButtonSearch').show();
-            if(publicAddr) {
-                $("#findTransactions").show();
-            }
+			if (publicAddr) {
+				$("#findTransactions").show();
+			}
 		}
 	}
 

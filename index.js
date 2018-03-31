@@ -1,5 +1,4 @@
 {
-
 	// shorthands
 	var _delta = bundle.DeltaBalances;
 	var _util = bundle.utility;
@@ -319,7 +318,7 @@
 			makeTable(lastResult, hideZero);
 		}
 		changeZero = false;
-        setStorage();
+		setStorage();
 	}
 
 	function checkAsk() {
@@ -371,13 +370,13 @@
 			placeholderTable();
 		}
 		changedDecimals = false;
-        setStorage();
+		setStorage();
 	}
 
 	function checkCustom() {
 		showCustomTokens = $('#custom').prop('checked');
 		$('#customMessage').prop('hidden', showCustomTokens);
-        setStorage();
+		setStorage();
 		let maxcount = Object.keys(_delta.uniqueTokens).length;
 		if (showCustomTokens) {
 			tokenCount = maxcount;
@@ -1193,10 +1192,10 @@
 			} else {
 				localStorage.removeItem('address');
 			}
-            
-            localStorage.setItem("customTokens", showCustomTokens);
-            localStorage.setItem("decimals", decimals);
-            localStorage.setItem("hideZero", hideZero);
+
+			localStorage.setItem("customTokens", showCustomTokens);
+			localStorage.setItem("decimals", decimals);
+			localStorage.setItem("hideZero", hideZero);
 			localStorage.setItem('usd', showDollars);
 
 			Object.keys(exchanges).forEach(function (key) {
@@ -1216,27 +1215,27 @@
 					showDollars = false;
 			}
 
-            if (localStorage.getItem("customTokens") === null) {
+			if (localStorage.getItem("customTokens") === null) {
 				showCustomTokens = false;
 			} else {
 				var custom = localStorage.getItem('customTokens');
-				 showCustomTokens = custom === "true";
+				showCustomTokens = custom === "true";
 			}
-            
-            if (localStorage.getItem("hideZero") === null) {
+
+			if (localStorage.getItem("hideZero") === null) {
 				hideZero = true;
 			} else {
 				var zero = localStorage.getItem('hideZero');
-				 hideZero = zero === "true";
+				hideZero = zero === "true";
 			}
-            
-             if (localStorage.getItem("decimals") === null) {
+
+			if (localStorage.getItem("decimals") === null) {
 				decimals = false;
 			} else {
 				var dec = localStorage.getItem('decimals');
-				 decimals = dec === "true";
+				decimals = dec === "true";
 			}
-            
+
 			Object.keys(exchanges).forEach(function (key) {
 				let enabled = localStorage.getItem(key);
 				if (enabled !== null) {

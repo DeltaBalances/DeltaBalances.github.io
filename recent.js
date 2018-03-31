@@ -1,5 +1,4 @@
 {
-
 	// shorthands
 	var _delta = bundle.DeltaBalances;
 	var _util = bundle.utility;
@@ -100,7 +99,7 @@
 		getStorage();
 
 		$('#decimals').prop('checked', decimals);
-        checkDecimal();
+		checkDecimal();
 
 		// detect enter & keypresses in input
 		$('#address').keypress(function (e) {
@@ -185,7 +184,7 @@
 	function checkDecimal() {
 		changedDecimals = true;
 		decimals = $('#decimals').prop('checked');
-        setStorage();
+		setStorage();
 		fixedDecimals = decimals ? 8 : 3;
 
 
@@ -705,8 +704,8 @@
 			} else {
 				localStorage.removeItem('address');
 			}
-            
-            localStorage.setItem("decimals", decimals);
+
+			localStorage.setItem("decimals", decimals);
 
 		}
 	}
@@ -722,13 +721,13 @@
 					showDollars = false;
 			}
 
-            if (localStorage.getItem("decimals") === null) {
+			if (localStorage.getItem("decimals") === null) {
 				decimals = false;
 			} else {
 				var dec = localStorage.getItem('decimals');
-				 decimals = dec === "true";
+				decimals = dec === "true";
 			}
-            
+
 			// check for saved address
 			if (localStorage.getItem("address") !== null) {
 				var addr = localStorage.getItem("address");

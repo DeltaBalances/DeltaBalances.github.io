@@ -4,8 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="A tool to view Token store trade history." />
-  <!-- Tell the browser to be responsive to screen width -->
+  <meta name="description" content="A tool to view Token store trade history.">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
 
   <title>Delta Balances</title>
@@ -85,7 +84,6 @@
               </button>
             </span>
           </div>
-
         </li>
       </ul>
       <ul class="nav navbar-nav pull-right navbar-user">
@@ -100,12 +98,10 @@
           </a>
         </li>
       </ul>
-
-
     </nav>
   </header>
 
-
+  <!-- top alert message -->
   <div class="alert alert-danger alert-top" style="display:none;" onclick="hideError()" id='error' role="alert">
     <strong>Error</strong>
     <span id="errortext"></span>
@@ -121,8 +117,6 @@
     </button>
   </div>
 
-
-
   <!-- Left side column. contains the logo and sidebar -->
   <aside class="main-sidebar">
 
@@ -131,11 +125,11 @@
 
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu" data-widget="tree">
-	    <li id="homeLinkHeader" class="header"> 
-		  <a href="index.html">
+        <li id="homeLinkHeader" class="header">
+          <a href="index.html">
             <span class="homeLink3">Delta</span>
-            <span class="homeLink4">Balances</span> 
-		  </a>
+            <span class="homeLink4">Balances</span>
+          </a>
         </li>
         <li class="header">Multi Exchange</li>
         <!-- Optionally, you can add icons to the links -->
@@ -157,9 +151,7 @@
             <span>Transaction details</span>
           </a>
         </li>
-
         <li class="header">Exchange Trade History</li>
-
         <li>
           <a id="historyNav" href="history.html">
             <i class="fa fa-book"></i>
@@ -178,7 +170,6 @@
             <span>Decentrex</span>
           </a>
         </li>
-
         <li class="header">Legacy features</li>
         <li>
           <a href="./old/index.html" target="_blank">
@@ -192,7 +183,6 @@
     <!-- /.sidebar -->
   </aside>
 
-
   <div class="wrapper">
 
     <!-- Content Wrapper. Contains page content -->
@@ -202,15 +192,10 @@
       <h1>
         Token balances
       </h1>
-  
     </section> -->
 
       <!-- Main content -->
       <section class="content container-fluid">
-
-        <!--------------------------
-        | Your Page Content Here |
-        -------------------------->
 
         <div class="row">
           <div class="col-md-12 col-lg-10">
@@ -292,11 +277,14 @@
                         </form>
                       </li>
                     </ul>
-                      <button id='findTransactions' onclick="myClick()" class="btn" style="display:none;" hidden> Retrieve trades  <i class="fa fa-search" aria-hidden="true"></i></button>
+                    <button id='findTransactions' onclick="myClick()" class="btn" style="display:none;" hidden> Retrieve trades
+                      <i class="fa fa-search" aria-hidden="true"></i>
+                    </button>
                   </div>
                   <div class="col-md-7" style="overflow:hidden;">
                     <h4>Info</h4>
-                    <span class="visible-xs"><strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.</span>
+                    <span class="visible-xs">
+                      <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.</span>
                     <br>
                     <br> Trades are retrieved from the blockchain using Infura.
                     <br>Large block ranges will take a long time to load.
@@ -305,7 +293,6 @@
                     <span id="minBlockLink"></span>
                     <br> Fees are 0% Maker, 0.3% Taker.
                     <br>
-
                   </div>
                   <div class="col-md-12" style="overflow:hidden;">
                     <h4>Export trades:</h4>
@@ -330,8 +317,6 @@
                       </li>
                     </ul>
                   </div>
-
-
                 </div>
               </div>
               <!-- /.box-body -->
@@ -343,13 +328,11 @@
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body">
-
                 <div id="">
                   <h2>Trades
                     <button id='loadingTransactions' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
                     <span style="padding-left:20px; vertical-align: middle;font-weight: 400; font-size: 0.5em;" id="blockProgress"></span>
                   </h2>
-
                   <br>
                   <table class="tablesorter table table-striped" id="transactionsTable">
                     <thead></thead>
@@ -357,7 +340,6 @@
                   </table>
                   <br> Expecting to see more here? Increase the date range at the top.
                   <br>
-
                   <br>
                   <div class="col-md-6">
                     <span class="label label-info">Taker</span> Clicked an existing order.
@@ -371,21 +353,13 @@
                     <span class="label label-danger">Sell</span> Traded Tokens for ETH.
                     <br>
                   </div>
-
                 </div>
-
               </div>
               <!-- /.box-body -->
             </div>
             <!-- /.box -->
           </div>
-
-
-
-
         </div>
-
-
       </section>
       <!-- /.content -->
     </div>
@@ -398,10 +372,12 @@
 
       </div>
       <!-- Default to the left -->
-     <p> Powered by
+      <p> Powered by
         <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
         <a target="_blank" href="https://infura.io/">Infura</a>
-        <br> Contact: issue on <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">Github</a> or message on <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+        <br> Contact: issue on
+        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">Github</a> or message on
+        <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
         <br> Buy me a beer:
         <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
       </p>
@@ -431,10 +407,8 @@
             <li>
               <a href="" onclick="return false" style="pointer-events: none;">
                 <i id="currentAddrImg" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
-
                 <div class="menu-info">
                   <h4 id="currentAddr" class="control-sidebar-subheading">0x......</h4>
-
                   <p id="currentAddrDescr">Input address</p>
                 </div>
               </a>
@@ -470,7 +444,6 @@
               </li>
             </ul>
           </div>
-
         </div>
 
         <!-- /.tab-pane -->

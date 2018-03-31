@@ -4,8 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="A tool to view details on a transaciton to a decentralized exchange" />
-  <!-- Tell the browser to be responsive to screen width -->
+  <meta name="description" content="A tool to view details on a transaciton to a decentralized exchange">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
 
   <title>Delta Balances</title>
@@ -62,9 +61,7 @@
       <!-- mobile only logo -->
       <ul class="visible-xs nav navbar-nav pull-left navbar-logo" style="margin-left:0px; margin-top:5px;font-size:20px; height:30px; line-height:30px;">
         <li class="">
-
           <a href="index.html" class="dropdown">
-
             <span class="homeLink1">Delta</span>
             <span class="homeLink2">Balances</span>
           </a>
@@ -83,7 +80,6 @@
               </button>
             </span>
           </div>
-
         </li>
       </ul>
       <ul class="nav navbar-nav pull-right navbar-user">
@@ -98,12 +94,10 @@
           </a>
         </li>
       </ul>
-
-
     </nav>
   </header>
 
-
+  <!-- top alert message -->
   <div class="alert alert-danger alert-top" style="display:none;" onclick="hideError()" id='error' role="alert">
     <strong>Error</strong>
     <span id="errortext"></span>
@@ -119,8 +113,6 @@
     </button>
   </div>
 
-
-
   <!-- Left side column. contains the logo and sidebar -->
   <aside class="main-sidebar">
 
@@ -129,11 +121,11 @@
 
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu" data-widget="tree">
-	    <li id="homeLinkHeader" class="header"> 
-		  <a href="index.html">
+        <li id="homeLinkHeader" class="header">
+          <a href="index.html">
             <span class="homeLink3">Delta</span>
-            <span class="homeLink4">Balances</span> 
-		  </a>
+            <span class="homeLink4">Balances</span>
+          </a>
         </li>
         <li class="header">Multi Exchange</li>
         <!-- Optionally, you can add icons to the links -->
@@ -157,7 +149,6 @@
         </li>
 
         <li class="header">Exchange Trade History</li>
-
         <li>
           <a id="historyNav" href="history.html">
             <i class="fa fa-book"></i>
@@ -176,7 +167,6 @@
             <span>Decentrex</span>
           </a>
         </li>
-
         <li class="header">Legacy features</li>
         <li>
           <a href="./old/index.html" target="_blank">
@@ -190,7 +180,6 @@
     <!-- /.sidebar -->
   </aside>
 
-
   <div class="wrapper">
 
     <!-- Content Wrapper. Contains page content -->
@@ -200,15 +189,10 @@
       <h1>
         Token balances
       </h1>
-  
     </section> -->
 
       <!-- Main content -->
       <section class="content container-fluid">
-
-        <!--------------------------
-        | Your Page Content Here |
-        -------------------------->
 
         <div class="row">
           <div class="col-md-12 col-lg-10">
@@ -238,15 +222,12 @@
                 </h2>
                 <div class="col-md-12" style="overflow:hidden;">
                   <table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
-
                     <tr>
                       <td> Hash</td>
                       <td id='hash'>
                         <strong>Enter your transaction hash</strong>
                       </td>
                     </tr>
-
-
                     <tr>
                       <td> From</td>
                       <td id='from'></td>
@@ -259,7 +240,6 @@
                 </div>
 
                 <div class="col-md-6">
-
                   <table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
                     <tr>
                       <td>Type</td>
@@ -277,15 +257,11 @@
                       <td>ETH value </td>
                       <td id='ethval'></td>
                     </tr>
-
-
                   </table>
                 </div>
 
                 <div class="col-md-6">
-
                   <table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
-
                     <tr>
                       <td>Gas Price </td>
                       <td id='gasgwei'></td>
@@ -302,7 +278,6 @@
                       <td>Nonce </td>
                       <td id='nonce'></td>
                     </tr>
-
                   </table>
                 </div>
               </div>
@@ -310,11 +285,6 @@
             </div>
             <!-- /.box -->
           </div>
-
-
-
-
-
 
           <div class="col-md-12 col-lg-10">
             <div class="box box-default">
@@ -328,14 +298,11 @@
             <!-- /.box -->
           </div>
 
-
           <div class="col-md-12 col-lg-10" style="padding:0;">
-
             <div class="col-md-12 col-lg-6">
               <div class="box box-default">
                 <!-- /.box-header -->
                 <div class="box-body">
-
                   <h2>Input data </h2>
                   <p> Transaction input sent to the blockchain, what you attempted to do.</p>
                   <br>
@@ -345,8 +312,6 @@
               </div>
               <!-- /.box -->
             </div>
-
-
             <div class="col-md-12 col-lg-6">
               <div class="box box-default">
                 <!-- /.box-header -->
@@ -360,26 +325,19 @@
               </div>
               <!-- /.box -->
             </div>
-
           </div>
 
           <div class="col-md-12 col-lg-10">
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body">
-
                 Transaction details supports: EtherDelta (ForkDelta), IDEX, Token store, Decentrex (closed) and Ethereum tokens (ERC20)
-
-
               </div>
               <!-- /.box-body -->
             </div>
             <!-- /.box -->
           </div>
-
         </div>
-
-
       </section>
       <!-- /.content -->
     </div>
@@ -389,13 +347,14 @@
     <footer class="main-footer">
       <!-- To the right -->
       <div class="pull-right hidden-xs">
-
       </div>
       <!-- Default to the left -->
       <p> Powered by
         <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
         <a target="_blank" href="https://infura.io/">Infura</a>
-        <br> Contact: issue on <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">Github</a> or message on <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+        <br> Contact: issue on
+        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">Github</a> or message on
+        <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
         <br> Buy me a beer:
         <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
       </p>
@@ -425,10 +384,8 @@
             <li>
               <a href="" onclick="return false" style="pointer-events: none;">
                 <i id="currentAddrImg" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
-
                 <div class="menu-info">
                   <h4 id="currentAddr" class="control-sidebar-subheading">0x......</h4>
-
                   <p id="currentAddrDescr">Input address</p>
                 </div>
               </a>
@@ -455,7 +412,6 @@
               <li>
                 <a onclick="loadSaved()" href="#">
                   <i id="savedImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
-
                   <div class="menu-info">
                     <h4 id="savedAddress" class="control-sidebar-subheading">0x12345678</h4>
                     <p>Saved</p>
@@ -464,7 +420,6 @@
               </li>
             </ul>
           </div>
-
         </div>
 
         <!-- /.tab-pane -->

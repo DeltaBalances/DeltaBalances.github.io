@@ -1,7 +1,6 @@
 // try to get updated token list from EtherDelta, otherwise use own backup
 
 var etherDeltaConfig = offlineTokens;
-
 // dont get up to date etherdelta tokens, as they haven't been changed in 3 months
 /*
 try {
@@ -10,8 +9,7 @@ try {
 				etherDeltaConfig = jsonData;
 			}
 		});
-	} catch (err){}
-	*/
+	} catch (err){} */
 var stagingTokens = offlineStagingTokens;
 /*
 try {
@@ -20,8 +18,7 @@ try {
 				stagingTokens = jsonData;
 			}
 		});
-	} catch (err) {}
-*/
+	} catch (err) {} */
 var forkDeltaConfig = forkOfflineTokens;
 try {
 	$.getJSON('https://forkdelta.github.io/config/main.json', function (jsonData) {
@@ -44,5 +41,4 @@ try {
 			idexConfig = tokens;
 		}
 	});
-
 } catch (err) { }

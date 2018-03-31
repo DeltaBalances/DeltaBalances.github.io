@@ -1,5 +1,4 @@
 {
-
 	// shorthands
 	var _delta = bundle.DeltaBalances;
 	var _util = bundle.utility;
@@ -264,8 +263,8 @@
 			}
 			else if (address.length == 42 && address.slice(0, 2) === '0x')  //wallet addr, not transaction hash
 			{
-                window.location = window.location.origin + window.location.pathname + '/../index.html#' + address;
-                return;
+				window.location = window.location.origin + window.location.pathname + '/../index.html#' + address;
+				return;
 			}
 			else {
 				if (!addr) // ignore if in url arguments
@@ -761,12 +760,12 @@
 					let token = myList[i];
 					let popoverContents = "Placeholder";
 					if (token && token.name !== 'ETH' && _delta.uniqueTokens[token.addr]) {
-						if(token) {
-							popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals 
-												+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true) 
-												+ '</li><li>' + _util.forkDeltaURL(token, true) 
-												+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
-							if(token.IDEX) {
+						if (token) {
+							popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
+								+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
+								+ '</li><li>' + _util.forkDeltaURL(token, true)
+								+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
+							if (token.IDEX) {
 								popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
 							}
 							popoverContents += '</ul>';

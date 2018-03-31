@@ -1622,7 +1622,7 @@
 
 	//remove exponential notation 1e-8  etc.
 	function exportNotation(num) {
-		return Number(num).toFixed(25).replace(/\.?0+$/, ""); // rounded to 25 decimals, no trailing 0
+		return Number(num).toFixed(20).replace(/\.?0+$/, ""); // rounded to 25 decimals, no trailing 0
 	}
 
 

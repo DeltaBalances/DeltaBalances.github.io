@@ -1410,7 +1410,7 @@
 	function exportNotation(num) {
 		//return Number(num).toFixed(25).replace(/\.?0+$/,""); // rounded to 25 decimals, no trailing 0
 		//https://stackoverflow.com/questions/3612744/remove-insignificant-trailing-zeros-from-a-number
-		return Number(num).toFixed(25).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1')
+		return Number(num).toFixed(20).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1')
 	}
 
 	function placeholderTable() {

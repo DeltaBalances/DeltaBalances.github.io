@@ -1540,10 +1540,10 @@
 		}
 	}
 
-	const balanceHeaders = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'Total': 1, 'Value': 1, 'Bid': 1, 'Est. ETH': 1 };
-	const balanceHeaders2 = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'Total': 1, 'Value': 1, 'Ask': 1, 'Est. ETH': 1 };
-	const depositHeaders = { 'Name': 1, 'Value': 1, 'Type': 1, 'Hash': 1, 'Date': 1 };
-	const transactionHeaders = { 'Name': 1, 'Value': 1, 'Type': 1, 'Hash': 1, 'Date': 1, 'Price': 1, 'ETH': 1, 'Status': 1, 'Details': 1 };
+	var balanceHeaders = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'Total': 1, 'Value': 1, 'Bid': 1, 'Est. ETH': 1 };
+	var balanceHeaders2 = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'Total': 1, 'Value': 1, 'Ask': 1, 'Est. ETH': 1 };
+	var depositHeaders = { 'Name': 1, 'Value': 1, 'Type': 1, 'Hash': 1, 'Date': 1 };
+	var transactionHeaders = { 'Name': 1, 'Value': 1, 'Type': 1, 'Hash': 1, 'Date': 1, 'Price': 1, 'ETH': 1, 'Status': 1, 'Details': 1 };
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.
@@ -1807,6 +1807,6 @@
 
 	//remove exponential notation 1e-8  etc.
 	function exportNotation(num) {
-		return Number(num).toFixed(25).replace(/\.?0+$/, ""); // rounded to 25 decimals, no trailing 0
+		return Number(num).toFixed(20).replace(/\.?0+$/, ""); // rounded to 20 decimals, no trailing 0
 	}
 }

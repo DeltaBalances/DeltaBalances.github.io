@@ -1408,7 +1408,7 @@
 
 	//remove exponential notation 1e-8  etc.
 	function exportNotation(num) {
-		//return Number(num).toFixed(25).replace(/\.?0+$/,""); // rounded to 25 decimals, no trailing 0
+		//return Number(num).toFixed(20).replace(/\.?0+$/,""); // rounded to 20 decimals, no trailing 0
 		//https://stackoverflow.com/questions/3612744/remove-insignificant-trailing-zeros-from-a-number
 		return Number(num).toFixed(20).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1')
 	}

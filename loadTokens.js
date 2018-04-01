@@ -1,7 +1,9 @@
-// try to get updated token list from EtherDelta, otherwise use own backup
+// try to get updated token list from EtherDelta, ForkDelta and IDEX otherwise use own backup
 
 var etherDeltaConfig = offlineTokens;
-// dont get up to date etherdelta tokens, as they haven't been changed in 3 months
+var stagingTokens = offlineStagingTokens;
+
+// dont get live etherdelta tokens, as they haven't been changed in >3 months
 /*
 try {
 		$.getJSON('https://etherdelta.github.io/config/main.json', function(jsonData) {
@@ -9,36 +11,86 @@ try {
 				etherDeltaConfig = jsonData;
 			}
 		});
-	} catch (err){} */
-var stagingTokens = offlineStagingTokens;
-/*
+	} catch (err){} 
 try {
 		$.getJSON('https://etherdelta.github.io/config/staging.json', function(jsonData) {
 			if(jsonData && jsonData.tokens) {
 				stagingTokens = jsonData;
 			}
 		});
-	} catch (err) {} */
+	} catch (err) {} 
+*/
+
+
 var forkDeltaConfig = forkOfflineTokens;
 try {
-	$.getJSON('https://forkdelta.github.io/config/main.json', function (jsonData) {
-		if (jsonData && jsonData.tokens) {
-			forkDeltaConfig = jsonData;
-		}
-	});
-} catch (err) { }
+
+    let forkData = sessionStorage.getItem('forkTokens');
+    // only get live tokens if we haven't saved them this session already
+    if (forkData !== null && forkData) {
+        let parsed = JSON.parse(forkData);
+        if (parsed && parsed.length > 0) {
+            forkDeltaConfig.tokens = parsed;
+        }
+    } else {
+
+        // if we have saved data from a previous session, pre-load it
+        let forkData2 = localStorage.getItem('forkTokens');
+        if (forkData2 !== null && forkData2) {
+            let parsed = JSON.parse(forkData2);
+            if (parsed && parsed.length > forkDeltaConfig.tokens.length) {
+                forkDeltaConfig.tokens = parsed;
+            }
+        }
+
+        $.getJSON('https://forkdelta.github.io/config/main.json', function (jsonData) {
+            if (jsonData && jsonData.tokens && jsonData.tokens.length > 0) {
+                forkDeltaConfig = jsonData;
+                sessionStorage.setItem('forkTokens', JSON.stringify(forkDeltaConfig.tokens));
+                localStorage.setItem('forkTokens', JSON.stringify(forkDeltaConfig.tokens));
+            }
+        });
+    }
+} catch (err) {
+    console.log('forkdelta live tokens loading error ' + err);
+}
+
 
 var idexConfig = idexOfflineTokens;
 try {
-	$.post("https://api.idex.market/returnCurrencies", function (data) {
+    let idexData = sessionStorage.getItem('idexTokens');
+    // only get live tokens if we haven't saved them this session already
+    if (idexData !== null && idexData) {
+        let parsed = JSON.parse(idexData);
+        if (parsed && parsed.length > 0) {
+            idexConfig = parsed;
+        }
+    } else {
 
-		if (data) {
-			let tokens = [];
-			Object.keys(data).forEach(function (key) {
-				var token = data[key];
-				tokens.push({ name: key, decimals: token.decimals, addr: token.address.trim() });
-			});
-			idexConfig = tokens;
-		}
-	});
-} catch (err) { }
+        // if we have saved data from a previous session, pre-load it
+        let idexData2 = localStorage.getItem('forkTokens');
+        if (idexData2 !== null && idexData2) {
+            let parsed = JSON.parse(idexData2);
+            if (parsed && parsed.length > idexConfig.length) {
+                idexConfig = parsed;
+            }
+        }
+
+        $.post("https://api.idex.market/returnCurrencies", function (data) {
+            if (data) {
+                let tokens = [];
+                Object.keys(data).forEach(function (key) {
+                    var token = data[key];
+                    tokens.push({ name: key, decimals: token.decimals, addr: token.address.trim() });
+                });
+                if (tokens && tokens.length > 0) {
+                    idexConfig = tokens;
+                    sessionStorage.setItem('idexTokens', JSON.stringify(idexConfig));
+                    localStorage.setItem('idexTokens', JSON.stringify(idexConfig));
+                }
+            }
+        });
+    }
+} catch (err) {
+    console.log('IDEX live tokens loading error ' + err);
+}

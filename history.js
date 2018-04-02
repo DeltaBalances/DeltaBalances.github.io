@@ -627,35 +627,38 @@
 			if (rqid <= requestID) {
 				downloadedBlocks += blockCount;
 				if (logs) {
+
 					loadedLogs++;
-					var tradesInResult = parseOutput(logs);
+					if (logs.length > 0) {
+						var tradesInResult = parseOutput(logs);
 
-					//get tx times
+						//get tx times
 
-					var doneBlocks = {};
-					for (var i = 0; i < tradesInResult.length; i++) {
-						if (!blockDates[tradesInResult[i].Block] && !doneBlocks[tradesInResult[i].Block]) {
-							uniqueBlocks[tradesInResult[i].Block] = 1;
-							doneBlocks[tradesInResult[i].Block] = true;
-							blockReqs++;
+						var doneBlocks = {};
+						for (var i = 0; i < tradesInResult.length; i++) {
+							if (!blockDates[tradesInResult[i].Block] && !doneBlocks[tradesInResult[i].Block]) {
+								uniqueBlocks[tradesInResult[i].Block] = 1;
+								doneBlocks[tradesInResult[i].Block] = true;
+								blockReqs++;
 
-							_util.getBlockDate(_delta.web3, tradesInResult[i].Block, (err, unixtimestamp, nr) => {
-								if (!err && unixtimestamp) {
-									blockDates[nr] = toDateTime(unixtimestamp);
-								}
+								_util.getBlockDate(_delta.web3, tradesInResult[i].Block, (err, unixtimestamp, nr) => {
+									if (!err && unixtimestamp) {
+										blockDates[nr] = toDateTime(unixtimestamp);
+									}
 
-								blockLoaded++;
-								if (blockLoaded >= blockReqs) {
-									setBlockStorage(); // update cached block dates
-									if (!running)
-										done();
-								}
+									blockLoaded++;
+									if (blockLoaded >= blockReqs) {
+										setBlockStorage(); // update cached block dates
+										if (!running)
+											done();
+									}
 
-							});
+								});
 
+							}
 						}
+						tradeLogResult = tradeLogResult.concat(tradesInResult);
 					}
-					tradeLogResult = tradeLogResult.concat(tradesInResult);
 					done();
 				} else {
 					console.log('failed');

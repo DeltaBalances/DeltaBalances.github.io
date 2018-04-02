@@ -22579,102 +22579,16 @@ exports.createContext = Script.createContext = function (context) {
 };
 
 },{"indexof":100}],156:[function(require,module,exports){
-module.exports = {
-  homeURL: 'https://deltabalances.github.io',
-  socketURL: 'https://api.forkdelta.com', //'https://socket.etherdelta.com';
-  contractEtherDelta: 'smart_contract/etherdelta.sol',
-  contractToken: 'smart_contract/token.sol',
-  contractDeltaBalance: 'smart_contract/deltabalances.sol',
-  contractDeltaBalanceAddr: '0xf5f563d3a99152c18ce8b133232fe34317f60fef',
-  contractEtherDeltaAddr: '0x8d12a197cb00d4747a1fe03395095ce2a5cc6819',
-  contractEtherDeltaAddrs: [
-    { addr: '0x8d12a197cb00d4747a1fe03395095ce2a5cc6819' },
-    { addr: '0x373c55c277b866a69dc047cad488154ab9759466' },
-    { addr: '0x4aea7cf559f67cedcad07e12ae6bc00f07e8cf65' },
-    { addr: '0x2136bbba2edca21afdddee838fff19ea70d10f03' },
-    { addr: '0xc6b330df38d6ef288c953f1f2835723531073ce2' },
-  ],
-  contractTokenStoreAddr: '0x1ce7ae555139c5ef5a57cc8d814a867ee6ee33d8',
-  contractIdexAddr: '0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208',
-  contractDecentrexAddr: '0xbf29685856fae1e228878dfb35b280c0adcc3b05',
-
-  ethProvider: 'http://localhost:8545',
-  ethGasPrice: 4000000000,
-  ethAddr: '0x0000000000000000000000000000000000000000',
-  apiServer: '',
-  apiServers: ['https://api.forkdelta.com', /*'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/],
-  etherscanAPIKey: 'YHBUWV6P5B5ITKMI91JIRZZYBP1CG1V65R',
-  tokens: [
-    // get them live from config.js
-    { addr: '0x0000000000000000000000000000000000000000', name: 'ETH', decimals: 18 },
-  ],
-
-  etherDeltaAbi: [{ "constant": false, "inputs": [{ "name": "tokenGet", "type": "address" }, { "name": "amountGet", "type": "uint256" }, { "name": "tokenGive", "type": "address" }, { "name": "amountGive", "type": "uint256" }, { "name": "expires", "type": "uint256" }, { "name": "nonce", "type": "uint256" }, { "name": "user", "type": "address" }, { "name": "v", "type": "uint8" }, { "name": "r", "type": "bytes32" }, { "name": "s", "type": "bytes32" }, { "name": "amount", "type": "uint256" }], "name": "trade", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "tokenGet", "type": "address" }, { "name": "amountGet", "type": "uint256" }, { "name": "tokenGive", "type": "address" }, { "name": "amountGive", "type": "uint256" }, { "name": "expires", "type": "uint256" }, { "name": "nonce", "type": "uint256" }], "name": "order", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "address" }, { "name": "", "type": "bytes32" }], "name": "orderFills", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "tokenGet", "type": "address" }, { "name": "amountGet", "type": "uint256" }, { "name": "tokenGive", "type": "address" }, { "name": "amountGive", "type": "uint256" }, { "name": "expires", "type": "uint256" }, { "name": "nonce", "type": "uint256" }, { "name": "v", "type": "uint8" }, { "name": "r", "type": "bytes32" }, { "name": "s", "type": "bytes32" }], "name": "cancelOrder", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "amount", "type": "uint256" }], "name": "withdraw", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "token", "type": "address" }, { "name": "amount", "type": "uint256" }], "name": "depositToken", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "tokenGet", "type": "address" }, { "name": "amountGet", "type": "uint256" }, { "name": "tokenGive", "type": "address" }, { "name": "amountGive", "type": "uint256" }, { "name": "expires", "type": "uint256" }, { "name": "nonce", "type": "uint256" }, { "name": "user", "type": "address" }, { "name": "v", "type": "uint8" }, { "name": "r", "type": "bytes32" }, { "name": "s", "type": "bytes32" }], "name": "amountFilled", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "address" }, { "name": "", "type": "address" }], "name": "tokens", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "feeMake_", "type": "uint256" }], "name": "changeFeeMake", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "feeMake", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "feeRebate_", "type": "uint256" }], "name": "changeFeeRebate", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "feeAccount", "outputs": [{ "name": "", "type": "address" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "tokenGet", "type": "address" }, { "name": "amountGet", "type": "uint256" }, { "name": "tokenGive", "type": "address" }, { "name": "amountGive", "type": "uint256" }, { "name": "expires", "type": "uint256" }, { "name": "nonce", "type": "uint256" }, { "name": "user", "type": "address" }, { "name": "v", "type": "uint8" }, { "name": "r", "type": "bytes32" }, { "name": "s", "type": "bytes32" }, { "name": "amount", "type": "uint256" }, { "name": "sender", "type": "address" }], "name": "testTrade", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "feeAccount_", "type": "address" }], "name": "changeFeeAccount", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "feeRebate", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "feeTake_", "type": "uint256" }], "name": "changeFeeTake", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "admin_", "type": "address" }], "name": "changeAdmin", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "token", "type": "address" }, { "name": "amount", "type": "uint256" }], "name": "withdrawToken", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "address" }, { "name": "", "type": "bytes32" }], "name": "orders", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "feeTake", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [], "name": "deposit", "outputs": [], "payable": true, "type": "function" }, { "constant": false, "inputs": [{ "name": "accountLevelsAddr_", "type": "address" }], "name": "changeAccountLevelsAddr", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "accountLevelsAddr", "outputs": [{ "name": "", "type": "address" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "token", "type": "address" }, { "name": "user", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "admin", "outputs": [{ "name": "", "type": "address" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "tokenGet", "type": "address" }, { "name": "amountGet", "type": "uint256" }, { "name": "tokenGive", "type": "address" }, { "name": "amountGive", "type": "uint256" }, { "name": "expires", "type": "uint256" }, { "name": "nonce", "type": "uint256" }, { "name": "user", "type": "address" }, { "name": "v", "type": "uint8" }, { "name": "r", "type": "bytes32" }, { "name": "s", "type": "bytes32" }], "name": "availableVolume", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "inputs": [{ "name": "admin_", "type": "address" }, { "name": "feeAccount_", "type": "address" }, { "name": "accountLevelsAddr_", "type": "address" }, { "name": "feeMake_", "type": "uint256" }, { "name": "feeTake_", "type": "uint256" }, { "name": "feeRebate_", "type": "uint256" }], "payable": false, "type": "constructor" }, { "payable": false, "type": "fallback" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "tokenGet", "type": "address" }, { "indexed": false, "name": "amountGet", "type": "uint256" }, { "indexed": false, "name": "tokenGive", "type": "address" }, { "indexed": false, "name": "amountGive", "type": "uint256" }, { "indexed": false, "name": "expires", "type": "uint256" }, { "indexed": false, "name": "nonce", "type": "uint256" }, { "indexed": false, "name": "user", "type": "address" }], "name": "Order", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "tokenGet", "type": "address" }, { "indexed": false, "name": "amountGet", "type": "uint256" }, { "indexed": false, "name": "tokenGive", "type": "address" }, { "indexed": false, "name": "amountGive", "type": "uint256" }, { "indexed": false, "name": "expires", "type": "uint256" }, { "indexed": false, "name": "nonce", "type": "uint256" }, { "indexed": false, "name": "user", "type": "address" }, { "indexed": false, "name": "v", "type": "uint8" }, { "indexed": false, "name": "r", "type": "bytes32" }, { "indexed": false, "name": "s", "type": "bytes32" }], "name": "Cancel", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "tokenGet", "type": "address" }, { "indexed": false, "name": "amountGet", "type": "uint256" }, { "indexed": false, "name": "tokenGive", "type": "address" }, { "indexed": false, "name": "amountGive", "type": "uint256" }, { "indexed": false, "name": "get", "type": "address" }, { "indexed": false, "name": "give", "type": "address" }], "name": "Trade", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "token", "type": "address" }, { "indexed": false, "name": "user", "type": "address" }, { "indexed": false, "name": "amount", "type": "uint256" }, { "indexed": false, "name": "balance", "type": "uint256" }], "name": "Deposit", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "token", "type": "address" }, { "indexed": false, "name": "user", "type": "address" }, { "indexed": false, "name": "amount", "type": "uint256" }, { "indexed": false, "name": "balance", "type": "uint256" }], "name": "Withdraw", "type": "event" }],
-  tokenStoreAbi: [{ "constant": false, "inputs": [{ "name": "_tokenGet", "type": "address" }, { "name": "_amountGet", "type": "uint256" }, { "name": "_tokenGive", "type": "address" }, { "name": "_amountGive", "type": "uint256" }, { "name": "_expires", "type": "uint256" }, { "name": "_nonce", "type": "uint256" }, { "name": "_user", "type": "address" }, { "name": "_v", "type": "uint8" }, { "name": "_r", "type": "bytes32" }, { "name": "_s", "type": "bytes32" }, { "name": "_amount", "type": "uint256" }], "name": "trade", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "deprecated", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "address" }, { "name": "", "type": "bytes32" }], "name": "orderFills", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_tokenGet", "type": "address" }, { "name": "_amountGet", "type": "uint256" }, { "name": "_tokenGive", "type": "address" }, { "name": "_amountGive", "type": "uint256" }, { "name": "_expires", "type": "uint256" }, { "name": "_nonce", "type": "uint256" }, { "name": "_v", "type": "uint8" }, { "name": "_r", "type": "bytes32" }, { "name": "_s", "type": "bytes32" }], "name": "cancelOrder", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "_tokenGet", "type": "address" }, { "name": "_amountGet", "type": "uint256" }, { "name": "_tokenGive", "type": "address" }, { "name": "_amountGive", "type": "uint256" }, { "name": "_expires", "type": "uint256" }, { "name": "_nonce", "type": "uint256" }, { "name": "_user", "type": "address" }], "name": "amountFilled", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_amount", "type": "uint256" }], "name": "withdraw", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_token", "type": "address" }, { "name": "_amount", "type": "uint256" }], "name": "depositToken", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_accountModifiers", "type": "address" }], "name": "changeAccountModifiers", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_token", "type": "address" }, { "name": "_amount", "type": "uint256" }, { "name": "_user", "type": "address" }], "name": "depositTokenForUser", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_tradeTracker", "type": "address" }], "name": "changeTradeTracker", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "address" }, { "name": "", "type": "address" }], "name": "tokens", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "version", "outputs": [{ "name": "", "type": "uint16" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "getAccountModifiers", "outputs": [{ "name": "takeFeeDiscount", "type": "uint256" }, { "name": "rebatePercentage", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_fee", "type": "uint256" }], "name": "changeFee", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_user", "type": "address" }], "name": "depositForUser", "outputs": [], "payable": true, "type": "function" }, { "constant": true, "inputs": [{ "name": "_tokenGet", "type": "address" }, { "name": "_amountGet", "type": "uint256" }, { "name": "_tokenGive", "type": "address" }, { "name": "_amountGive", "type": "uint256" }, { "name": "_expires", "type": "uint256" }, { "name": "_nonce", "type": "uint256" }, { "name": "_user", "type": "address" }, { "name": "_v", "type": "uint8" }, { "name": "_r", "type": "bytes32" }, { "name": "_s", "type": "bytes32" }, { "name": "_amount", "type": "uint256" }, { "name": "_sender", "type": "address" }], "name": "testTrade", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "successor", "outputs": [{ "name": "", "type": "address" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_feeAccount", "type": "address" }], "name": "changeFeeAccount", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "owner", "outputs": [{ "name": "", "type": "address" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_token", "type": "address" }, { "name": "_amount", "type": "uint256" }], "name": "withdrawToken", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "predecessor", "outputs": [{ "name": "", "type": "address" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_tokens", "type": "address[]" }], "name": "migrateFunds", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [], "name": "deposit", "outputs": [], "payable": true, "type": "function" }, { "constant": true, "inputs": [], "name": "fee", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_deprecated", "type": "bool" }, { "name": "_successor", "type": "address" }], "name": "deprecate", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "_newOwner", "type": "address" }], "name": "transferOwnership", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "_token", "type": "address" }, { "name": "_user", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "_tokenGet", "type": "address" }, { "name": "_amountGet", "type": "uint256" }, { "name": "_tokenGive", "type": "address" }, { "name": "_amountGive", "type": "uint256" }, { "name": "_expires", "type": "uint256" }, { "name": "_nonce", "type": "uint256" }, { "name": "_user", "type": "address" }, { "name": "_v", "type": "uint8" }, { "name": "_r", "type": "bytes32" }, { "name": "_s", "type": "bytes32" }], "name": "availableVolume", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "inputs": [{ "name": "_fee", "type": "uint256" }, { "name": "_predecessor", "type": "address" }], "payable": false, "type": "constructor" }, { "payable": false, "type": "fallback" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "tokenGet", "type": "address" }, { "indexed": false, "name": "amountGet", "type": "uint256" }, { "indexed": false, "name": "tokenGive", "type": "address" }, { "indexed": false, "name": "amountGive", "type": "uint256" }, { "indexed": false, "name": "expires", "type": "uint256" }, { "indexed": false, "name": "nonce", "type": "uint256" }, { "indexed": false, "name": "user", "type": "address" }, { "indexed": false, "name": "v", "type": "uint8" }, { "indexed": false, "name": "r", "type": "bytes32" }, { "indexed": false, "name": "s", "type": "bytes32" }], "name": "Cancel", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "tokenGet", "type": "address" }, { "indexed": false, "name": "amountGet", "type": "uint256" }, { "indexed": false, "name": "tokenGive", "type": "address" }, { "indexed": false, "name": "amountGive", "type": "uint256" }, { "indexed": false, "name": "get", "type": "address" }, { "indexed": false, "name": "give", "type": "address" }, { "indexed": false, "name": "nonce", "type": "uint256" }], "name": "Trade", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "token", "type": "address" }, { "indexed": false, "name": "user", "type": "address" }, { "indexed": false, "name": "amount", "type": "uint256" }, { "indexed": false, "name": "balance", "type": "uint256" }], "name": "Deposit", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "token", "type": "address" }, { "indexed": false, "name": "user", "type": "address" }, { "indexed": false, "name": "amount", "type": "uint256" }, { "indexed": false, "name": "balance", "type": "uint256" }], "name": "Withdraw", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "user", "type": "address" }], "name": "FundsMigrated", "type": "event" }],
-  idexAbi: [{ "constant": false, "inputs": [{ "name": "assertion", "type": "bool" }], "name": "assert", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "newOwner", "type": "address" }], "name": "setOwner", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "token", "type": "address" }, { "name": "amount", "type": "uint256" }, { "name": "user", "type": "address" }, { "name": "nonce", "type": "uint256" }, { "name": "v", "type": "uint8" }, { "name": "r", "type": "bytes32" }, { "name": "s", "type": "bytes32" }, { "name": "feeWithdrawal", "type": "uint256" }], "name": "adminWithdraw", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "address" }], "name": "lastActiveTransaction", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "token", "type": "address" }, { "name": "amount", "type": "uint256" }], "name": "depositToken", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "bytes32" }], "name": "withdrawn", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "address" }], "name": "admins", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "admin", "type": "address" }, { "name": "isAdmin", "type": "bool" }], "name": "setAdmin", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "address" }, { "name": "", "type": "address" }], "name": "tokens", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "feeAccount", "outputs": [{ "name": "", "type": "address" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "address" }], "name": "invalidOrder", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [], "name": "getOwner", "outputs": [{ "name": "out", "type": "address" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "owner", "outputs": [{ "name": "", "type": "address" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "a", "type": "uint256" }, { "name": "b", "type": "uint256" }], "name": "safeSub", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "user", "type": "address" }, { "name": "nonce", "type": "uint256" }], "name": "invalidateOrdersBefore", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "a", "type": "uint256" }, { "name": "b", "type": "uint256" }], "name": "safeMul", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [], "name": "deposit", "outputs": [], "payable": true, "stateMutability": "payable", "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "bytes32" }], "name": "traded", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "expiry", "type": "uint256" }], "name": "setInactivityReleasePeriod", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "a", "type": "uint256" }, { "name": "b", "type": "uint256" }], "name": "safeAdd", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": false, "inputs": [{ "name": "tradeValues", "type": "uint256[8]" }, { "name": "tradeAddresses", "type": "address[4]" }, { "name": "v", "type": "uint8[2]" }, { "name": "rs", "type": "bytes32[4]" }], "name": "trade", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "inactivityReleasePeriod", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "token", "type": "address" }, { "name": "amount", "type": "uint256" }], "name": "withdraw", "outputs": [{ "name": "success", "type": "bool" }], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "bytes32" }], "name": "orderFills", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "token", "type": "address" }, { "name": "user", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "inputs": [{ "name": "feeAccount_", "type": "address" }], "payable": false, "stateMutability": "nonpayable", "type": "constructor" }, { "payable": false, "stateMutability": "nonpayable", "type": "fallback" }, { "anonymous": false, "inputs": [{ "indexed": true, "name": "previousOwner", "type": "address" }, { "indexed": true, "name": "newOwner", "type": "address" }], "name": "SetOwner", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "tokenBuy", "type": "address" }, { "indexed": false, "name": "amountBuy", "type": "uint256" }, { "indexed": false, "name": "tokenSell", "type": "address" }, { "indexed": false, "name": "amountSell", "type": "uint256" }, { "indexed": false, "name": "expires", "type": "uint256" }, { "indexed": false, "name": "nonce", "type": "uint256" }, { "indexed": false, "name": "user", "type": "address" }, { "indexed": false, "name": "v", "type": "uint8" }, { "indexed": false, "name": "r", "type": "bytes32" }, { "indexed": false, "name": "s", "type": "bytes32" }], "name": "Order", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "tokenBuy", "type": "address" }, { "indexed": false, "name": "amountBuy", "type": "uint256" }, { "indexed": false, "name": "tokenSell", "type": "address" }, { "indexed": false, "name": "amountSell", "type": "uint256" }, { "indexed": false, "name": "expires", "type": "uint256" }, { "indexed": false, "name": "nonce", "type": "uint256" }, { "indexed": false, "name": "user", "type": "address" }, { "indexed": false, "name": "v", "type": "uint8" }, { "indexed": false, "name": "r", "type": "bytes32" }, { "indexed": false, "name": "s", "type": "bytes32" }], "name": "Cancel", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "tokenBuy", "type": "address" }, { "indexed": false, "name": "amountBuy", "type": "uint256" }, { "indexed": false, "name": "tokenSell", "type": "address" }, { "indexed": false, "name": "amountSell", "type": "uint256" }, { "indexed": false, "name": "get", "type": "address" }, { "indexed": false, "name": "give", "type": "address" }], "name": "Trade", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "token", "type": "address" }, { "indexed": false, "name": "user", "type": "address" }, { "indexed": false, "name": "amount", "type": "uint256" }, { "indexed": false, "name": "balance", "type": "uint256" }], "name": "Deposit", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "name": "token", "type": "address" }, { "indexed": false, "name": "user", "type": "address" }, { "indexed": false, "name": "amount", "type": "uint256" }, { "indexed": false, "name": "balance", "type": "uint256" }], "name": "Withdraw", "type": "event" }],
-  zeroxAbi: [{ "constant": true, "inputs": [{ "name": "numerator", "type": "uint256" }, { "name": "denominator", "type": "uint256" }, { "name": "target", "type": "uint256" }], "name": "isRoundingError", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "bytes32" }], "name": "filled", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "", "type": "bytes32" }], "name": "cancelled", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "orderAddresses", "type": "address[5][]" }, { "name": "orderValues", "type": "uint256[6][]" }, { "name": "fillTakerTokenAmount", "type": "uint256" }, { "name": "shouldThrowOnInsufficientBalanceOrAllowance", "type": "bool" }, { "name": "v", "type": "uint8[]" }, { "name": "r", "type": "bytes32[]" }, { "name": "s", "type": "bytes32[]" }], "name": "fillOrdersUpTo", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "orderAddresses", "type": "address[5]" }, { "name": "orderValues", "type": "uint256[6]" }, { "name": "cancelTakerTokenAmount", "type": "uint256" }], "name": "cancelOrder", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "ZRX_TOKEN_CONTRACT", "outputs": [{ "name": "", "type": "address" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "orderAddresses", "type": "address[5][]" }, { "name": "orderValues", "type": "uint256[6][]" }, { "name": "fillTakerTokenAmounts", "type": "uint256[]" }, { "name": "v", "type": "uint8[]" }, { "name": "r", "type": "bytes32[]" }, { "name": "s", "type": "bytes32[]" }], "name": "batchFillOrKillOrders", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "orderAddresses", "type": "address[5]" }, { "name": "orderValues", "type": "uint256[6]" }, { "name": "fillTakerTokenAmount", "type": "uint256" }, { "name": "v", "type": "uint8" }, { "name": "r", "type": "bytes32" }, { "name": "s", "type": "bytes32" }], "name": "fillOrKillOrder", "outputs": [], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "orderHash", "type": "bytes32" }], "name": "getUnavailableTakerTokenAmount", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "signer", "type": "address" }, { "name": "hash", "type": "bytes32" }, { "name": "v", "type": "uint8" }, { "name": "r", "type": "bytes32" }, { "name": "s", "type": "bytes32" }], "name": "isValidSignature", "outputs": [{ "name": "", "type": "bool" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "numerator", "type": "uint256" }, { "name": "denominator", "type": "uint256" }, { "name": "target", "type": "uint256" }], "name": "getPartialAmount", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "TOKEN_TRANSFER_PROXY_CONTRACT", "outputs": [{ "name": "", "type": "address" }], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "orderAddresses", "type": "address[5][]" }, { "name": "orderValues", "type": "uint256[6][]" }, { "name": "fillTakerTokenAmounts", "type": "uint256[]" }, { "name": "shouldThrowOnInsufficientBalanceOrAllowance", "type": "bool" }, { "name": "v", "type": "uint8[]" }, { "name": "r", "type": "bytes32[]" }, { "name": "s", "type": "bytes32[]" }], "name": "batchFillOrders", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "orderAddresses", "type": "address[5][]" }, { "name": "orderValues", "type": "uint256[6][]" }, { "name": "cancelTakerTokenAmounts", "type": "uint256[]" }], "name": "batchCancelOrders", "outputs": [], "payable": false, "type": "function" }, { "constant": false, "inputs": [{ "name": "orderAddresses", "type": "address[5]" }, { "name": "orderValues", "type": "uint256[6]" }, { "name": "fillTakerTokenAmount", "type": "uint256" }, { "name": "shouldThrowOnInsufficientBalanceOrAllowance", "type": "bool" }, { "name": "v", "type": "uint8" }, { "name": "r", "type": "bytes32" }, { "name": "s", "type": "bytes32" }], "name": "fillOrder", "outputs": [{ "name": "filledTakerTokenAmount", "type": "uint256" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [{ "name": "orderAddresses", "type": "address[5]" }, { "name": "orderValues", "type": "uint256[6]" }], "name": "getOrderHash", "outputs": [{ "name": "", "type": "bytes32" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "EXTERNAL_QUERY_GAS_LIMIT", "outputs": [{ "name": "", "type": "uint16" }], "payable": false, "type": "function" }, { "constant": true, "inputs": [], "name": "VERSION", "outputs": [{ "name": "", "type": "string" }], "payable": false, "type": "function" }, { "inputs": [{ "name": "_zrxToken", "type": "address" }, { "name": "_tokenTransferProxy", "type": "address" }], "payable": false, "type": "constructor" }, { "anonymous": false, "inputs": [{ "indexed": true, "name": "maker", "type": "address" }, { "indexed": false, "name": "taker", "type": "address" }, { "indexed": true, "name": "feeRecipient", "type": "address" }, { "indexed": false, "name": "makerToken", "type": "address" }, { "indexed": false, "name": "takerToken", "type": "address" }, { "indexed": false, "name": "filledMakerTokenAmount", "type": "uint256" }, { "indexed": false, "name": "filledTakerTokenAmount", "type": "uint256" }, { "indexed": false, "name": "paidMakerFee", "type": "uint256" }, { "indexed": false, "name": "paidTakerFee", "type": "uint256" }, { "indexed": true, "name": "tokens", "type": "bytes32" }, { "indexed": false, "name": "orderHash", "type": "bytes32" }], "name": "LogFill", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "name": "maker", "type": "address" }, { "indexed": true, "name": "feeRecipient", "type": "address" }, { "indexed": false, "name": "makerToken", "type": "address" }, { "indexed": false, "name": "takerToken", "type": "address" }, { "indexed": false, "name": "cancelledMakerTokenAmount", "type": "uint256" }, { "indexed": false, "name": "cancelledTakerTokenAmount", "type": "uint256" }, { "indexed": true, "name": "tokens", "type": "bytes32" }, { "indexed": false, "name": "orderHash", "type": "bytes32" }], "name": "LogCancel", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "name": "errorId", "type": "uint8" }, { "indexed": true, "name": "orderHash", "type": "bytes32" }], "name": "LogError", "type": "event" }],
-  tokenAbi: [{ "constant": true, "inputs": [], "name": "name", "outputs": [{ "name": "", "type": "string" }], "type": "function" }, { "constant": false, "inputs": [{ "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "approve", "outputs": [{ "name": "success", "type": "bool" }], "type": "function" }, { "constant": true, "inputs": [], "name": "totalSupply", "outputs": [{ "name": "supply", "type": "uint256" }], "type": "function" }, { "constant": false, "inputs": [{ "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "name": "success", "type": "bool" }], "type": "function" }, { "constant": true, "inputs": [], "name": "decimals", "outputs": [{ "name": "", "type": "uint256" }], "type": "function" }, { "constant": true, "inputs": [{ "name": "_owner", "type": "address" }], "name": "balanceOf", "outputs": [{ "name": "balance", "type": "uint256" }], "type": "function" }, { "constant": false, "inputs": [{ "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" }], "name": "transfer", "outputs": [{ "name": "success", "type": "bool" }], "type": "function" }, { "constant": true, "inputs": [{ "name": "_owner", "type": "address" }, { "name": "_spender", "type": "address" }], "name": "allowance", "outputs": [{ "name": "remaining", "type": "uint256" }], "type": "function" }, { "anonymous": false, "inputs": [{ "indexed": true, "name": "_from", "type": "address" }, { "indexed": true, "name": "_to", "type": "address" }, { "indexed": false, "name": "_value", "type": "uint256" }], "name": "Transfer", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "name": "_owner", "type": "address" }, { "indexed": true, "name": "_spender", "type": "address" }, { "indexed": false, "name": "_value", "type": "uint256" }], "name": "Approval", "type": "event" }],
-  deltaBalancesAbi: [{ "constant": true, "inputs": [{ "name": "user", "type": "address" }, { "name": "token", "type": "address" }], "name": "tokenBalance", "outputs": [{ "name": "", "type": "uint256" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [], "name": "withdraw", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [{ "name": "exchanges", "type": "address[]" }, { "name": "user", "type": "address" }, { "name": "tokens", "type": "address[]" }], "name": "multiDeltaBalances", "outputs": [{ "name": "", "type": "uint256[]" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "exchange", "type": "address" }, { "name": "user", "type": "address" }, { "name": "tokens", "type": "address[]" }], "name": "deltaBalances", "outputs": [{ "name": "", "type": "uint256[]" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [{ "name": "user", "type": "address" }, { "name": "tokens", "type": "address[]" }], "name": "walletBalances", "outputs": [{ "name": "", "type": "uint256[]" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [{ "name": "token", "type": "address" }, { "name": "amount", "type": "uint256" }], "name": "withdrawToken", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [{ "name": "exchange", "type": "address" }, { "name": "user", "type": "address" }, { "name": "tokens", "type": "address[]" }], "name": "allBalances", "outputs": [{ "name": "", "type": "uint256[]" }], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "admin", "outputs": [{ "name": "", "type": "address" }], "payable": false, "stateMutability": "view", "type": "function" }, { "inputs": [], "payable": false, "stateMutability": "nonpayable", "type": "constructor" }, { "payable": true, "stateMutability": "payable", "type": "fallback" }],
-
-  //First block on day 1 of month, UTC time  (feb 2017 is feb 9, contract deployment date)
-  blockMonths: [
-    { m: "Feb 2017", blockFrom: 3154196, blockTo: 3269188 },
-    { m: "Mar 2017", blockFrom: 3269188, blockTo: 3454529 },
-    { m: "Apr 2017", blockFrom: 3454529, blockTo: 3629091 },
-    { m: "May 2017", blockFrom: 3629091, blockTo: 3800776 },
-    { m: "Jun 2017", blockFrom: 3800776, blockTo: 3955159 },
-    { m: "Jul 2017", blockFrom: 3955159, blockTo: 4101695 },
-    { m: "Aug 2017", blockFrom: 4101695, blockTo: 4225038 },
-    { m: "Sept 2017", blockFrom: 4225038, blockTo: 4326061 },
-    { m: "Oct 2017", blockFrom: 4326061, blockTo: 4467005 },
-    { m: "Nov 2017", blockFrom: 4467005, blockTo: 4652926 },
-    { m: "Dec 2017", blockFrom: 4652926, blockTo: 4832686 },
-    { m: "Jan 2018", blockFrom: 4832686, blockTo: 5008422 },
-    { m: "Feb 2018", blockFrom: 5008422, blockTo: 5174125 },
-  ],
-
-  historyEtherDelta: {
-    exchange: 'EtherDelta',
-    exchangeAddr: 'contractEtherDeltaAddr',
-    minBlock: 3154197,
-    maxBlock: undefined,
-    topic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
-    createTx: '0xc10fc67499a037b6c2f14ae0c63b659b05bd7b553378202f96e777dd4843130f',
-  },
-  historyDecentrex: {
-    exchange: 'Decentrex',
-    exchangeAddr: 'contractDecentrexAddr',
-    minBlock: 3767902,
-    maxBlock: 4832686,
-    topic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
-    createTx: '0x1b2ff86bbf91feb9ef7f5310dd258137e034d65f6e99ea432fa98a933a2ffecd',
-  },
-  historyTokenStore: {
-    exchange: 'Token.store',
-    exchangeAddr: 'contractTokenStoreAddr',
-    minBlock: 4097029,
-    maxBlock: undefined,
-    topic: '0x3314c351c2a2a45771640a1442b843167a4da29bd543612311c031bbfb4ffa98',
-    createTx: '0x386439acefbf00018b318f283a9ebc6185c483ff6738117243dba40fc1b42bb6',
-  },
-};
-},{}],157:[function(require,module,exports){
-
 let config = require('./config.js');
 const Web3 = require('web3');
 const utility = require('./utility.js')(config);
 const BigNumber = require('bignumber.js');
 
 function DeltaBalances() {
-
     this.uniqueTokens = {};
     this.connection = undefined;
-    this.contractEtherDelta = undefined;
-    this.contractToken = undefined;
-    this.secondsPerBlock = 15;
-    this.selectedContract = undefined;
+    this.secondsPerBlock = 14;
     this.web3 = undefined;
-    // this.minGas = 0.005;
     this.contractDeltaBalance = undefined;
     this.socket = null;
     this.socketConnected = false;
@@ -22725,7 +22639,6 @@ DeltaBalances.prototype.connectSocket = function connectSocket(callbackConnect, 
         console.log('socket disconnected');
     });
 
-
     if (callBackNotifications) {
         this.socket.on('orders', (orders) => {
             callBackNotifications('orders', orders);
@@ -22752,15 +22665,14 @@ DeltaBalances.prototype.dialogInfo = function dialogInfo(message) {
 DeltaBalances.prototype.dialogError = function dialogError(message) {
     console.log(message);
 };
+
 DeltaBalances.prototype.alertSuccess = function alertSuccess(message) {
     console.log(message);
 };
 
-
 DeltaBalances.prototype.addressLink = function addressLink(address) {
     return utility.addressLink(address, false, false);
 };
-
 
 DeltaBalances.prototype.getDivisor = function getDivisor(tokenOrAddress) {
     let result = 1000000000000000000;
@@ -22806,17 +22718,12 @@ DeltaBalances.prototype.getToken = function getToken(addrOrToken, name, decimals
 
 
 DeltaBalances.prototype.loadWeb3 = function loadWeb3(callback) {
-    //let _delta = this;
-
     this.config = config;
-
-    let provider = 'https://mainnet.infura.io/DeltaBalances ';
-
+    let provider = this.config.infuraURL;
 
     // mist/geth/parity situation
     this.web3 = new Web3(new Web3.providers.HttpProvider(provider));
     try {
-        this.connection = { connection: 'RPC', provider: provider, testnet: this.config.ethTestnet };
         const block = this.web3.eth.blockNumber;
         if (block === undefined)
             throw 'fuck';
@@ -22825,15 +22732,9 @@ DeltaBalances.prototype.loadWeb3 = function loadWeb3(callback) {
     } catch (err) {
         etherscanFallback = true;
         console.log('catch, fallback etherscan');
-        this.connection = {
-            connection: 'Proxy',
-            provider: `https://${this.config.ethTestnet ? `${this.config.ethTestnet}.` : ''}etherscan.io`,
-            testnet: this.config.ethTestnet,
-        };
         this.web3.setProvider(undefined);
     }
     callback();
-
 };
 
 DeltaBalances.prototype.changeContract = function changeContract(index) {
@@ -22846,12 +22747,12 @@ DeltaBalances.prototype.changeContract = function changeContract(index) {
 
 DeltaBalances.prototype.initContracts = function initContracts(callback) {
     let _delta = this;
-
+    /*
     this.web3.version.getNetwork((error, version) => {
         if (!error && version && Number(version) !== 1) {
             _delta.dialogError('You are connected to the Ethereum testnet. Please connect to the Ethereum mainnet.');
         }
-    });
+    }); */
 
     this.config = config;
     this.config.contractEtherDeltaAddr = this.config.contractEtherDeltaAddrs[0].addr;
@@ -22864,28 +22765,12 @@ DeltaBalances.prototype.initContracts = function initContracts(callback) {
 
     // load contract
     utility.loadContract(
-        this.web3,
-        this.config.etherDeltaAbi,
-        this.config.contractEtherDeltaAddr,
-        (err, contractEtherDelta) => {
-
-            _delta.contractEtherDelta = contractEtherDelta;
-            utility.loadContract(
-                _delta.web3,
-                _delta.config.tokenAbi,
-                '0x0000000000000000000000000000000000000000',
-                (errLoadContract, contractToken) => {
-                    _delta.contractToken = contractToken;
-
-                    utility.loadContract(
-                        _delta.web3,
-                        _delta.config.deltaBalancesAbi,
-                        _delta.config.contractDeltaBalanceAddr,
-                        (err, contractDeltaBalance) => {
-                            _delta.contractDeltaBalance = contractDeltaBalance;
-                            callback();
-                        });
-                });
+        _delta.web3,
+        _delta.config.deltaBalancesAbi,
+        _delta.config.contractDeltaBalanceAddr,
+        (err, contractDeltaBalance) => {
+            _delta.contractDeltaBalance = contractDeltaBalance;
+            callback();
         });
 };
 
@@ -22922,7 +22807,6 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         forkTokens = forkOfflineTokens;
     }
 
-
     //forkTokens = forkTokens.filter((x) => { return !(this.uniqueTokens[x.addr]) });
     for (var i = 0; i < forkTokens.length; i++) {
         var token = forkTokens[i];
@@ -22940,7 +22824,6 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             }
         }
     }
-
 
     //format MEW tokens like ED tokens
     offlineCustomTokens = offlineCustomTokens.map((x) => {
@@ -23201,8 +23084,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     if (tradeType === 'Sell') {
                         amount = Number(unpacked.params[1].value);
                         oppositeAmount = Number(unpacked.params[3].value);
-
-
                     } else {
                         oppositeAmount = Number(unpacked.params[1].value);
                         amount = Number(unpacked.params[3].value);
@@ -23215,7 +23096,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var val2 = utility.weiToEth(oppositeAmount, dvsr2);
 
                     var orderSize = 0;
-
                     var price = 0;
                     //	if(tradeType === 'sell')
                     {
@@ -23264,14 +23144,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var type = '';
                     var note = '';
 
-                    if (token.addr !== '0x0000000000000000000000000000000000000000') {
+                    if (token.addr !== this.config.ethAddr) {
                         type = 'Token Withdraw';
                         note = utility.addressLink(unpacked.params[2].value, true, true) + ' requested IDEX to withdraw tokens';
                     } else {
                         type = 'Withdraw';
                         note = utility.addressLink(unpacked.params[2].value, true, true) + ' requested IDEX to withdraw ETH';
                     }
-
 
                     var obj = {
                         'type': type,
@@ -23289,14 +23168,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
         } else {
             return undefined;
         }
-
         return undefined;
     } catch (error) {
         console.log('unpacked input parsing exception ' + error);
         return undefined;
     }
-
-
 };
 
 DeltaBalances.prototype.addressName = function (addr, showAddr) {
@@ -23330,7 +23206,6 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
             }
         }
     }
-
     // no known alias, return address
     return addr;
 };
@@ -23340,7 +23215,6 @@ DeltaBalances.prototype.isTokenAddress = function (addr) {
     if (this.uniqueTokens[lcAddr] || this.uniqueTokens[addr]) {
         return true
     }
-
     return false;
 };
 
@@ -23352,16 +23226,13 @@ DeltaBalances.prototype.isExchangeAddress = function (addr) {
         || lcAddr === this.config.contractIdexAddr
         || lcAddr === this.config.contractDecentrexAddr) {
         return true;
-    }
-
-    else {
+    } else {
         for (var i = 0; i < this.config.contractEtherDeltaAddrs.length; i++) {
             if (lcAddr == this.config.contractEtherDeltaAddrs[i].addr) {
                 return true;
             }
         }
     }
-
     return false;
 };
 
@@ -23435,7 +23306,6 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     else if (sellUser === myAddr)
                         tradeType = "Sell";
 
-
                     let fee = 0;
                     let feeCurrency = '';
                     if (transType === 'Taker') {
@@ -23459,8 +23329,6 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                         }
                     }
 
-
-
                     var obj = {
                         'type': transType + ' ' + tradeType,
                         // myAddr works in tx.js , history doesn't show note anyway
@@ -23479,7 +23347,6 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     };
                     return obj;
                 }
-
             }
             else if (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw') {
                 var type = unpacked.name;
@@ -23500,7 +23367,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                         note = 'Deposited into the exchange';
                     }
 
-                    if (token.addr !== '0x0000000000000000000000000000000000000000')
+                    if (token.addr !== this.config.ethAddr)
                         type = 'Token ' + type;
                     var obj = {
                         'type': type,
@@ -23615,25 +23482,19 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
     }
 };
 
-
 DeltaBalances.prototype.startDeltaBalances = function startDeltaBalances(callback) {
     let _delta = this;
-
-    console.log('Beginning init', new Date());
     this.loadWeb3(() => {
-        console.log('Web3 done', new Date());
         _delta.initContracts(() => {
-            console.log('Init contracts done', new Date());
             callback();
         });
     });
 };
 
 const deltaBalances = new DeltaBalances();
-
 module.exports = { DeltaBalances: deltaBalances, utility };
 
-},{"./config.js":156,"./utility.js":298,"bignumber.js":210,"web3":246}],158:[function(require,module,exports){
+},{"./config.js":"/config.js","./utility.js":297,"bignumber.js":209,"web3":245}],157:[function(require,module,exports){
 const SolidityCoder = require("web3/lib/solidity/coder.js");
 const Web3 = require('web3');
 
@@ -23807,7 +23668,7 @@ module.exports = {
   removeABI: _removeABI
 };
 
-},{"web3":160,"web3/lib/solidity/coder.js":167}],159:[function(require,module,exports){
+},{"web3":159,"web3/lib/solidity/coder.js":166}],158:[function(require,module,exports){
 /*! bignumber.js v2.0.7 https://github.com/MikeMcl/bignumber.js/LICENCE */
 
 ;(function (global) {
@@ -26492,7 +26353,7 @@ module.exports = {
     }
 })(this);
 
-},{"crypto":56}],160:[function(require,module,exports){
+},{"crypto":56}],159:[function(require,module,exports){
 var Web3 = require('./lib/web3');
 
 // dont override global variable
@@ -26502,7 +26363,7 @@ if (typeof window !== 'undefined' && typeof window.Web3 === 'undefined') {
 
 module.exports = Web3;
 
-},{"./lib/web3":182}],161:[function(require,module,exports){
+},{"./lib/web3":181}],160:[function(require,module,exports){
 module.exports=[
   {
     "constant": true,
@@ -26758,7 +26619,7 @@ module.exports=[
   }
 ]
 
-},{}],162:[function(require,module,exports){
+},{}],161:[function(require,module,exports){
 module.exports=[
   {
     "constant": true,
@@ -26868,7 +26729,7 @@ module.exports=[
   }
 ]
 
-},{}],163:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 module.exports=[
   {
     "constant": false,
@@ -27017,7 +26878,7 @@ module.exports=[
   }
 ]
 
-},{}],164:[function(require,module,exports){
+},{}],163:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -27045,7 +26906,7 @@ SolidityTypeAddress.prototype.isType = function (name) {
 
 module.exports = SolidityTypeAddress;
 
-},{"./formatters":169,"./type":174}],165:[function(require,module,exports){
+},{"./formatters":168,"./type":173}],164:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -27073,7 +26934,7 @@ SolidityTypeBool.prototype.isType = function (name) {
 
 module.exports = SolidityTypeBool;
 
-},{"./formatters":169,"./type":174}],166:[function(require,module,exports){
+},{"./formatters":168,"./type":173}],165:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -27104,7 +26965,7 @@ SolidityTypeBytes.prototype.isType = function (name) {
 
 module.exports = SolidityTypeBytes;
 
-},{"./formatters":169,"./type":174}],167:[function(require,module,exports){
+},{"./formatters":168,"./type":173}],166:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -27369,7 +27230,7 @@ var coder = new SolidityCoder([
 
 module.exports = coder;
 
-},{"./address":164,"./bool":165,"./bytes":166,"./dynamicbytes":168,"./formatters":169,"./int":170,"./real":172,"./string":173,"./uint":175,"./ureal":176}],168:[function(require,module,exports){
+},{"./address":163,"./bool":164,"./bytes":165,"./dynamicbytes":167,"./formatters":168,"./int":169,"./real":171,"./string":172,"./uint":174,"./ureal":175}],167:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -27391,7 +27252,7 @@ SolidityTypeDynamicBytes.prototype.isDynamicType = function () {
 
 module.exports = SolidityTypeDynamicBytes;
 
-},{"./formatters":169,"./type":174}],169:[function(require,module,exports){
+},{"./formatters":168,"./type":173}],168:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -27645,7 +27506,7 @@ module.exports = {
     formatOutputAddress: formatOutputAddress
 };
 
-},{"../utils/config":178,"../utils/utils":180,"./param":171,"bignumber.js":159}],170:[function(require,module,exports){
+},{"../utils/config":177,"../utils/utils":179,"./param":170,"bignumber.js":158}],169:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -27679,7 +27540,7 @@ SolidityTypeInt.prototype.isType = function (name) {
 
 module.exports = SolidityTypeInt;
 
-},{"./formatters":169,"./type":174}],171:[function(require,module,exports){
+},{"./formatters":168,"./type":173}],170:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -27833,7 +27694,7 @@ SolidityParam.encodeList = function (params) {
 module.exports = SolidityParam;
 
 
-},{"../utils/utils":180}],172:[function(require,module,exports){
+},{"../utils/utils":179}],171:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -27867,7 +27728,7 @@ SolidityTypeReal.prototype.isType = function (name) {
 
 module.exports = SolidityTypeReal;
 
-},{"./formatters":169,"./type":174}],173:[function(require,module,exports){
+},{"./formatters":168,"./type":173}],172:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -27889,7 +27750,7 @@ SolidityTypeString.prototype.isDynamicType = function () {
 
 module.exports = SolidityTypeString;
 
-},{"./formatters":169,"./type":174}],174:[function(require,module,exports){
+},{"./formatters":168,"./type":173}],173:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityParam = require('./param');
 
@@ -28146,7 +28007,7 @@ SolidityType.prototype.decode = function (bytes, offset, name) {
 
 module.exports = SolidityType;
 
-},{"./formatters":169,"./param":171}],175:[function(require,module,exports){
+},{"./formatters":168,"./param":170}],174:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -28180,7 +28041,7 @@ SolidityTypeUInt.prototype.isType = function (name) {
 
 module.exports = SolidityTypeUInt;
 
-},{"./formatters":169,"./type":174}],176:[function(require,module,exports){
+},{"./formatters":168,"./type":173}],175:[function(require,module,exports){
 var f = require('./formatters');
 var SolidityType = require('./type');
 
@@ -28214,7 +28075,7 @@ SolidityTypeUReal.prototype.isType = function (name) {
 
 module.exports = SolidityTypeUReal;
 
-},{"./formatters":169,"./type":174}],177:[function(require,module,exports){
+},{"./formatters":168,"./type":173}],176:[function(require,module,exports){
 'use strict';
 
 // go env doesn't have and need XMLHttpRequest
@@ -28225,7 +28086,7 @@ if (typeof XMLHttpRequest === 'undefined') {
 }
 
 
-},{}],178:[function(require,module,exports){
+},{}],177:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -28306,7 +28167,7 @@ module.exports = {
 };
 
 
-},{"bignumber.js":159}],179:[function(require,module,exports){
+},{"bignumber.js":158}],178:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -28346,7 +28207,7 @@ module.exports = function (value, options) {
 };
 
 
-},{"crypto-js":219,"crypto-js/sha3":240}],180:[function(require,module,exports){
+},{"crypto-js":218,"crypto-js/sha3":239}],179:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -28977,12 +28838,12 @@ module.exports = {
     isTopic: isTopic,
 };
 
-},{"./sha3.js":179,"bignumber.js":159,"utf8":245}],181:[function(require,module,exports){
+},{"./sha3.js":178,"bignumber.js":158,"utf8":244}],180:[function(require,module,exports){
 module.exports={
     "version": "0.18.4"
 }
 
-},{}],182:[function(require,module,exports){
+},{}],181:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -29134,7 +28995,7 @@ Web3.prototype.createBatch = function () {
 module.exports = Web3;
 
 
-},{"./utils/sha3":179,"./utils/utils":180,"./version.json":181,"./web3/batch":184,"./web3/extend":188,"./web3/httpprovider":192,"./web3/iban":193,"./web3/ipcprovider":194,"./web3/methods/db":197,"./web3/methods/eth":198,"./web3/methods/net":199,"./web3/methods/personal":200,"./web3/methods/shh":201,"./web3/methods/swarm":202,"./web3/property":205,"./web3/requestmanager":206,"./web3/settings":207,"bignumber.js":159}],183:[function(require,module,exports){
+},{"./utils/sha3":178,"./utils/utils":179,"./version.json":180,"./web3/batch":183,"./web3/extend":187,"./web3/httpprovider":191,"./web3/iban":192,"./web3/ipcprovider":193,"./web3/methods/db":196,"./web3/methods/eth":197,"./web3/methods/net":198,"./web3/methods/personal":199,"./web3/methods/shh":200,"./web3/methods/swarm":201,"./web3/property":204,"./web3/requestmanager":205,"./web3/settings":206,"bignumber.js":158}],182:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -29224,7 +29085,7 @@ AllSolidityEvents.prototype.attachToContract = function (contract) {
 module.exports = AllSolidityEvents;
 
 
-},{"../utils/sha3":179,"../utils/utils":180,"./event":187,"./filter":189,"./formatters":190,"./methods/watches":203}],184:[function(require,module,exports){
+},{"../utils/sha3":178,"../utils/utils":179,"./event":186,"./filter":188,"./formatters":189,"./methods/watches":202}],183:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -29292,7 +29153,7 @@ Batch.prototype.execute = function () {
 module.exports = Batch;
 
 
-},{"./errors":186,"./jsonrpc":195}],185:[function(require,module,exports){
+},{"./errors":185,"./jsonrpc":194}],184:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -29604,7 +29465,7 @@ var Contract = function (eth, abi, address) {
 
 module.exports = ContractFactory;
 
-},{"../solidity/coder":167,"../utils/utils":180,"./allevents":183,"./event":187,"./function":191}],186:[function(require,module,exports){
+},{"../solidity/coder":166,"../utils/utils":179,"./allevents":182,"./event":186,"./function":190}],185:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -29646,7 +29507,7 @@ module.exports = {
     }
 };
 
-},{}],187:[function(require,module,exports){
+},{}],186:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -29856,7 +29717,7 @@ SolidityEvent.prototype.attachToContract = function (contract) {
 module.exports = SolidityEvent;
 
 
-},{"../solidity/coder":167,"../utils/sha3":179,"../utils/utils":180,"./filter":189,"./formatters":190,"./methods/watches":203}],188:[function(require,module,exports){
+},{"../solidity/coder":166,"../utils/sha3":178,"../utils/utils":179,"./filter":188,"./formatters":189,"./methods/watches":202}],187:[function(require,module,exports){
 var formatters = require('./formatters');
 var utils = require('./../utils/utils');
 var Method = require('./method');
@@ -29906,7 +29767,7 @@ var extend = function (web3) {
 module.exports = extend;
 
 
-},{"./../utils/utils":180,"./formatters":190,"./method":196,"./property":205}],189:[function(require,module,exports){
+},{"./../utils/utils":179,"./formatters":189,"./method":195,"./property":204}],188:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -30143,7 +30004,7 @@ Filter.prototype.get = function (callback) {
 module.exports = Filter;
 
 
-},{"../utils/utils":180,"./formatters":190}],190:[function(require,module,exports){
+},{"../utils/utils":179,"./formatters":189}],189:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -30448,7 +30309,7 @@ module.exports = {
 };
 
 
-},{"../utils/config":178,"../utils/utils":180,"./iban":193}],191:[function(require,module,exports){
+},{"../utils/config":177,"../utils/utils":179,"./iban":192}],190:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -30712,7 +30573,7 @@ SolidityFunction.prototype.attachToContract = function (contract) {
 module.exports = SolidityFunction;
 
 
-},{"../solidity/coder":167,"../utils/sha3":179,"../utils/utils":180,"./formatters":190}],192:[function(require,module,exports){
+},{"../solidity/coder":166,"../utils/sha3":178,"../utils/utils":179,"./formatters":189}],191:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -30867,7 +30728,7 @@ HttpProvider.prototype.isConnected = function() {
 
 module.exports = HttpProvider;
 
-},{"./errors":186,"xhr2":297,"xmlhttprequest":177}],193:[function(require,module,exports){
+},{"./errors":185,"xhr2":296,"xmlhttprequest":176}],192:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -31096,7 +30957,7 @@ Iban.prototype.toString = function () {
 module.exports = Iban;
 
 
-},{"bignumber.js":159}],194:[function(require,module,exports){
+},{"bignumber.js":158}],193:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -31305,7 +31166,7 @@ IpcProvider.prototype.sendAsync = function (payload, callback) {
 module.exports = IpcProvider;
 
 
-},{"../utils/utils":180,"./errors":186}],195:[function(require,module,exports){
+},{"../utils/utils":179,"./errors":185}],194:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -31392,7 +31253,7 @@ Jsonrpc.toBatchPayload = function (messages) {
 module.exports = Jsonrpc;
 
 
-},{}],196:[function(require,module,exports){
+},{}],195:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -31559,7 +31420,7 @@ Method.prototype.request = function () {
 module.exports = Method;
 
 
-},{"../utils/utils":180,"./errors":186}],197:[function(require,module,exports){
+},{"../utils/utils":179,"./errors":185}],196:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -31627,7 +31488,7 @@ var methods = function () {
 
 module.exports = DB;
 
-},{"../method":196}],198:[function(require,module,exports){
+},{"../method":195}],197:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -31983,7 +31844,7 @@ Eth.prototype.isSyncing = function (callback) {
 
 module.exports = Eth;
 
-},{"../../utils/config":178,"../../utils/utils":180,"../contract":185,"../filter":189,"../formatters":190,"../iban":193,"../method":196,"../namereg":204,"../property":205,"../syncing":208,"../transfer":209,"./watches":203}],199:[function(require,module,exports){
+},{"../../utils/config":177,"../../utils/utils":179,"../contract":184,"../filter":188,"../formatters":189,"../iban":192,"../method":195,"../namereg":203,"../property":204,"../syncing":207,"../transfer":208,"./watches":202}],198:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -32037,7 +31898,7 @@ var properties = function () {
 
 module.exports = Net;
 
-},{"../../utils/utils":180,"../property":205}],200:[function(require,module,exports){
+},{"../../utils/utils":179,"../property":204}],199:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -32132,7 +31993,7 @@ var properties = function () {
 
 module.exports = Personal;
 
-},{"../formatters":190,"../method":196,"../property":205}],201:[function(require,module,exports){
+},{"../formatters":189,"../method":195,"../property":204}],200:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -32220,7 +32081,7 @@ var methods = function () {
 module.exports = Shh;
 
 
-},{"../filter":189,"../formatters":190,"../method":196,"./watches":203}],202:[function(require,module,exports){
+},{"../filter":188,"../formatters":189,"../method":195,"./watches":202}],201:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -32367,7 +32228,7 @@ var properties = function () {
 
 module.exports = Swarm;
 
-},{"../method":196,"../property":205}],203:[function(require,module,exports){
+},{"../method":195,"../property":204}],202:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -32483,7 +32344,7 @@ module.exports = {
 };
 
 
-},{"../method":196}],204:[function(require,module,exports){
+},{"../method":195}],203:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -32524,7 +32385,7 @@ module.exports = {
 };
 
 
-},{"../contracts/GlobalRegistrar.json":161,"../contracts/ICAPRegistrar.json":162}],205:[function(require,module,exports){
+},{"../contracts/GlobalRegistrar.json":160,"../contracts/ICAPRegistrar.json":161}],204:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -32670,7 +32531,7 @@ Property.prototype.request = function () {
 module.exports = Property;
 
 
-},{"../utils/utils":180}],206:[function(require,module,exports){
+},{"../utils/utils":179}],205:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -32937,7 +32798,7 @@ RequestManager.prototype.poll = function () {
 module.exports = RequestManager;
 
 
-},{"../utils/config":178,"../utils/utils":180,"./errors":186,"./jsonrpc":195}],207:[function(require,module,exports){
+},{"../utils/config":177,"../utils/utils":179,"./errors":185,"./jsonrpc":194}],206:[function(require,module,exports){
 
 
 var Settings = function () {
@@ -32948,7 +32809,7 @@ var Settings = function () {
 module.exports = Settings;
 
 
-},{}],208:[function(require,module,exports){
+},{}],207:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -33043,7 +32904,7 @@ IsSyncing.prototype.stopWatching = function () {
 module.exports = IsSyncing;
 
 
-},{"../utils/utils":180,"./formatters":190}],209:[function(require,module,exports){
+},{"../utils/utils":179,"./formatters":189}],208:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -33137,7 +32998,7 @@ var deposit = function (eth, from, to, value, client, callback) {
 module.exports = transfer;
 
 
-},{"../contracts/SmartExchange.json":163,"./iban":193}],210:[function(require,module,exports){
+},{"../contracts/SmartExchange.json":162,"./iban":192}],209:[function(require,module,exports){
 /*! bignumber.js v5.0.0 https://github.com/MikeMcl/bignumber.js/LICENCE */
 
 ;(function (globalObj) {
@@ -35874,7 +35735,7 @@ module.exports = transfer;
     }
 })(this);
 
-},{}],211:[function(require,module,exports){
+},{}],210:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -36107,7 +35968,7 @@ module.exports = transfer;
 	return CryptoJS.AES;
 
 }));
-},{"./cipher-core":212,"./core":213,"./enc-base64":214,"./evpkdf":216,"./md5":221}],212:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212,"./enc-base64":213,"./evpkdf":215,"./md5":220}],211:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -36983,7 +36844,7 @@ module.exports = transfer;
 
 
 }));
-},{"./core":213}],213:[function(require,module,exports){
+},{"./core":212}],212:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -37744,7 +37605,7 @@ module.exports = transfer;
 	return CryptoJS;
 
 }));
-},{}],214:[function(require,module,exports){
+},{}],213:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -37880,7 +37741,7 @@ module.exports = transfer;
 	return CryptoJS.enc.Base64;
 
 }));
-},{"./core":213}],215:[function(require,module,exports){
+},{"./core":212}],214:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -38030,7 +37891,7 @@ module.exports = transfer;
 	return CryptoJS.enc.Utf16;
 
 }));
-},{"./core":213}],216:[function(require,module,exports){
+},{"./core":212}],215:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -38163,7 +38024,7 @@ module.exports = transfer;
 	return CryptoJS.EvpKDF;
 
 }));
-},{"./core":213,"./hmac":218,"./sha1":237}],217:[function(require,module,exports){
+},{"./core":212,"./hmac":217,"./sha1":236}],216:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -38230,7 +38091,7 @@ module.exports = transfer;
 	return CryptoJS.format.Hex;
 
 }));
-},{"./cipher-core":212,"./core":213}],218:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],217:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -38374,7 +38235,7 @@ module.exports = transfer;
 
 
 }));
-},{"./core":213}],219:[function(require,module,exports){
+},{"./core":212}],218:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -38393,7 +38254,7 @@ module.exports = transfer;
 	return CryptoJS;
 
 }));
-},{"./aes":211,"./cipher-core":212,"./core":213,"./enc-base64":214,"./enc-utf16":215,"./evpkdf":216,"./format-hex":217,"./hmac":218,"./lib-typedarrays":220,"./md5":221,"./mode-cfb":222,"./mode-ctr":224,"./mode-ctr-gladman":223,"./mode-ecb":225,"./mode-ofb":226,"./pad-ansix923":227,"./pad-iso10126":228,"./pad-iso97971":229,"./pad-nopadding":230,"./pad-zeropadding":231,"./pbkdf2":232,"./rabbit":234,"./rabbit-legacy":233,"./rc4":235,"./ripemd160":236,"./sha1":237,"./sha224":238,"./sha256":239,"./sha3":240,"./sha384":241,"./sha512":242,"./tripledes":243,"./x64-core":244}],220:[function(require,module,exports){
+},{"./aes":210,"./cipher-core":211,"./core":212,"./enc-base64":213,"./enc-utf16":214,"./evpkdf":215,"./format-hex":216,"./hmac":217,"./lib-typedarrays":219,"./md5":220,"./mode-cfb":221,"./mode-ctr":223,"./mode-ctr-gladman":222,"./mode-ecb":224,"./mode-ofb":225,"./pad-ansix923":226,"./pad-iso10126":227,"./pad-iso97971":228,"./pad-nopadding":229,"./pad-zeropadding":230,"./pbkdf2":231,"./rabbit":233,"./rabbit-legacy":232,"./rc4":234,"./ripemd160":235,"./sha1":236,"./sha224":237,"./sha256":238,"./sha3":239,"./sha384":240,"./sha512":241,"./tripledes":242,"./x64-core":243}],219:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -38470,7 +38331,7 @@ module.exports = transfer;
 	return CryptoJS.lib.WordArray;
 
 }));
-},{"./core":213}],221:[function(require,module,exports){
+},{"./core":212}],220:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -38739,7 +38600,7 @@ module.exports = transfer;
 	return CryptoJS.MD5;
 
 }));
-},{"./core":213}],222:[function(require,module,exports){
+},{"./core":212}],221:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -38818,7 +38679,7 @@ module.exports = transfer;
 	return CryptoJS.mode.CFB;
 
 }));
-},{"./cipher-core":212,"./core":213}],223:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],222:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -38935,7 +38796,7 @@ module.exports = transfer;
 	return CryptoJS.mode.CTRGladman;
 
 }));
-},{"./cipher-core":212,"./core":213}],224:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],223:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -38994,7 +38855,7 @@ module.exports = transfer;
 	return CryptoJS.mode.CTR;
 
 }));
-},{"./cipher-core":212,"./core":213}],225:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],224:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39035,7 +38896,7 @@ module.exports = transfer;
 	return CryptoJS.mode.ECB;
 
 }));
-},{"./cipher-core":212,"./core":213}],226:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],225:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39090,7 +38951,7 @@ module.exports = transfer;
 	return CryptoJS.mode.OFB;
 
 }));
-},{"./cipher-core":212,"./core":213}],227:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],226:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39140,7 +39001,7 @@ module.exports = transfer;
 	return CryptoJS.pad.Ansix923;
 
 }));
-},{"./cipher-core":212,"./core":213}],228:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],227:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39185,7 +39046,7 @@ module.exports = transfer;
 	return CryptoJS.pad.Iso10126;
 
 }));
-},{"./cipher-core":212,"./core":213}],229:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],228:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39226,7 +39087,7 @@ module.exports = transfer;
 	return CryptoJS.pad.Iso97971;
 
 }));
-},{"./cipher-core":212,"./core":213}],230:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],229:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39257,7 +39118,7 @@ module.exports = transfer;
 	return CryptoJS.pad.NoPadding;
 
 }));
-},{"./cipher-core":212,"./core":213}],231:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],230:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39303,7 +39164,7 @@ module.exports = transfer;
 	return CryptoJS.pad.ZeroPadding;
 
 }));
-},{"./cipher-core":212,"./core":213}],232:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212}],231:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39449,7 +39310,7 @@ module.exports = transfer;
 	return CryptoJS.PBKDF2;
 
 }));
-},{"./core":213,"./hmac":218,"./sha1":237}],233:[function(require,module,exports){
+},{"./core":212,"./hmac":217,"./sha1":236}],232:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39640,7 +39501,7 @@ module.exports = transfer;
 	return CryptoJS.RabbitLegacy;
 
 }));
-},{"./cipher-core":212,"./core":213,"./enc-base64":214,"./evpkdf":216,"./md5":221}],234:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212,"./enc-base64":213,"./evpkdf":215,"./md5":220}],233:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39833,7 +39694,7 @@ module.exports = transfer;
 	return CryptoJS.Rabbit;
 
 }));
-},{"./cipher-core":212,"./core":213,"./enc-base64":214,"./evpkdf":216,"./md5":221}],235:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212,"./enc-base64":213,"./evpkdf":215,"./md5":220}],234:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -39973,7 +39834,7 @@ module.exports = transfer;
 	return CryptoJS.RC4;
 
 }));
-},{"./cipher-core":212,"./core":213,"./enc-base64":214,"./evpkdf":216,"./md5":221}],236:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212,"./enc-base64":213,"./evpkdf":215,"./md5":220}],235:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -40241,7 +40102,7 @@ module.exports = transfer;
 	return CryptoJS.RIPEMD160;
 
 }));
-},{"./core":213}],237:[function(require,module,exports){
+},{"./core":212}],236:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -40392,7 +40253,7 @@ module.exports = transfer;
 	return CryptoJS.SHA1;
 
 }));
-},{"./core":213}],238:[function(require,module,exports){
+},{"./core":212}],237:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -40473,7 +40334,7 @@ module.exports = transfer;
 	return CryptoJS.SHA224;
 
 }));
-},{"./core":213,"./sha256":239}],239:[function(require,module,exports){
+},{"./core":212,"./sha256":238}],238:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -40673,7 +40534,7 @@ module.exports = transfer;
 	return CryptoJS.SHA256;
 
 }));
-},{"./core":213}],240:[function(require,module,exports){
+},{"./core":212}],239:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -40997,7 +40858,7 @@ module.exports = transfer;
 	return CryptoJS.SHA3;
 
 }));
-},{"./core":213,"./x64-core":244}],241:[function(require,module,exports){
+},{"./core":212,"./x64-core":243}],240:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -41081,7 +40942,7 @@ module.exports = transfer;
 	return CryptoJS.SHA384;
 
 }));
-},{"./core":213,"./sha512":242,"./x64-core":244}],242:[function(require,module,exports){
+},{"./core":212,"./sha512":241,"./x64-core":243}],241:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -41405,7 +41266,7 @@ module.exports = transfer;
 	return CryptoJS.SHA512;
 
 }));
-},{"./core":213,"./x64-core":244}],243:[function(require,module,exports){
+},{"./core":212,"./x64-core":243}],242:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -42176,7 +42037,7 @@ module.exports = transfer;
 	return CryptoJS.TripleDES;
 
 }));
-},{"./cipher-core":212,"./core":213,"./enc-base64":214,"./evpkdf":216,"./md5":221}],244:[function(require,module,exports){
+},{"./cipher-core":211,"./core":212,"./enc-base64":213,"./evpkdf":215,"./md5":220}],243:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -42481,7 +42342,7 @@ module.exports = transfer;
 	return CryptoJS;
 
 }));
-},{"./core":213}],245:[function(require,module,exports){
+},{"./core":212}],244:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/utf8js v2.1.2 by @mathias */
 ;(function(root) {
@@ -42729,21 +42590,21 @@ module.exports = transfer;
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],246:[function(require,module,exports){
+},{}],245:[function(require,module,exports){
+arguments[4][159][0].apply(exports,arguments)
+},{"./lib/web3":267,"dup":159}],246:[function(require,module,exports){
 arguments[4][160][0].apply(exports,arguments)
-},{"./lib/web3":268,"dup":160}],247:[function(require,module,exports){
+},{"dup":160}],247:[function(require,module,exports){
 arguments[4][161][0].apply(exports,arguments)
 },{"dup":161}],248:[function(require,module,exports){
 arguments[4][162][0].apply(exports,arguments)
 },{"dup":162}],249:[function(require,module,exports){
 arguments[4][163][0].apply(exports,arguments)
-},{"dup":163}],250:[function(require,module,exports){
+},{"./formatters":254,"./type":259,"dup":163}],250:[function(require,module,exports){
 arguments[4][164][0].apply(exports,arguments)
-},{"./formatters":255,"./type":260,"dup":164}],251:[function(require,module,exports){
+},{"./formatters":254,"./type":259,"dup":164}],251:[function(require,module,exports){
 arguments[4][165][0].apply(exports,arguments)
-},{"./formatters":255,"./type":260,"dup":165}],252:[function(require,module,exports){
-arguments[4][166][0].apply(exports,arguments)
-},{"./formatters":255,"./type":260,"dup":166}],253:[function(require,module,exports){
+},{"./formatters":254,"./type":259,"dup":165}],252:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -42992,31 +42853,31 @@ var coder = new SolidityCoder([
 
 module.exports = coder;
 
-},{"./address":250,"./bool":251,"./bytes":252,"./dynamicbytes":254,"./formatters":255,"./int":256,"./real":258,"./string":259,"./uint":261,"./ureal":262}],254:[function(require,module,exports){
+},{"./address":249,"./bool":250,"./bytes":251,"./dynamicbytes":253,"./formatters":254,"./int":255,"./real":257,"./string":258,"./uint":260,"./ureal":261}],253:[function(require,module,exports){
+arguments[4][167][0].apply(exports,arguments)
+},{"./formatters":254,"./type":259,"dup":167}],254:[function(require,module,exports){
 arguments[4][168][0].apply(exports,arguments)
-},{"./formatters":255,"./type":260,"dup":168}],255:[function(require,module,exports){
+},{"../utils/config":263,"../utils/utils":265,"./param":256,"bignumber.js":295,"dup":168}],255:[function(require,module,exports){
 arguments[4][169][0].apply(exports,arguments)
-},{"../utils/config":264,"../utils/utils":266,"./param":257,"bignumber.js":296,"dup":169}],256:[function(require,module,exports){
+},{"./formatters":254,"./type":259,"dup":169}],256:[function(require,module,exports){
 arguments[4][170][0].apply(exports,arguments)
-},{"./formatters":255,"./type":260,"dup":170}],257:[function(require,module,exports){
+},{"../utils/utils":265,"dup":170}],257:[function(require,module,exports){
 arguments[4][171][0].apply(exports,arguments)
-},{"../utils/utils":266,"dup":171}],258:[function(require,module,exports){
+},{"./formatters":254,"./type":259,"dup":171}],258:[function(require,module,exports){
 arguments[4][172][0].apply(exports,arguments)
-},{"./formatters":255,"./type":260,"dup":172}],259:[function(require,module,exports){
+},{"./formatters":254,"./type":259,"dup":172}],259:[function(require,module,exports){
 arguments[4][173][0].apply(exports,arguments)
-},{"./formatters":255,"./type":260,"dup":173}],260:[function(require,module,exports){
+},{"./formatters":254,"./param":256,"dup":173}],260:[function(require,module,exports){
 arguments[4][174][0].apply(exports,arguments)
-},{"./formatters":255,"./param":257,"dup":174}],261:[function(require,module,exports){
+},{"./formatters":254,"./type":259,"dup":174}],261:[function(require,module,exports){
 arguments[4][175][0].apply(exports,arguments)
-},{"./formatters":255,"./type":260,"dup":175}],262:[function(require,module,exports){
+},{"./formatters":254,"./type":259,"dup":175}],262:[function(require,module,exports){
 arguments[4][176][0].apply(exports,arguments)
-},{"./formatters":255,"./type":260,"dup":176}],263:[function(require,module,exports){
+},{"dup":176}],263:[function(require,module,exports){
 arguments[4][177][0].apply(exports,arguments)
-},{"dup":177}],264:[function(require,module,exports){
+},{"bignumber.js":295,"dup":177}],264:[function(require,module,exports){
 arguments[4][178][0].apply(exports,arguments)
-},{"bignumber.js":296,"dup":178}],265:[function(require,module,exports){
-arguments[4][179][0].apply(exports,arguments)
-},{"crypto-js":219,"crypto-js/sha3":240,"dup":179}],266:[function(require,module,exports){
+},{"crypto-js":218,"crypto-js/sha3":239,"dup":178}],265:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -43646,12 +43507,12 @@ module.exports = {
     isTopic: isTopic,
 };
 
-},{"./sha3.js":265,"bignumber.js":296,"utf8":245}],267:[function(require,module,exports){
+},{"./sha3.js":264,"bignumber.js":295,"utf8":244}],266:[function(require,module,exports){
 module.exports={
     "version": "0.20.3"
 }
 
-},{}],268:[function(require,module,exports){
+},{}],267:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -43805,7 +43666,7 @@ Web3.prototype.createBatch = function () {
 module.exports = Web3;
 
 
-},{"./utils/sha3":265,"./utils/utils":266,"./version.json":267,"./web3/batch":270,"./web3/extend":274,"./web3/httpprovider":278,"./web3/iban":279,"./web3/ipcprovider":280,"./web3/methods/db":283,"./web3/methods/eth":284,"./web3/methods/net":285,"./web3/methods/personal":286,"./web3/methods/shh":287,"./web3/methods/swarm":288,"./web3/property":291,"./web3/requestmanager":292,"./web3/settings":293,"bignumber.js":296}],269:[function(require,module,exports){
+},{"./utils/sha3":264,"./utils/utils":265,"./version.json":266,"./web3/batch":269,"./web3/extend":273,"./web3/httpprovider":277,"./web3/iban":278,"./web3/ipcprovider":279,"./web3/methods/db":282,"./web3/methods/eth":283,"./web3/methods/net":284,"./web3/methods/personal":285,"./web3/methods/shh":286,"./web3/methods/swarm":287,"./web3/property":290,"./web3/requestmanager":291,"./web3/settings":292,"bignumber.js":295}],268:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -43895,11 +43756,11 @@ AllSolidityEvents.prototype.attachToContract = function (contract) {
 module.exports = AllSolidityEvents;
 
 
-},{"../utils/sha3":265,"../utils/utils":266,"./event":273,"./filter":275,"./formatters":276,"./methods/watches":289}],270:[function(require,module,exports){
+},{"../utils/sha3":264,"../utils/utils":265,"./event":272,"./filter":274,"./formatters":275,"./methods/watches":288}],269:[function(require,module,exports){
+arguments[4][183][0].apply(exports,arguments)
+},{"./errors":271,"./jsonrpc":280,"dup":183}],270:[function(require,module,exports){
 arguments[4][184][0].apply(exports,arguments)
-},{"./errors":272,"./jsonrpc":281,"dup":184}],271:[function(require,module,exports){
-arguments[4][185][0].apply(exports,arguments)
-},{"../solidity/coder":253,"../utils/utils":266,"./allevents":269,"./event":273,"./function":277,"dup":185}],272:[function(require,module,exports){
+},{"../solidity/coder":252,"../utils/utils":265,"./allevents":268,"./event":272,"./function":276,"dup":184}],271:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -43944,7 +43805,7 @@ module.exports = {
     }
 };
 
-},{}],273:[function(require,module,exports){
+},{}],272:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -44154,9 +44015,9 @@ SolidityEvent.prototype.attachToContract = function (contract) {
 module.exports = SolidityEvent;
 
 
-},{"../solidity/coder":253,"../utils/sha3":265,"../utils/utils":266,"./filter":275,"./formatters":276,"./methods/watches":289}],274:[function(require,module,exports){
-arguments[4][188][0].apply(exports,arguments)
-},{"./../utils/utils":266,"./formatters":276,"./method":282,"./property":291,"dup":188}],275:[function(require,module,exports){
+},{"../solidity/coder":252,"../utils/sha3":264,"../utils/utils":265,"./filter":274,"./formatters":275,"./methods/watches":288}],273:[function(require,module,exports){
+arguments[4][187][0].apply(exports,arguments)
+},{"./../utils/utils":265,"./formatters":275,"./method":281,"./property":290,"dup":187}],274:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -44403,7 +44264,7 @@ Filter.prototype.get = function (callback) {
 module.exports = Filter;
 
 
-},{"../utils/utils":266,"./formatters":276}],276:[function(require,module,exports){
+},{"../utils/utils":265,"./formatters":275}],275:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -44714,7 +44575,7 @@ module.exports = {
 };
 
 
-},{"../utils/config":264,"../utils/utils":266,"./iban":279}],277:[function(require,module,exports){
+},{"../utils/config":263,"../utils/utils":265,"./iban":278}],276:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -44999,7 +44860,7 @@ SolidityFunction.prototype.attachToContract = function (contract) {
 
 module.exports = SolidityFunction;
 
-},{"../solidity/coder":253,"../utils/sha3":265,"../utils/utils":266,"./errors":272,"./formatters":276}],278:[function(require,module,exports){
+},{"../solidity/coder":252,"../utils/sha3":264,"../utils/utils":265,"./errors":271,"./formatters":275}],277:[function(require,module,exports){
 (function (Buffer){
 /*
     This file is part of web3.js.
@@ -45166,13 +45027,13 @@ HttpProvider.prototype.isConnected = function () {
 module.exports = HttpProvider;
 
 }).call(this,require("buffer").Buffer)
-},{"./errors":272,"buffer":47,"xhr2":297,"xmlhttprequest":263}],279:[function(require,module,exports){
+},{"./errors":271,"buffer":47,"xhr2":296,"xmlhttprequest":262}],278:[function(require,module,exports){
+arguments[4][192][0].apply(exports,arguments)
+},{"bignumber.js":295,"dup":192}],279:[function(require,module,exports){
 arguments[4][193][0].apply(exports,arguments)
-},{"bignumber.js":296,"dup":193}],280:[function(require,module,exports){
+},{"../utils/utils":265,"./errors":271,"dup":193}],280:[function(require,module,exports){
 arguments[4][194][0].apply(exports,arguments)
-},{"../utils/utils":266,"./errors":272,"dup":194}],281:[function(require,module,exports){
-arguments[4][195][0].apply(exports,arguments)
-},{"dup":195}],282:[function(require,module,exports){
+},{"dup":194}],281:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -45338,9 +45199,9 @@ Method.prototype.request = function () {
 
 module.exports = Method;
 
-},{"../utils/utils":266,"./errors":272}],283:[function(require,module,exports){
-arguments[4][197][0].apply(exports,arguments)
-},{"../method":282,"dup":197}],284:[function(require,module,exports){
+},{"../utils/utils":265,"./errors":271}],282:[function(require,module,exports){
+arguments[4][196][0].apply(exports,arguments)
+},{"../method":281,"dup":196}],283:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -45696,9 +45557,9 @@ Eth.prototype.isSyncing = function (callback) {
 
 module.exports = Eth;
 
-},{"../../utils/config":264,"../../utils/utils":266,"../contract":271,"../filter":275,"../formatters":276,"../iban":279,"../method":282,"../namereg":290,"../property":291,"../syncing":294,"../transfer":295,"./watches":289}],285:[function(require,module,exports){
-arguments[4][199][0].apply(exports,arguments)
-},{"../../utils/utils":266,"../property":291,"dup":199}],286:[function(require,module,exports){
+},{"../../utils/config":263,"../../utils/utils":265,"../contract":270,"../filter":274,"../formatters":275,"../iban":278,"../method":281,"../namereg":289,"../property":290,"../syncing":293,"../transfer":294,"./watches":288}],284:[function(require,module,exports){
+arguments[4][198][0].apply(exports,arguments)
+},{"../../utils/utils":265,"../property":290,"dup":198}],285:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -45815,7 +45676,7 @@ var properties = function () {
 
 module.exports = Personal;
 
-},{"../formatters":276,"../method":282,"../property":291}],287:[function(require,module,exports){
+},{"../formatters":275,"../method":281,"../property":290}],286:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -45961,9 +45822,9 @@ var methods = function () {
 module.exports = Shh;
 
 
-},{"../filter":275,"../method":282,"./watches":289}],288:[function(require,module,exports){
-arguments[4][202][0].apply(exports,arguments)
-},{"../method":282,"../property":291,"dup":202}],289:[function(require,module,exports){
+},{"../filter":274,"../method":281,"./watches":288}],287:[function(require,module,exports){
+arguments[4][201][0].apply(exports,arguments)
+},{"../method":281,"../property":290,"dup":201}],288:[function(require,module,exports){
 /*
     This file is part of web3.js.
 
@@ -46072,35 +45933,27 @@ module.exports = {
 };
 
 
-},{"../method":282}],290:[function(require,module,exports){
+},{"../method":281}],289:[function(require,module,exports){
+arguments[4][203][0].apply(exports,arguments)
+},{"../contracts/GlobalRegistrar.json":246,"../contracts/ICAPRegistrar.json":247,"dup":203}],290:[function(require,module,exports){
 arguments[4][204][0].apply(exports,arguments)
-},{"../contracts/GlobalRegistrar.json":247,"../contracts/ICAPRegistrar.json":248,"dup":204}],291:[function(require,module,exports){
+},{"../utils/utils":265,"dup":204}],291:[function(require,module,exports){
 arguments[4][205][0].apply(exports,arguments)
-},{"../utils/utils":266,"dup":205}],292:[function(require,module,exports){
+},{"../utils/config":263,"../utils/utils":265,"./errors":271,"./jsonrpc":280,"dup":205}],292:[function(require,module,exports){
 arguments[4][206][0].apply(exports,arguments)
-},{"../utils/config":264,"../utils/utils":266,"./errors":272,"./jsonrpc":281,"dup":206}],293:[function(require,module,exports){
+},{"dup":206}],293:[function(require,module,exports){
 arguments[4][207][0].apply(exports,arguments)
-},{"dup":207}],294:[function(require,module,exports){
+},{"../utils/utils":265,"./formatters":275,"dup":207}],294:[function(require,module,exports){
 arguments[4][208][0].apply(exports,arguments)
-},{"../utils/utils":266,"./formatters":276,"dup":208}],295:[function(require,module,exports){
-arguments[4][209][0].apply(exports,arguments)
-},{"../contracts/SmartExchange.json":249,"./iban":279,"dup":209}],296:[function(require,module,exports){
-arguments[4][159][0].apply(exports,arguments)
-},{"crypto":56,"dup":159}],297:[function(require,module,exports){
+},{"../contracts/SmartExchange.json":248,"./iban":278,"dup":208}],295:[function(require,module,exports){
+arguments[4][158][0].apply(exports,arguments)
+},{"crypto":56,"dup":158}],296:[function(require,module,exports){
 module.exports = XMLHttpRequest;
 
-},{}],298:[function(require,module,exports){
-//const request = require('request');
+},{}],297:[function(require,module,exports){
 const Web3 = require('web3');
 const SolidityFunction = require('web3/lib/web3/function.js');
-//const SolidityEvent = require('web3/lib/web3/event.js');
-//const coder = require('web3/lib/solidity/coder.js');
-//const utils = require('web3/lib/utils/utils.js');
 const Decoder = require('abi-decoder');
-//const sha3 = require('web3/lib/utils/sha3.js');
-//const Tx = require('ethereumjs-tx');
-//const keythereum = require('keythereum');
-//const ethUtil = require('ethereumjs-util');
 const BigNumber = require('bignumber.js');
 
 module.exports = (config) => {
@@ -46176,8 +46029,8 @@ module.exports = (config) => {
   utility.processLogs = function (data) {
 
     if (!bundle.DeltaBalances.config.methodIDS) {
-      Decoder.addABI(bundle.DeltaBalances.contractEtherDelta.abi);
-      Decoder.addABI(bundle.DeltaBalances.contractToken.abi);
+      Decoder.addABI(bundle.DeltaBalances.config.etherDeltaAbi);
+      Decoder.addABI(bundle.DeltaBalances.config.tokenAbi);
       Decoder.addABI(bundle.DeltaBalances.config.tokenStoreAbi);
       Decoder.addABI(bundle.DeltaBalances.config.idexAbi);
       Decoder.addABI(bundle.DeltaBalances.config.zeroxAbi);
@@ -46213,14 +46066,14 @@ module.exports = (config) => {
   utility.processInput = function (data) {
 
     if (!bundle.DeltaBalances.config.methodIDS) {
-      Decoder.addABI(bundle.DeltaBalances.contractEtherDelta.abi);
-      Decoder.addABI(bundle.DeltaBalances.contractToken.abi);
+      Decoder.addABI(bundle.DeltaBalances.config.etherDeltaAbi);
+      Decoder.addABI(bundle.DeltaBalances.config.tokenAbi);
       Decoder.addABI(bundle.DeltaBalances.config.tokenStoreAbi);
       Decoder.addABI(bundle.DeltaBalances.config.idexAbi);
       Decoder.addABI(bundle.DeltaBalances.config.zeroxAbi);
       bundle.DeltaBalances.config.methodIDS = true;
+      bundle.DeltaBalances.config.methodIDS = true;
     }
-
 
     if (data) {
       try {
@@ -46244,7 +46097,6 @@ module.exports = (config) => {
       } else {
         url += tokenObj.name + "-ETH";
       }
-
     } else {
       url = '';
     }
@@ -46395,7 +46247,6 @@ module.exports = (config) => {
     } else {
       proxy(0);
     }
-
   };
 
   //get etherdelta history logs from INFURA
@@ -46410,8 +46261,6 @@ module.exports = (config) => {
       topics: [topic]
     }]);
 
-
-
     let retries = 0;
     retry();
 
@@ -46423,14 +46272,14 @@ module.exports = (config) => {
         },
         type: "POST",
         async: true,
-        'url': 'https://mainnet.infura.io/DeltaBalances',
+        'url': bundle.DeltaBalances.config.infuraURL,
         'data': '{"jsonrpc":"2.0","method":"eth_getLogs","params":' + filterObj + ' ,"id":' + rpcID + '}',
         'dataType': 'json',
       }).done((result) => {
         if (result.result && result.result.length > 0) {
           callback(result.result, (endblock - startblock) + 1);
         } else {
-          callback(undefined, (endblock - startblock) + 1);
+          callback([], (endblock - startblock) + 1);
         }
       }).fail((result) => {
         if (retries < 1) {
@@ -46451,7 +46300,6 @@ module.exports = (config) => {
   //inclusive for start and end
   // can handle up to 1000 results. (worst case, like 10 blocks?)
   utility.getTradeLogs2 = function getTradeLogs(web3In, contractAddress, startblock, endblock, rpcID, callback) {
-
 
     let retries = 0;
     retry2();
@@ -46476,7 +46324,6 @@ module.exports = (config) => {
       });
     }
   };
-
 
   utility.txReceipt = function txReceipt(web3, txHash, callback, index) {
     proxy();
@@ -46668,5 +46515,5 @@ module.exports = (config) => {
   return utility;
 };
 
-},{"abi-decoder":158,"bignumber.js":210,"web3":246,"web3/lib/web3/function.js":277}]},{},[157])(157)
+},{"abi-decoder":157,"bignumber.js":209,"web3":245,"web3/lib/web3/function.js":276}]},{},[156])(156)
 });

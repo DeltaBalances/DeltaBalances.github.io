@@ -1,9 +1,9 @@
-require=(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({"/config.js":[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/config.js":[function(require,module,exports){
 module.exports = {
   homeURL: 'https://deltabalances.github.io',
   socketURL: 'https://api.forkdelta.com', //'https://socket.etherdelta.com';
 
-  contractDeltaBalanceAddr: '0xf5f563d3a99152c18ce8b133232fe34317f60fef',
+  contractDeltaBalanceAddr: '0x3E25F0BA291F202188Ae9Bda3004A7B3a803599a',
   contractEtherDeltaAddr: '0x8d12a197cb00d4747a1fe03395095ce2a5cc6819',
   contractEtherDeltaAddrs: [
     { addr: '0x8d12a197cb00d4747a1fe03395095ce2a5cc6819' },

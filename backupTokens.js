@@ -1745,7 +1745,7 @@ var forkOfflineTokens = [
   {a:"0xffe8196bc259e8dedc544d935786aa4709ec3e64",n:"HDG",d:18}
 ]; // end forkOfflineTokens
 
-//no decimals var,deciamls :0  2018-04-03
+//no decimals property d:, decimals :0  2018-04-03
 var idexOfflineTokens = [
   {n:"ETH",d:18,a:"0x0000000000000000000000000000000000000000"},
   {n:"PLU",d:18,a:"0xd8912c10681d8b21fd3742244f44658dba12264e"},

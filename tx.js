@@ -404,7 +404,7 @@
 
 				var unpackedLogs = _util.processLogs(outputLogs);
 
-				for (i = 0; i < unpackedLogs.length; i++) {
+				for (let i = 0; i < unpackedLogs.length; i++) {
 
 					let unpacked = unpackedLogs[i];
 

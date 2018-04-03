@@ -690,7 +690,7 @@
 			//if from etherscan, timestamp is included
 			// from web3/infura, no timestamp
 			if (filteredLogs.length > 0 && filteredLogs[0].timeStamp && filteredLogs[0].blockNumber) {
-				for (i = 0; i < filteredLogs.length; i++) {
+				for (let i = 0; i < filteredLogs.length; i++) {
 					let num = Number(filteredLogs[i].blockNumber);
 					if (!blockDates[num]) {
 						blockDates[num] = toDateTime(filteredLogs[0].timeStamp);
@@ -700,7 +700,7 @@
 
 			let unpackedLogs = _util.processLogs(filteredLogs);
 
-			for (i = 0; i < unpackedLogs.length; i++) {
+			for (let i = 0; i < unpackedLogs.length; i++) {
 
 				let unpacked = unpackedLogs[i];
 				if (!unpacked || unpacked.events.length < 6 || unpacked.name != 'Trade') {

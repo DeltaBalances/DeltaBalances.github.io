@@ -34,16 +34,29 @@
 	<script>
 		var customTokens = {};
 		
-		function parseMewTokens(array) {
-			for (var i = 0; i < array.length; i++) {
+        function parseOfflineTokens(array) {
+            for (var i = 0; i < array.length; i++) {
 				var customToken = array[i];
 				if (customToken) {
-					customToken.symbol = escapeHtml(customToken.symbol);
-					if(customToken.type)
-						delete customToken.type;	
-					customToken.address = customToken.address.toLowerCase();		
-					if (!customTokens[customToken.address]) {
-						customTokens[customToken.address] = customToken;
+					customToken.n = escapeHtml(customToken.n);	
+					customToken.a = customToken.a.toLowerCase();		
+					if (!customTokens[customToken.a]) {
+						customTokens[customToken.a] = customToken;
+					}
+				}			
+			}
+        }
+        
+		function parseMewTokens(array) {
+			for (var i = 0; i < array.length; i++) {
+				var mewToken = array[i];
+                var customToken = {};
+				if (mewToken) {
+					customToken.n = escapeHtml(mewToken.symbol);
+					customToken.a = mewToken.address.toLowerCase();
+                    customToken.d = Number(mewToken.decimal);
+					if (!customTokens[customToken.a]) {
+						customTokens[customToken.a] = customToken;
 					}
 				}			
 			}
@@ -54,13 +67,13 @@
 				let tok = response.tokens[i].tokenInfo;
 				let addr = tok.address.toLowerCase();
 				if (!customTokens[addr] && tok.symbol && response.tokens[i].balance > 10 && tok.holdersCount > 10) {
-					customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: tok.decimals };
+					customTokens[addr] = { a: addr, n: escapeHtml(tok.symbol), d: Number(tok.decimals) };
 				}
 			}
 		}
 		
 		//parse existing custom tokens from offlineCustomTokens (backupTokens.js)
-		parseMewTokens(offlineCustomTokens);
+		parseOfflineTokens(offlineCustomTokens);
 		
 		
 		//get list of tokens from myetherwallet & mycrypto
@@ -86,12 +99,15 @@
 						let customTokensList = Object.values(customTokens);
 						
 						customTokensList = customTokensList.sort(function(a,b){
-							return (a.symbol + a.address).localeCompare(b.symbol + b.address);
+							return (a.n + a.a).localeCompare(b.n + b.a);
 						})
 						
 						let outputString = "[<br>";
 						for(let i = 0; i<customTokensList.length; i++) {
 							let str = JSON.stringify(customTokensList[i]);
+                            str = str.replace('"a"', 'a');
+                            str = str.replace('"n"', 'n');
+                            str = str.replace('"d"', 'd');
 							outputString += str + ",<br>";
 						}
 						outputString += "]";

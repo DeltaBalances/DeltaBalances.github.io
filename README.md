@@ -13,8 +13,8 @@ Supported exchanges
 This website is not affiliated with any of the mentioned exchanges
 
 # Smart contract
-Want to check token balances in your Dapp?
-DeltaBalances [smart contract](https://etherscan.io/address/0xf5f563D3A99152c18cE8b133232Fe34317F60FEF) 
-+ Get balanceOf for multiple tokens in a single batched web3 request
+Want to check token balances in your Dapp?  
+Try the DeltaBalances [smart contract](https://etherscan.io/address/0x3e25f0ba291f202188ae9bda3004a7b3a803599a#code) 
++ Get balanceOf for multiple tokens in a single web3 request
 + Get the token balance in both the wallet and decentralized exchange in 1 request
 

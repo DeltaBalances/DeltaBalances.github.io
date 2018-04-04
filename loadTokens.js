@@ -21,31 +21,6 @@ try {
 	} catch (err) {} 
 */
 
-// turn tokens from {a:, n:, d:} into {addr:, name:, decimals:}
-function cleanOfflineTokens(tokenArray, addressName, symbolName, decimalName) {
-    
-    for(let i =0; i < tokenArray.length; i++) {
-        
-        let token = tokenArray[i];
-        token[addressName] = token.a;
-        token[symbolName] = token.n;
-        if(token.d) {
-            token[decimalName] = token.d;
-            delete token.d;
-        }
-        delete token.a;
-        delete token.n;
-        tokenArray[i] = token;
-    } 
-}
-
-
-cleanOfflineTokens(offlineTokens.tokens, "addr", "name", "decimals");
-cleanOfflineTokens(offlineStagingTokens.tokens, "addr", "name", "decimals");
-cleanOfflineTokens(forkOfflineTokens, "addr", "name", "decimals");
-cleanOfflineTokens(idexOfflineTokens, "addr", "name", "decimals");
-cleanOfflineTokens(offlineCustomTokens, "address", "symbol", "decimal");
-
 
 var forkDeltaConfig = forkOfflineTokens;
 try {

@@ -1243,9 +1243,9 @@
 		$('#downloadCointracking2Trades').html('');
 
 		$('#downloadFunds').html('');
-		$('#downloadBitcoinTaxFunds').html('');
+	//	$('#downloadBitcoinTaxFunds').html('');
 		$('#downloadCointrackingFunds').html('');
-		$('#downloadCointracking2Funds').html('');
+	//	$('#downloadCointracking2Funds').html('');
 	}
 
 
@@ -1261,6 +1261,7 @@
 			}
 			if (typeMode > 0) {
 				downloadFunds();
+                downloadCointrackingFunds();
 			}
 		}
 
@@ -1473,9 +1474,63 @@
 				var parent = document.getElementById('downloadCointrackingTrades');
 				parent.appendChild(sp);
 				//parent.appendCild(a);
-
 			}
+		}
+        
+        //csv columns
+		function downloadCointrackingFunds() {
+			//if(lastResult)
+			{
+				//checkBlockDates(lastResult);
+				var allTrades = lastResult.filter((x) => { return (x.Type == 'Deposit' || x.Type == 'Withdraw'); });
 
+				var A = [['\"Type\"', '\"Buy\"', '\"Cur.\"', '\"Sell\"', '\"Cur.\"', '\"Fee\"', '\"Cur.\"', '\"Exchange\"', '\"Group\"', '\"Comment\"', '\"Trade ID\"', '\"Date\"']];
+				// initialize array of rows with header row as 1st item
+				for (var i = 0; i < allTrades.length; ++i) {
+					var arr = [];
+					if (allTrades[i]['Type'] === 'Deposit') { // deposit is 'buy'
+						arr = ['Deposit', allTrades[i]['Amount'], allTrades[i]['Token'].name, "", "", "", "",
+							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 
+                            allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
+					}
+					else {  //withdraw is 'sell'
+						arr = ['Withdrawal', "","", allTrades[i]['Amount'], allTrades[i]['Token'].name, "", "",
+							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 
+                            allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
+					}
+
+					for (let j = 0; j < arr.length; j++) {
+						//remove exponential notation
+						if (A[0][j] == '\"Buy\"' || A[0][j] == '\"Sell\"') {
+							arr[j] = exportNotation(arr[j]);
+						}
+
+						// add quotes
+						arr[j] = `\"${arr[j]}\"`;
+					}
+
+					A.push(arr);
+				}
+				var csvRows = [];
+				for (var i = 0, l = A.length; i < l; ++i) {
+					csvRows.push(A[i].join(','));   // unquoted CSV row
+				}
+				var csvString = csvRows.join("\r\n");
+
+				var sp = document.createElement('span');
+				sp.innerHTML = " ";
+				var a = document.createElement('a');
+				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
+				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
+				a.target = '_blank';
+				a.download = 'CointrackingFunds_CSV_' + historyConfig.exchange + '_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				sp.appendChild(a);
+
+				$('#downloadCointrackingFunds').html('');
+				var parent = document.getElementById('downloadCointrackingFunds');
+				parent.appendChild(sp);
+				//parent.appendCild(a);
+			}
 		}
 
 		//custom exchange columns

@@ -241,7 +241,7 @@
               <div class="box-body">
 
                 <div class="col-md-9" style="overflow:hidden;">
-                  <h2>Token store Trade History</h2>
+                  <h2>Token store History</h2>
 
                   <div style="white-space:nowrap; overflow:hidden;">
                     <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
@@ -256,6 +256,13 @@
                 </div>
                 <div class="col-md-12">
                   <div class="col-md-5" style="overflow:hidden;">
+                    <h4>Operation types</h4>
+
+                    <select style="display:inline; width:80%; " class="form-control" id="typeSelect" onChange="changeTypes()">
+                      <option value="0">Trades</option>
+                      <option value="1">Funds (Deposit/Withdraw)</option>
+                      <option value="2">Trades + Funds</option>
+                    </select>
                     <h4>Date range: </h4>
                     <span id="selectedBlocks">Selected block range:</span>
                     <br>
@@ -296,16 +303,18 @@
                         </form>
                       </li>
                     </ul>
-                    <button id='findTransactions' onclick="myClick()" class="btn" style="display:none;" hidden> Retrieve trades
+                    <button id='findTransactions' onclick="myClick()" class="btn" style="display:none;" hidden> Retrieve history
                       <i class="fa fa-search" aria-hidden="true"></i>
                     </button>
                   </div>
                   <div class="col-md-7" style="overflow:hidden;">
                     <h4>Info</h4>
                     <span class="visible-xs">
-                      <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.</span>
-                    <br>
-                    <br> Trades are retrieved from the blockchain using Infura.
+                      <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
+                      <br>
+                      <br>
+                    </span>
+                    Trades are retrieved from the blockchain using Infura.
                     <br>Large block ranges will take a long time to load.
                     <br>
                     <br> History is limited to trades including ETH, starting at block
@@ -313,7 +322,10 @@
                     <br> Fees are 0% Maker, 0.3% Taker.
                     <br>
                   </div>
-                  <div class="col-md-12" style="overflow:hidden;">
+                  <div class="col-md-12">
+                    <br>
+                  </div>
+                  <div class="col-md-6" style="overflow:hidden;">
                     <h4>Export trades:</h4>
                     <ul>
                       <li>Default (CSV)
@@ -336,6 +348,31 @@
                       </li>
                     </ul>
                   </div>
+                  <div class="col-md-6" style="overflow:hidden;">
+                    <h4>Export funds (deposit/withdraw):</h4>
+                    <ul>
+                      <li>Default (CSV)
+                        <span id="downloadFunds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+                      <!--
+                      <li>Bitcoin.tax (CSV)
+                        <span id="downloadBitcoinTaxFunds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+                      <li>Cointracking.info (CSV)
+                        <span id="downloadCointrackingFunds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>, (CustomExchange)
+                        <span id="downloadCointracking2Funds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+					  -->
+                    </ul>
+                  </div>
                 </div>
               </div>
               <!-- /.box-body -->
@@ -348,7 +385,7 @@
               <!-- /.box-header -->
               <div class="box-body">
                 <div id="">
-                  <h2>Trades
+                  <h2>History
                     <button id='loadingTransactions' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
                     <span style="padding-left:20px; vertical-align: middle;font-weight: 400; font-size: 0.5em;" id="blockProgress"></span>
                   </h2>

@@ -46252,13 +46252,17 @@ module.exports = (config) => {
   //get etherdelta history logs from INFURA
   //inclusive for start and end
   // can handle ranges of 5k-10k blocks
-  utility.getTradeLogs = function getTradeLogs(web3In, contractAddress, topic, startblock, endblock, rpcID, callback) {
+  utility.getTradeLogs = function getTradeLogs(web3In, contractAddress, topics, startblock, endblock, rpcID, callback) {
+
+    if (!Array.isArray(topics)) {
+      topics = [topics];
+    }
 
     const filterObj = JSON.stringify([{
       fromBlock: '0x' + utility.decToHex(startblock),
       toBlock: '0x' + utility.decToHex(endblock),
       address: contractAddress,
-      topics: [topic]
+      topics: topics,
     }]);
 
     let retries = 0;

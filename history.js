@@ -19,6 +19,7 @@
 	var trigger1 = false;
 	var running = false;
 
+	var typeMode = 0;  // 0 trades, 1, deposit/withdraw, 2 all
 
 	// settings
 	var decimals = false;
@@ -62,7 +63,7 @@
 			Amount: 0,
 			Price: 0,
 			ETH: 0,
-			Hash: '0xH4SH',
+			Hash: '0xH4SH1',
 			Date: toDateTimeNow(),
 			Block: '',
 			Buyer: '',
@@ -72,7 +73,25 @@
 			'Fee in': { "name": "Token", "addr": "0x00" }, //shorter name feetoken
 			Details: window.location.origin + window.location.pathname + '/../tx.html',
 			Unlisted: true,
-		}
+		},
+		/*{
+			Type: 'Deposit',
+			Trade: '',
+			Token: { "name": "Token", "addr": "0x00" },
+			Amount: 0,
+			Price: '',
+			ETH: '',
+			Hash: '0xH4SH2',
+			Date: toDateTimeNow(),
+			Block: '',
+			Buyer: '',
+			Seller: '',
+			Fee: '',
+			FeeToken: '',
+			'Fee in': '', //shorter name feetoken
+			Details: window.location.origin + window.location.pathname + '/../tx.html',
+			Unlisted: true,
+		}*/
 	];
 
 
@@ -442,6 +461,17 @@
 	}
 
 
+	function changeTypes() {
+		var mode = $('#typeSelect').val();
+		mode = Number(mode);
+
+		if (mode >= 0 && mode < 3)
+			typeMode = mode;
+		else
+			mode = 0;
+	}
+
+
 	function setDaySelector() {
 		useDaySelector = true;
 		validateDays();
@@ -555,13 +585,20 @@
 
 
 	function setBlockProgress(loaded, max, trades, start, end) {
-		let progressString = 'Loaded ' + loaded + '/' + max + ' blocks, found ' + trades + ' trade';
-		if (trades < 1 || trades > 1) progressString += 's';
+		let progressString = 'Loaded ' + loaded + '/' + max + ' blocks, found ' + trades + ' relevant transactions';
 		$('#blockProgress').html(progressString);
 	}
 
 
 	function getTransactions(rqid) {
+
+		var topics = [];
+		if (typeMode == 0)
+			topics = [historyConfig.tradeTopic];
+		else if (typeMode == 1)
+			topics = [[historyConfig.depositTopic, historyConfig.withdrawTopic]];
+		else
+			topics = [[historyConfig.tradeTopic, historyConfig.depositTopic, historyConfig.withdrawTopic]];
 
 		var start = startblock;
 		var end = endblock;
@@ -604,7 +641,7 @@
 			}
 
 			function getLogsInRange(startNum, endNum, rpcID) {
-				_util.getTradeLogs(_delta.web3, contractAddr, historyConfig.topic, startNum, endNum, rpcID, receiveLogs);
+				_util.getTradeLogs(_delta.web3, contractAddr, topics, startNum, endNum, rpcID, receiveLogs);
 			}
 		}
 
@@ -703,29 +740,52 @@
 			for (let i = 0; i < unpackedLogs.length; i++) {
 
 				let unpacked = unpackedLogs[i];
-				if (!unpacked || unpacked.events.length < 6 || unpacked.name != 'Trade') {
+				if (!unpacked || unpacked.events.length < 4 || (unpacked.name != 'Trade' && unpacked.name != 'Deposit' && unpacked.name != 'Withdraw')) {
 					continue;
 				}
 
 				let obj = _delta.processUnpackedEvent(unpacked, myAddr);
 				if (obj && !obj.error) {
-					var obj2 = {
-						Type: obj.transType,
-						Trade: obj.tradeType,
-						Token: obj.token,
-						Amount: obj.amount,
-						Price: obj.price,
-						ETH: obj.ETH,
-						Hash: filteredLogs[i].transactionHash,
-						Date: '??', // retrieved by later etherscan call
-						Block: _util.hexToDec(filteredLogs[i].blockNumber),
-						Buyer: obj.buyer,
-						Seller: obj.seller,
-						Fee: obj.fee,
-						FeeToken: obj.feeCurrency,
-						'Fee in': obj.feeCurrency,
-						Details: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
-						Unlisted: obj.unlisted,
+
+					var obj2 = {};
+					if (unpacked.name == 'Trade') {
+						obj2 = {
+							Type: obj.transType,
+							Trade: obj.tradeType,
+							Token: obj.token,
+							Amount: obj.amount,
+							Price: obj.price,
+							ETH: obj.ETH,
+							Hash: filteredLogs[i].transactionHash,
+							Date: '??', // retrieved by later etherscan call
+							Block: _util.hexToDec(filteredLogs[i].blockNumber),
+							Buyer: obj.buyer,
+							Seller: obj.seller,
+							Fee: obj.fee,
+							FeeToken: obj.feeCurrency,
+							'Fee in': obj.feeCurrency,
+							Details: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
+							Unlisted: obj.unlisted,
+						}
+					} else {
+						obj2 = {
+							Type: obj.type.replace('Token ', ''),
+							Trade: '',
+							Token: obj.token,
+							Amount: obj.amount,
+							Price: '',
+							ETH: '',
+							Hash: filteredLogs[i].transactionHash,
+							Date: '??', // retrieved by later etherscan call
+							Block: _util.hexToDec(filteredLogs[i].blockNumber),
+							Buyer: '',
+							Seller: '',
+							Fee: '',
+							FeeToken: '',
+							'Fee in': '',
+							Details: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
+							Unlisted: obj.unlisted,
+						}
 					}
 					outputs.push(obj2);
 				}
@@ -871,7 +931,7 @@
 				widgetOptions: {
 					scroller_height: 500,
 				},
-				sortList: [[8, "d"]]
+				sortList: [[7, "d"]]
 			});
 
 			tableLoaded = true;
@@ -910,11 +970,12 @@
 				for (var colIndex = 0; colIndex < columns.length; colIndex++) {
 					var head = columns[colIndex];
 					var cellValue = myList[i][head];
+
 					if (cellValue === null) cellValue = "";
 
 
 					if (head == 'Amount' || head == 'Price' || head == 'Fee' || head == 'ETH') {
-						if (head == 'Fee' && myList[i][columns[0]] == 'Maker') {
+						if (head == 'Fee' && myList[i][columns[0]] != 'Taker') {
 							cellValue = '';
 						}
 
@@ -932,7 +993,7 @@
 						}
 					}
 					else if (head == 'Token' || head == 'Fee in') {
-						if ((head == 'Fee in') && myList[i][columns[0]] == 'Maker') {
+						if ((head == 'Fee in') && myList[i][columns[0]] != 'Taker') {
 							cellValue = '';
 						}
 
@@ -970,26 +1031,33 @@
 
 					}
 					else if (head == 'Type') {
-						if (cellValue == 'Taker') {
-							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
-						}
-						else if (cellValue == 'Maker') {
-							row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
-						}
-						else {
-							row$.append($('<td/>').html('<span class="" >' + cellValue + '</span>'));
-						}
-					}
-					else if (head == 'Trade') {
-						if (cellValue == 'Buy') {
+						if (cellValue == 'Taker' || cellValue == 'Maker') {
+							let contents = ''
+							if (cellValue == 'Taker') {
+								contents = '<span class="label label-info" >' + cellValue + '</span>';
+							}
+							else if (cellValue == 'Maker') {
+								contents = '<span class="label label-default" >' + cellValue + '</span>';
+							}
+
+							if (myList[i].Trade == 'Buy') {
+								contents += '<span class="label label-success" >' + myList[i].Trade + '</span>';
+							}
+							else if (myList[i].Trade == 'Sell') {
+								contents += '<span class="label label-danger" >' + myList[i].Trade + '</span>';
+							}
+							row$.append($('<td/>').html(contents));
+
+						} else if (cellValue == 'Deposit') {
 							row$.append($('<td/>').html('<span class="label label-success" >' + cellValue + '</span>'));
 						}
-						else if (cellValue == 'Sell') {
+						else if (cellValue == 'Withdraw') {
 							row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
+						} else {
+							row$.append($('<td/>').html('<span>' + cellValue + '</span>'));
 						}
-						else {
-							row$.append($('<td/>').html('<span class="" >' + cellValue + '</span>'));
-						}
+
+
 					}
 					else if (head == 'Hash') {
 						row$.append($('<td/>').html(_util.hashLink(cellValue, true, true)));
@@ -998,7 +1066,10 @@
 						row$.append($('<td/>').html('<a target="_blank" href="https://etherscan.io/block/' + cellValue + '">' + cellValue + '</a>'));
 					}
 					else if (head == 'Buyer' || head == 'Seller') {
-						row$.append($('<td/>').html(_util.addressLink(cellValue, true, true)));
+						let url = '';
+						if (cellValue !== '')
+							url = _util.addressLink(cellValue, true, true);
+						row$.append($('<td/>').html(url));
 					}
 					else if (head == 'Date') {
 						if (cellValue !== '??')
@@ -1020,7 +1091,7 @@
 		}
 	}
 
-	var tradeHeaders = { 'Type': 1, 'Trade': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'ETH': 1, 'Hash': 1, 'Date': 1, 'Buyer': 1, 'Seller': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Details': 1 };
+	var tradeHeaders = { 'Type': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'ETH': 1, 'Hash': 1, 'Date': 1, 'Buyer': 1, 'Seller': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Details': 1 };
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.
@@ -1170,6 +1241,11 @@
 		$('#downloadBitcoinTaxTrades').html('');
 		$('#downloadCointrackingTrades').html('');
 		$('#downloadCointracking2Trades').html('');
+
+		$('#downloadFunds').html('');
+		$('#downloadBitcoinTaxFunds').html('');
+		$('#downloadCointrackingFunds').html('');
+		$('#downloadCointracking2Funds').html('');
 	}
 
 
@@ -1177,10 +1253,15 @@
 		if (lastResult) {
 			checkBlockDates(lastResult);
 
-			downloadTrades();
-			downloadBitcoinTaxTrades();
-			downloadCointrackingTrades();
-			downloadCointracking2Trades();
+			if (typeMode != 1) {
+				downloadTrades();
+				downloadBitcoinTaxTrades();
+				downloadCointrackingTrades();
+				downloadCointracking2Trades();
+			}
+			if (typeMode > 0) {
+				downloadFunds();
+			}
 		}
 
 
@@ -1189,8 +1270,7 @@
 		function downloadTrades() {
 			//if(lastResult)
 			{
-				//	checkBlockDates(lastResult);
-				var allTrades = lastResult;
+				var allTrades = lastResult.filter((x) => { return (x.Type == 'Maker' || x.Type == 'Taker'); });
 
 				var A = [['Type', 'Trade', 'Token', 'Amount', 'Price (ETH)', 'Total ETH', 'Date', 'Block', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract', 'Exchange']];
 				// initialize array of rows with header row as 1st item
@@ -1236,11 +1316,58 @@
 			}
 		}
 
+		function downloadFunds() {
+			//if(lastResult)
+			{
+				var allTrades = lastResult.filter((x) => { return (x.Type == 'Deposit' || x.Type == 'Withdraw'); });
+
+				var A = [['Type', 'Token', 'Amount', 'Date', 'Block', 'Transaction Hash', 'Token Contract', 'Exchange']];
+				// initialize array of rows with header row as 1st item
+				for (var i = 0; i < allTrades.length; ++i) {
+					var arr = [allTrades[i]['Type'], allTrades[i]['Token'].name, allTrades[i]['Amount'], formatDateOffset(allTrades[i]['Date']),
+					allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Token'].addr, historyConfig.exchange];
+
+					for (let j = 0; j < arr.length; j++) {
+						//remove exponential notation
+						if (A[0][j] == 'Amount') {
+							arr[j] = exportNotation(arr[j]);
+						}
+
+						// add quotes
+						//arr[j] = `\"${arr[j]}\"`;
+					}
+					A.push(arr);
+				}
+
+
+				var csvRows = [];
+				for (var i = 0, l = A.length; i < l; ++i) {
+					csvRows.push(A[i].join(','));   // unquoted CSV row
+				}
+				var csvString = csvRows.join("\r\n");
+
+				var sp = document.createElement('span');
+				sp.innerHTML = " ";
+				var a = document.createElement('a');
+				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
+				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
+				a.target = '_blank';
+				a.download = historyConfig.exchange + "_Funds_" + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				sp.appendChild(a);
+
+				$('#downloadFunds').html('');
+				var parent = document.getElementById('downloadFunds');
+				parent.appendChild(sp);
+				//parent.appendCild(a);
+
+			}
+		}
+
 		function downloadBitcoinTaxTrades() {
 			//if(lastResult)
 			{
 				//checkBlockDates(lastResult);
-				var allTrades = lastResult;
+				var allTrades = lastResult.filter((x) => { return (x.Type == 'Maker' || x.Type == 'Taker'); });
 
 				var A = [['Date', 'Action', 'Source', 'Volume', 'Symbol', 'Price', 'Currency', 'Fee', 'FeeCurrency', 'Memo']];
 
@@ -1299,7 +1426,7 @@
 			//if(lastResult)
 			{
 				//checkBlockDates(lastResult);
-				var allTrades = lastResult;
+				var allTrades = lastResult.filter((x) => { return (x.Type == 'Maker' || x.Type == 'Taker'); });
 
 				var A = [['\"Type\"', '\"Buy\"', '\"Cur.\"', '\"Sell\"', '\"Cur.\"', '\"Fee\"', '\"Cur.\"', '\"Exchange\"', '\"Group\"', '\"Comment\"', '\"Trade ID\"', '\"Date\"']];
 				// initialize array of rows with header row as 1st item
@@ -1356,7 +1483,7 @@
 			//if(lastResult)
 			{
 				//checkBlockDates(lastResult);
-				var allTrades = lastResult;
+				var allTrades = lastResult.filter((x) => { return (x.Type == 'Maker' || x.Type == 'Taker'); });
 
 				var A = [['\"Date\"', '\"Buy\"', '\"Cur.\"', '\"Sell\"', '\"Cur.\"', '\"Fee\"', '\"Cur.\"', '\"Trade ID\"', '\"Comment\"', '\"Exchange\"', '\"Type\"']];
 

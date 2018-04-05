@@ -55,7 +55,9 @@ module.exports = {
     exchangeAddr: 'contractEtherDeltaAddr',
     minBlock: 3154197,
     maxBlock: undefined,
-    topic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
+    tradeTopic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
+    withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
+    depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
     createTx: '0xc10fc67499a037b6c2f14ae0c63b659b05bd7b553378202f96e777dd4843130f',
   },
   historyDecentrex: {
@@ -63,7 +65,9 @@ module.exports = {
     exchangeAddr: 'contractDecentrexAddr',
     minBlock: 3767902,
     maxBlock: 4832686,
-    topic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
+    tradeTopic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
+    withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
+    depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
     createTx: '0x1b2ff86bbf91feb9ef7f5310dd258137e034d65f6e99ea432fa98a933a2ffecd',
   },
   historyTokenStore: {
@@ -71,7 +75,9 @@ module.exports = {
     exchangeAddr: 'contractTokenStoreAddr',
     minBlock: 4097029,
     maxBlock: undefined,
-    topic: '0x3314c351c2a2a45771640a1442b843167a4da29bd543612311c031bbfb4ffa98',
+    tradeTopic: '0x3314c351c2a2a45771640a1442b843167a4da29bd543612311c031bbfb4ffa98',
+    withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
+    depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
     createTx: '0x386439acefbf00018b318f283a9ebc6185c483ff6738117243dba40fc1b42bb6',
   },
 };

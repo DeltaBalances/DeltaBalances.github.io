@@ -39,6 +39,7 @@
 				var customToken = array[i];
 				if (customToken) {
 					customToken.symbol = escapeHtml(customToken.symbol);
+                    customToken.decimal = Number(customToken.decimal);
 					if(customToken.type)
 						delete customToken.type;	
 					customToken.address = customToken.address.toLowerCase();		
@@ -54,7 +55,7 @@
 				let tok = response.tokens[i].tokenInfo;
 				let addr = tok.address.toLowerCase();
 				if (!customTokens[addr] && tok.symbol && response.tokens[i].balance > 10 && tok.holdersCount > 10) {
-					customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: tok.decimals };
+					customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: Number(tok.decimals) };
 				}
 			}
 		}
@@ -95,8 +96,13 @@
 							outputString += str + ",<br>";
 						}
 						outputString += "]";
-						
-						
+						outputString = outputString.replace(/"address"/g , "address");
+                        outputString = outputString.replace(/"symbol"/g, 'symbol');
+						outputString = outputString.replace(/"decimal"/g, 'decimal');
+                        outputString = outputString.replace(/{ /g, '{');
+                        outputString = outputString.replace(/ }/g, '}');
+                        outputString = outputString.replace(/, /g, ',');
+                        outputString = outputString.replace(/: /g, ':');
 						
 						$('#output').html(outputString);
 						

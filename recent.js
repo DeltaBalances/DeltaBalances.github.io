@@ -42,7 +42,7 @@
 	var blocknum = -1;
 	var startblock = 0;
 	var endblock = 'latest';
-	var transactionDays = 3;
+	var transactionDays = 5;
 
 	// placeholder
 	var transactionsPlaceholder = [

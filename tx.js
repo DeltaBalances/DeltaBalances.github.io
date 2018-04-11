@@ -468,7 +468,9 @@
 					transaction.blockNumber = tx.blockNumber;
 					transaction.blockHash = tx.blockHash;
 					transaction.rawoutput = null;
-					transaction.output = parseOutput(tx, txLog.logs);
+                    var parsedOutput = parseOutput(tx, txLog.logs);
+					transaction.output = parsedOutput.output;
+                    transaction.outputErrors = parsedOutput.errors;
 				}
 				else {
 					transaction.status = 'Error';
@@ -487,7 +489,7 @@
 
 			function parseOutput(tx, outputLogs) {
 				var outputs = [];
-
+                var unknownEvents = 0;
 				var unpackedLogs = _util.processLogs(outputLogs);
 
 				for (let i = 0; i < unpackedLogs.length; i++) {
@@ -495,7 +497,7 @@
 					let unpacked = unpackedLogs[i];
 
 					if (!unpacked) {
-						outputs.push({ 'Unknown': 'unknown event emitted' });
+						unknownEvents++;
 						continue;
 					} else {
 
@@ -518,7 +520,7 @@
 						}
 					}
 				}
-				return outputs;
+				return {output:outputs, errors:unknownEvents};
 			}
 
 			function parseInput(tx, input) {
@@ -706,7 +708,7 @@
 			$('#status').html('<i style="color:red;" class="fa fa-exclamation-circle"></i>' + ' ' + transaction.status);
 			$('#time').html(txDate !== "??" ? formatDate(txDate) : txDate);
 		}
-		$('#ethval').html(transaction.value);
+		$('#ethval').html(transaction.value.toString());
 		$('#inputdata').html('');
 		if (transaction.input && transaction.input.type) {
 			$('#inputtype').html(transaction.input.type);
@@ -723,6 +725,9 @@
 			for (var i = 0; i < transaction.output.length; i++) {
 				displayParse(transaction.output[i], "#outputdata");
 			}
+            if(transaction.outputErrors) {
+                $('#outputdata').append('<br> + ' + transaction.outputErrors + ' unrecognized events emitted');
+            }
 		}
 		else if (transaction.status === 'Pending')
 			$('#outputdata').html('Transaction is pending, no output available yet.');
@@ -877,10 +882,10 @@
 				else if (keys[i] == 'price') {
 					cellValue = Number(cellValue).toFixed(5);
 				}
-				else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'ETH' || keys[i] == 'fee') {
+				else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'ETH' || keys[i] == 'fee' || keys[i] == 'balance') {
 					cellValue = Number(cellValue).toFixed(3);
 				}
-				else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender') {
+				else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from') {
 					cellValue = _util.addressLink(cellValue, true, true);
 				}
 
@@ -888,7 +893,7 @@
 				//let head = columns[colIndex];
 
 				{
-					row$.append($('<td/>').html(cellValue));
+					row$.append($('<td/>').html(cellValue.toString()));
 				}
 			}
 		}

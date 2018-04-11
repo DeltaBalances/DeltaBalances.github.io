@@ -622,7 +622,7 @@
 						var trans = createOutputTransaction('Deposit', 'ETH', val2, '', tx.hash, tx.timeStamp, false, 0, '', tx.isError === '0', _delta.addressName(txto, false));
 						outputTransactions.push(trans);
 					}
-					else if (val == 0 && _delta.isExchangeAddress(txto)) {
+					else if (val == 0 && (_delta.isExchangeAddress(txto) || _delta.uniqueTokens[txto])) {
 						if (!withdrawHashes[tx.hash]) // exclude withdraws
 						{
 							tokens.push(tx); //withdraw, deposit & trade, & cancel
@@ -648,6 +648,10 @@
 						}
 						else if (unpacked.name === 'trade') {
 							trans = createOutputTransaction(obj.type, obj.token.name, obj.amount, obj.ETH, tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.token.addr, obj.price, tokens[l].isError === '0', exchange);
+						}
+                        else if (unpacked.name === 'approve') {
+                            exchange = _delta.addressName(obj.to.toLowerCase(), false);
+							trans = createOutputTransaction(obj.type, obj.token.name, obj.amount, '', tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.token.addr, '', tokens[l].isError === '0', exchange);
 						}
 
 						if (trans)
@@ -815,7 +819,7 @@
 					scroller_barWidth: 18,
 					scroller_upAfterSort: true,
 				},
-				sortList: [[7, 1]]
+				sortList: [[8, 1]]
 			});
 
 			table2Loaded = true;
@@ -889,7 +893,7 @@
 
 					}
 					else if (head == 'Type') {
-						if (cellValue == 'Deposit') {
+						if (cellValue == 'Deposit' || cellValue == 'Approve') {
 							row$.append($('<td/>').html('<span class="label label-success" >' + cellValue + '</span>'));
 						}
 						else if (cellValue == 'Withdraw') {
@@ -901,8 +905,11 @@
 						else if (cellValue == 'Taker Buy') {
 							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
 						}
-						else {
+						else if(cellValue == 'Taker Sell'){
 							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
+						}
+                        else {
+							row$.append($('<td/>').html('<span>' + cellValue + '</span>'));
 						}
 					}
 					else if (head == 'Hash') {

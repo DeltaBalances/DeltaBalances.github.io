@@ -114,6 +114,14 @@
 			}
 		});
 
+        $('body').on('expanded.pushMenu collapsed.pushMenu', function() {
+           // Add delay to trigger code only after the pushMenu animation completes
+            setTimeout(function() {
+                $("#transactionsTable2").trigger("update", [true, () => { }]);
+                $("#transactionsTable2").trigger("applyWidgets");
+            }, 300);
+        } );
+        
 		$(window).resize(function () {
 			$("#transactionsTable2").trigger("applyWidgets");
 

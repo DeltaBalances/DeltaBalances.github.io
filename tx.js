@@ -102,6 +102,13 @@
 			}
 		});
 
+          $('body').on('expanded.pushMenu collapsed.pushMenu', function() {
+           // Add delay to trigger code only after the pushMenu animation completes
+            setTimeout(function() {
+                $("table").trigger("update", [true, () => { }]);
+                $("table").trigger("applyWidgets");
+            }, 300);
+        } );
 
 		$(window).resize(function () {
 			$("table").trigger("applyWidgets");

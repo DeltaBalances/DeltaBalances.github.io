@@ -129,6 +129,14 @@
 		$('#dollars').prop('checked', showDollars);
 
 
+        $('body').on('expanded.pushMenu collapsed.pushMenu', function() {
+           // Add delay to trigger code only after the pushMenu animation completes
+            setTimeout(function() {
+                $("#resultTable").trigger("update", [true, () => { }]);
+                $("#resultTable").trigger("applyWidgets");
+            }, 300);
+        } );
+
 
 
 		// detect enter & keypresses in input
@@ -143,7 +151,7 @@
 		});
 
 		$(window).resize(function () {
-			$("#resultTable").trigger("applyWidgets");
+            $("#resultTable").trigger("applyWidgets");
 
 			//hide popovers
 			$('[data-toggle="popover"]').each(function () {
@@ -1307,7 +1315,7 @@
 					filter_external: '.search',
 					filter_defaultFilter: { 0: '~{query}' },
 					filter_columnFilters: false,
-					filter_placeholder: { search: 'Search...' },
+					filter_placeholder: { search: 'Search...' }, 
 					scroller_height: 500,
 				},
 				sortList: [[0, 0]]

@@ -7,6 +7,8 @@
 	var initiated = false;
 	var autoStart = false;
 
+	var web3Index = 0;  //last used web3 instance
+	
 	var requestID = 0;
 
 	// loading states
@@ -874,17 +876,27 @@
 				arguments = [publicAddr, tokens];
 			}
 
-			var oneCompleted = false;
+			var completed = 0;
+			var success = false;
 			var totalTries = 0;
 
-			//get balances from both metamask and etherscan, go on with the fastest one
-			makeCall(_delta.web3, mode, functionName, arguments, 0); //Infura
-			makeCall(undefined, mode, functionName, arguments, 0); // etherscan
-
-
+			if(web3Index >= _delta.web3s.length) {
+				web3Index = 0;
+			}
+			
+			//get balances from 2 web3 sources at once, use the fastest response
+			// web3 provider (infura, myetherapi, mycryptoapi) or etherscan
+			makeCall(_delta.web3s[web3Index], mode, functionName, arguments, 0);
+			makeCall( web3Index >= _delta.web3s.length ? undefined : _delta.web3s[web3Index], mode, functionName, arguments, 0); 
 
 
 			function makeCall(web3Provider, exName, funcName, args, retried) {
+				
+				if(completed || requestID > rqid)
+					return;
+				if(web3Provider)
+					web3Index++;
+				
 				_util.call(
 					web3Provider,
 					_delta.contractDeltaBalance,
@@ -892,15 +904,14 @@
 					funcName,
 					args,
 					(err, result) => {
-						if (requestID > rqid)
+						if (success || requestID > rqid)
 							return;
-						if (oneCompleted)
-							return;
-
+						
+						completed++;
+						
 						const returnedBalances = result;
-						if (returnedBalances && returnedBalances.length > 0) {
 
-							oneCompleted = true;
+						if (!err && returnedBalances && returnedBalances.length > 0) {
 							loadedCustom = showCustomTokens;
 							for (var i = 0; i < tokens.length; i++) {
 								var token = _delta.uniqueTokens[tokens[i]];
@@ -912,6 +923,8 @@
 										exchanges[exName].loaded++;
 									if (exchanges[exName].loaded >= tokenCount)
 										finishedBalanceRequest();
+									
+									success = true;
 								}/* else { //both wallet & etherdelta
 									var j = i * 2;
 									balances[token.addr].EtherDelta = _util.weiToEth(returnedBalances[j], div);
@@ -923,13 +936,19 @@
 								} */
 							}
 						}
-						else if (!oneCompleted) //request returned wrong/empty and other hasn't completed yet
+						else if (completed >= 2) // both requests returned
 						{
 							const retryAmount = 2;
 							if (retried < retryAmount) //retry both etherscan and infura 3 times
 							{
 								totalTries++;
-								makeCall(web3Provider, exName, funcName, args, retried + 1);
+								console.log('retrying request');
+								if(web3Index >= _delta.web3s.length) {
+									web3Index = 0;
+								}
+								
+								makeCall(_delta.web3s[web3Index], exName, funcName, args, retried + 1);
+								makeCall(web3Index >= _delta.web3s.length ? undefined : _delta.web3s[web3Index], exName, funcName, args, retried + 1);
 								return;
 							}
 							else if (totalTries >= retryAmount * 2) {
@@ -944,13 +963,6 @@
 									exchanges[exName].loaded = -1;
 									finishedBalanceRequest();
 								}
-								/*else //both wallet & etherdelta
-								{
-									showError('Failed to load all balances after 3 tries, try again later');
-									loadedED = tokenCount;
-									loadedW = tokenCount;
-									finishedBalanceRequest();
-								} */
 							}
 						}
 					}

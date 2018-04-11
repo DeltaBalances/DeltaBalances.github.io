@@ -562,8 +562,8 @@
 		var days = 1;
 		if (input < 0.25)
 			days = 0.25;
-		else if (input > 50)
-			days = 50;
+		else if (input > 100)
+			days = 100;
 		else
 			days = input;
 

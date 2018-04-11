@@ -27,6 +27,7 @@
 
 	var showTransactions = true;
 
+	var blockDates = {};
 
 
 	// user input & data
@@ -70,6 +71,7 @@
 
 	function init() {
 
+		getBlockStorage();
 
 		// borrow some ED code for compatibility
 		_delta.startDeltaBalances(() => {
@@ -564,9 +566,22 @@
 
 
 
+
+
+
 			// internal tx, withdraws
 			for (var i = 0; i < itxs.length; i++) {
 				var tx = itxs[i];
+
+				//save dates in cache for tx details & history
+				if (tx.blockNumber) {
+					let block = tx.blockNumber;
+					if (!blockDates[block]) {
+						blockDates[block] = toDateTime(tx.timeStamp);
+					}
+				}
+
+
 				if (_delta.isExchangeAddress(tx.from.toLowerCase())) {
 					var val = _util.weiToEth(Number(tx.value));
 					var trans = createOutputTransaction('Withdraw', 'ETH', val, '', tx.hash, tx.timeStamp, false, 0, '', tx.isError === '0', _delta.addressName(tx.from, false));
@@ -579,6 +594,16 @@
 			// normal tx, deposit, token, trade
 			for (var i = 0; i < txs.length; i++) {
 				var tx = txs[i];
+
+				//save dates in cache for tx details & history
+				if (tx.blockNumber) {
+					let block = tx.blockNumber;
+					if (!blockDates[block]) {
+						blockDates[block] = toDateTime(tx.timeStamp);
+					}
+				}
+
+
 				//if(tx.isError === '0')
 				{
 					var val = Number(tx.value);
@@ -623,6 +648,7 @@
 				}
 			}
 
+			setBlockStorage();
 			done();
 
 			function createOutputTransaction(type, name, val, total, hash, timeStamp, unlisted, tokenaddr, price, status, exchange) {
@@ -1054,5 +1080,32 @@
 			myClick();
 		}
 		return false;
+	}
+
+	function getBlockStorage() {
+		if (typeof (Storage) !== "undefined") {
+			let dates = localStorage.getItem("blockdates");
+			if (dates) {
+				dates = JSON.parse(dates);
+				if (dates) {
+					// map date strings to objects & get count
+					let dateCount = Object.keys(dates).map(x => blockDates[x] = new Date(dates[x])).length;
+					console.log('retrieved ' + dateCount + ' block dates from cache');
+				}
+
+			}
+		}
+	}
+
+	function setBlockStorage() {
+		if (typeof (Storage) !== "undefined") {
+			if (blockDates) {
+				let dateCount = Object.keys(blockDates).length;
+				if (dateCount > 0) {
+					console.log('saved ' + dateCount + ' block dates in cache');
+					localStorage.setItem("blockdates", JSON.stringify(blockDates));
+				}
+			}
+		}
 	}
 }

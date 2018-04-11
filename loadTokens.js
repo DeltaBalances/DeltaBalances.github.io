@@ -38,7 +38,7 @@ try {
         let forkData2 = localStorage.getItem('forkTokens2');
         if (forkData2 !== null && forkData2) {
             let parsed = JSON.parse(forkData2);
-            if (parsed && parsed.length > forkDeltaConfig.tokens.length) {
+            if (parsed && parsed.length > forkDeltaConfig.length) {
                 forkDeltaConfig.tokens = parsed;
             }
         }

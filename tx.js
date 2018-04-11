@@ -19,12 +19,15 @@
 	var fixedDecimals = 3;
 
 
+	var blockDates = {};
 
 	// user input & data
 	var transactionHash = '';
 	var lastTxData = undefined;
 	var lastTxLog = undefined;
 	var txDate = "??";
+
+	var blocknum = -1;
 
 	var publicAddr = '';
 	var savedAddr = '';
@@ -39,6 +42,8 @@
 	});
 
 	function init() {
+
+		getBlockStorage();
 		// borrow some ED code for compatibility
 		_delta.startDeltaBalances(() => {
 
@@ -298,55 +303,126 @@
 		var logResult = undefined;
 		var statusResult = undefined;
 
+		var gotBlockNum = false;
+
 		var transLoaded = 0;
 
-		// status https://api.etherscan.io/api?module=transaction&action=getstatus&txhash=0x15f8e5ea1079d9a0bb04a4c58ae5fe7654b5b2b4463375ff7ffb490aa0032f3a&apikey=YourApiKeyToken
-		// https://api.etherscan.io/api?module=proxy&action=eth_GetTransactionReceipt&txhash='+ transactionHash;
-		// https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash='+ transactionHash;
+		getTransactionData();
 
-		$.getJSON('https://api.etherscan.io/api?module=transaction&action=getstatus&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
-			if (result && result.status === '1')
-				statusResult = result.result;
-			transLoaded++;
-			if (transLoaded == 4)
-				processTransactions(transResult, statusResult, logResult);
-		});
+		function getTransactionData() {
+			var finished = false;
 
-		$.getJSON('https://api.etherscan.io/api?module=proxy&action=eth_GetTransactionReceipt&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
-			if (result)
-				logResult = result.result;
-			transLoaded++;
-			if (transLoaded == 4)
-				processTransactions(transResult, statusResult, logResult);
-		});
-
-		$.getJSON('https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
-			if (result) {
-
-				if (result.result && result.result.blockNumber) {
-					transResult = result.result;
-					$.getJSON('https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + _util.hexToDec(transResult.blockNumber) + '&apikey=' + _delta.config.etherscanAPIKey, (res) => {
-						if (res && res.status == "1" && res.result) {
-							var unixtime = res.result.timeStamp;
-							if (unixtime)
-								txDate = toDateTime(unixtime);
-						}
-						transLoaded++;
-						if (transLoaded == 4)
-							processTransactions(transResult, statusResult, logResult);
-					});
+			// get tx data & input from etherscan
+			$.getJSON('https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
+				if (finished)
+					return;
+				if (result && result.result) {
+					handleTransData(result.result);
 				} else {
-					transLoaded++; // no time call
+					//etherscan failed, try web3
+					_delta.web3s[0].eth.getTransaction(transactionHash, (err, result) => {
+						if (!err && result) {
+							handleTransData(result);
+						} else {
+							handleTransData(undefined);
+						}
+					});
+				}
+				finished = true;
+			});
+
+			// if etherscan takes >3 sec, try web3
+			setTimeout(function () {
+				if (!finished) {
+					_delta.web3s[0].eth.getTransaction(transactionHash, (err, result) => {
+						if (!err && result) {
+							finished = true;
+							handleTransData(result);
+						}
+					});
+				}
+			}, 3000);
+
+			function handleTransData(res) {
+				if (res) {
+					transResult = res;
+					transLoaded++;
+
+					if (res.blockNumber) {
+						getBlockTime(Number(res.blockNumber));
+						getTransactionReceipt();
+					} else {
+						// tx is pending, no need to wait for tx status or logs
+						transLoaded = 4;
+						processTransactions(transResult, undefined, undefined);
+						return;
+					}
+				} else {
+					processTransactions(undefined, undefined, undefined);
+					return;
 				}
 			}
-			transLoaded++;
-			if (transLoaded == 4)
-				processTransactions(transResult, statusResult, logResult);
-		});
+		}
 
+		//get tx output logs from etherscan
+		function getTransactionReceipt() {
 
+			_util.txReceipt(_delta.web3s[0], transactionHash, (err, result, _) => {
+				if (!err && result) {
+					logResult = result;
+					if (result.blockNumber) {
+						if (Number(logResult.status) !== 1) {
+							getTxStatus(); // get error msg
+						} else {
+							transLoaded++;
+						}
+					}
+				}
+				transLoaded++;
+				if (transLoaded >= 4)
+					processTransactions(transResult, statusResult, logResult);
+			});
+		}
 
+		function getBlockTime(num) {
+			num = Number(num);
+			if (gotBlockNum)
+				return;
+			else
+				gotBlockNum = true;
 
+			if (!blockDates[num]) {
+				_util.getBlockDate(_delta.web3s[0], num, (err, res, _) => {
+					if (!err && res) {
+
+						var unixtime = res;
+						if (unixtime) {
+							txDate = toDateTime(unixtime);
+							blockDates[num] = txDate;
+							setBlockStorage();
+						}
+					}
+					transLoaded++;
+					if (transLoaded >= 4)
+						processTransactions(transResult, statusResult, logResult);
+				});
+			} else {
+				txDate = blockDates[num];
+				transLoaded++;
+				if (transLoaded >= 4)
+					processTransactions(transResult, statusResult, logResult);
+			}
+		}
+
+		function getTxStatus() {
+			$.getJSON('https://api.etherscan.io/api?module=transaction&action=getstatus&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
+				if (result && result.status === '1')
+					statusResult = result.result;
+				transLoaded++;
+				if (transLoaded >= 4)
+					processTransactions(transResult, statusResult, logResult);
+			});
+		}
 
 		function processTransactions(tx, txStatus, txLog) {
 			if (!tx) {
@@ -354,10 +430,10 @@
 				showError('failed to load transaction from <a href="https://etherscan.io/tx/' + transactionHash + '" + target="_blank"> Etherscan </a>');
 				disableInput(false);
 				hideLoading();
+				buttonLoading();
 				running = false;
 				return;
 			}
-			console.log('completed requests');
 			var pending = false;
 			if (!tx.blockHash || !tx.blockNumber || !tx.transactionIndex) {
 				pending = true;
@@ -378,17 +454,20 @@
 			}
 
 			if (!pending) {
-				if (txStatus.isError === '0') {
+				transaction.gasUsed = Number(txLog.gasUsed);
+				transaction.gasEth = Number(txLog.gasUsed) * _util.weiToEth(Number(tx.gasPrice));
+				if (Number(txLog.status) === 1) {
 					transaction.status = 'Completed';
-					transaction.gasUsed = Number(txLog.gasUsed),
-						transaction.gasEth = Number(txLog.gasUsed) * _util.weiToEth(Number(tx.gasPrice));
 					transaction.blockNumber = tx.blockNumber;
 					transaction.blockHash = tx.blockHash;
 					transaction.rawoutput = null;
 					transaction.output = parseOutput(tx, txLog.logs);
 				}
 				else {
-					transaction.status = 'Error: ' + txStatus.errDescription;
+					transaction.status = 'Error';
+					if (txStatus && txStatus.errDescription)
+						transaction.status += ': ' + txStatus.errDescription;
+
 					transaction.gasEth = transaction.gasLimit * transaction.gasPrice;
 				}
 			}
@@ -409,7 +488,7 @@
 					let unpacked = unpackedLogs[i];
 
 					if (!unpacked) {
-						outputs.push({ 'error': 'unknown output' });
+						outputs.push({ 'Unknown': 'unknown event emitted' });
 						continue;
 					} else {
 
@@ -436,7 +515,6 @@
 			}
 
 			function parseInput(tx, input) {
-
 				var unpacked = _util.processInput(input);
 				if (!unpacked)
 					return undefined;
@@ -447,7 +525,6 @@
 				return obj;
 
 			}
-
 
 		}
 	}
@@ -473,9 +550,7 @@
 
 	// callback when balance request completes
 	function finish(transaction) {
-		console.log('outputting data');
-		/*
-		
+		/*	
 		var transaction = {
 			hash: ,
 			from: ,
@@ -493,6 +568,7 @@
 		}
 		*/
 
+		//generate messages based on tx 
 		var sum = '';
 		if (transaction.status === 'Completed') {
 			sum += 'Status: Completed<br>';
@@ -535,6 +611,8 @@
 			sum += 'This transaction is to an outdated EtherDelta contract, only use these to withdraw old funds.<br>';
 		}
 
+
+		//handle tx output logs
 		var tradeCount = 0;
 		var zeroDecWarning = '';
 		if (transaction.output) {
@@ -590,6 +668,9 @@
 
 		$('#summary').html(sum);
 
+
+		// handle generic tx data
+
 		$('#hash').html(_util.hashLink(transaction.hash, true));
 		$('#from').html(_util.addressLink(transaction.from, true, false));
 		$('#to').html(_util.addressLink(transaction.to, true, false));
@@ -608,7 +689,7 @@
 		$('#nonce').html(transaction.nonce);
 		if (transaction.status === 'Completed') {
 			$('#status').html('<i style="color:green;" class="fa fa-check"></i>' + ' ' + transaction.status);
-			$('#time').html(txDate);
+			$('#time').html(txDate !== "??" ? formatDate(txDate) : txDate);
 		}
 		else if (transaction.status === 'Pending') {
 			$('#status').html('<i class="fa fa-cog fa-fw"></i>' + ' ' + transaction.status);
@@ -616,7 +697,7 @@
 		}
 		else {
 			$('#status').html('<i style="color:red;" class="fa fa-exclamation-circle"></i>' + ' ' + transaction.status);
-			$('#time').html('txDate');
+			$('#time').html(txDate !== "??" ? formatDate(txDate) : txDate);
 		}
 		$('#ethval').html(transaction.value);
 		$('#inputdata').html('');
@@ -646,7 +727,6 @@
 		running = false;
 		buttonLoading();
 		disableInput(false);
-		console.log('done');
 	}
 
 	function clearOverview() {
@@ -661,6 +741,7 @@
 		$('#gasgwei').html('');
 		$('#gascost').html('');
 		$('#gaslimit').html('');
+		$('#gasusedlimit').html('');
 		$('#nonce').html('');
 		$('#status').html('');
 		$('#time').html('');
@@ -674,7 +755,7 @@
 	function displayParse(parsedInput, id) {
 		if (!parsedInput) {
 			$(id).html('No familiar Exchange input recognized');
-			console.log('fuck');
+
 			return;
 		}
 		//let html = $(id).html();
@@ -726,19 +807,23 @@
 	}
 
 	function formatDate(d) {
-		var month = '' + (d.getMonth() + 1),
-			day = '' + d.getDate(),
-			year = d.getFullYear(),
-			hour = d.getHours(),
-			min = d.getMinutes();
+        try{
+            var month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear(),
+                hour = d.getHours(),
+                min = d.getMinutes();
 
 
-		if (month.length < 2) month = '0' + month;
-		if (day.length < 2) day = '0' + day;
-		if (hour < 10) hour = '0' + hour;
-		if (min < 10) min = '0' + min;
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+            if (hour < 10) hour = '0' + hour;
+            if (min < 10) min = '0' + min;
 
-		return [year, month, day].join('-') + ' ' + [hour, min].join(':');
+            return [year, month, day].join('-') + ' ' + [hour, min].join(':');
+        } catch (err) {
+            return d;
+        }
 	}
 
 	// Builds the HTML Table out of myList.
@@ -947,6 +1032,33 @@
 			setAddrImage(savedAddr);
 		}
 		return false;
+	}
+
+	function getBlockStorage() {
+		if (typeof (Storage) !== "undefined") {
+			let dates = localStorage.getItem("blockdates");
+			if (dates) {
+				dates = JSON.parse(dates);
+				if (dates) {
+					// map date strings to objects & get count
+					let dateCount = Object.keys(dates).map(x => blockDates[x] = new Date(dates[x])).length;
+					console.log('retrieved ' + dateCount + ' block dates from cache');
+				}
+
+			}
+		}
+	}
+
+	function setBlockStorage() {
+		if (typeof (Storage) !== "undefined") {
+			if (blockDates) {
+				let dateCount = Object.keys(blockDates).length;
+				if (dateCount > 0) {
+					console.log('saved ' + dateCount + ' block dates in cache');
+					localStorage.setItem("blockdates", JSON.stringify(blockDates));
+				}
+			}
+		}
 	}
 
 }

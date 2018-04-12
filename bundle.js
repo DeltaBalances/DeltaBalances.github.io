@@ -22698,29 +22698,58 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     };
                 return obj;
             }
+            // exchange deposit/withdraw and 0x WETH (un)wrapping
             else if (unpacked.name === 'deposit' || unpacked.name === 'withdraw') {
                 var type = '';
                 var note = '';
                 var rawVal = 0;
                 var token = this.setToken(this.config.ethAddr);
+                var token2 = undefined;
+
                 if (unpacked.name === 'deposit') {
                     rawVal = tx.value;
-                    type = 'Deposit';
-                    note = 'Deposit ETH into the exchange contract';
+                    if (!utility.isWrappedETH(tx.to)) {
+                        type = 'Deposit';
+                        note = 'Deposit ETH into the exchange contract';
+                    } else {
+                        type = 'Wrap ETH';
+                        note = 'Wrap ETH to WETH';
+                        token = this.setToken(this.config.ethAddr);
+                        token2 = this.setToken(tx.to);
+                    }
                 } else {
                     rawVal = unpacked.params[0].value;
-                    type = 'Withdraw';
-                    note = 'Request the exchange to withdraw ETH';
+                    if (!utility.isWrappedETH(tx.to)) {
+                        type = 'Withdraw';
+                        note = 'Request the exchange to withdraw ETH';
+                    } else {
+                        type = 'Unwrap WETH';
+                        note = 'Unwrap WETH to ETH';
+                        token = this.setToken(tx.to);
+                        token2 = this.setToken(this.config.ethAddr);
+                    }
                 }
+
                 var val = utility.weiToEth(rawVal);
 
-                var obj = {
-                    'type': type,
-                    'token': token,
-                    'note': note,
-                    'amount': val,
-                };
-                return obj;
+                if (!utility.isWrappedETH(tx.to)) {
+                    var obj = {
+                        'type': type,
+                        'token': token,
+                        'note': note,
+                        'amount': val,
+                    };
+                    return obj;
+                } else {
+                    var obj = {
+                        'type': type,
+                        'token In': token,
+                        'token Out':token2,
+                        'note': note,
+                        'amount': val,
+                    };
+                    return obj;
+                }
             }
             else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken') {
                 var token = this.setToken(unpacked.params[0].value);
@@ -22893,6 +22922,102 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     return obj;
                 }
             }
+            // 0x single trade input
+            /* else if (unpacked.name === 'fillOrder' && unpacked.params.length == 7) {
+     
+                 let orderAddresses = unpacked.params[0].value;
+                 let orderValues = unpacked.params[1].value;
+                 let fillTakerTokenAmount = new BigNumber(unpacked.params[2].value);
+                 let failCheck = unpacked.params[3].value;
+                
+                 let maker = orderAddresses[0].toLowerCase();
+                 let taker = orderAddresses[1].toLowerCase();
+                 let makerToken = this.setToken(orderAddresses[2]);
+                 let takerToken = this.setToken(orderAddresses[3]);
+     
+                 let makerAmount = new BigNumber(orderValues[0]);
+                 let takerAmount = new BigNumber(orderValues[1]);
+                 
+                 // fee is ZRX
+                 let feeCurrency = this.setToken('0xe41d2489571d322189246dafa5ebde1f4699f498');
+                 let makerFee = new BigNumber(orderValues[2]);
+                 let takerFee = new BigNumber(orderValues[3]);
+                 // orderValues[4] is expiry
+     
+                 var tradeType = 'Sell';
+                 var token = undefined;
+                 var token2 = undefined;
+     
+                 if (unpacked.params[0].value === this.config.tokens[0].addr) // get eth  -> sell
+                 {
+                     tradeType = 'Buy';
+                     token = this.setToken(unpacked.params[2].value);
+                     token2 = this.setToken(unpacked.params[0].value);
+                 }
+                 else // buy
+                 {
+                     token = this.setToken(unpacked.params[0].value);
+                     token2 = this.setToken(unpacked.params[2].value);
+                 }
+     
+                 if (token && token2 && token.addr && token2.addr) {
+                     var amount = 0;
+                     var oppositeAmount = 0;
+                     var chosenAmount = new BigNumber(unpacked.params[10].value);
+                     if (tradeType === 'Sell') {
+                         amount = new BigNumber(unpacked.params[1].value);
+                         oppositeAmount = new BigNumber(unpacked.params[3].value);
+                     } else {
+                         oppositeAmount = new BigNumber(unpacked.params[1].value);
+                         amount = new BigNumber(unpacked.params[3].value);
+                     }
+     
+                     var unlisted = token.unlisted;
+                     var dvsr = this.divisorFromDecimals(token.decimals)
+                     var dvsr2 = this.divisorFromDecimals(token2.decimals)
+                     var val = utility.weiToEth(amount, dvsr);
+                     var val2 = utility.weiToEth(oppositeAmount, dvsr2);
+     
+                     var orderSize = 0;
+                     var price = 0;
+                     //	if(tradeType === 'sell')
+                     {
+                         price = val2.div(val);
+                     }
+     
+                     if (tradeType === 'Buy') {
+                         orderSize = val;
+                         if (oppositeAmount > chosenAmount) {
+                             val2 = utility.weiToEth(chosenAmount, dvsr2);
+                             amount = chosenAmount.div((oppositeAmount.div(amount)));
+                             val = utility.weiToEth(amount, dvsr);
+                         }
+                     } else {
+                         orderSize = val;
+                         if (amount > chosenAmount) {
+                             val = utility.weiToEth(chosenAmount, dvsr);
+                             oppositeAmount = (chosenAmount.times(oppositeAmount)).div(amount);
+                             val2 = utility.weiToEth(oppositeAmount, dvsr2);
+                         }
+                     }
+     
+                     let takerAddr = idex ? unpacked.params[11].value : tx.from;
+     
+                     var obj = {
+                         'type': 'Taker ' + tradeType,
+                         'note': utility.addressLink(takerAddr, true, true) + ' selected ' + utility.addressLink(unpacked.params[6].value, true, true) + '\'s order in the orderbook to trade.',
+                         'token': token,
+                         'amount': val,
+                         'price': price,
+                         'ETH': val2,
+                         'order size': orderSize,
+                         'unlisted': unlisted,
+                     };
+                     return obj;
+                 }
+     
+     
+             }*/
             //idex adminWithdraw(address token, uint256 amount, address user, uint256 nonce, uint8 v, bytes32 r, bytes32 s, uint256 feeWithdrawal)
             else if (unpacked.name === 'adminWithdraw') {
                 var token = this.setToken(unpacked.params[0].value);
@@ -23108,7 +23233,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     return obj;
                 }
             }
-            else if (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw') {
+            else if (unpacked.events.length >= 4 && (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw')) {
                 var type = unpacked.name;
                 var token = this.setToken(unpacked.events[0].value);
                 var user = unpacked.events[1].value;
@@ -23137,6 +23262,45 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                         'balance': balance,
                         'unlisted': unlisted,
                     };
+                    return obj;
+                }
+            }
+            else if (unpacked.events.length == 2 && (unpacked.name == 'Deposit' || unpacked.name == 'Withdrawal')) {
+                var type = '';
+                var token = this.setToken(unpacked.address);
+                var tokenETH = this.setToken(this.config.ethAddr);
+                var user = unpacked.events[0].value;
+                var rawAmount = unpacked.events[1].value;
+
+                if (token && token.addr) {
+                    var unlisted = token.unlisted;
+                    var dvsr = this.divisorFromDecimals(token.decimals)
+                    var val = utility.weiToEth(rawAmount, dvsr);
+                    var fromToken = undefined;
+                    var toToken = undefined;
+                    if (unpacked.name === 'Withdrawal') {
+                        type = 'Unwrap WETH';
+                        note = 'Unwrap WETH back to ETH';
+                        fromToken = token;
+                        toToken = tokenETH;
+                    }
+                    else {
+                        type = 'Wrap ETH';
+                        note = 'Wrap ETH to WETH';
+                        fromToken = tokenETH;
+                        toToken = token;
+                    }
+
+                    var obj = {
+                        'type': type,
+                        'note': note,
+                        'token In': fromToken,
+                        'token Out': toToken,
+                        'amount': val,
+                        'unlisted': unlisted,
+                        'wallet': user
+                    };
+
                     return obj;
                 }
             }
@@ -45725,6 +45889,16 @@ module.exports = (config) => {
     const divisor = !divisorIn ? 1000000000000000000 : divisorIn;
     return (new BigNumber(wei).div(divisor));
   };
+
+  // token is ether or wrapped ether
+  utility.isWrappedETH = function (address) {
+    if (address) {
+      address = address.toLowerCase();
+      return bundle.DeltaBalances.config.wrappedETH[address] === 1;
+    }
+    return false;
+  };
+
 
   utility.getURL = function getURL(url, callback) {
 

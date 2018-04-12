@@ -505,7 +505,7 @@
 						if (tx.to.toLowerCase() !== unpacked.address.toLowerCase() && unpacked.name !== 'Transfer' && unpacked.name !== 'Approve')
 							myAddr = tx.to.toLowerCase();
 						let obj = _delta.processUnpackedEvent(unpacked, myAddr);
-						if (obj) {
+						if (obj && !obj.error) {
 							if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 								unknownToken = true;
 							if (unpacked.name === 'Trade') {
@@ -516,7 +516,8 @@
 							}
 							outputs.push(obj);
 						} else {
-							outputs.push({ 'error': 'unknown output' });
+							unknownEvents++;
+                            continue;
 						}
 					}
 				}
@@ -852,7 +853,7 @@
 			if (columns[keys[i]]) {
 
 				var cellValue = myList[i];
-				if (keys[i] == 'token' || keys[i] == 'feeToken') {
+				if (keys[i] == 'token' || keys[i] == 'feeToken' || keys[i] == 'token In' || keys[i] == 'token Out') {
 
 					let token = myList[i];
 					let popoverContents = "Placeholder";
@@ -885,7 +886,7 @@
 				else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'ETH' || keys[i] == 'fee' || keys[i] == 'balance') {
 					cellValue = Number(cellValue).toFixed(3);
 				}
-				else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from') {
+				else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'wallet') {
 					cellValue = _util.addressLink(cellValue, true, true);
 				}
 

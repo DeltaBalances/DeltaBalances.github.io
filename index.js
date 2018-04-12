@@ -1087,7 +1087,7 @@
 				bal['Est. ETH'] = '';
 
 				// ETH and  wrapped eth fixed at value of 1 ETH
-				if (token.addr === "0x0000000000000000000000000000000000000000" || token.addr === "0x2956356cd2a2bf3202f771f50d3d14a367b48070" || token.addr === "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2" || token.addr === "0xecf8f87f810ecf450940c9f60066b4a7a501d6a7") {
+				if (_util.isWrappedETH(token.addr)){
 					bal.Bid = '';
 					bal.Ask = '';
 					bal['Est. ETH'] = bal.Total;

@@ -75,6 +75,9 @@ let tokenBlacklist = {
   "0x904c7051d12ace7d0107ada8702c0c759cad1672":"DRTBNT",
   "0x26b5748f9253363f95e37767e9ed7986877a4b1b":"KINBNT",
 
+  // nearly unused WETH
+  "0xe495bcacaf29a0eb00fb67b86e9cd2a994dd55d8":"WETH",
+  
   // random duplicates? 
   "0x3dbfa746dae5214acab3304376bec7fbf526841d":"RESO055",
   "0x27e3795619a866c2e5eec144fe6a150437128edc":"RESO056",
@@ -5296,6 +5299,7 @@ let offlineCustomTokens = [
   {address:"0xa9d0ea9ab6e15b301a45f731dd84b0507021664a",symbol:"WELOOK",decimal:18},
   {address:"0x76195ffd0cfedf68625b3e5b64c7bd904eeb9d6c",symbol:"WET",decimal:18},
   {address:"0xecf8f87f810ecf450940c9f60066b4a7a501d6a7",symbol:"WETH",decimal:18},
+  {address:"0xe495bcacaf29a0eb00fb67b86e9cd2a994dd55d8",symbol:"WETH",decimal:18},
   {address:"0xa37adde3ba20a396338364e2ddb5e0897d11a91d",symbol:"WFEE",decimal:18},
   {address:"0x88eded244d147c6a96b2565a3831020462fed555",symbol:"WHALE",decimal:18},
   {address:"0x985e9cda2fc567ace547a57f567734f59b8290c9",symbol:"WHD",decimal:18},

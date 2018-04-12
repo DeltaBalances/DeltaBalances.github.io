@@ -50,15 +50,13 @@
 			Status: true,
 			Exchange: 'EtherDelta',
 			Type: 'Deposit',
-			Name: 'ETH',
+			Token: _delta.config.tokens[0],
 			Value: 0,
 			Price: '',
 			'ETH': 0,
 			Hash: '',
 			Date: toDateTimeNow(),
 			Details: window.location.origin + window.location.pathname + '/../tx.html#',
-			Unlisted: false,
-			TokenAddr: ''
 		}
 	];
 
@@ -592,10 +590,15 @@
 
 				if (_delta.isExchangeAddress(tx.from.toLowerCase())) {
 					var val = _util.weiToEth(Number(tx.value));
-					var trans = createOutputTransaction('Withdraw', 'ETH', val, '', tx.hash, tx.timeStamp, false, 0, '', tx.isError === '0', _delta.addressName(tx.from, false));
+					var trans = createOutputTransaction('Withdraw', _delta.config.tokens[0], val, '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
 					outputTransactions.push(trans);
 					withdrawHashes[tx.hash.toLowerCase()] = true;
-				}
+				} else if(_util.isWrappedETH(tx.from)) {
+                    var val = _util.weiToEth(Number(tx.value));
+					var trans = createOutputTransaction('Unwrap ETH', _delta.setToken(tx.from), val, val, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+					outputTransactions.push(trans);
+					withdrawHashes[tx.hash.toLowerCase()] = true;
+                }
 			}
 			var tokens = [];
 
@@ -616,11 +619,18 @@
 				{
 					var val = Number(tx.value);
 					var txto = tx.to.toLowerCase();
-					if (val > 0 && _delta.isExchangeAddress(txto)) // eth deposit
+					if (val > 0 && (_delta.isExchangeAddress(txto) || _util.isWrappedETH(txto))) // eth deposit
 					{
 						var val2 = _util.weiToEth(val);
-						var trans = createOutputTransaction('Deposit', 'ETH', val2, '', tx.hash, tx.timeStamp, false, 0, '', tx.isError === '0', _delta.addressName(txto, false));
-						outputTransactions.push(trans);
+                        // deposit ETH to exchange
+                        if(_delta.isExchangeAddress(txto)) {
+                            var trans = createOutputTransaction('Deposit', _delta.config.tokens[0], val2, '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(txto, false));
+                            outputTransactions.push(trans);
+                        } else {
+                            //wrap ETH to WETH
+                            var trans = createOutputTransaction('Wrap ETH', _delta.setToken(txto), val2, val2, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+                            outputTransactions.push(trans);
+                        }
 					}
 					else if (val == 0 && (_delta.isExchangeAddress(txto) || _delta.uniqueTokens[txto])) {
 						if (!withdrawHashes[tx.hash]) // exclude withdraws
@@ -641,17 +651,21 @@
 						let exchange = _delta.addressName(tokens[l].to.toLowerCase(), false);
 						if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken') {
 							obj.type = obj.type.replace('Token ', '');
-							trans = createOutputTransaction(obj.type, obj.token.name, obj.amount, '', tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.token.addr, '', tokens[l].isError === '0', exchange);
+							trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', tokens[l].hash, tokens[l].timeStamp, obj.unlisted, '', tokens[l].isError === '0', exchange);
 						}
 						else if (unpacked.name === 'cancelOrder') {
-							trans = createOutputTransaction(obj.type, obj.token.name, obj.amount, '', tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.token.addr, obj.price, tokens[l].isError === '0', exchange);
+							trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.price, tokens[l].isError === '0', exchange);
 						}
 						else if (unpacked.name === 'trade') {
-							trans = createOutputTransaction(obj.type, obj.token.name, obj.amount, obj.ETH, tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.token.addr, obj.price, tokens[l].isError === '0', exchange);
+							trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.ETH, tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.price, tokens[l].isError === '0', exchange);
 						}
                         else if (unpacked.name === 'approve') {
-                            exchange = _delta.addressName(obj.to.toLowerCase(), false);
-							trans = createOutputTransaction(obj.type, obj.token.name, obj.amount, '', tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.token.addr, '', tokens[l].isError === '0', exchange);
+                            if(_delta.isExchangeAddress(txto)) {
+                                exchange = _delta.addressName(obj.to.toLowerCase(), false);
+                            } else {
+                                exchange = '';
+                            }
+							trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', tokens[l].hash, tokens[l].timeStamp, obj.unlisted, '', tokens[l].isError === '0', exchange);
 						}
 
 						if (trans)
@@ -663,23 +677,26 @@
 			setBlockStorage();
 			done();
 
-			function createOutputTransaction(type, name, val, total, hash, timeStamp, unlisted, tokenaddr, price, status, exchange) {
-				if (status === undefined)
-					status = true;
-				return {
-					Status: status,
-					Exchange: exchange,
-					Type: type,
-					Name: name,
-					Value: val,
-					Price: price,
-					'ETH': total,
-					Hash: hash,
-					Date: toDateTime(timeStamp),
-					Details: window.location.origin + window.location.pathname + '/../tx.html#' + hash,
-					Unlisted: unlisted,
-					TokenAddr: tokenaddr,
-				};
+			function createOutputTransaction(type, token, val, total, hash, timeStamp, unlisted, price, status, exchange) {
+				
+                if(token) {
+                    if (status === undefined)
+                        status = true;
+                    return {
+                        Status: status,
+                        Exchange: exchange,
+                        Type: type,
+                        Token: token,
+                        Value: val,
+                        Price: price,
+                        'ETH': total,
+                        Hash: hash,
+                        Date: toDateTime(timeStamp),
+                        Details: window.location.origin + window.location.pathname + '/../tx.html#' + hash,
+                    };
+                } else {
+                    return undefined;
+                }
 			}
 
 			function done() {
@@ -867,9 +884,9 @@
 							row$.append($('<td/>').html(cellValue));
 						}
 					}
-					else if (head == 'Name') {
+					else if (head == 'Token') {
 
-						let token = _delta.uniqueTokens[myList[i].TokenAddr];
+						let token = cellValue;
 						let popoverContents = "Placeholder";
 						if (cellValue !== 'ETH') {
 							if (token) {
@@ -886,17 +903,17 @@
 							popoverContents = "Ether (not a token)<br> Decimals: 18";
 						}
 						let labelClass = 'label-warning';
-						if (!myList[i].Unlisted)
+						if (!token.unlisted)
 							labelClass = 'label-primary';
 
-						row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + cellValue + '" data-container="body" data-content=\'' + popoverContents + '\'>' + cellValue + ' <i class="fa fa-external-link"></i></a>'));
+						row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + ' <i class="fa fa-external-link"></i></a>'));
 
 					}
 					else if (head == 'Type') {
-						if (cellValue == 'Deposit' || cellValue == 'Approve') {
+						if (cellValue == 'Deposit' || cellValue == 'Approve' || cellValue == 'Wrap ETH') {
 							row$.append($('<td/>').html('<span class="label label-success" >' + cellValue + '</span>'));
 						}
-						else if (cellValue == 'Withdraw') {
+						else if (cellValue == 'Withdraw' || cellValue == 'Unwrap ETH') {
 							row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
 						}
 						else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy') {
@@ -940,7 +957,7 @@
 	}
 
 
-	var transactionHeaders = { 'Name': 1, 'Value': 1, 'Type': 1, 'Hash': 1, 'Date': 1, 'Price': 1, 'ETH': 1, 'Status': 1, 'Details': 1, 'Exchange': 1 };
+	var transactionHeaders = { 'Token': 1, 'Value': 1, 'Type': 1, 'Hash': 1, 'Date': 1, 'Price': 1, 'ETH': 1, 'Status': 1, 'Details': 1, 'Exchange': 1 };
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.

@@ -660,11 +660,13 @@
 							trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.ETH, tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.price, tokens[l].isError === '0', exchange);
 						}
                         else if (unpacked.name === 'approve') {
-                            if(_delta.isExchangeAddress(txto)) {
+								if (_delta.isExchangeAddress(tokens[l].to)) {
                                 exchange = _delta.addressName(obj.to.toLowerCase(), false);
                             } else {
                                 exchange = '';
                             }
+                                if(obj.amount.greaterThan(999999999999999))
+                                    obj.amount = '';
 							trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', tokens[l].hash, tokens[l].timeStamp, obj.unlisted, '', tokens[l].isError === '0', exchange);
 						}
 

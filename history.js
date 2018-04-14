@@ -1442,12 +1442,12 @@
 				for (var i = 0; i < allTrades.length; ++i) {
 					var arr = [];
 					if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
-						arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'] + allTrades[i]['Fee'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'].plus(allTrades[i]['Fee']), 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
 							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
 
 					}
 					else {  //sell add fee to token total
-						arr = ['Trade', allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						arr = ['Trade', allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
 							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
 					}
 
@@ -1554,12 +1554,12 @@
 				for (var i = 0; i < allTrades.length; ++i) {
 					var arr = [];
 					if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
-						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'] + allTrades[i]['Fee'], 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'].plus(allTrades[i]['Fee']), 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
 						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, historyConfig.exchange, 'Trade'];
 
 					}
 					else { //sell add fee to token total
-						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
 						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, historyConfig.exchange, 'Trade'];
 					}
 
@@ -1603,7 +1603,7 @@
 	function exportNotation(num) {
 		//return Number(num).toFixed(20).replace(/\.?0+$/,""); // rounded to 20 decimals, no trailing 0
 		//https://stackoverflow.com/questions/3612744/remove-insignificant-trailing-zeros-from-a-number
-		return Number(num).toFixed(20).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1')
+		return _delta.web3.toBigNumber(num).toFixed(20).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1')
 	}
 
 	function placeholderTable() {

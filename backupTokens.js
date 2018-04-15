@@ -4722,6 +4722,7 @@ let offlineCustomTokens = [
   {address:"0x618e75ac90b12c6049ba3b27f5d5f8651b0037f6",symbol:"QASH",decimal:6},
   {address:"0x671abbe5ce652491985342e85428eb1b07bc6c64",symbol:"QAU",decimal:8},
   {address:"0xc029ba3dc12e1834571e821d94a07de0a01138ea",symbol:"QBE",decimal:18},
+  {address:"0xcb5ea3c190d8f82deadf7ce5af855ddbf33e3962",symbol:"QBIT",decimal:6},
   {address:"0xe6917b0b68a9d72f384758c2e19cc2a95adc1947",symbol:"QEC",decimal:0},
   {address:"0x60538f00263cc5ad2e02b7834aadf9bdd9f42831",symbol:"QIWI",decimal:18},
   {address:"0x697beac28b09e122c4332d163985e8a73121b97f",symbol:"QRL",decimal:8},

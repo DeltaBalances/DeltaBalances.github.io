@@ -1,4 +1,4 @@
-require=(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({"/config.js":[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/config.js":[function(require,module,exports){
 module.exports = {
   homeURL: 'https://deltabalances.github.io',
   socketURL: 'https://api.forkdelta.com', //'https://socket.etherdelta.com';
@@ -17,6 +17,13 @@ module.exports = {
   contractDecentrexAddr: '0xbf29685856fae1e228878dfb35b280c0adcc3b05',
   contract0xAddr: '0x12459c951127e0c374ff9105dda097662a027093',
   contract0xProxy: '0x8da0d80f5007ef1e431dd2127178d224e32c2ef4',
+  contract0xRelayers: {
+    '0xa258b39954cef5cb142fd567a46cddb31a670124': "RadarRelay",
+    '0xeb71bad396acaa128aeadbc7dbd59ca32263de01': "IDT",
+    '0x173a2467cece1f752eb8416e337d0f0b58cad795': 'Erc Dex',
+    '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX',
+    //'0x0000000000000000000000000000000000000000' : 'Paradex'
+  },
   ethAddr: '0x0000000000000000000000000000000000000000',
   apiServer: '',
   apiServers: ['https://api.forkdelta.com', /*'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/],
@@ -94,8 +101,8 @@ module.exports = {
     "0xe495bcacaf29a0eb00fb67b86e9cd2a994dd55d8": 1, // 0x style ?, deprecated
     "0x2956356cd2a2bf3202f771f50d3d14a367b48070": 1, // 0x WETH v1 (deprecated)
     "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": 1, // 0x WETH v2 (active)
-  //  "0xecf8f87f810ecf450940c9f60066b4a7a501d6a7": 1, // WETH MKR 
-  //  "0xc0829421c1d260bd3cb3e0f06cfe2d52db2ce315": 1, // Bancor ether token
+    //  "0xecf8f87f810ecf450940c9f60066b4a7a501d6a7": 1, // WETH MKR 
+    //  "0xc0829421c1d260bd3cb3e0f06cfe2d52db2ce315": 1, // Bancor ether token
   },
   // non ETH/WETH  base currency (like DAI)
   baseToken: {

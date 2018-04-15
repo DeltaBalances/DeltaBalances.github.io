@@ -666,6 +666,12 @@
 								let cancelAmount = '';
 								if (obj.baseAmount)
 									cancelAmount = obj.baseAmount;
+								if (obj.relayer) {
+									let relay = _util.relayName(obj.relayer);
+									if (relay) {
+										exchange = relay;
+									}
+								}
 								trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, cancelAmount, tokens[l].hash, tokens[l].timeStamp, obj.unlisted, obj.price, tokens[l].isError === '0', exchange);
 							}
 							else if (unpacked.name === 'trade') {
@@ -695,7 +701,12 @@
 									else {
 										continue;
 									}
-
+								}
+								if (obj.relayer) {
+									let relay = _util.relayName(obj.relayer);
+									if (relay) {
+										exchange = relay;
+									}
 								}
 								trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tokens[l].hash, tokens[l].timeStamp, obj.unlisted, price, tokens[l].isError === '0', exchange);
 							}

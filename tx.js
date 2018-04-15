@@ -514,10 +514,14 @@
 								delete obj.transType;
 								delete obj.tradeType;
 							} else if (unpacked.name === 'LogFill') {
+								let relay = obj.relayer;
 								delete obj.transType;
 								delete obj.tradeType;
+								delete obj.relayer;
 								obj.feeToken = obj.feeCurrency;
 								delete obj.feeCurrency;
+								if (relay)
+									obj.relayer = relay;
 							}
 							outputs.push(obj);
 						} else {
@@ -934,6 +938,9 @@
 					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'wallet') {
 						cellValue = _util.addressLink(cellValue, true, true);
 					}
+					else if (keys[i] == 'relayer') {
+						cellValue = _util.relayName(cellValue);
+					}
 
 					if (cellValue == null) cellValue = "";
 					//let head = columns[colIndex];
@@ -971,7 +978,7 @@
 			{
 				if (!columnSet[key] && key !== 'unlisted' && key !== 'note') {
 					columnSet[key] = 1;
-					if(key === 'baseAmount')
+					if (key === 'baseAmount')
 						key = 'Total';
 					headerTr$.append($('<th/>').html(capitalizeFirstLetter(key)));
 				}

@@ -62,7 +62,8 @@
 			Token: { "name": "Token", "addr": "0x00" },
 			Amount: 0,
 			Price: 0,
-			ETH: 0,
+			Base: { "name": "Token", "addr": "0x00" },
+			Total: 0,
 			Hash: '0xH4SH1',
 			Date: toDateTimeNow(),
 			Block: '',
@@ -764,7 +765,8 @@
 								Token: obj.token,
 								Amount: obj.amount,
 								Price: obj.price,
-								ETH: obj.baseAmount,
+								Base: obj.base,
+								Total: obj.baseAmount,
 								Hash: filteredLogs[i].transactionHash,
 								Date: '??', // retrieved by later etherscan call
 								Block: _util.hexToDec(filteredLogs[i].blockNumber),
@@ -784,7 +786,8 @@
 							Token: obj.token,
 							Amount: obj.amount,
 							Price: '',
-							ETH: '',
+							Base: '',
+							Total: '',
 							Hash: filteredLogs[i].transactionHash,
 							Date: '??', // retrieved by later etherscan call
 							Block: _util.hexToDec(filteredLogs[i].blockNumber),
@@ -985,7 +988,7 @@
 					if (cellValue === null) cellValue = "";
 
 
-					if (head == 'Amount' || head == 'Price' || head == 'Fee' || head == 'ETH') {
+					if (head == 'Amount' || head == 'Price' || head == 'Fee' || head == 'Total') {
 						if (head == 'Fee' && myList[i][columns[0]] != 'Taker') {
 							cellValue = '';
 						}
@@ -1003,7 +1006,7 @@
 							row$.append($('<td/>').html(cellValue));
 						}
 					}
-					else if (head == 'Token' || head == 'Fee in') {
+					else if (head == 'Token' || head == 'Base' || head == 'Fee in') {
 						if ((head == 'Fee in') && myList[i][columns[0]] != 'Taker') {
 							cellValue = '';
 						}
@@ -1108,7 +1111,7 @@
 		}
 	}
 
-	var tradeHeaders = { 'Type': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'ETH': 1, 'Hash': 1, 'Date': 1, 'Buyer': 1, 'Seller': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Details': 1 };
+	var tradeHeaders = { 'Type': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'Base': 1, 'Total': 1, 'Hash': 1, 'Date': 1, 'Buyer': 1, 'Seller': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Details': 1 };
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.
@@ -1290,18 +1293,18 @@
 			{
 				var allTrades = lastResult.filter((x) => { return (x.Type == 'Maker' || x.Type == 'Taker'); });
 
-				var A = [['Type', 'Trade', 'Token', 'Amount', 'Price (ETH)', 'Total ETH', 'Date', 'Block', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract', 'Exchange']];
+				var A = [['Type', 'Trade', 'Token', 'Amount', 'Price', 'BaseCurrency', 'Total', 'Date', 'Block', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract', 'BaseCurrency Contract', 'Exchange']];
 				// initialize array of rows with header row as 1st item
 				for (var i = 0; i < allTrades.length; ++i) {
-					var arr = [allTrades[i]['Type'], allTrades[i]['Trade'], allTrades[i]['Token'].name, allTrades[i]['Amount'], allTrades[i]['Price'],
-					allTrades[i]['ETH'], formatDateOffset(allTrades[i]['Date']), allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'],
-					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr, historyConfig.exchange];
-
+					var arr = [allTrades[i]['Type'], allTrades[i]['Trade'], allTrades[i]['Token'].name, allTrades[i]['Amount'], allTrades[i]['Price'], allTrades[i]['Base'].name,
+					allTrades[i]['Total'], formatDateOffset(allTrades[i]['Date']), allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'],
+					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr, allTrades[i]['Base'].addr, historyConfig.exchange];
 
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
-						if (A[0][j] == 'Amount' || A[0][j] == 'Price (ETH)' || A[0][j] == 'Total ETH' || A[0][j] == 'Fee') {
-							arr[j] = _util.exportNotation(arr[j]);
+						if (A[0][j] == 'Amount' || A[0][j] == 'Price' || A[0][j] == 'Total ETH' || A[0][j] == 'Fee') {
+							if (arr[j])
+								arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1348,7 +1351,8 @@
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == 'Amount') {
-							arr[j] = _util.exportNotation(arr[j]);
+							if (arr[j])
+								arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1395,19 +1399,20 @@
 					var memoString = '"Transaction Hash ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr + '"';
 
 					//if (allTrades[i]['Trade'] === 'Buy') {
-					arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), historyConfig.exchange, allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
+					arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), historyConfig.exchange, allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], allTrades[i]['Base'].name,
 					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
 					//	}
 					// add token fee to total for correct balance in bitcoin tax
 					//	else {
-					//		arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), historyConfig.exchange, allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], 'ETH',
+					//		arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), historyConfig.exchange, allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], allTrades[i]['Base'].name,
 					//		allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
 					//	}
 
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == 'Volume' || A[0][j] == 'Price' || A[0][j] == 'Fee' || A[0][j] == 'Total') {
-							arr[j] = _util.exportNotation(arr[j]);
+							if (arr[j])
+								arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1451,19 +1456,20 @@
 				for (var i = 0; i < allTrades.length; ++i) {
 					var arr = [];
 					if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
-						arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'].plus(allTrades[i]['Fee']), 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
 							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
 
 					}
 					else {  //sell add fee to token total
-						arr = ['Trade', allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						arr = ['Trade', allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
 							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
 					}
 
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == '\"Buy\"' || A[0][j] == '\"Sell\"' || A[0][j] == '\"Fee\"') {
-							arr[j] = _util.exportNotation(arr[j]);
+							if (arr[j])
+								arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1519,7 +1525,8 @@
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == '\"Buy\"' || A[0][j] == '\"Sell\"') {
-							arr[j] = _util.exportNotation(arr[j]);
+							if (arr[j])
+								arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1563,19 +1570,20 @@
 				for (var i = 0; i < allTrades.length; ++i) {
 					var arr = [];
 					if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
-						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['ETH'].plus(allTrades[i]['Fee']), 'ETH', allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
 						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, historyConfig.exchange, 'Trade'];
 
 					}
 					else { //sell add fee to token total
-						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['ETH'], 'ETH', allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
 						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, historyConfig.exchange, 'Trade'];
 					}
 
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == '\"Buy\"' || A[0][j] == '\"Sell\"' || A[0][j] == '\"Fee\"') {
-							arr[j] = _util.exportNotation(arr[j]);
+							if (arr[j])
+								arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes

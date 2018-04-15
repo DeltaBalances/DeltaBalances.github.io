@@ -102,13 +102,13 @@
 			}
 		});
 
-          $('body').on('expanded.pushMenu collapsed.pushMenu', function() {
-           // Add delay to trigger code only after the pushMenu animation completes
-            setTimeout(function() {
-                $("table").trigger("update", [true, () => { }]);
-                $("table").trigger("applyWidgets");
-            }, 300);
-        } );
+		$('body').on('expanded.pushMenu collapsed.pushMenu', function () {
+			// Add delay to trigger code only after the pushMenu animation completes
+			setTimeout(function () {
+				$("table").trigger("update", [true, () => { }]);
+				$("table").trigger("applyWidgets");
+			}, 300);
+		});
 
 		$(window).resize(function () {
 			$("table").trigger("applyWidgets");
@@ -452,8 +452,8 @@
 				to: tx.to,
 				rawinput: tx.input,
 				nonce: Number(tx.nonce),
-				value: _util.weiToEth(Number(tx.value)),
-				gasPrice: _util.weiToEth(Number(tx.gasPrice)),
+				value: _util.weiToEth(tx.value),
+				gasPrice: _util.weiToEth(tx.gasPrice),
 				gasGwei: (Number(tx.gasPrice) / 1000000000),
 				gasLimit: Number(tx.gas),
 				status: 'Pending',
@@ -468,9 +468,9 @@
 					transaction.blockNumber = tx.blockNumber;
 					transaction.blockHash = tx.blockHash;
 					transaction.rawoutput = null;
-                    var parsedOutput = parseOutput(tx, txLog.logs);
+					var parsedOutput = parseOutput(tx, txLog.logs);
 					transaction.output = parsedOutput.output;
-                    transaction.outputErrors = parsedOutput.errors;
+					transaction.outputErrors = parsedOutput.errors;
 				}
 				else {
 					transaction.status = 'Error';
@@ -489,7 +489,7 @@
 
 			function parseOutput(tx, outputLogs) {
 				var outputs = [];
-                var unknownEvents = 0;
+				var unknownEvents = 0;
 				var unpackedLogs = _util.processLogs(outputLogs);
 
 				for (let i = 0; i < unpackedLogs.length; i++) {
@@ -513,15 +513,20 @@
 								delete obj.feeCurrency;
 								delete obj.transType;
 								delete obj.tradeType;
+							} else if (unpacked.name === 'LogFill') {
+								delete obj.transType;
+								delete obj.tradeType;
+								obj.feeToken = obj.feeCurrency;
+								delete obj.feeCurrency;
 							}
 							outputs.push(obj);
 						} else {
 							unknownEvents++;
-                            continue;
+							continue;
 						}
 					}
 				}
-				return {output:outputs, errors:unknownEvents};
+				return { output: outputs, errors: unknownEvents };
 			}
 
 			function parseInput(tx, input) {
@@ -530,8 +535,14 @@
 					return undefined;
 
 				let obj = _delta.processUnpackedInput(tx, unpacked);
-				if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
-					unknownToken = true;
+				if (obj) {
+					if (!Array.isArray(obj))
+						obj = [obj];
+					for (let i = 0; i < obj.length; i++) {
+						if (obj[i] && obj[i].token && obj[i].token.name === "???" && obj[i].token.unknown)
+							unknownToken = true;
+					}
+				}
 				return obj;
 
 			}
@@ -587,10 +598,10 @@
 			sum += 'Status: Transaction is pending, try again later. For a faster transaction raise your gas price next time.<br> Pending for a really long time? Try to <a href="https://www.reddit.com/r/EtherDelta/comments/72tctz/guide_how_to_cancel_a_pending_transaction/" target="_blank">cancel or replace</a> it. <br>';
 		}
 		else if (transaction.status === 'Error: Bad jump destination') {
-			if (transaction.input.type === 'Taker Sell' || transaction.input.type === 'Taker Buy') {
+			if (transaction.input[0].type === 'Taker Sell' || transaction.input[0].type === 'Taker Buy') {
 				sum += 'Status: Bad jump destination, someone filled this order before you. (Sent earlier or with a higher gas price).<br>';
 			}
-			else if (transaction.input.type === 'Token Deposit' || transaction.input.type === 'Token Withdraw') {
+			else if (transaction.input[0].type === 'Token Deposit' || transaction.input[0].type === 'Token Withdraw') {
 				sum += 'Status: Bad jump destination, token deposit/withdraw failed. You might not have had the right account balance left. Otherwise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br>';
 			}
 		} else {
@@ -601,16 +612,16 @@
 			sum += "<strong>This token is still unknown to DeltaBalances </strong>, amount and price might be wrong if the token has less than 18 decimals <br> "
 
 		}
-		if (transaction.input && transaction.input.note) {
-			sum += 'Transaction type: ' + transaction.input.note + '<br>';
-		} else if (transaction.output && transaction.output.length > 0) {
+		if (transaction.input && transaction.input[0].note) {
+			sum += 'Transaction type: ' + transaction.input[0].note + '<br>';
+		} else if (transaction.output && transaction.output[0].length > 0) {
 			sum += 'Transaction type: ' + transaction.output[0].note + '<br>';
 		}
-		if (transaction.input && transaction.input.type === 'Transfer') {
-			if (_delta.uniqueTokens[transaction.input.to]) {
+		if (transaction.input && transaction.input[0].type === 'Transfer') {
+			if (_delta.uniqueTokens[transaction.input[0].to]) {
 				sum += '<strong>Warning</strong>, you sent tokens to a token contract. These tokens are most likely lost forever. <br>';
 			}
-			else if (_delta.isExchangeAddress(transaction.input.to)) {
+			else if (_delta.isExchangeAddress(transaction.input[0].to)) {
 				sum += '<strong>Warning</strong>, you sent tokens to the Exchange contract without a deposit. Nobody can access these tokens anymore, they are most likely lost forever. <br>';
 			}
 		}
@@ -626,16 +637,17 @@
 		var tradeCount = 0;
 		var zeroDecWarning = '';
 		if (transaction.output) {
+			// TODO fix this etherdelta only?
 			// output price can get wrong decimals if trading like 15e-10, so get price from input if possible. 
-			if (transaction.input && transaction.output.length == 1 && transaction.output[0].price >= 0) {
-				transaction.output[0].price = transaction.input.price;
-				if (transaction.output[0].amount < transaction.input['order size']) {
+			if (transaction.input && transaction.output.length == 1 && transaction.output.price) {
+				//transaction.output[0].price = transaction.input[0].price;
+				if (transaction.input[0]['order size'].greaterThan(transaction.output[0].amount)) {
 					sum += "Partial fill, ";
 				}
 			}
 
-			var spent = 0;
-			var received = 0;
+			//var spent = _delta.web3.toBigNumber(0);
+			//var received = _delta.web3.toBigNumber(0);
 
 			for (var i = 0; i < transaction.output.length; i++) {
 				if (transaction.output[i].type == 'Taker Buy') {
@@ -643,16 +655,16 @@
 						zeroDecWarning = "<strong>Note: </strong> " + transaction.output[i].token.name + " has 0 decimals precision. Numbers might be lower than expected due to rounding. <br>";
 					}
 					tradeCount++;
-					sum += "Bought " + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " ETH each, " + transaction.output[i].ETH + " ETH in total. <br>";
-					spent += transaction.output[i].ETH;
+					sum += "Bought " + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " " + transaction.output[i].base.name + " each, " + transaction.output[i].baseAmount + " " + transaction.output[i].base.name + " in total. <br>";
+					//spent = transaction.output[i].ETH.plus(spent);
 				}
 				else if (transaction.output[i].type == 'Taker Sell') {
 					if (transaction.output[i].token.decimals == 0 && !zeroDecWarning) {
 						zeroDecWarning = "<strong>Note: </strong> " + transaction.output[i].token.name + " has 0 decimals precision. Numbers might be lower than expected due to rounding. <br>"
 					}
 					tradeCount++;
-					sum += "Sold " + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " ETH each, " + transaction.output[i].ETH + " ETH in total. <br>";
-					received += transaction.output[i].ETH;
+					sum += "Sold " + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " " + transaction.output[i].base.name + " each, " + transaction.output[i].baseAmount + " " + transaction.output[i].base.name + " in total. <br>";
+					//	received = transaction.output[i].ETH.plus(received);
 				}
 				else if (transaction.output[i].type == "Deposit" || transaction.output[i].type == "Token Deposit") {
 					sum += "Deposited " + transaction.output[i].amount + " " + transaction.output[i].token.name + ", new exchange balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name + '<br>';
@@ -662,10 +674,10 @@
 				}
 			}
 
-			if (tradeCount > 1 && transaction.to !== _delta.config.contractEtherDeltaAddr) {
+			if (tradeCount > 1 && !_delta.isExchangeAddress(transaction.to)) {
 				sum += 'This transaction was made by a contract that has made multiple trades in a single transaction. <br>';
 				// sum up what a custom cotract did in multiple trades
-				sum += "ETH gain over these trades: " + (received - spent - Number(transaction.gasEth)) + " (incl. gas cost). <br>";
+				//	sum += "ETH gain over these trades: " + (received.minus(spent).minus(transaction.gasEth)) + " (incl. gas cost). <br>";
 			}
 			else if (tradeCount > 0 && !_delta.isExchangeAddress(transaction.to)) {
 				sum += 'This transaction was made by a contract instead of a user. <br>';
@@ -711,24 +723,24 @@
 		}
 		$('#ethval').html(transaction.value.toString());
 		$('#inputdata').html('');
-		if (transaction.input && transaction.input.type) {
-			$('#inputtype').html(transaction.input.type);
+		if (transaction.input && transaction.input[0].type) {
+			$('#inputtype').html(transaction.input[0].type);
 		} else {
 			if (tradeCount == 0)
 				$('#inputtype').html('');
 			else
 				$('#inputtype').html('Trade');
 		}
-		displayParse(transaction.input, "#inputdata");
+		if (transaction.input) {
+			displayParse(transaction.input, "#inputdata");
+		}
+
 		$('#outputdata').html('');
 		if (transaction.output) {
-
-			for (var i = 0; i < transaction.output.length; i++) {
-				displayParse(transaction.output[i], "#outputdata");
+			displayParse(transaction.output, "#outputdata");
+			if (transaction.outputErrors) {
+				$('#outputdata').append('<br> + ' + transaction.outputErrors + ' unrecognized events emitted');
 			}
-            if(transaction.outputErrors) {
-                $('#outputdata').append('<br> + ' + transaction.outputErrors + ' unrecognized events emitted');
-            }
 		}
 		else if (transaction.status === 'Pending')
 			$('#outputdata').html('Transaction is pending, no output available yet.');
@@ -767,13 +779,32 @@
 
 	function displayParse(parsedInput, id) {
 		if (!parsedInput) {
-			$(id).html('No familiar Exchange input recognized');
+			$(id).html('No familiar Exchange data recognized');
 
 			return;
 		}
-		//let html = $(id).html();
-		//$(id).html(html + div);
-		buildHtmlTable(id, parsedInput);
+
+		// group similar typed events into the same table
+		let types = {};
+		for (var i = 0; i < parsedInput.length; i++) {
+			let uniqueType = parsedInput[i].type.toLowerCase();
+			if (uniqueType.indexOf('taker') !== -1 || uniqueType.indexOf('maker') !== -1) {
+				uniqueType = 'trade';
+			}
+			else if (uniqueType.indexOf('cancel') !== -1) {
+				uniqueType = 'cancel';
+			}
+			if (!types[uniqueType])
+				types[uniqueType] = [];
+
+			types[uniqueType].push(parsedInput[i]);
+		}
+
+
+		let batchedInput = Object.values(types);
+		for (var i = 0; i < batchedInput.length; i++) {
+			buildHtmlTable(id, batchedInput[i]);
+		}
 
 
 		$("table").tablesorter({
@@ -820,88 +851,108 @@
 	}
 
 	function formatDate(d) {
-        try{
-            var month = '' + (d.getMonth() + 1),
-                day = '' + d.getDate(),
-                year = d.getFullYear(),
-                hour = d.getHours(),
-                min = d.getMinutes();
+		try {
+			var month = '' + (d.getMonth() + 1),
+				day = '' + d.getDate(),
+				year = d.getFullYear(),
+				hour = d.getHours(),
+				min = d.getMinutes();
 
 
-            if (month.length < 2) month = '0' + month;
-            if (day.length < 2) day = '0' + day;
-            if (hour < 10) hour = '0' + hour;
-            if (min < 10) min = '0' + min;
+			if (month.length < 2) month = '0' + month;
+			if (day.length < 2) day = '0' + day;
+			if (hour < 10) hour = '0' + hour;
+			if (min < 10) min = '0' + min;
 
-            return [year, month, day].join('-') + ' ' + [hour, min].join(':');
-        } catch (err) {
-            return d;
-        }
+			return [year, month, day].join('-') + ' ' + [hour, min].join(':');
+		} catch (err) {
+			return d;
+		}
 	}
 
 	// Builds the HTML Table out of myList.
 	function buildHtmlTable(selector, myObj) {
-		var myList = Object.values(myObj);
-		var keys = Object.keys(myObj);
+
+		if (!myObj)
+			return;
+		if (!Array.isArray(myObj))
+			myObj = [myObj];
+
+		var keys = Object.keys(myObj[0]);
+
+
 		var table$ = $('<table class="table table-sm parsed" cellspacing="0" cellpadding="0" />');
 
 		var columns = addAllColumnHeaders(keys, table$);
 		var tbody$ = $('<tbody class/>');
-		var row$ = $('<tr/>');
-		for (var i = 0; i < myList.length; i++) {
 
-			if (columns[keys[i]]) {
+		for (let j = 0; j < myObj.length; j++) {
+			let myList = Object.values(myObj[j]);
+			var row$ = $('<tr/>');
 
-				var cellValue = myList[i];
-				if (keys[i] == 'token' || keys[i] == 'feeToken' || keys[i] == 'token In' || keys[i] == 'token Out') {
+			for (var i = 0; i < myList.length; i++) {
 
-					let token = myList[i];
-					let popoverContents = "Placeholder";
-					if (token && token.name !== 'ETH' && _delta.uniqueTokens[token.addr]) {
-						if (token) {
-							popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
-								+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
-								+ '</li><li>' + _util.forkDeltaURL(token, true)
-								+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
-							if (token.IDEX) {
-								popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
+				if (columns[keys[i]]) {
+
+					var cellValue = myList[i];
+					if (keys[i] == 'token' || keys[i] == 'base' || keys[i] == 'feeToken' || keys[i] == 'token In' || keys[i] == 'token Out') {
+
+						let token = myList[i];
+						let popoverContents = "Placeholder";
+						if (token && !_util.isWrappedETH(token.addr) && _delta.uniqueTokens[token.addr]) {
+							if (token) {
+								popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
+									+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
+									+ '</li><li>' + _util.forkDeltaURL(token, true)
+									+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
+								if (token.IDEX) {
+									popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
+								}
+								popoverContents += '</ul>';
 							}
-							popoverContents += '</ul>';
+						} else {
+							if (!_delta.uniqueTokens[token.addr])
+								popoverContents = "Token unknown to deltabalances <br> Contract: " + _util.addressLink(token.addr, true, true);
+							else if (token.addr == _delta.config.ethAddr) {
+								popoverContents = "Ether (not a token)<br> Decimals: 18";
+							} else {
+								popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
+							}
 						}
-					} else {
-						if (!_delta.uniqueTokens[token.addr])
-							popoverContents = "Token unknown to deltabalances <br> Contract: " + _util.addressLink(token.addr, true, true);
-						else
-							popoverContents = "Ether (not a token)<br> Decimals: 18";
+						let labelClass = 'label-warning';
+						if (!token.unlisted && !token.unknown)
+							labelClass = 'label-primary';
+
+						cellValue = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + ' <i class="fa fa-external-link"></i></a>';
 					}
-					let labelClass = 'label-warning';
-					if (!token.unlisted && !token.unknown)
-						labelClass = 'label-primary';
+					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice') {
+						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(5) + '</span>';
+					}
+					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'baseAmount' || keys[i] == 'fee' || keys[i] == 'balance') {
+						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(3) + '</span>';
+					}
+					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'wallet') {
+						cellValue = _util.addressLink(cellValue, true, true);
+					}
 
-					cellValue = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + ' <i class="fa fa-external-link"></i></a>';
-				}
-				else if (keys[i] == 'price') {
-					cellValue = Number(cellValue).toFixed(5);
-				}
-				else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'ETH' || keys[i] == 'fee' || keys[i] == 'balance') {
-					cellValue = Number(cellValue).toFixed(3);
-				}
-				else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'wallet') {
-					cellValue = _util.addressLink(cellValue, true, true);
-				}
+					if (cellValue == null) cellValue = "";
+					//let head = columns[colIndex];
 
-				if (cellValue == null) cellValue = "";
-				//let head = columns[colIndex];
-
-				{
-					row$.append($('<td/>').html(cellValue.toString()));
+					{
+						row$.append($('<td/>').html(cellValue.toString()));
+					}
 				}
 			}
+
+			tbody$.append(row$);
 		}
 
-		tbody$.append(row$);
 		table$.append(tbody$);
 		$(selector).append(table$);
+		$('[data-toggle=tooltip]').tooltip({
+			'placement': 'top',
+			'container': 'body'
+		});
 		$("[data-toggle=popover]").popover();
 	}
 
@@ -920,6 +971,8 @@
 			{
 				if (!columnSet[key] && key !== 'unlisted' && key !== 'note') {
 					columnSet[key] = 1;
+					if(key === 'baseAmount')
+						key = 'Total';
 					headerTr$.append($('<th/>').html(capitalizeFirstLetter(key)));
 				}
 			}

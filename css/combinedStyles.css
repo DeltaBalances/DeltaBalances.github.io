@@ -307,11 +307,11 @@ font-size: 105%;
 	color:gray;
 }
 
-#overviewTable tr:nth-child(3)
+#overviewTable tr:nth-child(4)
 {
     border-top: 1px solid black;
 }
-#overviewTable tr:nth-child(3) td
+#overviewTable tr:nth-child(4) td
 {
 	padding:3px;
 }
@@ -705,3 +705,7 @@ input[type=number] {
 .icon-etherdelta:before { content: '\e800'; } /* '' */
 .icon-decentrex:before { content: '\e801'; } /* '' */
 .icon-tokenstore:before { content: '\e802'; } /* '' */
+
+.tooltip-inner {
+  max-width: 500px;
+}

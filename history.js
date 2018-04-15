@@ -156,14 +156,14 @@
 			}
 		});
 
-        $('body').on('expanded.pushMenu collapsed.pushMenu', function() {
-           // Add delay to trigger code only after the pushMenu animation completes
-            setTimeout(function() {
-                $("#transactionsTable").trigger("update", [true, () => { }]);
-                $("#transactionsTable").trigger("applyWidgets");
-            }, 300);
-        } );
-        
+		$('body').on('expanded.pushMenu collapsed.pushMenu', function () {
+			// Add delay to trigger code only after the pushMenu animation completes
+			setTimeout(function () {
+				$("#transactionsTable").trigger("update", [true, () => { }]);
+				$("#transactionsTable").trigger("applyWidgets");
+			}, 300);
+		});
+
 		$(window).resize(function () {
 			$("#transactionsTable").trigger("applyWidgets");
 
@@ -755,27 +755,29 @@
 				let obj = _delta.processUnpackedEvent(unpacked, myAddr);
 				if (obj && !obj.error) {
 
-					var obj2 = {};
+					var obj2 = undefined;
 					if (unpacked.name == 'Trade') {
-						obj2 = {
-							Type: obj.transType,
-							Trade: obj.tradeType,
-							Token: obj.token,
-							Amount: obj.amount,
-							Price: obj.price,
-							ETH: obj.ETH,
-							Hash: filteredLogs[i].transactionHash,
-							Date: '??', // retrieved by later etherscan call
-							Block: _util.hexToDec(filteredLogs[i].blockNumber),
-							Buyer: obj.buyer,
-							Seller: obj.seller,
-							Fee: obj.fee,
-							FeeToken: obj.feeCurrency,
-							'Fee in': obj.feeCurrency,
-							Details: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
-							Unlisted: obj.unlisted,
+						if (_util.isWrappedETH(obj.base.addr)) {
+							obj2 = {
+								Type: obj.transType,
+								Trade: obj.tradeType,
+								Token: obj.token,
+								Amount: obj.amount,
+								Price: obj.price,
+								ETH: obj.baseAmount,
+								Hash: filteredLogs[i].transactionHash,
+								Date: '??', // retrieved by later etherscan call
+								Block: _util.hexToDec(filteredLogs[i].blockNumber),
+								Buyer: obj.buyer,
+								Seller: obj.seller,
+								Fee: obj.fee,
+								FeeToken: obj.feeCurrency,
+								'Fee in': obj.feeCurrency,
+								Details: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
+								Unlisted: obj.unlisted,
+							}
 						}
-					} else {
+					} else if (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw') {
 						obj2 = {
 							Type: obj.type.replace('Token ', ''),
 							Trade: '',
@@ -795,7 +797,8 @@
 							Unlisted: obj.unlisted,
 						}
 					}
-					outputs.push(obj2);
+					if (obj2)
+						outputs.push(obj2);
 				}
 			} // for
 			return outputs;
@@ -993,7 +996,7 @@
 								dec += 6;
 							else if (head == 'Fee')
 								dec += 2;
-							var num = Number(cellValue).toFixed(dec);
+							var num = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(dec) + '</span>';
 							row$.append($('<td/>').html(num));
 						}
 						else {
@@ -1011,7 +1014,7 @@
 							let popoverContents = "Placeholder";
 							if (cellValue) {
 								if (cellValue.name != 'Token') {
-									if (cellValue.name !== 'ETH') {
+									if (!_util.isWrappedETH(token.addr)) {
 										if (token) {
 											popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
 												+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
@@ -1022,8 +1025,10 @@
 											}
 											popoverContents += '</ul>';
 										}
-									} else {
+									} else if (token.addr == _delta.config.ethAddr) {
 										popoverContents = "Ether (not a token)<br> Decimals: 18";
+									} else {
+										popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
 									}
 								}
 								let labelClass = 'label-warning';
@@ -1095,6 +1100,10 @@
 			}
 
 			body.append(row$);
+			$('[data-toggle=tooltip]').tooltip({
+				'placement': 'top',
+				'container': 'body'
+			});
 			$("[data-toggle=popover]").popover();
 		}
 	}
@@ -1251,9 +1260,9 @@
 		$('#downloadCointracking2Trades').html('');
 
 		$('#downloadFunds').html('');
-	//	$('#downloadBitcoinTaxFunds').html('');
+		//	$('#downloadBitcoinTaxFunds').html('');
 		$('#downloadCointrackingFunds').html('');
-	//	$('#downloadCointracking2Funds').html('');
+		//	$('#downloadCointracking2Funds').html('');
 	}
 
 
@@ -1269,7 +1278,7 @@
 			}
 			if (typeMode > 0) {
 				downloadFunds();
-                downloadCointrackingFunds();
+				downloadCointrackingFunds();
 			}
 		}
 
@@ -1292,7 +1301,7 @@
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == 'Amount' || A[0][j] == 'Price (ETH)' || A[0][j] == 'Total ETH' || A[0][j] == 'Fee') {
-							arr[j] = exportNotation(arr[j]);
+							arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1339,7 +1348,7 @@
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == 'Amount') {
-							arr[j] = exportNotation(arr[j]);
+							arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1398,7 +1407,7 @@
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == 'Volume' || A[0][j] == 'Price' || A[0][j] == 'Fee' || A[0][j] == 'Total') {
-							arr[j] = exportNotation(arr[j]);
+							arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1454,7 +1463,7 @@
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == '\"Buy\"' || A[0][j] == '\"Sell\"' || A[0][j] == '\"Fee\"') {
-							arr[j] = exportNotation(arr[j]);
+							arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1484,8 +1493,8 @@
 				//parent.appendCild(a);
 			}
 		}
-        
-        //csv columns
+
+		//csv columns
 		function downloadCointrackingFunds() {
 			//if(lastResult)
 			{
@@ -1498,19 +1507,19 @@
 					var arr = [];
 					if (allTrades[i]['Type'] === 'Deposit') { // deposit is 'buy'
 						arr = ['Deposit', allTrades[i]['Amount'], allTrades[i]['Token'].name, "", "", "", "",
-							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 
-                            allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
+							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
+							allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
 					}
 					else {  //withdraw is 'sell'
-						arr = ['Withdrawal', "","", allTrades[i]['Amount'], allTrades[i]['Token'].name, "", "",
-							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, 
-                            allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
+						arr = ['Withdrawal', "", "", allTrades[i]['Amount'], allTrades[i]['Token'].name, "", "",
+							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
+							allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
 					}
 
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == '\"Buy\"' || A[0][j] == '\"Sell\"') {
-							arr[j] = exportNotation(arr[j]);
+							arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1566,7 +1575,7 @@
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
 						if (A[0][j] == '\"Buy\"' || A[0][j] == '\"Sell\"' || A[0][j] == '\"Fee\"') {
-							arr[j] = exportNotation(arr[j]);
+							arr[j] = _util.exportNotation(arr[j]);
 						}
 
 						// add quotes
@@ -1597,13 +1606,6 @@
 			}
 
 		}
-	}
-
-	//remove exponential notation 1e-8  etc.
-	function exportNotation(num) {
-		//return Number(num).toFixed(20).replace(/\.?0+$/,""); // rounded to 20 decimals, no trailing 0
-		//https://stackoverflow.com/questions/3612744/remove-insignificant-trailing-zeros-from-a-number
-		return _delta.web3.toBigNumber(num).toFixed(20).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1')
 	}
 
 	function placeholderTable() {

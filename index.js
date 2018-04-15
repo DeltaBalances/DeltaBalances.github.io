@@ -8,7 +8,7 @@
 	var autoStart = false;
 
 	var web3Index = 0;  //last used web3 instance
-	
+
 	var requestID = 0;
 
 	// loading states
@@ -94,7 +94,7 @@
 				Decentrex: 0,
 				Total: 0,
 				Unlisted: false,
-				Address: '',
+				Address: '0x0000000000000000000000000000000000000000',
 				Bid: '',
 				Ask: '',
 				'Est. ETH': '',
@@ -129,13 +129,13 @@
 		$('#dollars').prop('checked', showDollars);
 
 
-        $('body').on('expanded.pushMenu collapsed.pushMenu', function() {
-           // Add delay to trigger code only after the pushMenu animation completes
-            setTimeout(function() {
-                $("#resultTable").trigger("update", [true, () => { }]);
-                $("#resultTable").trigger("applyWidgets");
-            }, 300);
-        } );
+		$('body').on('expanded.pushMenu collapsed.pushMenu', function () {
+			// Add delay to trigger code only after the pushMenu animation completes
+			setTimeout(function () {
+				$("#resultTable").trigger("update", [true, () => { }]);
+				$("#resultTable").trigger("applyWidgets");
+			}, 300);
+		});
 
 
 
@@ -151,7 +151,7 @@
 		});
 
 		$(window).resize(function () {
-            $("#resultTable").trigger("applyWidgets");
+			$("#resultTable").trigger("applyWidgets");
 
 			//hide popovers
 			$('[data-toggle="popover"]').each(function () {
@@ -350,9 +350,7 @@
 	function checkDollars() {
 		showDollars = $('#dollars').prop('checked');
 
-		$('#ethbalancePrice').html('');
-		$('#tokenbalancePrice').html('');
-		$('#totalbalancePrice').html('');
+		clearOverviewHtml(true);
 
 		if (showDollars && lastResult) {
 			finishedBalanceRequest();
@@ -375,7 +373,7 @@
 		if (lastResult) {
 			//table1Loaded = false;
 			//	table2Loaded = false;
-			makeTable(lastResult, hideZero);
+			finishedBalanceRequest();
 		} else {
 			placeholderTable();
 		}
@@ -391,8 +389,7 @@
 		if (showCustomTokens) {
 			tokenCount = maxcount;
 			if (lastResult && loadedCustom) {
-				setBalanceProgress();
-				makeTable(lastResult, hideZero);
+				finishedBalanceRequest();
 			}
 			else if (publicAddr) {
 				// load only added custom tokens if listed already loaded
@@ -404,8 +401,7 @@
 			tokenCount = _delta.config.tokens.length;
 
 			if (lastResult) {
-				setBalanceProgress();
-				makeTable(lastResult, hideZero);
+				finishedBalanceRequest();
 			}
 		}
 		showTokenCount();
@@ -498,6 +494,7 @@
 		hideError();
 		hideHint();
 		//disableInput(true);
+		clearOverviewHtml(false);
 		$('#downloadBalances').html('');
 
 		// validate address
@@ -565,6 +562,21 @@
 		});
 	}
 
+	function clearOverviewHtml(dollarOnly) {
+
+		if (!dollarOnly) {
+			$('#ethbalance').html('');
+			$('#wethbalance').html('');
+			$('#tokenbalance').html('');
+			$('#totalbalance').html('');
+		}
+
+		$('#ethbalancePrice').html('');
+		$('#wethbalancePrice').html('');
+		$('#tokenbalancePrice').html('');
+		$('#totalbalancePrice').html('');
+	}
+
 	function getBalances(rqid, appendExchange, appendCustom) {
 		if (!rqid)
 			rqid = requestID;
@@ -574,13 +586,7 @@
 		if (!appendExchange && !appendCustom)
 			balances = {};
 
-		$('#ethbalance').html('');
-		$('#tokenbalance').html('');
-		$('#totalbalance').html('');
-
-		$('#ethbalancePrice').html('');
-		$('#tokenbalancePrice').html('');
-		$('#totalbalancePrice').html('');
+		clearOverviewHtml(false);
 
 		$('#downloadBalances').html('');
 
@@ -888,23 +894,23 @@
 			var success = false;
 			var totalTries = 0;
 
-			if(web3Index >= _delta.web3s.length) {
+			if (web3Index >= _delta.web3s.length) {
 				web3Index = 0;
 			}
-			
+
 			//get balances from 2 web3 sources at once, use the fastest response
 			// web3 provider (infura, myetherapi, mycryptoapi) or etherscan
 			makeCall(_delta.web3s[web3Index], mode, functionName, arguments, 0);
-			makeCall( web3Index >= _delta.web3s.length ? undefined : _delta.web3s[web3Index], mode, functionName, arguments, 0); 
+			makeCall(web3Index >= _delta.web3s.length ? undefined : _delta.web3s[web3Index], mode, functionName, arguments, 0);
 
 
 			function makeCall(web3Provider, exName, funcName, args, retried) {
-				
-				if(completed || requestID > rqid)
+
+				if (completed || requestID > rqid)
 					return;
-				if(web3Provider)
+				if (web3Provider)
 					web3Index++;
-				
+
 				_util.call(
 					web3Provider,
 					_delta.contractDeltaBalance,
@@ -914,9 +920,9 @@
 					(err, result) => {
 						if (success || requestID > rqid)
 							return;
-						
+
 						completed++;
-						
+
 						const returnedBalances = result;
 
 						if (!err && returnedBalances && returnedBalances.length > 0) {
@@ -931,7 +937,7 @@
 										exchanges[exName].loaded++;
 									if (exchanges[exName].loaded >= tokenCount)
 										finishedBalanceRequest();
-									
+
 									success = true;
 								}/* else { //both wallet & etherdelta
 									var j = i * 2;
@@ -951,10 +957,10 @@
 							{
 								totalTries++;
 								console.log('retrying request');
-								if(web3Index >= _delta.web3s.length) {
+								if (web3Index >= _delta.web3s.length) {
 									web3Index = 0;
 								}
-								
+
 								makeCall(_delta.web3s[web3Index], exName, funcName, args, retried + 1);
 								makeCall(web3Index >= _delta.web3s.length ? undefined : _delta.web3s[web3Index], exName, funcName, args, retried + 1);
 								return;
@@ -1054,13 +1060,15 @@
 		}
 
 		setBalanceProgress();
+		clearOverviewHtml(false);
 
 		if (noneDone)
 			return;
 
 
-		var sumETH = 0;
-		var sumToken = 0;
+		var sumETH = _delta.web3.toBigNumber(0);
+		var sumWETH = _delta.web3.toBigNumber(0);
+		var sumToken = _delta.web3.toBigNumber(0);
 
 		for (let i = 0; i < keys.length; i++) {
 			exchanges[keys[i]].displayed = exchanges[keys[i]].loaded >= tokenCount || exchanges[keys[i]].loaded == -1;
@@ -1077,36 +1085,39 @@
 			var bal = balances[token.addr];
 			if (bal) {
 
-				bal.Total = 0;
+				bal.Total = _delta.web3.toBigNumber(0);
 				for (let i = 0; i < keys.length; i++) {
 					if (exchanges[keys[i]].enabled && exchanges[keys[i]].loaded >= tokenCount) {
-						bal.Total += Number(bal[keys[i]]);
+						if (bal[keys[i]])
+							bal.Total = bal.Total.plus(bal[keys[i]]);
 					}
 				}
 
 				bal['Est. ETH'] = '';
 
 				// ETH and  wrapped eth fixed at value of 1 ETH
-				if (_util.isWrappedETH(token.addr)){
+				if (_util.isWrappedETH(token.addr)) {
 					bal.Bid = '';
 					bal.Ask = '';
 					bal['Est. ETH'] = bal.Total;
 
 					if (token.addr === "0x0000000000000000000000000000000000000000") {
 						sumETH = bal.Total;
+					} else if (_util.isWrappedETH(token.addr)) {
+						sumWETH = sumWETH.plus(bal.Total);
 					} else {
-						sumToken += bal.Total;
+						sumToken = sumToken.plus(bal.Total);
 					}
 				}
 				else if ((bal.Bid || (useAsk && bal.Ask)) && bal.Total) {
 					// calculate estimate if not (wrapped) ETH
 					var val;
 					if (!useAsk)
-						val = Number(bal.Bid) * Number(bal.Total);
+						val = bal.Total.times(bal.Bid);
 					else
-						val = Number(bal.Ask) * Number(bal.Total);
+						val = bal.Total.times(bal.Ask);
 					bal['Est. ETH'] = val;
-					sumToken += val;
+					sumToken = sumToken.plus(val);
 				}
 
 				if (!bal.Bid) {
@@ -1124,14 +1135,23 @@
 		lastResult = result;
 
 		if (allDone) {
-			$('#ethbalance').html(sumETH.toFixed(fixedDecimals) + ' ETH');
-			$('#tokenbalance').html(sumToken.toFixed(fixedDecimals) + ' ETH');
-			$('#totalbalance').html((sumETH + sumToken).toFixed(fixedDecimals) + ' ETH');
+
+			$('#ethbalance').html('<span data-toggle="tooltip" title="' + sumETH.toString() + '">' + sumETH.toFixed(fixedDecimals) + ' ETH</span>');
+			$('#wethbalance').html('<span data-toggle="tooltip" title="' + sumWETH.toString() + '">' + sumWETH.toFixed(fixedDecimals) + ' ETH</span>');
+			$('#tokenbalance').html('<span data-toggle="tooltip" title="' + sumToken.toString() + '">' + sumToken.toFixed(fixedDecimals) + ' ETH</span>');
+			let totalSumETH = sumETH.plus(sumToken).plus(sumWETH);
+			$('#totalbalance').html('<span data-toggle="tooltip" title="' + totalSumETH.toString() + '">' + totalSumETH.toFixed(fixedDecimals) + ' ETH</span>');
+
+			$('[data-toggle=tooltip]').tooltip({
+				'placement': 'top',
+				'container': 'body'
+			});
 
 			if (showDollars) {
-				$('#ethbalancePrice').html(" $" + numberCommas((sumETH * etherPrice).toFixed(2)));
-				$('#tokenbalancePrice').html(" $" + numberCommas((sumToken * etherPrice).toFixed(2)));
-				$('#totalbalancePrice').html(" $" + numberCommas(((sumETH + sumToken) * etherPrice).toFixed(2)));
+				$('#ethbalancePrice').html(" $" + _util.commaNotation((sumETH.times(etherPrice)).toFixed(2)));
+				$('#wethbalancePrice').html(" $" + _util.commaNotation((sumWETH.times(etherPrice)).toFixed(2)));
+				$('#tokenbalancePrice').html(" $" + _util.commaNotation((sumToken.times(etherPrice)).toFixed(2)));
+				$('#totalbalancePrice').html(" $" + _util.commaNotation((totalSumETH.times(etherPrice)).toFixed(2)));
 			}
 
 
@@ -1140,14 +1160,7 @@
 
 		} else {
 
-			$('#ethbalance').html('');
-			$('#tokenbalance').html('');
-			$('#totalbalance').html('');
-
-			$('#ethbalancePrice').html('');
-			$('#tokenbalancePrice').html('');
-			$('#totalbalancePrice').html('');
-
+			clearOverviewHtml(false);
 			$('#downloadBalances').html('');
 		}
 
@@ -1315,7 +1328,7 @@
 					filter_external: '.search',
 					filter_defaultFilter: { 0: '~{query}' },
 					filter_columnFilters: false,
-					filter_placeholder: { search: 'Search...' }, 
+					filter_placeholder: { search: 'Search...' },
 					scroller_height: 500,
 				},
 				sortList: [[0, 0]]
@@ -1371,18 +1384,17 @@
 							if (head == 'Bid' || head == 'Ask') {
 								dec += 2;
 							}
-							var num = Number(cellValue).toFixed(dec);
-							num = numberCommas(num);
+							var num = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(dec) + '</span>';
+							num = _util.commaNotation(num);
 							row$.append($('<td/>').html(num));
 						} else {
 							row$.append($('<td/>').html(cellValue));
 						}
-
 					}
 					else if (head == 'Name') {
 						let token = _delta.uniqueTokens[myList[i].Address];
 						let popoverContents = "Placeholder";
-						if (cellValue !== 'ETH') {
+						if (token && !_util.isWrappedETH(token.addr)) {
 							if (token) {
 								popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
 									+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
@@ -1393,9 +1405,12 @@
 								}
 								popoverContents += '</ul>';
 							}
-						} else {
+						} else if (!token || token.addr == _delta.config.ethAddr) {
 							popoverContents = "Ether (not a token)<br> Decimals: 18";
+						} else {
+							popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
 						}
+
 						let labelClass = 'label-warning';
 						if (!myList[i].Unlisted)
 							labelClass = 'label-primary';
@@ -1412,6 +1427,10 @@
 			}
 			body.append(row$);
 			$("[data-toggle=popover]").popover();
+			$('[data-toggle=tooltip]').tooltip({
+				'placement': 'top',
+				'container': 'body'
+			});
 		}
 	}
 
@@ -1608,7 +1627,7 @@
 					//remove exponential notation
 					if (A[0][j] == 'Wallet' || A[0][j] == 'EtherDelta' || A[0][j] == 'IDEX' || A[0][j] == 'Token store' || A[0][j] == 'Decentrex' || A[0][j] == 'Total' || A[0][j] == 'Estimated value (ETH)' || A[0][j] == 'EtherDelta Bid (ETH)' || A[0][j] == 'EtherDelta Ask (ETH)') {
 						if (arr[j] != '' && arr[j] != ' ')
-							arr[j] = exportNotation(arr[j]);
+							arr[j] = _util.exportNotation(arr[j]);
 					}
 
 					// add quotes
@@ -1639,13 +1658,6 @@
 		}
 
 	}
-
-	//remove exponential notation 1e-8  etc.
-	function exportNotation(num) {
-		return Number(num).toFixed(20).replace(/\.?0+$/, ""); // rounded to 20 decimals, no trailing 0
-	}
-
-
 
 	function forget() {
 		if (publicAddr) {
@@ -1690,11 +1702,5 @@
 		return false;
 	}
 
-	function numberCommas(num) {
-		var n = num.toString(), p = n.indexOf('.');
-		return n.replace(/\d(?=(?:\d{3})+(?:\.|$))/g, function ($0, i) {
-			return p < 0 || i < p ? ($0 + ',') : $0;
-		});
-	}
 
 }

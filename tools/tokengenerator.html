@@ -54,7 +54,7 @@
 			for (let i = 0; i < response.tokens.length; i++) {
 				let tok = response.tokens[i].tokenInfo;
 				let addr = tok.address.toLowerCase();
-				if (!customTokens[addr] && tok.symbol && response.tokens[i].balance > 10 && tok.holdersCount > 10) {
+				if (!customTokens[addr] && tok.symbol && response.tokens[i].balance > 10 && tok.holdersCount > 10 && response.tokens[i].balance < Number(tok.totalSupply)) {
 					customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: Number(tok.decimals) };
 				}
 			}

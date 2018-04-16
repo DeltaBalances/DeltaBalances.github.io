@@ -73,7 +73,7 @@
 		getBlockStorage();
 
 		// borrow some ED code for compatibility
-		_delta.startDeltaBalances(() => {
+		_delta.startDeltaBalances(false, () => {
 			if (!autoStart) {
 				if (blocknum > -1) {
 					startblock = getStartBlock(blocknum, transactionDays);

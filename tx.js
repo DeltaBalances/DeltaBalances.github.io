@@ -47,7 +47,7 @@
 
 		getBlockStorage();
 		// borrow some ED code for compatibility
-		_delta.startDeltaBalances(() => {
+		_delta.startDeltaBalances(false, () => {
 
 			_delta.initTokens(false);
 

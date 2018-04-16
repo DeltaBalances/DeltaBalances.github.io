@@ -109,7 +109,7 @@
 	});
 
 	function init() {
-		_delta.startDeltaBalances(() => {
+		_delta.startDeltaBalances(true, () => {
 			_delta.initTokens(true);
 
 			showTokenCount();//checkCustom();

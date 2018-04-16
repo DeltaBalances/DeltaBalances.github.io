@@ -790,7 +790,7 @@
 								Block: _util.hexToDec(filteredLogs[i].blockNumber),
 								Buyer: obj.buyer,
 								Seller: obj.seller,
-								Fee: (!obj.fee.greaterThan(0)) ? '' : obj.fee,
+								Fee: (!obj.fee || !obj.fee.greaterThan(0)) ? '' : obj.fee,
 								FeeToken: obj.feeCurrency,
 								'Fee in': obj.feeCurrency,
 								Info: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,

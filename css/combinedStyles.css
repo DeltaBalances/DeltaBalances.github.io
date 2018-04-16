@@ -701,10 +701,22 @@ input[type=number] {
   /* Uncomment for 3D effect */
   /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
+
+.sidebar-icon {
+  width: 25px;
+  display: inline-block;
+  text-align:left;
+}
  
 .icon-etherdelta:before { content: '\e800'; } /* '' */
-.icon-decentrex:before { content: '\e801'; } /* '' */
 .icon-tokenstore:before { content: '\e802'; } /* '' */
+.icon-zrx:before { content: '\e803'; } /* '' */
+.icon-info:before { content: '\e804'; } /* '' */
+.icon-link:before { content: '\e805'; } /* '' */
+.icon-github:before { content: '\f09b'; } /* '' */
+.icon-recent:before { content: '\f133'; } /* '' */
+.icon-balances:before { content: '\f19c'; } /* '' */
+.icon-decentrex:before { content: '\f1c0'; } /* '' */
 
 .tooltip-inner {
   max-width: 500px;

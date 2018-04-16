@@ -33,6 +33,8 @@
 	var savedAddr = '';
 
 	var unknownToken = false;
+	
+	var wideOutput = false;
 
 
 	init();
@@ -208,7 +210,9 @@
 			autoStart = true;
 			return;
 		}
-
+		
+		
+		wideOutput = false;
 		unknownToken = false;
 		hideError();
 		hideHint();
@@ -794,9 +798,11 @@
 			let uniqueType = parsedInput[i].type.toLowerCase();
 			if (uniqueType.indexOf('taker') !== -1 || uniqueType.indexOf('maker') !== -1) {
 				uniqueType = 'trade';
+				wideOutput = true;
 			}
 			else if (uniqueType.indexOf('cancel') !== -1) {
 				uniqueType = 'cancel';
+				wideOutput = true;
 			}
 			if (!types[uniqueType])
 				types[uniqueType] = [];
@@ -804,7 +810,15 @@
 			types[uniqueType].push(parsedInput[i]);
 		}
 
-
+		if(wideOutput) {
+			$('#inputdiv').removeClass('col-lg-6')
+			$('#outputdiv').removeClass('col-lg-6');
+		} else {
+			$('#inputdiv').addClass('col-lg-6')
+			$('#outputdiv').addClass('col-lg-6');
+		}
+		
+		
 		let batchedInput = Object.values(types);
 		for (var i = 0; i < batchedInput.length; i++) {
 			buildHtmlTable(id, batchedInput[i]);
@@ -824,6 +838,8 @@
 		$("table thead th").removeClass("tablesorter-headerUnSorted");
 		$("table thead th").removeClass("tablesorter-headerDesc");
 		$("table thead th").removeClass("tablesorter-headerAsc");
+		
+		
 	}
 
 	function hideInput() {

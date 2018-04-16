@@ -2485,6 +2485,7 @@ DeltaBalances.prototype.loadWeb3 = function loadWeb3(wait, callback) {
             detected++;
             if (!wait || detected >= urls.length) {
                 if (!calledBack) {
+                    calledBack = true;
                     callback();
                 }
             }

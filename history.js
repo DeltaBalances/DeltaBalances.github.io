@@ -60,10 +60,10 @@
 			Relayer: '0x',
 			Type: 'Taker',
 			Trade: 'Sell',
-			Token: { "name": "Token", "addr": "0x00" },
+			Token: { "name": "Token", "addr": "" },
 			Amount: 0,
 			Price: 0,
-			Base: { "name": "Token", "addr": "0x00" },
+			Base: { "name": "Token", "addr": "" },
 			Total: 0,
 			Hash: '0xH4SH1',
 			Date: _util.toDateTimeNow(),
@@ -71,8 +71,8 @@
 			Buyer: '',
 			Seller: '',
 			Fee: 0,
-			FeeToken: { "name": "Token", "addr": "0x00" },
-			'Fee in': { "name": "Token", "addr": "0x00" }, //shorter name feetoken
+			FeeToken: { "name": "Token", "addr": "" },
+			'Fee in': { "name": "Token", "addr": "" }, //shorter name feetoken
 			Info: window.location.origin + window.location.pathname + '/../tx.html',
 			Unlisted: true,
 		},
@@ -1040,26 +1040,8 @@
 						if (cellValue !== "" && cellValue !== undefined) {
 
 							let token = cellValue;
-							let popoverContents = "Placeholder";
+							let popoverContents = _delta.makePopoverContents(token);
 							if (cellValue) {
-								if (cellValue.name != 'Token') {
-									if (!_util.isWrappedETH(token.addr)) {
-										if (token) {
-											popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
-												+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
-												+ '</li><li>' + _util.forkDeltaURL(token, true)
-												+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
-											if (token.IDEX) {
-												popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
-											}
-											popoverContents += '</ul>';
-										}
-									} else if (token.addr == _delta.config.ethAddr) {
-										popoverContents = "Ether (not a token)<br> Decimals: 18";
-									} else {
-										popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
-									}
-								}
 								let labelClass = 'label-warning';
 								if (!token.unlisted)
 									labelClass = 'label-primary';

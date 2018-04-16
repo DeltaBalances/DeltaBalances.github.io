@@ -891,27 +891,7 @@
 					if (keys[i] == 'token' || keys[i] == 'base' || keys[i] == 'feeToken' || keys[i] == 'token In' || keys[i] == 'token Out') {
 
 						let token = myList[i];
-						let popoverContents = "Placeholder";
-						if (token && !_util.isWrappedETH(token.addr) && _delta.uniqueTokens[token.addr]) {
-							if (token) {
-								popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
-									+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
-									+ '</li><li>' + _util.forkDeltaURL(token, true)
-									+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
-								if (token.IDEX) {
-									popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
-								}
-								popoverContents += '</ul>';
-							}
-						} else {
-							if (!_delta.uniqueTokens[token.addr])
-								popoverContents = "Token unknown to deltabalances <br> Contract: " + _util.addressLink(token.addr, true, true);
-							else if (token.addr == _delta.config.ethAddr) {
-								popoverContents = "Ether (not a token)<br> Decimals: 18";
-							} else {
-								popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
-							}
-						}
+						let popoverContents = _delta.makePopoverContents(token);
 						let labelClass = 'label-warning';
 						if (!token.unlisted && !token.unknown)
 							labelClass = 'label-primary';

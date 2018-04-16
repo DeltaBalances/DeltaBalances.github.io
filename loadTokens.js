@@ -46,8 +46,9 @@ try {
         $.getJSON('https://forkdelta.github.io/config/main.json', function (jsonData) {
             if (jsonData && jsonData.tokens && jsonData.tokens.length > 0) {
                 forkDeltaConfig = jsonData;
-                sessionStorage.setItem('forkTokens1', JSON.stringify(forkDeltaConfig.tokens));
-                localStorage.setItem('forkTokens2', JSON.stringify(forkDeltaConfig.tokens));
+                let string = JSON.stringify(forkDeltaConfig.tokens);
+                sessionStorage.setItem('forkTokens1', string);
+                localStorage.setItem('forkTokens2', string);
             }
         });
     }
@@ -85,12 +86,48 @@ try {
                 });
                 if (tokens && tokens.length > 0) {
                     idexConfig = tokens;
-                    sessionStorage.setItem('idexTokens1', JSON.stringify(idexConfig));
-                    localStorage.setItem('idexTokens2', JSON.stringify(idexConfig));
+                    let string = JSON.stringify(idexConfig)
+                    sessionStorage.setItem('idexTokens1', string);
+                    localStorage.setItem('idexTokens2', string);
                 }
             }
         });
     }
 } catch (err) {
     console.log('IDEX live tokens loading error ' + err);
+}
+
+var ddexConfig = ddexOfflineTokens;
+try {
+
+    let ddexData = sessionStorage.getItem('ddexTokens1');
+    // only get live tokens if we haven't saved them this session already
+    if (ddexData !== null && ddexData) {
+        let parsed = JSON.parse(ddexData);
+        if (parsed && parsed.length > 0) {
+            ddexConfig.tokens = parsed;
+        }
+    } else {
+
+        // if we have saved data from a previous session, pre-load it
+        let ddexData2 = localStorage.getItem('ddexTokens2');
+        if (ddexData2 !== null && ddexData2) {
+            let parsed = JSON.parse(ddexData2);
+            if (parsed && parsed.length > ddexConfig.length) {
+                ddexConfig.tokens = parsed;
+            }
+        }
+
+        $.getJSON('https://api.ddex.io/v2/tokens', function (jsonData) {
+            if (jsonData && jsonData.data && jsonData.data.tokens && jsonData.data.tokens.length > 0) {
+                ddexConfig = jsonData.data;
+                ddexConfig.tokens.map((x) => { delete x.id; delete x.name;});
+                let string = JSON.stringify(ddexConfig.tokens);
+                sessionStorage.setItem('ddexTokens1', string);
+                localStorage.setItem('ddexTokens2', string);
+            }
+        });
+    }
+} catch (err) {
+    console.log('ddex live tokens loading error ' + err);
 }

@@ -1391,24 +1391,7 @@
 				}
 				else if (head == 'Name') {
 					let token = _delta.uniqueTokens[myList[i].Address];
-					let popoverContents = "Placeholder";
-					if (token && !_util.isWrappedETH(token.addr)) {
-						if (token) {
-							popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
-								+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
-								+ '</li><li>' + _util.forkDeltaURL(token, true)
-								+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
-							if (token.IDEX) {
-								popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
-							}
-							popoverContents += '</ul>';
-						}
-					} else if (!token || token.addr == _delta.config.ethAddr) {
-						popoverContents = "Ether (not a token)<br> Decimals: 18";
-					} else {
-						popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
-					}
-
+					let popoverContents = _delta.makePopoverContents(token);
 					let labelClass = 'label-warning';
 					if (!myList[i].Unlisted)
 						labelClass = 'label-primary';

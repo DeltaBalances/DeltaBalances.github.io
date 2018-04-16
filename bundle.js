@@ -2557,6 +2557,36 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         }
     }
 
+    let ddexTokens = [];
+    if (ddexConfig && ddexConfig.tokens) {
+        ddexTokens = ddexConfig.tokens;
+    } else {
+        ddexTokens = ddexOfflineTokens;
+    }
+    for (var i = 0; i < ddexTokens.length; i++) {
+        var tok = ddexTokens[i];
+        if (tok) {
+            let token = {};
+            token.addr = tok.address.toLowerCase();
+            token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
+
+            token.decimals = tok.decimals;
+            token.unlisted = false;
+            token.DDEX = true;
+            token.DDEXname = token.name;
+            if (this.uniqueTokens[token.addr]) {
+                this.uniqueTokens[token.addr].DDEX = true;
+                if (this.uniqueTokens[token.addr].name !== token.name) {
+                    this.uniqueTokens[token.addr].DDEXname = name;
+                }
+            }
+            else if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
+                this.uniqueTokens[token.addr] = token;
+                this.config.tokens.push(token);
+            }
+        }
+    }
+
     //format MEW tokens like ED tokens
     offlineCustomTokens = offlineCustomTokens.map((x) => {
 
@@ -3845,6 +3875,39 @@ DeltaBalances.prototype.startDeltaBalances = function startDeltaBalances(wait, c
             callback();
         });
     });
+};
+
+DeltaBalances.prototype.makePopoverContents = function (token) {
+    let contents = 'PlaceHolder';
+    try {
+        if (token && token.addr) {
+            if (!utility.isWrappedETH(token.addr)) {
+                if (!this.uniqueTokens[token.addr]) {
+                    contents = "Token unknown to DeltaBalances <br> Contract: " + utility.addressLink(token.addr, true, true);
+                } else {
+                    contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals;
+                }
+                contents += '<br> Trade on: <ul><li>' + utility.etherDeltaURL(token, true)
+                    + '</li><li>' + utility.forkDeltaURL(token, true)
+                    + '</li><li>' + utility.tokenStoreURL(token, true) + '</li>';
+                if (token.IDEX) {
+                    contents += '<li>' + utility.idexURL(token, true) + '</li>';
+                }
+                if (token.DDEX) {
+                    contents += '<li>' + utility.ddexURL(token, true) + '</li>';
+                }
+                contents += '</ul>';
+
+            } else if (token.addr == this.config.ethAddr) {
+                contents = "Ether (not a token)<br> Decimals: 18";
+            } else {
+                contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
+            }
+        }
+    } catch (e) {
+        console.log('error making popover ' + e);
+    }
+    return contents;
 };
 
 const deltaBalances = new DeltaBalances();
@@ -25833,6 +25896,25 @@ module.exports = (config) => {
 
     if (html) {
       url = '<a href="' + url + '" target="_blank"> IDEX</a>';
+    }
+    return url;
+  }
+
+  utility.ddexURL = function (tokenObj, html) {
+    var url = "https://ddex.io/trade/";
+
+    if (tokenObj) {
+      if (tokenObj.DDEXname)
+        url += tokenObj.DDEXname;
+      else
+        url += tokenObj.name;
+    } else {
+      url = '';
+    }
+    if (url)
+      url += '-ETH';
+    if (html) {
+      url = '<a href="' + url + '" target="_blank"> DDEX</a>';
     }
     return url;
   }

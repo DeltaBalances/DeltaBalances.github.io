@@ -10,6 +10,13 @@ Supported exchanges
 + [Token store](https://token.store)
 + [Decentrex](https://decentrex.com) (exchange discontinued)
 
+0x Protocol Relayers, including:
++ [DDEX](https://ddex.io/)
++ [RadarRelay](https://radarrelay.com/)
++ [Paradex](https://paradex.io/)
++ [Erc Dex](https://ercdex.com/)
+
+
 This website is not affiliated with any of the mentioned exchanges
 
 # Smart contract

@@ -2584,17 +2584,21 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     offlineCustomTokens = offlineCustomTokens.map((x) => {
 
         let unlisted = true;
-        let addr = x.address.toLowerCase();
-        //make sure WETH appears listed 
-        if (utility.isWrappedETH(addr)) {
-            unlisted = false;
+        if (x.address && x.symbol) {
+            let addr = x.address.toLowerCase();
+            //make sure WETH appears listed 
+            if (utility.isWrappedETH(addr)) {
+                unlisted = false;
+            }
+            return {
+                "name": utility.escapeHtml(x.symbol),
+                "addr": addr,
+                "unlisted": unlisted,
+                "decimals": x.decimal,
+            };
+        } else {
+            return this.config.tokens[0]; //filtered out next step
         }
-        return {
-            "name": utility.escapeHtml(x.symbol),
-            "addr": addr,
-            "unlisted": unlisted,
-            "decimals": x.decimal,
-        };
     });
     //filter out custom tokens that have been listed by now
     this.config.customTokens = offlineCustomTokens.filter((x) => { return !(this.uniqueTokens[x.addr] && !(tokenBlacklist[x.addr])) });
@@ -3131,14 +3135,16 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     if (objs[0].type.indexOf('Sell') !== -1) {
                         tok = this.setToken(orderAddresses3[0][3]);
                         tok2 = this.setToken(orderAddresses3[0][2]);
+                        takeAmount = utility.weiToEth(takeAmount, this.divisorFromDecimals(tok.decimals));
                         isAmount = true;
                     } else {
                         tok = this.setToken(orderAddresses3[0][2]);
                         tok2 = this.setToken(orderAddresses3[0][3]);
+                        takeAmount = utility.weiToEth(takeAmount, this.divisorFromDecimals(tok2.decimals));
                         isAmount = false;
                     }
 
-                    takeAmount = utility.weiToEth(takeAmount, this.divisorFromDecimals(tok.decimals));
+                   
 
                     let relayer3 = orderAddresses3[0][4].toLowerCase();
 

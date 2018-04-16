@@ -1038,7 +1038,7 @@
 								if (!token.unlisted)
 									labelClass = 'label-primary';
 
-								row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + ' <i class="fa fa-external-link"></i></a>'));
+								row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + '</a>'));
 							}
 						}
 						else {

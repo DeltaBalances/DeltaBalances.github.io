@@ -1415,7 +1415,7 @@
 						if (!myList[i].Unlisted)
 							labelClass = 'label-primary';
 
-						row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + cellValue + '" data-container="body" data-content=\'' + popoverContents + '\'>' + cellValue + ' <i class="fa fa-external-link"></i></a>'));
+						row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + cellValue + '" data-container="body" data-content=\'' + popoverContents + '\'>' + cellValue + '</a>'));
 					}
 					else if (head == 'Date') {
 						row$.append($('<td/>').html(formatDate(cellValue, false)));

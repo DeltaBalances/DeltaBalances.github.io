@@ -927,7 +927,7 @@
 						if (!token.unlisted && !token.unknown)
 							labelClass = 'label-primary';
 
-						cellValue = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + ' <i class="fa fa-external-link"></i></a>';
+						cellValue = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + '</a>';
 					}
 					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice') {
 						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(5) + '</span>';

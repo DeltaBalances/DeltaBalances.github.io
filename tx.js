@@ -404,7 +404,7 @@
 
 						var unixtime = res;
 						if (unixtime) {
-							txDate = toDateTime(unixtime);
+							txDate = _util.toDateTime(unixtime);
 							blockDates[num] = txDate;
 							setBlockStorage();
 						}
@@ -715,7 +715,7 @@
 		$('#nonce').html(transaction.nonce);
 		if (transaction.status === 'Completed') {
 			$('#status').html('<i style="color:green;" class="fa fa-check"></i>' + ' ' + transaction.status);
-			$('#time').html(txDate !== "??" ? formatDate(txDate) : txDate);
+			$('#time').html(txDate !== "??" ? _util.formatDate(txDate) : txDate);
 		}
 		else if (transaction.status === 'Pending') {
 			$('#status').html('<i class="fa fa-cog fa-fw"></i>' + ' ' + transaction.status);
@@ -723,7 +723,7 @@
 		}
 		else {
 			$('#status').html('<i style="color:red;" class="fa fa-exclamation-circle"></i>' + ' ' + transaction.status);
-			$('#time').html(txDate !== "??" ? formatDate(txDate) : txDate);
+			$('#time').html(txDate !== "??" ? _util.formatDate(txDate) : txDate);
 		}
 		$('#ethval').html(transaction.value.toString());
 		$('#inputdata').html('');
@@ -846,33 +846,6 @@
 		return false;
 	}
 
-
-	function toDateTime(secs) {
-		var utcSeconds = secs;
-		var d = new Date(0);
-		d.setUTCSeconds(utcSeconds);
-		return formatDate(d);
-	}
-
-	function formatDate(d) {
-		try {
-			var month = '' + (d.getMonth() + 1),
-				day = '' + d.getDate(),
-				year = d.getFullYear(),
-				hour = d.getHours(),
-				min = d.getMinutes();
-
-
-			if (month.length < 2) month = '0' + month;
-			if (day.length < 2) day = '0' + day;
-			if (hour < 10) hour = '0' + hour;
-			if (min < 10) min = '0' + min;
-
-			return [year, month, day].join('-') + ' ' + [hour, min].join(':');
-		} catch (err) {
-			return d;
-		}
-	}
 
 	// Builds the HTML Table out of myList.
 	function buildHtmlTable(selector, myObj) {

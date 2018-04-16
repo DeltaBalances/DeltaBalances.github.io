@@ -1198,7 +1198,7 @@
 
 		balanceHeaders['Ask'] = useAsk;
 		balanceHeaders['Bid'] = !useAsk;
-		buildHtmlTable('#resultTable', filtered, loaded, 'balances', balanceHeaders);
+		buildHtmlTable('#resultTable', filtered, loaded, balanceHeaders);
 
 		trigger();
 	}
@@ -1361,68 +1361,62 @@
 
 
 	// Builds the HTML Table out of myList.
-	function buildHtmlTable(selector, myList, loaded, type, headers) {
+	function buildHtmlTable(selector, myList, loaded, headers) {
 		var body = $(selector + ' tbody');
-		var columns = addAllColumnHeaders(myList, selector, loaded, type, headers);
+		var columns = addAllColumnHeaders(myList, selector, loaded, headers);
 
 		for (var i = 0; i < myList.length; i++) {
 			if (!showCustomTokens && myList[i].Unlisted)
 				continue;
 			var row$ = $('<tr/>');
 
-			if (type === 'balances') {
-				//if(!balances[myList[i].Name])
-				//continue;
-				for (var colIndex = 0; colIndex < columns.length; colIndex++) {
-					var cellValue = myList[i][columns[colIndex]];
-					if (cellValue == null) cellValue = "";
-					var head = columns[colIndex];
 
-					if (head == 'Total' || head == 'EtherDelta' || head == 'Decentrex' || head == 'Token store' || head == 'IDEX' || head == 'Wallet' || head == 'Bid' || head == 'Ask' || head == 'Est. ETH') {
-						if (cellValue !== "" && cellValue !== undefined) {
-							var dec = fixedDecimals;
-							if (head == 'Bid' || head == 'Ask') {
-								dec += 2;
-							}
-							var num = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(dec) + '</span>';
-							num = _util.commaNotation(num);
-							row$.append($('<td/>').html(num));
-						} else {
-							row$.append($('<td/>').html(cellValue));
+			for (var colIndex = 0; colIndex < columns.length; colIndex++) {
+				var cellValue = myList[i][columns[colIndex]];
+				if (cellValue == null) cellValue = "";
+				var head = columns[colIndex];
+
+				if (head == 'Total' || head == 'EtherDelta' || head == 'Decentrex' || head == 'Token store' || head == 'IDEX' || head == 'Wallet' || head == 'Bid' || head == 'Ask' || head == 'Est. ETH') {
+					if (cellValue !== "" && cellValue !== undefined) {
+						var dec = fixedDecimals;
+						if (head == 'Bid' || head == 'Ask') {
+							dec += 2;
 						}
-					}
-					else if (head == 'Name') {
-						let token = _delta.uniqueTokens[myList[i].Address];
-						let popoverContents = "Placeholder";
-						if (token && !_util.isWrappedETH(token.addr)) {
-							if (token) {
-								popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
-									+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
-									+ '</li><li>' + _util.forkDeltaURL(token, true)
-									+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
-								if (token.IDEX) {
-									popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
-								}
-								popoverContents += '</ul>';
-							}
-						} else if (!token || token.addr == _delta.config.ethAddr) {
-							popoverContents = "Ether (not a token)<br> Decimals: 18";
-						} else {
-							popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
-						}
-
-						let labelClass = 'label-warning';
-						if (!myList[i].Unlisted)
-							labelClass = 'label-primary';
-
-						row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + cellValue + '" data-container="body" data-content=\'' + popoverContents + '\'>' + cellValue + '</a>'));
-					}
-					else if (head == 'Date') {
-						row$.append($('<td/>').html(formatDate(cellValue, false)));
-					}
-					else {
+						var num = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(dec) + '</span>';
+						num = _util.commaNotation(num);
+						row$.append($('<td/>').html(num));
+					} else {
 						row$.append($('<td/>').html(cellValue));
 					}
+				}
+				else if (head == 'Name') {
+					let token = _delta.uniqueTokens[myList[i].Address];
+					let popoverContents = "Placeholder";
+					if (token && !_util.isWrappedETH(token.addr)) {
+						if (token) {
+							popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
+								+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
+								+ '</li><li>' + _util.forkDeltaURL(token, true)
+								+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
+							if (token.IDEX) {
+								popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
+							}
+							popoverContents += '</ul>';
+						}
+					} else if (!token || token.addr == _delta.config.ethAddr) {
+						popoverContents = "Ether (not a token)<br> Decimals: 18";
+					} else {
+						popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
+					}
+
+					let labelClass = 'label-warning';
+					if (!myList[i].Unlisted)
+						labelClass = 'label-primary';
+
+					row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + cellValue + '" data-container="body" data-content=\'' + popoverContents + '\'>' + cellValue + '</a>'));
+				}
+				else {
+					row$.append($('<td/>').html(cellValue));
 				}
 			}
 			body.append(row$);
@@ -1439,7 +1433,7 @@
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.
-	function addAllColumnHeaders(myList, selector, loaded, type, headers) {
+	function addAllColumnHeaders(myList, selector, loaded, headers) {
 		var columnSet = {};
 
 		if (!loaded)
@@ -1505,82 +1499,6 @@
 		div.appendChild(selectList);
 		selectList.selectedIndex = 0;
 	}
-
-
-	function toDateTime(secs) {
-		var utcSeconds = secs;
-		var d = new Date(0);
-		d.setUTCSeconds(utcSeconds);
-		return d;
-		//return formatDate(d);
-	}
-
-	function toDateTimeNow(short) {
-		var t = new Date();
-		return t; //formatDate(t, short);
-	}
-
-	function createUTCOffset(date) {
-
-		function pad(value) {
-			return value < 10 ? '0' + value : value;
-		}
-
-		var sign = (date.getTimezoneOffset() > 0) ? "-" : "+";
-		var offset = Math.abs(date.getTimezoneOffset());
-		var hours = pad(Math.floor(offset / 60));
-		var minutes = pad(offset % 60);
-		return sign + hours + ":" + minutes;
-	}
-
-	function formatDateOffset(d, short) {
-		if (short)
-			return formatDate(d, short);
-		else
-			return formatDateT(d, short) + createUTCOffset(d);
-	}
-
-	function formatDate(d, short) {
-		var month = '' + (d.getMonth() + 1),
-			day = '' + d.getDate(),
-			year = d.getFullYear(),
-			hour = d.getHours(),
-			min = d.getMinutes();
-
-
-		if (month.length < 2) month = '0' + month;
-		if (day.length < 2) day = '0' + day;
-		if (hour < 10) hour = '0' + hour;
-		if (min < 10) min = '0' + min;
-
-		if (!short)
-			return [year, month, day].join('-') + ' ' + [hour, min].join(':');
-		else
-			return [year, month, day].join('');
-	}
-
-	function formatDateT(d, short) {
-		if (d == "??")
-			return "??";
-
-		var month = '' + (d.getMonth() + 1),
-			day = '' + d.getDate(),
-			year = d.getFullYear(),
-			hour = d.getHours(),
-			min = d.getMinutes();
-
-
-		if (month.length < 2) month = '0' + month;
-		if (day.length < 2) day = '0' + day;
-		if (hour < 10) hour = '0' + hour;
-		if (min < 10) min = '0' + min;
-
-		if (!short)
-			return [year, month, day].join('-') + 'T' + [hour, min].join(':');
-		else
-			return [year, month, day].join('');
-	}
-
 
 	function downloadBalances() {
 		if (lastResult) {
@@ -1648,7 +1566,7 @@
 			a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 			a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 			a.target = '_blank';
-			a.download = formatDate(toDateTimeNow(true), true) + '-' + publicAddr + '.csv';
+			a.download = _util.formatDate(_util.toDateTimeNow(true), true) + '-' + publicAddr + '.csv';
 			sp.appendChild(a);
 
 			$('#downloadBalances').html('');

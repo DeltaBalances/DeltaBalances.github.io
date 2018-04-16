@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="A tool to view details on a transaciton to a decentralized exchange">
+  <meta name="description" content="A tool to view 0x Protocol trade history.">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
@@ -27,12 +27,14 @@
   <script src="backupTokens.js"></script>
   <script src="loadTokens.js"></script>
 
-
   <!-- JS  Main functionality -->
   <!--  config excluded from bundle -->
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
-  <script src="tx.js"></script>
+  <script> 
+    var historyConfig = bundle.DeltaBalances.config.history0x;
+  </script>
+  <script src="history.js"></script>
 
 </head>
 
@@ -146,13 +148,12 @@
             <span>Recent transactions</span>
           </a>
         </li>
-        <li class="active">
+        <li>
           <a id="txNav" href="tx.html">
             <i class="fa fa-info"></i>
             <span>Transaction details</span>
           </a>
         </li>
-
         <li class="header">Exchange History</li>
         <li>
           <a id="historyNav" href="history.html">
@@ -172,7 +173,7 @@
             <span>Decentrex</span>
           </a>
         </li>
-        <li>
+		<li class="active">
           <a id="historyNav4" href="history4.html">
             <i class="fa fa-link"></i>
             <span>0x Protocol</span>
@@ -219,72 +220,149 @@
 
         <div class="row">
 
-          <div class="col-md-12 col-lg-10">
+          <div class="col-md-12 col-lg-10" style="overflow:hidden;">
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body">
-                <h2> Transaction info
-                  <button id='loading' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
-                </h2>
-                <div class="col-md-12" style="overflow:hidden;">
-                  <table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
-                    <tr>
-                      <td> Hash</td>
-                      <td id='hash'>
-                        <strong>Enter your transaction hash</strong>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td> From</td>
-                      <td id='from'></td>
-                    </tr>
-                    <tr>
-                      <td>To </td>
-                      <td id='to'></td>
-                    </tr>
-                  </table>
+                <div class="col-md-9" style="overflow:hidden;">
+                  <h2> 0x Protocol History</h2>
+                  <div style="white-space:nowrap; overflow:hidden;">
+                    <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
+                    <div class="hidden-xs" style="padding-left: 3%; float:left;">
+                      <p style="line-height:64px;display: inline-block;"> </p>
+                    </div>
+                    <div style="float:left; white-space:nowrap;">
+                      <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;" id="addr">Enter your public address </p>
+                    </div>
+                  </div>
+                  <br>
                 </div>
+                <div class="col-md-12">
+                  <div class="col-md-5" style="overflow:hidden;">
+                    <h4 class="hidden">Operation types</h4>
 
-                <div class="col-md-6">
-                  <table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
-                    <tr>
-                      <td>Type</td>
-                      <td id='inputtype'></td>
-                    </tr>
-                    <tr>
-                      <td> Status</td>
-                      <td id='status'></td>
-                    </tr>
-                    <tr>
-                      <td>Date </td>
-                      <td id='time'></td>
-                    </tr>
-                    <tr>
-                      <td>ETH value </td>
-                      <td id='ethval'></td>
-                    </tr>
-                  </table>
-                </div>
+                    <select style="display:inline; width:80%; " class="hidden form-control" id="typeSelect" onChange="changeTypes()">
+                      <option value="0">Trades</option>
+                      <!-- <option value="1">Funds (Deposit/Withdraw)</option>
+                      <option value="2">Trades + Funds</option> -->
+                    </select>
+                    <h4>Date range: </h4>
+                    <span id="selectedBlocks">Selected block range:</span>
+                    <br>
+                    <ul class="list-group">
+                      <li class="list-group-item" style="background-color:inherit; border:none;">
+                        <form id="blockSelector">
+                          <ul class="list-unstyled">
 
-                <div class="col-md-6">
-                  <table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
-                    <tr>
-                      <td>Gas Price </td>
-                      <td id='gasgwei'></td>
-                    </tr>
-                    <tr>
-                      <td>Gas Used </td>
-                      <td id='gasusedlimit'></td>
-                    </tr>
-                    <tr>
-                      <td>Gas Cost </td>
-                      <td id='gascost'></td>
-                    </tr>
-                    <tr>
-                      <td>Nonce </td>
-                      <td id='nonce'></td>
-                    </tr>
-                  </table>
+                            <li>
+                              <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" checked>
+                              <label for="r0"> The last
+                                <input class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;"
+                                  onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (14s per block)</label>
+                            </li>
+                            <li>
+                              <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()">
+                              <label for="r1"> Month
+                                <select style="display:inline; width: 60%; height:25px; padding-top:2px;" class="form-control" id="monthSelect" onChange="checkMonthInput()"
+                                  disabled></select>
+                              </label>
+                            </li>
+                            <li>
+                              <input type="radio" id="r2" name="dayBlocks" value="1" onchange="setBlockSelector()">
+                              <label for="r2"> Manual block range
+                                <br>
+                                <div style="padding-left:30px">
+                                  <input style="width: 100px; height:25px;" class="form-control blockInput" type="number" id="blockSelect1" style="text-align: center; height:85%;width:85px;"
+                                    onchange="checkBlockInput()" value="" disabled>
+                                  <i style="padding-left:5px;padding-right:5px;" class="fa fa-arrow-right"></i>
+                                  <input style="width: 100px; height:25px;" class="form-control blockInput" type="number" id="blockSelect2" style="text-align: center; height:85%;width:85px;"
+                                    onchange="checkBlockInput()" value="" disabled>
+                                </div>
+                              </label>
+                            </li>
+
+                          </ul>
+
+                        </form>
+                      </li>
+                    </ul>
+                    <button id='findTransactions' onclick="myClick()" class="btn" style="display:none;" hidden> Retrieve history
+                      <i class="fa fa-search" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <div class="col-md-7" style="overflow:hidden;">
+                    <h4>Info</h4>
+                    Supports any 0x exchange on contract
+                    <a href="https://etherscan.io/address/0x12459c951127e0c374ff9105dda097662a027093"
+                      target="_blank">0x12459..</a>.
+                    <br>Example relayers: <a href="https://ddex.io/" target="_blank">DDEX</a>, <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>, <a href="https://paradex.io/" target="_blank">Paradex</a> and <a href="https://ercdex.com/" target="_blank">Erc Dex</a>
+                    <br>
+                    <br>
+
+                    <span class="visible-xs">
+                      <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
+                      <br>
+                      <br>
+                    </span>
+                    Trades are retrieved from the blockchain using Infura.
+                    <br>Large block ranges will take a long time to load.
+                    <br>
+                    <br> History is limited to trades with base WETH or DAI, starting at block
+                    <span id="minBlockLink"></span>
+                    <br>
+
+                  </div>
+                  <div class="col-md-12">
+                    <br>
+                  </div>
+                  <div class="col-md-6" style="overflow:hidden;">
+                    <h4>Export trades:</h4>
+                    <ul>
+                      <li>Default V2 (CSV)
+                        <span id="downloadTrades">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+                      <li>Bitcoin.tax (CSV)
+                        <span id="downloadBitcoinTaxTrades">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+                      <li>Cointracking.info (CSV)
+                        <span id="downloadCointrackingTrades">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>, (CustomExchange)
+                        <span id="downloadCointracking2Trades">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="hidden col-md-6" style="overflow:hidden;">
+                    <h4>Export funds (deposit/withdraw):</h4>
+                    <ul>
+                      <li>Default (CSV)
+                        <span id="downloadFunds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+                      <!--
+                      <li>Bitcoin.tax (CSV)
+                        <span id="downloadBitcoinTaxFunds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>-->
+                      <li>Cointracking.info (CSV)
+                        <span id="downloadCointrackingFunds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                          <!--  </span>, (CustomExchange)
+                        <span id="downloadCointracking2Funds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+					  -->
+                    </ul>
+                  </div>
                 </div>
               </div>
               <!-- /.box-body -->
@@ -296,64 +374,32 @@
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body">
-                <h2>Summary</h2>
-                <span id="summary"></span>
-              </div>
-              <!-- /.box-body -->
-            </div>
-            <!-- /.box -->
-          </div>
-
-          <div class="col-md-12 col-lg-10" style="padding:0;">
-            <div class="col-md-12 col-lg-6">
-              <div class="box box-default">
-                <!-- /.box-header -->
-                <div class="box-body">
-                  <h2>Input data </h2>
-                  <p> Transaction input sent to the blockchain, what you attempted to do.</p>
+                <div id="">
+                  <h2>History
+                    <button id='loadingTransactions' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
+                    <span style="padding-left:20px; vertical-align: middle;font-weight: 400; font-size: 0.5em;" id="blockProgress"></span>
+                  </h2>
                   <br>
-                  <div id="inputdata"></div>
-                </div>
-                <!-- /.box-body -->
-              </div>
-              <!-- /.box -->
-            </div>
-            <div class="col-md-12 col-lg-6">
-              <div class="box box-default">
-                <!-- /.box-header -->
-                <div class="box-body">
-                  <h2>Output data </h2>
-                  <p>Transaction event logs on the blockchain, what actually happened. </p>
+                  <table class="tablesorter table table-striped" id="transactionsTable">
+                    <thead></thead>
+                    <tbody></tbody>
+                  </table>
+                  <br> Expecting to see more here? Increase the date range at the top.
                   <br>
-                  <div id="outputdata"></div>
+                  <br>
+                  <div class="col-md-6">
+                    <span class="label label-info">Taker</span> Clicked an existing order.
+                    <br>
+                    <span class="label label-default">Maker</span> Made a new order.
+                    <br>
+                  </div>
+                  <div class="col-md-6">
+                    <span class="label label-success">Buy</span> Traded WETH or DAI for Tokens.
+                    <br>
+                    <span class="label label-danger">Sell</span> Traded Tokens for WETH or DAI.
+                    <br>
+                  </div>
                 </div>
-                <!-- /.box-body -->
-              </div>
-              <!-- /.box -->
-            </div>
-          </div>
-
-          <div class="col-md-12 col-lg-10">
-            <div class="box box-default">
-              <!-- /.box-header -->
-              <div class="box-body">
-                Transaction details supports:
-                <ul>
-                  <li>Deposit style exchanges:
-                    <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
-                    <a href="https://forkdelta.github.io" target="_blank">ForkDelta</a>),
-                    <a href="https://token.store" target="_blank">Token Store</a>,
-                    <a href="https://www.idex.market" target="_blank">IDEX</a>(partial) and Decentrex(closed).
-                  </li>
-                  <li> 0x exchanges (including):
-                    <a href="https://ddex.io/" target="_blank">DDEX</a>,
-                    <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>,
-                    <a href="https://paradex.io/" target="_blank">Paradex</a> and
-                    <a href="https://ercdex.com/" target="_blank">Erc Dex</a>
-                  </li>
-                  <li>Erc20 Transfers</li>
-                  <li>Wrapped ETH</li>
-                </ul>
               </div>
               <!-- /.box-body -->
             </div>
@@ -406,8 +452,10 @@
             <li>
               <a href="" onclick="return false" style="pointer-events: none;">
                 <i id="currentAddrImg" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
+
                 <div class="menu-info">
                   <h4 id="currentAddr" class="control-sidebar-subheading">0x......</h4>
+
                   <p id="currentAddrDescr">Input address</p>
                 </div>
               </a>
@@ -458,7 +506,6 @@
     <div class="control-sidebar-bg"></div>
   </div>
   <!-- ./wrapper -->
-
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116708935-1"></script>
   <script>
@@ -470,8 +517,8 @@
       gtag('js', new Date());
       gtag('config', 'UA-116708935-1');
     }
-  </script>
 
+  </script>
 </body>
 
 </html>

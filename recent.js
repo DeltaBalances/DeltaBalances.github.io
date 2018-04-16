@@ -56,8 +56,8 @@
 			Base: _delta.config.tokens[0],
 			Total: 0,
 			Hash: '',
-			Date: toDateTimeNow(),
-			Details: window.location.origin + window.location.pathname + '/../tx.html#',
+			Date: _util.toDateTimeNow(),
+			Info: window.location.origin + window.location.pathname + '/../tx.html#',
 		}
 	];
 
@@ -584,7 +584,7 @@
 				if (tx.blockNumber) {
 					let block = tx.blockNumber;
 					if (!blockDates[block]) {
-						blockDates[block] = toDateTime(tx.timeStamp);
+						blockDates[block] = _util.toDateTime(tx.timeStamp);
 					}
 				}
 
@@ -611,7 +611,7 @@
 				if (tx.blockNumber) {
 					let block = tx.blockNumber;
 					if (!blockDates[block]) {
-						blockDates[block] = toDateTime(tx.timeStamp);
+						blockDates[block] = _util.toDateTime(tx.timeStamp);
 					}
 				}
 
@@ -736,8 +736,8 @@
 						Base: base,
 						Total: total,
 						Hash: hash,
-						Date: toDateTime(timeStamp),
-						Details: window.location.origin + window.location.pathname + '/../tx.html#' + hash,
+						Date: _util.toDateTime(timeStamp),
+						Info: window.location.origin + window.location.pathname + '/../tx.html#' + hash,
 					};
 				} else {
 					return undefined;
@@ -780,7 +780,7 @@
 		var loaded = table2Loaded;
 		if (changedDecimals)
 			loaded = false;
-		buildHtmlTable('#transactionsTable2', result, loaded, 'transactions', transactionHeaders);
+		buildHtmlTable('#transactionsTable2', result, loaded, transactionHeaders);
 		trigger2();
 
 	}
@@ -903,101 +903,100 @@
 
 
 	// Builds the HTML Table out of myList.
-	function buildHtmlTable(selector, myList, loaded, type, headers) {
+	function buildHtmlTable(selector, myList, loaded, headers) {
 		var body = $(selector + ' tbody');
-		var columns = addAllColumnHeaders(myList, selector, loaded, type, headers);
+		var columns = addAllColumnHeaders(myList, selector, loaded, headers);
 
 		for (var i = 0; i < myList.length; i++) {
 
 			var row$ = $('<tr/>');
 
-			if (type === 'transactions') {
-				for (var colIndex = 0; colIndex < columns.length; colIndex++) {
-					var cellValue = myList[i][columns[colIndex]];
-					if (cellValue == null) cellValue = "";
-					var head = columns[colIndex];
 
-					if (head == 'Amount' || head == 'Price' || head == "Total") {
-						if (cellValue !== "" && cellValue !== undefined) {
-							var dec = fixedDecimals;
-							if (head == 'Price')
-								dec += 2;
-							var num = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(dec) + '</span>';
-							row$.append($('<td/>').html(num));
-						}
-						else {
-							row$.append($('<td/>').html(cellValue));
-						}
-					}
-					else if (head == 'Token' || head == 'Base') {
+			for (var colIndex = 0; colIndex < columns.length; colIndex++) {
+				var cellValue = myList[i][columns[colIndex]];
+				if (cellValue == null) cellValue = "";
+				var head = columns[colIndex];
 
-						let token = cellValue;
-						if (token) {
-							let popoverContents = "Placeholder";
-							if (cellValue && !_util.isWrappedETH(token.addr)) {
-								if (token) {
-									popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
-										+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
-										+ '</li><li>' + _util.forkDeltaURL(token, true)
-										+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
-									if (token.IDEX) {
-										popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
-									}
-									popoverContents += '</ul>';
-								}
-							} else if (!token || token.addr == _delta.config.ethAddr) {
-								popoverContents = "Ether (not a token)<br> Decimals: 18";
-							} else {
-								popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
-							}
-							let labelClass = 'label-warning';
-							if (!token.unlisted)
-								labelClass = 'label-primary';
-
-							row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + '</a>'));
-						} else {
-							row$.append('<td> </td>');
-						}
-					}
-					else if (head == 'Type') {
-						if (cellValue == 'Deposit' || cellValue == 'Approve' || cellValue == 'Wrap ETH') {
-							row$.append($('<td/>').html('<span class="label label-success" >' + cellValue + '</span>'));
-						}
-						else if (cellValue == 'Withdraw' || cellValue == 'Unwrap ETH') {
-							row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
-						}
-						else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy') {
-							row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
-						}
-						else if (cellValue == 'Taker Buy' || cellValue == 'Buy up to') {
-							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
-						}
-						else if (cellValue == 'Taker Sell' || cellValue == 'Sell up to') {
-							row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
-						}
-						else {
-							row$.append($('<td/>').html('<span>' + cellValue + '</span>'));
-						}
-					}
-					else if (head == 'Hash') {
-						row$.append($('<td/>').html(_util.hashLink(cellValue, true, true)));
-					}
-					else if (head == 'Status') {
-						if (cellValue)
-							row$.append($('<td align="center"/>').html('<i style="color:green;" class="fa fa-check"></i>'));
-						else
-							row$.append($('<td align="center"/>').html('<i style="color:red;" class="fa fa-exclamation-circle"></i>'));
-					}
-					else if (head == 'Details') {
-
-						row$.append($('<td/>').html('<a href="' + cellValue + '" target="_blank">details</a>'));
-					}
-					else if (head == 'Date') {
-						row$.append($('<td/>').html(formatDate(cellValue, false)));
+				if (head == 'Amount' || head == 'Price' || head == "Total") {
+					if (cellValue !== "" && cellValue !== undefined) {
+						var dec = fixedDecimals;
+						if (head == 'Price')
+							dec += 2;
+						var num = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(dec) + '</span>';
+						row$.append($('<td/>').html(num));
 					}
 					else {
 						row$.append($('<td/>').html(cellValue));
 					}
+				}
+				else if (head == 'Token' || head == 'Base') {
+
+					let token = cellValue;
+					if (token) {
+						let popoverContents = "Placeholder";
+						if (cellValue && !_util.isWrappedETH(token.addr)) {
+							if (token) {
+								popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals
+									+ '<br> Trade on: <ul><li>' + _util.etherDeltaURL(token, true)
+									+ '</li><li>' + _util.forkDeltaURL(token, true)
+									+ '</li><li>' + _util.tokenStoreURL(token, true) + '</li>';
+								if (token.IDEX) {
+									popoverContents += '<li>' + _util.idexURL(token, true) + '</li>';
+								}
+								popoverContents += '</ul>';
+							}
+						} else if (!token || token.addr == _delta.config.ethAddr) {
+							popoverContents = "Ether (not a token)<br> Decimals: 18";
+						} else {
+							popoverContents = 'Contract: ' + _util.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
+						}
+						let labelClass = 'label-warning';
+						if (!token.unlisted)
+							labelClass = 'label-primary';
+
+						row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + '</a>'));
+					} else {
+						row$.append('<td> </td>');
+					}
+				}
+				else if (head == 'Type') {
+					if (cellValue == 'Deposit' || cellValue == 'Approve' || cellValue == 'Wrap ETH') {
+						row$.append($('<td/>').html('<span class="label label-success" >' + cellValue + '</span>'));
+					}
+					else if (cellValue == 'Withdraw' || cellValue == 'Unwrap ETH') {
+						row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
+					}
+					else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy') {
+						row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
+					}
+					else if (cellValue == 'Taker Buy' || cellValue == 'Buy up to') {
+						row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
+					}
+					else if (cellValue == 'Taker Sell' || cellValue == 'Sell up to') {
+						row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
+					}
+					else {
+						row$.append($('<td/>').html('<span>' + cellValue + '</span>'));
+					}
+				}
+				else if (head == 'Hash') {
+					row$.append($('<td/>').html(_util.hashLink(cellValue, true, true)));
+				}
+				else if (head == 'Status') {
+					if (cellValue)
+						row$.append($('<td align="center"/>').html('<i style="color:green;" class="fa fa-check"></i>'));
+					else
+						row$.append($('<td align="center"/>').html('<i style="color:red;" class="fa fa-exclamation-circle"></i>'));
+				}
+				else if (head == 'Info') {
+
+					row$.append($('<td/>').html('<a href="' + cellValue + '" target="_blank"><i class="fa fa-ellipsis-h"></i></a>'));
+				}
+				else if (head == 'Date') {
+					row$.append($('<td/>').html(_util.formatDate(cellValue, false, true)));
+				}
+				else {
+					row$.append($('<td/>').html(cellValue));
 				}
 			}
 
@@ -1011,11 +1010,11 @@
 	}
 
 
-	var transactionHeaders = { 'Token': 1, 'Amount': 1, 'Type': 1, 'Hash': 1, 'Date': 1, 'Price': 1, 'Base': 1, 'Total': 1, 'Status': 1, 'Details': 1, 'Exchange': 1 };
+	var transactionHeaders = { 'Token': 1, 'Amount': 1, 'Type': 1, 'Hash': 1, 'Date': 1, 'Price': 1, 'Base': 1, 'Total': 1, 'Status': 1, 'Info': 1, 'Exchange': 1 };
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.
-	function addAllColumnHeaders(myList, selector, loaded, type, headers) {
+	function addAllColumnHeaders(myList, selector, loaded, headers) {
 		var columnSet = {};
 
 		if (!loaded)
@@ -1043,80 +1042,6 @@
 		}
 		columnSet = Object.keys(columnSet);
 		return columnSet;
-	}
-
-	function toDateTime(secs) {
-		var utcSeconds = secs;
-		var d = new Date(0);
-		d.setUTCSeconds(utcSeconds);
-		return d;
-		//return formatDate(d);
-	}
-
-	function toDateTimeNow(short) {
-		var t = new Date();
-		return t; //formatDate(t, short);
-	}
-
-	function createUTCOffset(date) {
-
-		function pad(value) {
-			return value < 10 ? '0' + value : value;
-		}
-
-		var sign = (date.getTimezoneOffset() > 0) ? "-" : "+";
-		var offset = Math.abs(date.getTimezoneOffset());
-		var hours = pad(Math.floor(offset / 60));
-		var minutes = pad(offset % 60);
-		return sign + hours + ":" + minutes;
-	}
-
-	function formatDateOffset(d, short) {
-		if (short)
-			return formatDate(d, short);
-		else
-			return formatDateT(d, short) + createUTCOffset(d);
-	}
-
-	function formatDate(d, short) {
-		var month = '' + (d.getMonth() + 1),
-			day = '' + d.getDate(),
-			year = d.getFullYear(),
-			hour = d.getHours(),
-			min = d.getMinutes();
-
-
-		if (month.length < 2) month = '0' + month;
-		if (day.length < 2) day = '0' + day;
-		if (hour < 10) hour = '0' + hour;
-		if (min < 10) min = '0' + min;
-
-		if (!short)
-			return [year, month, day].join('-') + ' ' + [hour, min].join(':');
-		else
-			return [year, month, day].join('');
-	}
-
-	function formatDateT(d, short) {
-		if (d == "??")
-			return "??";
-
-		var month = '' + (d.getMonth() + 1),
-			day = '' + d.getDate(),
-			year = d.getFullYear(),
-			hour = d.getHours(),
-			min = d.getMinutes();
-
-
-		if (month.length < 2) month = '0' + month;
-		if (day.length < 2) day = '0' + day;
-		if (hour < 10) hour = '0' + hour;
-		if (min < 10) min = '0' + min;
-
-		if (!short)
-			return [year, month, day].join('-') + 'T' + [hour, min].join(':');
-		else
-			return [year, month, day].join('');
 	}
 
 	function forget() {

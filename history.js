@@ -57,6 +57,7 @@
 	// placeholder
 	var transactionsPlaceholder = [
 		{
+			Relayer: '0x',
 			Type: 'Taker',
 			Trade: 'Sell',
 			Token: { "name": "Token", "addr": "0x00" },
@@ -65,14 +66,14 @@
 			Base: { "name": "Token", "addr": "0x00" },
 			Total: 0,
 			Hash: '0xH4SH1',
-			Date: toDateTimeNow(),
+			Date: _util.toDateTimeNow(),
 			Block: '',
 			Buyer: '',
 			Seller: '',
 			Fee: 0,
 			FeeToken: { "name": "Token", "addr": "0x00" },
 			'Fee in': { "name": "Token", "addr": "0x00" }, //shorter name feetoken
-			Details: window.location.origin + window.location.pathname + '/../tx.html',
+			Info: window.location.origin + window.location.pathname + '/../tx.html',
 			Unlisted: true,
 		},
 		/*{
@@ -83,14 +84,14 @@
 			Price: '',
 			ETH: '',
 			Hash: '0xH4SH2',
-			Date: toDateTimeNow(),
+			Date: _util.toDateTimeNow(),
 			Block: '',
 			Buyer: '',
 			Seller: '',
 			Fee: '',
 			FeeToken: '',
 			'Fee in': '', //shorter name feetoken
-			Details: window.location.origin + window.location.pathname + '/../tx.html',
+			Info: window.location.origin + window.location.pathname + '/../tx.html',
 			Unlisted: true,
 		}*/
 	];
@@ -687,9 +688,26 @@
 								doneBlocks[tradesInResult[i].Block] = true;
 								blockReqs++;
 
+								// try getting block date from etherscan
 								_util.getBlockDate(_delta.web3, tradesInResult[i].Block, (err, unixtimestamp, nr) => {
+
+									if (err) {
+										console.log(err);
+										// etherscan fails, try web3 provider
+										if (_delta.web3s.length > 1 && nr) {
+											_util.getBlockDate(_delta.web3s[1], nr, (err2, unixtimestamp2, nr2) => {
+												receiveDates(err2, unixtimestamp2, nr2);
+											});
+										}
+									} else {
+										receiveDates(err, unixtimestamp, nr);
+									}
+
+								});
+
+								function receiveDates(err, unixtimestamp, nr) {
 									if (!err && unixtimestamp) {
-										blockDates[nr] = toDateTime(unixtimestamp);
+										blockDates[nr] = _util.toDateTime(unixtimestamp);
 									}
 
 									blockLoaded++;
@@ -698,8 +716,7 @@
 										if (!running)
 											done();
 									}
-
-								});
+								}
 
 							}
 						}
@@ -739,7 +756,7 @@
 				for (let i = 0; i < filteredLogs.length; i++) {
 					let num = Number(filteredLogs[i].blockNumber);
 					if (!blockDates[num]) {
-						blockDates[num] = toDateTime(filteredLogs[0].timeStamp);
+						blockDates[num] = _util.toDateTime(filteredLogs[0].timeStamp);
 					}
 				}
 			}
@@ -749,7 +766,7 @@
 			for (let i = 0; i < unpackedLogs.length; i++) {
 
 				let unpacked = unpackedLogs[i];
-				if (!unpacked || unpacked.events.length < 4 || (unpacked.name != 'Trade' && unpacked.name != 'Deposit' && unpacked.name != 'Withdraw')) {
+				if (!unpacked || unpacked.events.length < 4 || (unpacked.name != 'Trade' && unpacked.name != 'LogFill' && unpacked.name != 'Deposit' && unpacked.name != 'Withdraw')) {
 					continue;
 				}
 
@@ -757,9 +774,10 @@
 				if (obj && !obj.error) {
 
 					var obj2 = undefined;
-					if (unpacked.name == 'Trade') {
-						if (_util.isWrappedETH(obj.base.addr)) {
+					if (unpacked.name == 'Trade' || unpacked.name == 'LogFill') {
+						if (_util.isWrappedETH(obj.base.addr) || _util.isNonEthBase(obj.base.addr)) {
 							obj2 = {
+								Relayer: '',
 								Type: obj.transType,
 								Trade: obj.tradeType,
 								Token: obj.token,
@@ -772,11 +790,16 @@
 								Block: _util.hexToDec(filteredLogs[i].blockNumber),
 								Buyer: obj.buyer,
 								Seller: obj.seller,
-								Fee: obj.fee,
+								Fee: (!obj.fee.greaterThan(0)) ? '' : obj.fee,
 								FeeToken: obj.feeCurrency,
 								'Fee in': obj.feeCurrency,
-								Details: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
+								Info: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
 								Unlisted: obj.unlisted,
+							};
+							if (obj.relayer) {
+								obj2.Relayer = _util.relayName(obj.relayer);
+							} else {
+								delete obj2.Relayer;
 							}
 						}
 					} else if (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw') {
@@ -796,9 +819,9 @@
 							Fee: '',
 							FeeToken: '',
 							'Fee in': '',
-							Details: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
+							Info: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
 							Unlisted: obj.unlisted,
-						}
+						};
 					}
 					if (obj2)
 						outputs.push(obj2);
@@ -937,6 +960,9 @@
 
 		} else {
 			$("#transactionsTable thead th").data("sorter", true);
+			let defaultSortIndex = 7;
+			if (historyConfig.showRelayers)
+				defaultSortIndex = 8;
 			$("#transactionsTable").tablesorter({
 				textExtraction: {
 					2: function (node, table, cellIndex) { return $(node).find("a").text(); },
@@ -945,7 +971,7 @@
 				widgetOptions: {
 					scroller_height: 500,
 				},
-				sortList: [[7, "d"]]
+				sortList: [[defaultSortIndex, "d"]]
 			});
 
 			tableLoaded = true;
@@ -1089,12 +1115,12 @@
 					}
 					else if (head == 'Date') {
 						if (cellValue !== '??')
-							cellValue = formatDate(cellValue, false, true);
+							cellValue = _util.formatDate(cellValue, false, true);
 						row$.append($('<td/>').html(cellValue));
 					}
-					else if (head == 'Details') {
+					else if (head == 'Info') {
 
-						row$.append($('<td/>').html('<a href="' + cellValue + '" target="_blank">details</a>'));
+						row$.append($('<td/>').html('<a href="' + cellValue + '" target="_blank"><i class="fa fa-ellipsis-h"></i></a>'));
 					}
 					else {
 						row$.append($('<td/>').html(cellValue));
@@ -1111,7 +1137,7 @@
 		}
 	}
 
-	var tradeHeaders = { 'Type': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'Base': 1, 'Total': 1, 'Hash': 1, 'Date': 1, 'Buyer': 1, 'Seller': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Details': 1 };
+	var tradeHeaders = { 'Type': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'Base': 1, 'Total': 1, 'Hash': 1, 'Date': 1, 'Buyer': 1, 'Seller': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Info': 1 };
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.
@@ -1131,7 +1157,7 @@
 		for (var i = 0; i < myList.length; i++) {
 			var rowHash = myList[i];
 			for (var key in rowHash) {
-				if (!columnSet[key] && headers[key]) {
+				if (!columnSet[key] && (headers[key] || (historyConfig.showRelayers && key === 'Relayer'))) {
 					columnSet[key] = 1;
 					headerTr$.append($('<th/>').html(key));
 				}
@@ -1166,95 +1192,6 @@
 		select.selectedIndex = count - 1;
 	}
 
-
-
-	function toDateTime(secs) {
-		var utcSeconds = secs;
-		var d = new Date(0);
-		d.setUTCSeconds(utcSeconds);
-		return d; // formatDate(d);
-	}
-
-	function toDateTimeNow(short) {
-		var t = new Date();
-		return t;
-		//return formatDate(t, short);
-	}
-
-
-	function createUTCOffset(date) {
-
-		function pad(value) {
-			return value < 10 ? '0' + value : value;
-		}
-
-		var sign = (date.getTimezoneOffset() > 0) ? "-" : "+";
-		var offset = Math.abs(date.getTimezoneOffset());
-		var hours = pad(Math.floor(offset / 60));
-		var minutes = pad(offset % 60);
-		return sign + hours + ":" + minutes;
-	}
-
-	function formatDateOffset(d, short) {
-		if (d == "??")
-			return "??";
-
-		if (short)
-			return formatDate(d, short);
-		else
-			return formatDateT(d, short) + createUTCOffset(d);
-	}
-
-	function formatDate(d, short, removeSeconds) {
-		if (d == "??")
-			return "??";
-
-		var month = '' + (d.getMonth() + 1),
-			day = '' + d.getDate(),
-			year = d.getFullYear(),
-			hour = d.getHours(),
-			min = d.getMinutes(),
-			sec = d.getSeconds();
-
-
-		if (month.length < 2) month = '0' + month;
-		if (day.length < 2) day = '0' + day;
-		if (hour < 10) hour = '0' + hour;
-		if (min < 10) min = '0' + min;
-		if (sec < 10) sec = '0' + sec;
-
-		if (!short)
-			if (!removeSeconds)
-				return [year, month, day].join('-') + ' ' + [hour, min, sec].join(':');
-			else
-				return [year, month, day].join('-') + ' ' + [hour, min].join(':');
-		else
-			return [year, month, day].join('');
-	}
-
-	function formatDateT(d, short) {
-		if (d == "??")
-			return "??";
-
-		var month = '' + (d.getMonth() + 1),
-			day = '' + d.getDate(),
-			year = d.getFullYear(),
-			hour = d.getHours(),
-			min = d.getMinutes(),
-			sec = d.getSeconds();
-
-
-		if (month.length < 2) month = '0' + month;
-		if (day.length < 2) day = '0' + day;
-		if (hour < 10) hour = '0' + hour;
-		if (min < 10) min = '0' + min;
-		if (sec < 10) sec = '0' + sec;
-
-		if (!short)
-			return [year, month, day].join('-') + 'T' + [hour, min, sec].join(':');
-		else
-			return [year, month, day].join('');
-	}
 
 	function clearDownloads() {
 		$('#downloadTrades').html('');
@@ -1296,9 +1233,15 @@
 				var A = [['Type', 'Trade', 'Token', 'Amount', 'Price', 'BaseCurrency', 'Total', 'Date', 'Block', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract', 'BaseCurrency Contract', 'Exchange']];
 				// initialize array of rows with header row as 1st item
 				for (var i = 0; i < allTrades.length; ++i) {
+
+					let exchange = historyConfig.exchange;
+					if (allTrades[i].Relayer) {
+						exchange = allTrades[i].Relayer;
+					}
+
 					var arr = [allTrades[i]['Type'], allTrades[i]['Trade'], allTrades[i]['Token'].name, allTrades[i]['Amount'], allTrades[i]['Price'], allTrades[i]['Base'].name,
-					allTrades[i]['Total'], formatDateOffset(allTrades[i]['Date']), allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'],
-					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr, allTrades[i]['Base'].addr, historyConfig.exchange];
+					allTrades[i]['Total'], _util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'],
+					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr, allTrades[i]['Base'].addr, exchange];
 
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
@@ -1326,7 +1269,7 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target = '_blank';
-				a.download = historyConfig.exchange + "_Trades_" + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = historyConfig.exchange + "_Trades_" + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 
 				$('#downloadTrades').html('');
@@ -1345,8 +1288,13 @@
 				var A = [['Type', 'Token', 'Amount', 'Date', 'Block', 'Transaction Hash', 'Token Contract', 'Exchange']];
 				// initialize array of rows with header row as 1st item
 				for (var i = 0; i < allTrades.length; ++i) {
-					var arr = [allTrades[i]['Type'], allTrades[i]['Token'].name, allTrades[i]['Amount'], formatDateOffset(allTrades[i]['Date']),
-					allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Token'].addr, historyConfig.exchange];
+
+					let exchange = historyConfig.exchange;
+					if (allTrades[i].Relayer) {
+						exchange = allTrades[i].Relayer;
+					}
+					var arr = [allTrades[i]['Type'], allTrades[i]['Token'].name, allTrades[i]['Amount'], _util.formatDateOffset(allTrades[i]['Date']),
+					allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Token'].addr, exchange];
 
 					for (let j = 0; j < arr.length; j++) {
 						//remove exponential notation
@@ -1374,7 +1322,7 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target = '_blank';
-				a.download = historyConfig.exchange + "_Funds_" + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = historyConfig.exchange + "_Funds_" + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 
 				$('#downloadFunds').html('');
@@ -1398,13 +1346,18 @@
 					var arr = undefined;
 					var memoString = '"Transaction Hash ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr + '"';
 
+					let exchange = historyConfig.exchange;
+					if (allTrades[i].Relayer) {
+						exchange = allTrades[i].Relayer;
+					}
+
 					//if (allTrades[i]['Trade'] === 'Buy') {
-					arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), historyConfig.exchange, allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], allTrades[i]['Base'].name,
+					arr = [_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), exchange, allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], allTrades[i]['Base'].name,
 					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
 					//	}
 					// add token fee to total for correct balance in bitcoin tax
 					//	else {
-					//		arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), historyConfig.exchange, allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], allTrades[i]['Base'].name,
+					//		arr = [_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), exchange, allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], allTrades[i]['Base'].name,
 					//		allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
 					//	}
 
@@ -1432,7 +1385,7 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target = '_blank';
-				a.download = 'BitcoinTax_' + historyConfig.exchange + '_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = 'BitcoinTax_' + historyConfig.exchange + '_' + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 
 				$('#downloadBitcoinTaxTrades').html('');
@@ -1455,14 +1408,19 @@
 				// initialize array of rows with header row as 1st item
 				for (var i = 0; i < allTrades.length; ++i) {
 					var arr = [];
+					let exchange = historyConfig.exchange;
+					if (allTrades[i].Relayer) {
+						exchange = allTrades[i].Relayer;
+					}
+
 					if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
 						arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
+							exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])];
 
 					}
 					else {  //sell add fee to token total
 						arr = ['Trade', allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
+							exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])];
 					}
 
 					for (let j = 0; j < arr.length; j++) {
@@ -1490,7 +1448,7 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target = '_blank';
-				a.download = 'Cointracking_CSV_' + historyConfig.exchange + '_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = 'Cointracking_CSV_' + historyConfig.exchange + '_' + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 
 				$('#downloadCointrackingTrades').html('');
@@ -1511,15 +1469,20 @@
 				// initialize array of rows with header row as 1st item
 				for (var i = 0; i < allTrades.length; ++i) {
 					var arr = [];
+					let exchange = historyConfig.exchange;
+					if (allTrades[i].Relayer) {
+						exchange = allTrades[i].Relayer;
+					}
+
 					if (allTrades[i]['Type'] === 'Deposit') { // deposit is 'buy'
 						arr = ['Deposit', allTrades[i]['Amount'], allTrades[i]['Token'].name, "", "", "", "",
-							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
-							allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
+							exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
+							allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])];
 					}
 					else {  //withdraw is 'sell'
 						arr = ['Withdrawal', "", "", allTrades[i]['Amount'], allTrades[i]['Token'].name, "", "",
-							historyConfig.exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
-							allTrades[i]['Hash'], formatDateOffset(allTrades[i]['Date'])];
+							exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
+							allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])];
 					}
 
 					for (let j = 0; j < arr.length; j++) {
@@ -1547,7 +1510,7 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target = '_blank';
-				a.download = 'CointrackingFunds_CSV_' + historyConfig.exchange + '_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = 'CointrackingFunds_CSV_' + historyConfig.exchange + '_' + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 
 				$('#downloadCointrackingFunds').html('');
@@ -1569,14 +1532,18 @@
 				// initialize array of rows with header row as 1st item
 				for (var i = 0; i < allTrades.length; ++i) {
 					var arr = [];
+					let exchange = historyConfig.exchange;
+					if (allTrades[i].Relayer) {
+						exchange = allTrades[i].Relayer;
+					}
 					if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
-						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, historyConfig.exchange, 'Trade'];
+						arr = [_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, exchange, 'Trade'];
 
 					}
 					else { //sell add fee to token total
-						arr = [formatDateOffset(allTrades[i]['Date']), allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, historyConfig.exchange, 'Trade'];
+						arr = [_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, exchange, 'Trade'];
 					}
 
 					for (let j = 0; j < arr.length; j++) {
@@ -1603,7 +1570,7 @@
 				a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 				a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvString);
 				a.target = '_blank';
-				a.download = 'Cointracking_CustomExchange_' + historyConfig.exchange + '_' + formatDate(toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+				a.download = 'Cointracking_Custom_' + historyConfig.exchange + '_' + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 				sp.appendChild(a);
 
 				$('#downloadCointracking2Trades').html('');

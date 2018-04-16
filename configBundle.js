@@ -1,4 +1,4 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/config.js":[function(require,module,exports){
+require=(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({"/config.js":[function(require,module,exports){
 module.exports = {
   homeURL: 'https://deltabalances.github.io',
   socketURL: 'https://api.forkdelta.com', //'https://socket.etherdelta.com';
@@ -22,7 +22,7 @@ module.exports = {
     '0xeb71bad396acaa128aeadbc7dbd59ca32263de01': "IDT",
     '0x173a2467cece1f752eb8416e337d0f0b58cad795': 'Erc Dex',
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX',
-    //'0x0000000000000000000000000000000000000000' : 'Paradex'
+    '0x0000000000000000000000000000000000000000': 'Paradex'
   },
   ethAddr: '0x0000000000000000000000000000000000000000',
   apiServer: '',
@@ -95,6 +95,17 @@ module.exports = {
     withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
     depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
     createTx: '0x386439acefbf00018b318f283a9ebc6185c483ff6738117243dba40fc1b42bb6',
+  },
+  history0x: {
+    exchange: '0x Exchange',
+    exchangeAddr: 'contract0xAddr',
+    minBlock: 4145578,
+    maxBlock: undefined,
+    tradeTopic: '0x0d0b9391970d9a25552f37d436d2aae2925e2bfe1b2a923754bada030c498cb3',
+    withdrawTopic: undefined,
+    depositTopic: undefined,
+    showRelayers: true,
+    createTx: '0x4ba480054e660dd81dea5d9ffcdc12a355650762d6997f181c9fe2ec6fa96f6e',
   },
   wrappedETH: {
     "0x0000000000000000000000000000000000000000": 1, // EtherDelta, IDEX, tokenStore, Decentrex  reserved for ETH

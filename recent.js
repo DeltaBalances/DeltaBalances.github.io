@@ -906,7 +906,7 @@
 					scroller_barWidth: 18,
 					scroller_upAfterSort: true,
 				},
-				sortList: [[8, 1]]
+				sortList: [[9, 1]]
 			});
 
 			table2Loaded = true;
@@ -993,9 +993,9 @@
 				}
 				else if (head == 'Status') {
 					if (cellValue)
-						row$.append($('<td align="center"/>').html('<i style="color:green;" class="fa fa-check"></i>'));
+						row$.append($('<td align="center"/>').html('<i title="success" style="color:green;" class="fa fa-check"></i>'));
 					else
-						row$.append($('<td align="center"/>').html('<i style="color:red;" class="fa fa-exclamation-circle"></i>'));
+						row$.append($('<td align="center"/>').html('<i title="failed" style="color:red;" class="fa fa-exclamation-circle"></i>'));
 				}
 				else if (head == 'Info') {
 
@@ -1041,6 +1041,8 @@
 			for (var key in rowHash) {
 				if (!columnSet[key] && headers[key]) {
 					columnSet[key] = 1;
+                    if(key === 'Status')
+                        key = '<i title="Transaction status" class="fa fa-check"></i>'
 					headerTr$.append($('<th/>').html(key));
 				}
 			}

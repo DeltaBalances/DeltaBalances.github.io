@@ -679,9 +679,9 @@
 				}
 			}
 		} else if (transaction.output && transaction.output.length > 0) {
-			for (let i = 0; i < transaction.input.length; i++) {
-				if (transaction.input[i].note) {
-					let operation = 'Operation: ' + transaction.input[i].note + '<br>';
+			for (let i = 0; i < transaction.output.length; i++) {
+				if (transaction.output[i].note) {
+					let operation = 'Operation: ' + transaction.output[i].note + '<br>';
 					//avoid double messages
 					if (!operations[operation]) {
 						sum += operation;

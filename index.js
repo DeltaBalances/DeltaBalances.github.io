@@ -230,6 +230,7 @@
 		}
 		else {
 			_delta.connectSocket();
+			$('#userToggle').addClass('hidden');
 			$('#address').focus();
 		}
 	}
@@ -727,6 +728,7 @@
 			}
 		}
 
+		$('#userToggle').removeClass('hidden');
 		document.getElementById('address').value = address;
 		document.getElementById('currentAddr').innerHTML = address.slice(0, 16); // side menu
 		document.getElementById('currentAddr2').innerHTML = address.slice(0, 8); //top bar
@@ -1591,6 +1593,10 @@
 		setStorage();
 		window.location.hash = "";
 		$('#walletInfo').addClass('hidden');
+		if(!publicAddr && !savedAddr && !metamaskAddr) {
+			$('#userToggle').click();
+			$('#userToggle').addClass('hidden');
+		}
 
 		myClick();
 

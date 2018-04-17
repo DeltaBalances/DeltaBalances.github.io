@@ -26349,6 +26349,20 @@ module.exports = (config) => {
   };
 
 
+  utility.getMetamaskAddress = function () {
+    // Checking if Web3 has been injected by the browser (Mist/MetaMask)
+    if (typeof web3 !== 'undefined') {
+
+      // Use the browser's ethereum provider
+      var provider = web3.currentProvider;
+      var localWeb3 = new Web3(web3.currentProvider);
+      if (localWeb3.eth.accounts.length > 0) {
+        return localWeb3.eth.accounts[0].toLowerCase();
+      }
+
+    }
+    return '';
+  };
 
 
 

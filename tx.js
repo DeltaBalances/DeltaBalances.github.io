@@ -31,9 +31,10 @@
 
 	var publicAddr = '';
 	var savedAddr = '';
+	var metamaskAddr = '';
 
 	var unknownToken = false;
-	
+
 	var wideOutput = false;
 
 
@@ -59,9 +60,18 @@
 
 	function readyInit() {
 		hideLoading();
+
+		//get metamask address as possbile input (if available)
+		metamaskAddr = _util.getMetamaskAddress();
+		if (metamaskAddr) {
+			setMetamaskImage(metamaskAddr);
+			$('#metamaskAddress').html(metamaskAddr.slice(0, 16));
+		}
+
+
 		checkStorage();
 
-		if (!publicAddr && !savedAddr) {
+		if (!publicAddr && !savedAddr && !metamaskAddr) {
 			document.getElementById('currentAddr').innerHTML = '0x......'; // side menu
 			document.getElementById('currentAddr2').innerHTML = '0x......'; //top bar
 			document.getElementById('currentAddrDescr').innerHTML = 'Input address';
@@ -69,24 +79,66 @@
 		} else if (publicAddr) {
 			document.getElementById('currentAddr').innerHTML = publicAddr.slice(0, 16); // side menu
 			document.getElementById('currentAddr2').innerHTML = publicAddr.slice(0, 8); //top bar
-			document.getElementById('currentAddrDescr').innerHTML = 'Input address';
+			if (publicAddr !== metamaskAddr && publicAddr !== savedAddr) {
+				document.getElementById('currentAddrDescr').innerHTML = 'Input address';
+			} else if (publicAddr === savedAddr) {
+
+				if (savedAddr === metamaskAddr)
+					document.getElementById('currentAddrDescr').innerHTML = 'Metamask address (Saved)';
+				else
+					document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
+
+			} else {
+				document.getElementById('currentAddrDescr').innerHTML = 'Metamask address';
+			}
 			setAddrImage(publicAddr);
 			$('#etherscan').attr("href", _util.addressLink(publicAddr, false, false));
 			$('#walletInfo').removeClass('hidden');
-			if (savedAddr) {
-				$('#savedSection').removeClass('hidden');
+
+			if (savedAddr === publicAddr) {
+				$('#save').addClass('hidden');
+				$('#forget').removeClass('hidden');
+				$('#savedSection').addClass('hidden');
+			} else {
+				$('#forget').addClass('hidden');
+				$('#save').removeClass('hidden');
+				if (savedAddr)
+					$('#savedSection').removeClass('hidden');
 			}
-		} else {
+
+			if (metamaskAddr && metamaskAddr !== publicAddr) {
+				$('#metamaskSection').removeClass('hidden');
+			} else {
+				$('#metamaskSection').addClass('hidden');
+			}
+		} else if (savedAddr) {
 			document.getElementById('currentAddr').innerHTML = savedAddr.slice(0, 16); // side menu
 			document.getElementById('currentAddr2').innerHTML = savedAddr.slice(0, 8); //top bar
 
 			$('#walletInfo').removeClass('hidden');
 			$('#save').addClass('hidden');
 			$('#savedSection').addClass('hidden');
-			document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
+			if (savedAddr === metamaskAddr) {
+				document.getElementById('currentAddrDescr').innerHTML = 'Metamask address (Saved)';
+			} else {
+				document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
+			}
 
 			$('#etherscan').attr("href", _util.addressLink(savedAddr, false, false));
 			setAddrImage(savedAddr);
+			if (metamaskAddr) {
+				$('#metamaskSection').removeClass('hidden');
+			}
+		} else if (metamaskAddr) {
+			document.getElementById('currentAddr').innerHTML = metamaskAddr.slice(0, 16); // side menu
+			document.getElementById('currentAddr2').innerHTML = metamaskAddr.slice(0, 8); //top bar
+
+			$('#walletInfo').removeClass('hidden');
+			$('#metamaskSection').addClass('hidden');
+			document.getElementById('currentAddrDescr').innerHTML = 'Metamask address';
+
+			$('#etherscan').attr("href", _util.addressLink(metamaskAddr, false, false));
+			setAddrImage(metamaskAddr);
 		}
 
 
@@ -138,8 +190,8 @@
 		});
 
 
-		// url parameter ?addr=0x... /#0x..
-		var trans = getParameterByName('trans');
+		// url hash #0x..
+		var trans = '';
 		if (!trans) {
 			var hash = window.location.hash;  // url parameter /#0x...
 			if (hash)
@@ -210,8 +262,8 @@
 			autoStart = true;
 			return;
 		}
-		
-		
+
+
 		wideOutput = false;
 		unknownToken = false;
 		hideError();
@@ -294,19 +346,6 @@
 		document.getElementById('address').value = address;
 		return address;
 	}
-
-
-	// get parameter from url
-	function getParameterByName(name, url) {
-		if (!url) url = window.location.href;
-		name = name.replace(/[\[\]]/g, "\\$&");
-		var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-			results = regex.exec(url);
-		if (!results) return null;
-		if (!results[2]) return '';
-		return decodeURIComponent(results[2].replace(/\+/g, " "));
-	}
-
 
 	function getTransactions() {
 
@@ -810,15 +849,15 @@
 			types[uniqueType].push(parsedInput[i]);
 		}
 
-		if(wideOutput) {
+		if (wideOutput) {
 			$('#inputdiv').removeClass('col-lg-6')
 			$('#outputdiv').removeClass('col-lg-6');
 		} else {
 			$('#inputdiv').addClass('col-lg-6')
 			$('#outputdiv').addClass('col-lg-6');
 		}
-		
-		
+
+
 		let batchedInput = Object.values(types);
 		for (var i = 0; i < batchedInput.length; i++) {
 			buildHtmlTable(id, batchedInput[i]);
@@ -838,8 +877,8 @@
 		$("table thead th").removeClass("tablesorter-headerUnSorted");
 		$("table thead th").removeClass("tablesorter-headerDesc");
 		$("table thead th").removeClass("tablesorter-headerAsc");
-		
-		
+
+
 	}
 
 	function hideInput() {
@@ -1027,6 +1066,14 @@
 			icon.style.backgroundImage = '';
 	}
 
+	function setMetamaskImage(addr) {
+		var icon = document.getElementById('metamaskImage');
+		if (addr)
+			icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
+		else
+			icon.style.backgroundImage = '';
+	}
+
 	function forget() {
 		if (publicAddr) {
 			if (publicAddr.toLowerCase() === savedAddr.toLowerCase()) {
@@ -1058,6 +1105,7 @@
 		return false;
 	}
 
+	//called from html onclick
 	function loadSaved() {
 		if (savedAddr) {
 
@@ -1067,14 +1115,42 @@
 
 			$('#walletInfo').removeClass('hidden');
 			$('#save').addClass('hidden');
+			$('#forget').removeClass('hidden');
 			$('#savedSection').addClass('hidden');
 			document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
 
 			$('#etherscan').attr("href", _util.addressLink(savedAddr, false, false));
+			if (metamaskAddr && metamaskAddr !== savedAddr) {
+				$('#savedsection').removeClass('hidden');
+			}
 			setAddrImage(savedAddr);
+			setStorage();
 		}
 		return false;
 	}
+
+	//called from html onclick
+	function loadMetamask() {
+		if (metamaskAddr) {
+
+			publicAddr = metamaskAddr;
+			document.getElementById('currentAddr').innerHTML = metamaskAddr.slice(0, 16); // side menu
+			document.getElementById('currentAddr2').innerHTML = metamaskAddr.slice(0, 8); //top bar
+
+			$('#walletInfo').removeClass('hidden');
+			$('#metamaskSection').addClass('hidden');
+			document.getElementById('currentAddrDescr').innerHTML = 'Metamask address';
+
+			$('#etherscan').attr("href", _util.addressLink(metamaskAddr, false, false));
+			setAddrImage(metamaskAddr);
+			if (savedAddr && savedAddr !== metamaskAddr) {
+				$('#savedsection').removeClass('hidden');
+			}
+			setStorage();
+		}
+		return false;
+	}
+
 
 	function getBlockStorage() {
 		if (typeof (Storage) !== "undefined") {

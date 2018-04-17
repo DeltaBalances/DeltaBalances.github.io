@@ -225,12 +225,14 @@
                 <h2> Transaction info
                   <button id='loading' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
                 </h2>
+                <div id="emptyMsg" class="col-md-12">
+                    <h4><strong>Enter your transaction hash</strong></h4>
+                </div>
                 <div class="col-md-12" style="overflow:hidden;">
-                  <table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
+                  <table class="hidden txOverviewTable table table-sm" cellspacing="0" cellpadding="0">
                     <tr>
                       <td> Hash</td>
                       <td id='hash'>
-                        <strong>Enter your transaction hash</strong>
                       </td>
                     </tr>
                     <tr>
@@ -245,7 +247,7 @@
                 </div>
 
                 <div class="col-md-6">
-                  <table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
+                  <table class="hidden txOverviewTable table table-sm" cellspacing="0" cellpadding="0">
                     <tr>
                       <td>Type</td>
                       <td id='inputtype'></td>
@@ -266,7 +268,7 @@
                 </div>
 
                 <div class="col-md-6">
-                  <table class="table table-sm" cellspacing="0" cellpadding="0" id="txOverviewTable">
+                  <table class="hidden txOverviewTable table table-sm" cellspacing="0" cellpadding="0">
                     <tr>
                       <td>Gas Price </td>
                       <td id='gasgwei'></td>

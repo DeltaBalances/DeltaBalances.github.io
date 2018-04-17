@@ -282,6 +282,9 @@
 
 		autoStart = false;
 		if (transactionHash) {
+			$('#emptyMsg').hide();
+			$('.txOverviewTable').removeClass('hidden');
+			$('#hash').html(_util.hashLink(transactionHash, true));
 			window.location.hash = transactionHash;
 			getAll();
 
@@ -663,11 +666,34 @@
 			sum += "<strong>This token is still unknown to DeltaBalances </strong>, amount and price might be wrong if the token has less than 18 decimals <br> "
 
 		}
-		if (transaction.input && transaction.input[0].note) {
-			sum += 'Transaction type: ' + transaction.input[0].note + '<br>';
-		} else if (transaction.output && transaction.output[0].length > 0) {
-			sum += 'Transaction type: ' + transaction.output[0].note + '<br>';
+		let operations = {};
+		if (transaction.input && transaction.input.length > 0) {
+			for (let i = 0; i < transaction.input.length; i++) {
+				if (transaction.input[i].note) {
+					let operation = 'Operation: ' + transaction.input[i].note + '<br>';
+					//avoid double messages
+					if (!operations[operation]) {
+						sum += operation;
+						operations[operation] = true;
+					}
+				}
+			}
+		} else if (transaction.output && transaction.output.length > 0) {
+			for (let i = 0; i < transaction.input.length; i++) {
+				if (transaction.input[i].note) {
+					let operation = 'Operation: ' + transaction.input[i].note + '<br>';
+					//avoid double messages
+					if (!operations[operation]) {
+						sum += operation;
+						operations[operation] = true;
+					}
+				}
+			}
 		}
+        
+        if(Object.keys(operations).length > 0 )
+            sum += '<br>';
+        
 		if (transaction.input && transaction.input[0].type === 'Transfer') {
 			if (_delta.uniqueTokens[transaction.input[0].to]) {
 				sum += '<strong>Warning</strong>, you sent tokens to a token contract. These tokens are most likely lost forever. <br>';
@@ -677,7 +703,7 @@
 			}
 		}
 		if (!transaction.input && (!transaction.output || transaction.output.length == 0)) {
-			sum += 'This does not seem to be an exchange (EtherDelta, Decentrex, Token.store, Idex) transaction <br>';
+			sum += 'This does not seem to be an exchange (EtherDelta, 0x, Decentrex, Token.store, Idex) transaction <br>';
 		}
 		if (checkOldED(transaction.to)) {
 			sum += 'This transaction is to an outdated EtherDelta contract, only use these to withdraw old funds.<br>';
@@ -726,12 +752,12 @@
 			}
 
 			if (tradeCount > 1 && !_delta.isExchangeAddress(transaction.to)) {
-				sum += 'This transaction was made by a contract that has made multiple trades in a single transaction. <br>';
+				sum += '<br>This transaction was made by a contract that has made multiple trades in a single transaction. <br>';
 				// sum up what a custom cotract did in multiple trades
 				//	sum += "ETH gain over these trades: " + (received.minus(spent).minus(transaction.gasEth)) + " (incl. gas cost). <br>";
 			}
 			else if (tradeCount > 0 && !_delta.isExchangeAddress(transaction.to)) {
-				sum += 'This transaction was made by a contract instead of a user. <br>';
+				sum += '<br>This transaction was made by a contract instead of a user. <br>';
 			}
 
 			if (zeroDecWarning)
@@ -1092,7 +1118,7 @@
 		setStorage();
 		window.location.hash = "";
 		$('#walletInfo').addClass('hidden');
-		if(!publicAddr && !savedAddr && !metamaskAddr) {
+		if (!publicAddr && !savedAddr && !metamaskAddr) {
 			$('#userToggle').click();
 			$('#userToggle').addClass('hidden');
 		}

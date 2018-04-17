@@ -318,18 +318,18 @@ font-size: 105%;
 
 
 
-#txOverviewTable {
+.txOverviewTable.table {
 	width: 100%;
 	border:none;
 	font-size: 125%;
 }
 
-#txOverviewTable td {
+.txOverviewTable.table td {
 	border:none;
 	padding:3px 5px;
 }
 
-#txOverviewTable td :first-child{
+.txOverviewTable.table td :first-child{
 	border:none;
 	padding:3px 0px;
 }

@@ -530,7 +530,7 @@
 
 		let normalRetries = 0;
 		let internalRetries = 0;
-		let tokenReties = 0;
+		let tokenRetries = 0;
 
 		normalTransactions();
 		internalTransactions();

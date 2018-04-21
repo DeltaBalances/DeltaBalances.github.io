@@ -690,10 +690,10 @@
 				}
 			}
 		}
-        
-        if(Object.keys(operations).length > 0 )
-            sum += '<br>';
-        
+
+		if (Object.keys(operations).length > 0)
+			sum += '<br>';
+
 		if (transaction.input && transaction.input[0].type === 'Transfer') {
 			if (_delta.uniqueTokens[transaction.input[0].to]) {
 				sum += '<strong>Warning</strong>, you sent tokens to a token contract. These tokens are most likely lost forever. <br>';
@@ -973,7 +973,7 @@
 					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'baseAmount' || keys[i] == 'fee' || keys[i] == 'balance') {
 						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(3) + '</span>';
 					}
-					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'wallet') {
+					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'maker' || keys[i] == 'taker' || keys[i] == 'wallet') {
 						cellValue = _util.addressLink(cellValue, true, true);
 					}
 					else if (keys[i] == 'relayer') {

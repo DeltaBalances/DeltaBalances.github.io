@@ -3067,10 +3067,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
 
                     let takerAddr = idex ? unpacked.params[11].value : tx.from;
+                    let makerAddr = unpacked.params[6].value.toLowerCase();
 
                     var obj = {
                         'type': 'Taker ' + tradeType,
-                        'note': utility.addressLink(takerAddr, true, true) + ' selected ' + utility.addressLink(unpacked.params[6].value, true, true) + '\'s order in the orderbook to trade.',
+                        'note': utility.addressLink(takerAddr, true, true) + ' selected ' + utility.addressLink(makerAddr, true, true) + '\'s order in the orderbook to trade.',
                         'token': token,
                         'amount': val,
                         'price': price,
@@ -3078,6 +3079,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'baseAmount': val2,
                         'order size': orderSize,
                         'unlisted': unlisted,
+                        'taker': takerAddr,
+                        'maker': makerAddr,
                     };
                     return obj;
                 }
@@ -3186,7 +3189,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 function unpackOrderInput(orderAddresses, orderValues, fillTakerTokenAmount) {
 
                     let maker = orderAddresses[0].toLowerCase();
-                    let taker = tx.from.toLowerCase();// orderAddresses[1].toLowerCase();
+                    let taker = tx.contractAddress ? '' : tx.from.toLowerCase();//if tx has contractAddress field, is etherscan token transfer event, from/to incorrect for trade tx
                     let makerToken = _delta.setToken(orderAddresses[2]);
                     let takerToken = _delta.setToken(orderAddresses[3]);
 
@@ -3272,7 +3275,9 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                             'baseAmount': val2,
                             'order size': orderSize,
                             'unlisted': unlisted,
-                            'relayer': relayer
+                            'relayer': relayer,
+                            'maker': maker,
+                            'taker': taker,
                         };
 
                         return obj;
@@ -3344,8 +3349,14 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
     }
     else if (lcAddr == this.config.contractDecentrexAddr) {
         return 'Decentrex ' + (showAddr ? lcAddr : '');
-    } else if (lcAddr == '0xceceaa8edc0830c7cec497e33bb3a3c28dd55a32') {
+    } else if (lcAddr == this.config.idexAdminAddr) {
         return 'IDEX admin ' + (showAddr ? lcAddr : '');
+    }
+    else if (lcAddr == this.config.ddexAdminAddr) {
+        return 'DDEX admin ' + (showAddr ? lcAddr : '');
+    }
+    else if (lcAddr == this.config.paradexAdminAddr) {
+        return 'Paradex admin ' + (showAddr ? lcAddr : '');
     }
     else {
         for (var i = 0; i < this.config.contractEtherDeltaAddrs.length; i++) {
@@ -3566,13 +3577,13 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     if (tradeType === 'Sell') {
                         amount = takerAmount;
                         oppositeAmount = makerAmount;
-                        sellUser = maker;
-                        buyUser = taker;
+                        sellUser = taker;
+                        buyUser = maker;
                     } else {
                         oppositeAmount = takerAmount;
                         amount = makerAmount;
-                        sellUser = taker;
-                        buyUser = maker;
+                        sellUser = maker;
+                        buyUser = taker;
                     }
 
                     var unlisted = token.unlisted;
@@ -25775,6 +25786,7 @@ module.exports = (config) => {
       Decoder.addABI(bundle.DeltaBalances.config.tokenStoreAbi);
       Decoder.addABI(bundle.DeltaBalances.config.idexAbi);
       Decoder.addABI(bundle.DeltaBalances.config.zeroxAbi);
+      Decoder.addABI(bundle.DeltaBalances.config.oasisDexAbi);
       bundle.DeltaBalances.config.methodIDS = true;
     }
 
@@ -25812,7 +25824,7 @@ module.exports = (config) => {
       Decoder.addABI(bundle.DeltaBalances.config.tokenStoreAbi);
       Decoder.addABI(bundle.DeltaBalances.config.idexAbi);
       Decoder.addABI(bundle.DeltaBalances.config.zeroxAbi);
-      bundle.DeltaBalances.config.methodIDS = true;
+      Decoder.addABI(bundle.DeltaBalances.config.oasisDexAbi);
       bundle.DeltaBalances.config.methodIDS = true;
     }
 

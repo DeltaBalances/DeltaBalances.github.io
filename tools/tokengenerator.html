@@ -56,7 +56,16 @@
 				let addr = tok.address.toLowerCase();
 				if (!customTokens[addr] && tok.symbol && response.tokens[i].balance > 10 && tok.holdersCount > 10 && response.tokens[i].balance < Number(tok.totalSupply)) {
 					customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: Number(tok.decimals) };
-				}
+				} 
+                
+                if(customTokens[addr] && customTokens[addr].decimal !== tok.decimals) {
+                    customTokens[addr].decimal = Number(tok.decimals);
+                }
+                
+              /*  if(customTokens[addr] && customTokens[addr].symbol !== tok.symbol) {
+                    customTokens[addr].fixSymbol = tok.symbol;
+                }
+                */
 			}
 		}
 		

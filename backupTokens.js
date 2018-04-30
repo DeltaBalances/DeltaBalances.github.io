@@ -3970,7 +3970,7 @@ let offlineCustomTokens = [
   {address:"0x1cff439e724fa1690d5b346ddedb3ed55013aad4",symbol:"GBT",decimal:2},
   {address:"0x7585f835ae2d522722d2684323a0ba83401f32f5",symbol:"GBT",decimal:18},
   {address:"0x944f1a04ab8d735acdbc46505c5b283f54289152",symbol:"GBTS",decimal:18},
-  {address:"0x12fcd6463e66974cf7bbc24ffc4d40d6be458283",symbol:"GBX",decimal:18},
+  {address:"0x12fcd6463e66974cf7bbc24ffc4d40d6be458283",symbol:"GBX",decimal:8},
   {address:"0xdb0f69306ff8f949f258e83f6b87ee5d052d0b23",symbol:"GCP",decimal:18},
   {address:"0x86949dc8043a5fd7619a1289d65964ad5ec3d25c",symbol:"GCS",decimal:8},
   {address:"0xe780c49fe4b9022a0781b2dfcd34bbb337d946e7",symbol:"GCTX",decimal:18},

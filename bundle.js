@@ -3516,6 +3516,27 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     return obj;
                 }
             }
+            //0x error
+            else if (unpacked.name == 'LogError' && unpacked.events && unpacked.events.length == 2) {
+
+                const errortext = [
+                    'ORDER_EXPIRED',                    // Order has already expired
+                    'ORDER_FULLY_FILLED_OR_CANCELLED',  // Order has already been fully filled or cancelled
+                    'ROUNDING_ERROR_TOO_LARGE',         // Rounding error too large
+                    'INSUFFICIENT_BALANCE_OR_ALLOWANCE' // Insufficient balance or allowance for token transfer
+                ];
+
+                let errorid = Number(unpacked.events[0].value);
+                if (errorid < errortext.length) {
+
+                    let error = errortext[errorid];
+                    var obj = {
+                        'type': '0x Error',
+                        'description': error,
+                    };
+                    return obj;
+                }
+            }
             // 0x trade output event
             else if (unpacked.name == "LogFill") {
                 // LogFill (index_topic_1 address maker, address taker, index_topic_2 address feeRecipient, address makerToken, address takerToken, uint256 filledMakerTokenAmount, uint256 filledTakerTokenAmount, uint256 paidMakerFee, uint256 paidTakerFee, index_topic_3 bytes32 tokens, bytes32 orderHash)

@@ -521,6 +521,12 @@
 					var parsedOutput = parseOutput(tx, txLog.logs);
 					transaction.output = parsedOutput.output;
 					transaction.outputErrors = parsedOutput.errors;
+
+					if (parsedOutput.output && parsedOutput.output[0]) {
+						if (!parsedOutput.output[0].error && parsedOutput.output[0].type == '0x Error') {
+							transaction.status = 'Failed';
+						}
+					}
 				}
 				else {
 					transaction.status = 'Error';
@@ -658,6 +664,8 @@
 			else if (transaction.input[0].type === 'Token Deposit' || transaction.input[0].type === 'Token Withdraw') {
 				sum += 'Status: Bad jump destination, token deposit/withdraw failed. You might not have had the right account balance left. Otherwise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br>';
 			}
+		} else if (transaction.status === 'Failed') {
+			sum += 'Status: 0x operation failed.<br>';
 		} else {
 			sum += 'Status: Transaction failed.<br>';
 		}

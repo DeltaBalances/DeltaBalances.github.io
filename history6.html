@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="A tool to view recnt decentralized exchange transactions.">
+  <meta name="description" content="A tool to view Kyber Network trade history.">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
@@ -21,7 +21,7 @@
   <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
 
   <!-- JS socketIO  for exchange prices -->
-  <script src="js/socket.io.js" defer></script>
+  <!--<script src="js/socket.io.js" defer></script>-->
 
   <!-- JS  Token discover / loading -->
   <script src="backupTokens.js"></script>
@@ -31,7 +31,10 @@
   <!--  config excluded from bundle -->
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
-  <script src="recent.js"></script>
+  <script> 
+    var historyConfig = bundle.DeltaBalances.config.historyKyber;
+  </script>
+  <script src="history.js"></script>
 
 </head>
 
@@ -139,7 +142,7 @@
             <span>Token Balances</span>
           </a>
         </li>
-        <li class="active">
+        <li>
           <a id="recentNav" href="recent.html">
             <i class="sidebar-icon icon-recent"></i>
             <span>Recent Transactions</span>
@@ -174,6 +177,12 @@
           <a id="historyNav4" href="history4.html">
             <i class="sidebar-icon icon-zrx"></i>
             <span>0x Protocol</span>
+          </a>
+        </li>
+         <li class="active">
+          <a id="historyNav6" href="history6.html">
+            <i class="sidebar-icon icon-kyber"></i>
+            <span>Kyber Network</span>
           </a>
         </li>
         <li class="header">Links</li>
@@ -217,39 +226,150 @@
 
         <div class="row">
 
-          <div class="col-md-12 col-lg-7" style="overflow:hidden;">
+          <div class="col-md-12 col-lg-10" style="overflow:hidden;">
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body">
-                <div style="white-space:nowrap; overflow:hidden;">
-                  <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
-                  <div class="hidden-xs" style="padding-left: 3%; float:left;">
-                    <p style="line-height:64px;display: inline-block;"> </p>
+                <div class="col-md-9" style="overflow:hidden;">
+                  <h2>
+                    <i class="icon-kyber"></i> Kyber Network History</h2>
+                  <div style="white-space:nowrap; overflow:hidden;">
+                    <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
+                    <div class="hidden-xs" style="padding-left: 3%; float:left;">
+                      <p style="line-height:64px;display: inline-block;"> </p>
+                    </div>
+                    <div style="float:left; white-space:nowrap;">
+                      <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;" id="addr">Enter your public address </p>
+                    </div>
                   </div>
-                  <div style="float:left; white-space:nowrap;">
-                    <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;" id="addr">Enter your public address </p>
+                  <br>
+                </div>
+                <div class="col-md-12">
+                  <div class="col-md-5" style="overflow:hidden;">
+                    <h4 class="hidden">Operation types</h4>
+
+                    <select style="display:inline; width:80%; " class="hidden form-control" id="typeSelect" onChange="changeTypes()">
+                      <option value="0">Trades</option>
+                      <!-- <option value="1">Funds (Deposit/Withdraw)</option>
+                      <option value="2">Trades + Funds</option> -->
+                    </select>
+                    <h4>Date range: </h4>
+                    <span id="selectedBlocks">Selected block range:</span>
+                    <br>
+                    <ul class="list-group">
+                      <li class="list-group-item" style="background-color:inherit; border:none;">
+                        <form id="blockSelector">
+                          <ul class="list-unstyled">
+
+                            <li>
+                              <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" checked>
+                              <label for="r0"> The last
+                                <input class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;"
+                                  onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (14s per block)</label>
+                            </li>
+                            <li>
+                              <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()">
+                              <label for="r1"> Month
+                                <select style="display:inline; width: 60%; height:25px; padding-top:2px;" class="form-control" id="monthSelect" onChange="checkMonthInput()"
+                                  disabled></select>
+                              </label>
+                            </li>
+                            <li>
+                              <input type="radio" id="r2" name="dayBlocks" value="1" onchange="setBlockSelector()">
+                              <label for="r2"> Manual block range
+                                <br>
+                                <div style="padding-left:30px">
+                                  <input style="width: 100px; height:25px;" class="form-control blockInput" type="number" id="blockSelect1" style="text-align: center; height:85%;width:85px;"
+                                    onchange="checkBlockInput()" value="" disabled>
+                                  <i style="padding-left:5px;padding-right:5px;" class="fa fa-arrow-right"></i>
+                                  <input style="width: 100px; height:25px;" class="form-control blockInput" type="number" id="blockSelect2" style="text-align: center; height:85%;width:85px;"
+                                    onchange="checkBlockInput()" value="" disabled>
+                                </div>
+                              </label>
+                            </li>
+
+                          </ul>
+
+                        </form>
+                      </li>
+                    </ul>
+                    <button id='findTransactions' onclick="myClick()" class="btn btn-default" style="display:none;" hidden> Retrieve history
+                      <i class="fa fa-search" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                  <div class="col-md-7" style="overflow:hidden;">
+                    <h4>Info</h4>
+                    History for <a href="https://kyber.network/" target="_blank">Kyber Network</a> at contract
+                    <a href="https://etherscan.io/address/0x964f35fae36d75b1e72770e244f6595b68508cf5" target="_blank">0x964f3..</a>.
+                    <br>
+                    <br>
+
+                    <span class="visible-xs">
+                      <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
+                      <br>
+                      <br>
+                    </span>
+                    Trades are retrieved from the blockchain using Infura.
+                    <br>Large block ranges will take a long time to load.
+                    <br>
+                    <br> History is limited to trades with base WETH or DAI, starting at block
+                    <span id="minBlockLink"></span>
+                    <br>
+                    Kyber has no trade fees.
+
+                  </div>
+                  <div class="col-md-12">
+                    <br>
+                  </div>
+                  <div class="col-md-6" style="overflow:hidden;">
+                    <h4>Export trades:</h4>
+                    <ul>
+                      <li>Default V2 (CSV)
+                        <span id="downloadTrades">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+                      <li>Bitcoin.tax (CSV)
+                        <span id="downloadBitcoinTaxTrades">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+                      <li>Cointracking.info (CSV)
+                        <span id="downloadCointrackingTrades">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>, (CustomExchange)
+                        <span id="downloadCointracking2Trades">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="hidden col-md-6" style="overflow:hidden;">
+                    <h4>Export funds (deposit/withdraw):</h4>
+                    <ul>
+                      <li>Default (CSV)
+                        <span id="downloadFunds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+                      <!--
+                      <li>Bitcoin.tax (CSV)
+                        <span id="downloadBitcoinTaxFunds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>-->
+                      <li>Cointracking.info (CSV)
+                        <span id="downloadCointrackingFunds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                          <!--  </span>, (CustomExchange)
+                        <span id="downloadCointracking2Funds">
+                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
+                        </span>
+                      </li>
+					  -->
+                    </ul>
                   </div>
                 </div>
-              </div>
-              <!-- /.box-body -->
-            </div>
-            <!-- /.box -->
-          </div>
-
-          <div class="col-md-12 col-lg-3">
-            <div class="box box-default">
-              <!-- /.box-header -->
-              <div class="box-body">
-                <ul class="list-unstyled">
-                  <li>
-                    <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
-                    <label for="decimals">Show more decimals</label>
-                  </li>
-                  <li>
-                    <label>Transactions from last
-                      <input type="number" id="days" onchange="validateDays(this.value)" value="5" min="1" max="999" step="1"> days</label>
-                  </li>
-                </ul>
               </div>
               <!-- /.box-body -->
             </div>
@@ -260,83 +380,32 @@
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body">
-                <div class="col-md-8">
-                  <h2>Recent Transactions
-                    <button id='loadingTransactions2' onclick="getTrans()" class="fa fa-refresh" style="display:none;"></button>
+                <div id="">
+                  <h2>History
+                    <button id='loadingTransactions' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
+                    <span style="padding-left:20px; vertical-align: middle;font-weight: 400; font-size: 0.5em;" id="blockProgress"></span>
                   </h2>
-                  <p>Up to 1000 recent transactions (from etherscan), filtered to show decentralized exchanges </p>
-                  <p>
-                    <strong>Note: </strong> This page does not include all maker trades, Go to the
-                    <strong>
-                      History
-                    </strong> pages for a full trade history</p>
                   <br>
-                </div>
-                <div class="hidden-xs hidden-sm col-md-4">
-                  <br>
-                  <br>
-                  <input type="checkbox">
-                  <span class="label label-success">Type</span> Deposit or Wrap token.
-                  <br>
-                  <span class="label label-danger">Type</span> Withdraw or Unwrap token.
-                  <br>
-                  <span class="label label-default">Type</span> Cancelled order
-                  <br>
-                  <span class="label label-info">Type</span> Trade (clicked on an order)
-                  <br>
-                </div>
-                <br>
-                <div class="col-md-12" style="padding:0px;">
-                  <table class="tablesorter table table-striped" id="transactionsTable2">
+                  <table class="tablesorter table table-striped" id="transactionsTable">
                     <thead></thead>
                     <tbody></tbody>
                   </table>
+                  <br> Expecting to see more here? Increase the date range at the top.
+                  <br>
+                  <br>
+                  <div class="col-md-6">
+                    <span class="label label-info">Taker</span> Clicked an existing order.
+                    <br>
+                    <span class="label label-default">Maker</span> Made a new order.
+                    <br>
+                  </div>
+                  <div class="col-md-6">
+                    <span class="label label-success">Buy</span> Traded WETH or DAI for Tokens.
+                    <br>
+                    <span class="label label-danger">Sell</span> Traded Tokens for WETH or DAI.
+                    <br>
+                  </div>
                 </div>
-                <div class="visible-xs visible-sm col-md-4">
-                  <br>
-                  <br>
-                  <input type="checkbox">
-                  <span class="label label-success">Type</span> Deposit into exchange
-                  <br>
-                  <span class="label label-danger">Type</span> Withdraw to Wallet
-                  <br>
-                  <span class="label label-default">Type</span> Cancelled order
-                  <br>
-                  <span class="label label-info">Type</span> Taker trade (clicked on an order)
-                  <br>
-                </div>
-              </div>
-              <!-- /.box-body -->
-            </div>
-            <!-- /.box -->
-          </div>
-
-          <div class="col-md-12 col-lg-10">
-            <div class="box box-default">
-              <!-- /.box-header -->
-              <div class="box-body">
-                Recent Transactions supports:
-                <br>
-                <ul>
-                  <li>Deposit style exchanges:
-                    <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
-                    <a href="https://forkdelta.github.io" target="_blank">ForkDelta</a>),
-                    <a href="https://token.store" target="_blank">Token Store</a>,
-                    <a href="https://www.idex.market" target="_blank">IDEX</a>(partial) and Decentrex(closed).
-                  </li>
-                  <li> 0x exchanges (including):
-                    <a href="https://ddex.io/" target="_blank">DDEX</a>,
-                    <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>,
-                    <a href="https://paradex.io/" target="_blank">Paradex</a> and
-                    <a href="https://ercdex.com/" target="_blank">Erc Dex</a>
-                  </li>
-				  <li> Direct exchanges:
-                    <a href="https://airswap.io" target="_blank">AirSwap</a> and 
-                    <a href="https://kyber.network" target="_blank">Kyber Network</a>
-                  </li>
-                </ul>
-                Maker orders only show up for 0x exchanges.
-                <br> For IDEX only deposits and withdraws are shown.
               </div>
               <!-- /.box-body -->
             </div>
@@ -389,8 +458,10 @@
             <li>
               <a href="" onclick="return false" style="pointer-events: none;">
                 <i id="currentAddrImg" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
+
                 <div class="menu-info">
                   <h4 id="currentAddr" class="control-sidebar-subheading">0x......</h4>
+
                   <p id="currentAddrDescr">Input address</p>
                 </div>
               </a>
@@ -440,6 +511,7 @@
             </ul>
           </div>
         </div>
+
         <!-- /.tab-pane -->
         <!-- Settings tab content -->
         <div class="tab-pane" id="control-sidebar-settings-tab">

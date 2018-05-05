@@ -625,12 +625,19 @@
 	function getTransactions(rqid) {
 
 		var topics = [];
-		if (typeMode == 0)
-			topics = [historyConfig.tradeTopic];
-		else if (typeMode == 1)
+		if (typeMode == 0) {
+			//for Kyber, add user topic to search for speedup
+			if(historyConfig.userIndexed && historyConfig.userTopic == 1)
+				topics = [historyConfig.tradeTopic, ("0x000000000000000000000000" + publicAddr.slice(2).toLowerCase())];
+			else
+				topics = [historyConfig.tradeTopic];
+		}
+		else if (typeMode == 1) {
 			topics = [[historyConfig.depositTopic, historyConfig.withdrawTopic]];
-		else
+		}
+		else {
 			topics = [[historyConfig.tradeTopic, historyConfig.depositTopic, historyConfig.withdrawTopic]];
+		}
 
 		var start = startblock;
 		var end = endblock;
@@ -768,9 +775,29 @@
 			var myAddr = publicAddr.toLowerCase();
 			var addrrr = myAddr.slice(2);
 
-			let filteredLogs = outputLogs.filter((log) => {
-				return log.data.indexOf(addrrr) !== -1;
-			});
+			let filteredLogs;
+			
+			//kyber check only topic1
+			if(historyConfig == _delta.config.historyKyber){
+				filteredLogs = outputLogs.filter((log) => {
+					return log.topics[historyConfig.userTopic].indexOf(addrrr) !== -1;
+				});
+			} else {
+				
+				//airswap && 0x, check maker in topic and taker in data
+				if(historyConfig == _delta.config.history0x || historyConfig == _delta.config.historyAirSwap) {
+					filteredLogs = outputLogs.filter((log) => {
+						return (log.data.indexOf(addrrr) !== -1 || log.topics[1].indexOf(addrrr) !== -1);
+					});
+				} 
+				else {
+					// etherdelta, token store, decentrex check maker/taker in data
+					filteredLogs = outputLogs.filter((log) => {
+						return log.data.indexOf(addrrr) !== -1;
+					});
+				}
+			}
+			
 
 			//if from etherscan, timestamp is included
 			// from web3/infura, no timestamp
@@ -788,7 +815,7 @@
 			for (let i = 0; i < unpackedLogs.length; i++) {
 
 				let unpacked = unpackedLogs[i];
-				if (!unpacked || unpacked.events.length < 4 || (unpacked.name != 'Trade' && unpacked.name != 'LogFill' && unpacked.name != 'Deposit' && unpacked.name != 'Withdraw')) {
+				if (!unpacked || unpacked.events.length < 4 || (unpacked.name != 'Trade' && unpacked.name != 'LogFill'  &&unpacked.name !== 'ExecuteTrade' && unpacked.name != 'Filled' && unpacked.name != 'Deposit' && unpacked.name != 'Withdraw')) {
 					continue;
 				}
 
@@ -796,7 +823,7 @@
 				if (obj && !obj.error) {
 
 					var obj2 = undefined;
-					if (unpacked.name == 'Trade' || unpacked.name == 'LogFill') {
+					if (unpacked.name == 'Trade' || unpacked.name == 'LogFill' || unpacked.name == 'Filled' || unpacked.name == 'ExecuteTrade') {
 						if (_util.isWrappedETH(obj.base.addr) || _util.isNonEthBase(obj.base.addr)) {
 							obj2 = {
 								Relayer: '',
@@ -812,13 +839,16 @@
 								Block: _util.hexToDec(filteredLogs[i].blockNumber),
 								Buyer: obj.buyer,
 								Seller: obj.seller,
-								Fee: (!obj.fee || !obj.fee.greaterThan(0)) ? '' : obj.fee,
+								Fee: (!obj.fee || !obj.fee.greaterThan(0)) ? 0 : obj.fee,
 								FeeToken: obj.feeCurrency,
 								'Fee in': obj.feeCurrency,
 								Info: window.location.origin + window.location.pathname + '/../tx.html#' + filteredLogs[i].transactionHash,
 								Unlisted: obj.unlisted,
 							};
-							if (obj.relayer) {
+
+							if (unpacked.name == 'Filled' || unpacked.name == 'ExecuteTrade') {
+								obj2.FeeToken = {name: '', addr: ''}; // make compatible with export
+							} else if (obj.relayer) {
 								obj2.Relayer = _util.relayName(obj.relayer);
 							} else {
 								delete obj2.Relayer;
@@ -1604,7 +1634,7 @@
 		setStorage();
 		window.location.hash = "";
 		$('#walletInfo').addClass('hidden');
-		if(!publicAddr && !savedAddr && !metamaskAddr) {
+		if (!publicAddr && !savedAddr && !metamaskAddr) {
 			$('#userToggle').click();
 			$('#userToggle').addClass('hidden');
 		}

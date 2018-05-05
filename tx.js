@@ -523,7 +523,7 @@
 					transaction.outputErrors = parsedOutput.errors;
 
 					if (parsedOutput.output && parsedOutput.output[0]) {
-						if (!parsedOutput.output[0].error && parsedOutput.output[0].type == '0x Error') {
+						if (!parsedOutput.output[0].error && (parsedOutput.output[0].type == '0x Error' || parsedOutput.output[0].type == 'AirSwap Error')) {
 							transaction.status = 'Failed';
 						}
 					}
@@ -564,7 +564,7 @@
 						if (obj && !obj.error) {
 							if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 								unknownToken = true;
-							if (unpacked.name === 'Trade') {
+							if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade') {
 								delete obj.fee;
 								delete obj.feeCurrency;
 								delete obj.transType;
@@ -665,7 +665,7 @@
 				sum += 'Status: Bad jump destination, token deposit/withdraw failed. You might not have had the right account balance left. Otherwise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br>';
 			}
 		} else if (transaction.status === 'Failed') {
-			sum += 'Status: 0x operation failed.<br>';
+			sum += 'Status: Exchange operation failed.<br>';
 		} else {
 			sum += 'Status: Transaction failed.<br>';
 		}
@@ -873,12 +873,17 @@
 		let types = {};
 		for (var i = 0; i < parsedInput.length; i++) {
 			let uniqueType = parsedInput[i].type.toLowerCase();
-			if (uniqueType.indexOf('taker') !== -1 || uniqueType.indexOf('maker') !== -1) {
+			if (uniqueType.indexOf('taker') !== -1 || uniqueType.indexOf('maker') !== -1 )
+			{
 				uniqueType = 'trade';
 				wideOutput = true;
 			}
 			else if (uniqueType.indexOf('cancel') !== -1) {
 				uniqueType = 'cancel';
+				wideOutput = true;
+			}
+			else if (uniqueType.indexOf(' up to') !== -1 )
+			{
 				wideOutput = true;
 			}
 			if (!types[uniqueType])
@@ -978,11 +983,12 @@
 					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice') {
 						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(5) + '</span>';
 					}
-					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'baseAmount' || keys[i] == 'fee' || keys[i] == 'balance') {
+					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'fee' || keys[i] == 'balance') {
 						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(3) + '</span>';
 					}
 					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'maker' || keys[i] == 'taker' || keys[i] == 'wallet') {
-						cellValue = _util.addressLink(cellValue, true, true);
+						if(cellValue)
+							cellValue = _util.addressLink(cellValue, true, true);
 					}
 					else if (keys[i] == 'relayer') {
 						cellValue = _util.relayName(cellValue);
@@ -1026,6 +1032,10 @@
 					columnSet[key] = 1;
 					if (key === 'baseAmount')
 						key = 'Total';
+					else if(key === 'estBaseAmount')
+						key = 'Est. Total';
+					else if(key === 'estAmount')
+						key = 'Est. Amount';
 					headerTr$.append($('<th/>').html(capitalizeFirstLetter(key)));
 				}
 			}

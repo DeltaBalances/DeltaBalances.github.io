@@ -25,6 +25,8 @@ module.exports = {
     '0x0000000000000000000000000000000000000000': 'Paradex',
     '0x6f7ae872e995f98fcd2a7d3ba17b7ddfb884305f': 'TokenIon',
     '0x55890b06f0877a01bb5349d93b202961f8e27a9b': 'Shark Relay',
+    '0x5e150a33ffa97a8d22f59c77ae5487b089ef62e9': 'TokenJar',
+    '0x5dd835a893734b8d556eccf87800b76dda5aedc5': 'BambooRelay',
   },
   contractOasisDexAddr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425',
   contractOasisDirectAddr: '0x793ebbe21607e4f04788f89c7a9b97320773ec59',

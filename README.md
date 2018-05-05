@@ -16,6 +16,9 @@ Supported exchanges
 + [Paradex](https://paradex.io/)
 + [Erc Dex](https://ercdex.com/)
 
+Direct exchanges:  
++ [AirSwap](https://airswap.io)
++ [Kyber Network](https://kyber.network)
 
 This website is not affiliated with any of the mentioned exchanges
 

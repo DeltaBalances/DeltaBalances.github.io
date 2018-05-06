@@ -565,7 +565,7 @@
 							if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 								unknownToken = true;
 							if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade') {
-								delete obj.fee;
+                                obj.feeToken = obj.feeCurrency;
 								delete obj.feeCurrency;
 								delete obj.transType;
 								delete obj.tradeType;
@@ -602,6 +602,10 @@
 							unknownToken = true;
                         if(obj[i].relayer)
                             delete obj[i].relayer;
+                        if(obj[i].feeCurrency) {
+                            obj[i].feeToken = obj[i].feeCurrency;
+							delete obj[i].feeCurrency;
+                        }
 					}
 				}
 				return obj;
@@ -978,7 +982,7 @@
 				if (columns[keys[i]]) {
 
 					var cellValue = myList[i];
-					if (keys[i] == 'token' || keys[i] == 'base' || keys[i] == 'feeToken' || keys[i] == 'token In' || keys[i] == 'token Out') {
+					if (keys[i] == 'token' || keys[i] == 'base' || keys[i] == 'feeToken' || keys[i] == 'FeeToken ' || keys[i] == 'FeeToken'  || keys[i] == 'token In' || keys[i] == 'token Out') {
 
 						let token = cellValue;
                         if(token) {
@@ -993,7 +997,7 @@
 					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice') {
 						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(5) + '</span>';
 					}
-					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'fee' || keys[i] == 'balance') {
+					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'fee' || keys[i] == 'takerFee' || keys[i] == 'makerFee' || keys[i] == 'balance') {
 						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(3) + '</span>';
 					}
 					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'maker' || keys[i] == 'taker' || keys[i] == 'wallet') {

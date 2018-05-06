@@ -2110,7 +2110,7 @@ const Web3 = require('web3');
 const Interface = require('ethers-contracts/interface.js');
 
 const state = {
-  savedABIs: [],
+  savedABIs : [],
   methodIDs: {}
 }
 
@@ -2123,12 +2123,12 @@ function _addABI(abiArray) {
 
     // Iterate new abi to generate method id's
     abiArray.map(function (abi) {
-      if (abi.name) {
-        const signature = new Web3().sha3(abi.name + "(" + abi.inputs.map(function (input) { return input.type; }).join(",") + ")");
-        if (abi.type == "event") {
+      if(abi.name){
+        const signature = new Web3().sha3(abi.name + "(" + abi.inputs.map(function(input) {return input.type;}).join(",") + ")");
+        if(abi.type == "event"){
           state.methodIDs[signature.slice(2)] = abi;
         }
-        else {
+        else{
           state.methodIDs[signature.slice(2, 10)] = abi;
         }
       }
@@ -2146,14 +2146,14 @@ function _removeABI(abiArray) {
 
     // Iterate new abi to generate method id's
     abiArray.map(function (abi) {
-      if (abi.name) {
-        const signature = new Web3().sha3(abi.name + "(" + abi.inputs.map(function (input) { return input.type; }).join(",") + ")");
-        if (abi.type == "event") {
+      if(abi.name){
+        const signature = new Web3().sha3(abi.name + "(" + abi.inputs.map(function(input) {return input.type;}).join(",") + ")");
+        if(abi.type == "event"){
           if (state.methodIDs[signature.slice(2)]) {
             delete state.methodIDs[signature.slice(2)];
           }
         }
-        else {
+        else{
           if (state.methodIDs[signature.slice(2, 10)]) {
             delete state.methodIDs[signature.slice(2, 10)];
           }
@@ -2185,20 +2185,20 @@ function _decodeMethod(data) {
         const isInt = abiItem.inputs[index].type.indexOf("int") == 0;
 
         if (isUint || isInt) {
-          parsedParam = parseArrayNumber(param);
-
-          function parseArrayNumber(param2) {
-            let parsedParam2 = param2;
-            const isArray = Array.isArray(param2);
-
-            if (isArray) {
-              parsedParam2 = param2.map(val => parseArrayNumber(val));
-            } else {
-              parsedParam2 = new Web3().toBigNumber(param2).toString();
-            }
-            return parsedParam2;
-          }
-
+		  parsedParam = parseArrayNumber(param);
+			
+		  function parseArrayNumber (param2) {
+		    let parsedParam2 = param2;
+			const isArray = Array.isArray(param2);
+			
+			if (isArray) {
+			  parsedParam2 = param2.map(val => parseArrayNumber(val));
+			} else {
+			  parsedParam2 = new Web3().toBigNumber(param2).toString();
+			}
+			return parsedParam2;
+		  }
+		  
         }
         return {
           name: abiItem.inputs[index].name,
@@ -2210,7 +2210,7 @@ function _decodeMethod(data) {
   }
 }
 
-function padZeros(address) {
+function padZeros (address) {
   var formatted = address;
   if (address.indexOf('0x') != -1) {
     formatted = address.slice(2);
@@ -2224,7 +2224,7 @@ function padZeros(address) {
 };
 
 function _decodeLogs(logs) {
-  return logs.map(function (logItem) {
+  return logs.map(function(logItem) {
     const methodID = logItem.topics[0].slice(2);
     const method = state.methodIDs[methodID];
     if (method) {
@@ -2259,10 +2259,10 @@ function _decodeLogs(logs) {
           dataIndex++;
         }
 
-        if (param.type == "address") {
+        if (param.type == "address"){
           decodedP.value = padZeros(new Web3().toBigNumber(decodedP.value).toString(16));
         }
-        else if (param.type == "uint256" || param.type == "uint8" || param.type == "int") {
+        else if(param.type == "uint256" || param.type == "uint8" || param.type == "int" ){
           decodedP.value = new Web3().toBigNumber(decodedP.value).toString(10);
         }
 
@@ -2273,7 +2273,8 @@ function _decodeLogs(logs) {
       return {
         name: method.name,
         events: decodedParams,
-        address: logItem.address
+        address: logItem.address,
+        blockNumber: logItem.blockNumber
       };
     }
   });
@@ -3242,6 +3243,40 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let takerAddr = idex ? unpacked.params[11].value : tx.from;
                     let makerAddr = unpacked.params[6].value.toLowerCase();
 
+                    let takeFee = new BigNumber(0);
+                    let makeFee = new BigNumber(0);
+                    let takeFeeCurrency = '';
+                    let makeFeeCurrency = '';
+
+                    if (idex) {
+                        const ether1 = new BigNumber(1000000000000000000);
+                        let takerFee = new BigNumber(2000000000000000); //0.2% fee in wei
+                        let makerFee = new BigNumber(1000000000000000); //0.1% fee in wei
+
+                        //assume take trade
+
+                        if (tradeType === 'Sell') {
+                            if (takerFee.greaterThan(0)) {
+                                takeFee = utility.weiToEth((new BigNumber(amount).times(takerFee)).div(ether1), dvsr);
+                                takeFeeCurrency = token;
+                            }
+                            if (makerFee.greaterThan(0)) {
+                                makeFee = utility.weiToEth((new BigNumber(oppositeAmount).times(makerFee)).div(ether1), dvsr2);
+                                makeFeeCurrency = token2;
+                            }
+                        }
+                        else if (tradeType === 'Buy') {
+                            if (takerFee.greaterThan(0)) {
+                                takeFee = utility.weiToEth((new BigNumber(oppositeAmount).times(takerFee)).div(ether1), dvsr2);
+                                takeFeeCurrency = token2;
+                            } if (makerFee.greaterThan(0)) {
+                                makeFee = utility.weiToEth((new BigNumber(amount).times(makerFee)).div(ether1), dvsr);
+                                makeFeeCurrency = token2;
+                            }
+                        }
+                    }
+
+
                     var obj = {
                         'type': 'Taker ' + tradeType,
                         'exchange': exchange,
@@ -3256,6 +3291,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'taker': takerAddr,
                         'maker': makerAddr,
                     };
+
+                    if (idex) {
+                        obj['takerFee'] = takeFee;
+                        obj['FeeToken'] = takeFeeCurrency;
+                        obj['makerFee'] = makeFee;
+                        obj['FeeToken '] = makeFeeCurrency;
+                    }
                     return obj;
                 }
             }
@@ -3599,11 +3641,17 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 var token = this.setToken(unpacked.params[0].value);
                 if (token && token.addr) {
                     var unlisted = token.unlisted;
+                    var amount = new BigNumber(unpacked.params[1].value);
+                    var fee = new BigNumber(unpacked.params[7].value);
+
                     var dvsr = this.divisorFromDecimals(token.decimals)
-                    var val = utility.weiToEth(unpacked.params[1].value, dvsr);
-                    var feeVal = utility.weiToEth(unpacked.params[7].value, dvsr);
+                    var val = utility.weiToEth(amount, dvsr);
+
                     var type = '';
                     var note = '';
+
+                    const ether1 = new BigNumber(1000000000000000000);
+                    var feeVal = utility.weiToEth((fee.times(amount)).div(ether1), dvsr);
 
                     if (token.addr !== this.config.ethAddr) {
                         type = 'Token Withdraw';
@@ -3825,25 +3873,42 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     else if (sellUser === myAddr)
                         tradeType = "Sell";
 
+
+                    let takerFee = new BigNumber(0);
+                    let makerFee = new BigNumber(0);
+                    const ether1 = new BigNumber(1000000000000000000); // 1 ether in wei
+
+                    if (exchange == 'EtherDelta ' || exchange == 'Decentrex ' || exchange == 'Token store ') {
+                        takerFee = new BigNumber(3000000000000000); //0.3% fee in wei
+                    }
+
                     let fee = new BigNumber(0);
                     let feeCurrency = '';
                     if (transType === 'Taker') {
-                        const fee03 = new BigNumber(3000000000000000); //0.3% fee in wei
-                        const ether1 = new BigNumber(1000000000000000000); // 1 ether in wei
+
                         if (tradeType === 'Sell') {
-                            fee = utility.weiToEth((new BigNumber(amount).times(fee03)).div(ether1), dvsr);
+                            if (takerFee.greaterThan(0)) {
+                                fee = utility.weiToEth((new BigNumber(amount).times(takerFee)).div(ether1), dvsr);
+                            }
                             feeCurrency = token;
                         }
                         else if (tradeType === 'Buy') {
-                            fee = utility.weiToEth((new BigNumber(oppositeAmount).times(fee03)).div(ether1), dvsr2);
+                            if (takerFee.greaterThan(0)) {
+                                fee = utility.weiToEth((new BigNumber(oppositeAmount).times(takerFee)).div(ether1), dvsr2);
+                            }
                             feeCurrency = base;
                         }
                     } else if (transType === 'Maker') {
-                        fee = new BigNumber(0);
                         if (tradeType === 'Sell') {
+                            if (makerFee.greaterThan(0)) {
+                                fee = utility.weiToEth((new BigNumber(amount).times(makerFee)).div(ether1), dvsr);
+                            }
                             feeCurrency = token;
                         }
                         else if (tradeType === 'Buy') {
+                            if (makerFee.greaterThan(0)) {
+                                fee = utility.weiToEth((new BigNumber(oppositeAmount).times(makerFee)).div(ether1), dvsr2);
+                            }
                             feeCurrency = base;
                         }
                     }
@@ -4147,7 +4212,6 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 let feeDivisor = this.divisorFromDecimals(feeCurrency.decimals)
                 let makerFee = utility.weiToEth(unpacked.events[7].value, feeDivisor);
                 let takerFee = utility.weiToEth(unpacked.events[8].value, feeDivisor);
-
 
                 let relayer = unpacked.events[2].value.toLowerCase();
 

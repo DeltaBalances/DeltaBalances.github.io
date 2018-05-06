@@ -32,6 +32,8 @@ module.exports = {
   contractOasisDirectAddr: '0x793ebbe21607e4f04788f89c7a9b97320773ec59',
   contractAirSwapAddr: '0x8fd3121013a07c57f0d69646e86e7a4880b467b7',
   contractKyberAddr: '0x964f35fae36d75b1e72770e244f6595b68508cf5',
+  contractBancorQuickAddr: '0xcf1cc6ed5b653def7417e3fa93992c3ffe49139b',
+  contractEnclavesAddr: '0xbf45f4280cfbe7c2d2515a7d984b8c71c15e82b7',
   idexAdminAddr: '0xceceaa8edc0830c7cec497e33bb3a3c28dd55a32',
   ddexAdminAddr: '0xe269e891a2ec8585a378882ffa531141205e92e9',
   paradexAdminAddr: '0x4969358e80cdc3d74477d7447bffa3b2e2acbe92',

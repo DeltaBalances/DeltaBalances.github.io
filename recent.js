@@ -631,6 +631,9 @@
 						let from = tx.from.toLowerCase();
 						let to = tx.to.toLowerCase();
 						let myAddr = publicAddr.toLowerCase();
+                        let contract = tx.contractAddress;
+                        if(contract)
+                            contract = contract.toLowerCase();
 
 						//save etherscan block dates in cache for tx details & history
 						if (tx.blockNumber) {
@@ -644,7 +647,7 @@
 							if (Number(block) >= startblock) { // etherscan token events seem to return before startblock
 
 								// if we know a name for this address (token, exhcange, exchangeadmin), it is useful
-								if (_delta.addressName(from) !== from || _delta.addressName(to) !== to || to == myAddr || from == myAddr) {
+								if (_delta.addressName(from) !== from || _delta.addressName(to) !== to || to == myAddr || from == myAddr || (contract && _delta.addressName(contract) !== contract)) {
 									inputTransactions.push(tx);
 								}
 							}
@@ -698,8 +701,10 @@
 								let obj = objs[i];
 
 								let trans = undefined;
-								let exchange = _delta.addressName(to, false);
-                                if(contract && (!exchange || exchange.slice(0,2) == '0x'))
+								let exchange = obj.exchange;
+                                if(!exchange)
+                                    _delta.addressName(to, false);
+								if (contract && (!exchange || exchange.slice(0, 2) == '0x'))
 									exchange = _delta.addressName(from, false);
 
 								if (unpacked.name === 'deposit') {
@@ -748,11 +753,13 @@
 									}
 								}
 								else if (unpacked.name === 'approve') {
-									if (_delta.isExchangeAddress(obj.to)) {
-										exchange = _delta.addressName(obj.to.toLowerCase(), false);
-									} else {
-										exchange = '';
-									}
+                                    if(!exchange) {
+                                        if (_delta.isExchangeAddress(obj.to)) {
+                                            exchange = _delta.addressName(obj.to.toLowerCase(), false);
+                                        } else {
+                                            exchange = '';
+                                        }
+                                    }
 									if (obj.amount.greaterThan(999999999999999))
 										obj.amount = '';
 									trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
@@ -763,7 +770,9 @@
 									|| unpacked.name === 'batchFillOrKillOrders'
 									|| unpacked.name === 'fillOrdersUpTo'
 								) {
-									if (obj.maker == myAddr || obj.taker == myAddr) {
+									if ( (!contract && (obj.maker == myAddr || obj.taker == myAddr))
+                                          || (contract && ( to == myAddr || from == myAddr)))
+                                      {
 
 										if (obj.taker == '') {//from etherscan token event , admin took maker trade
 											if (obj.type == 'Taker Buy') {

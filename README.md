@@ -1,26 +1,29 @@
 # [DeltaBalances.github.io](https://deltabalances.github.io)
 A community tool to make decentralized exchanges a little easier.
 + View all your token balances in one place (including deposited balances)
-+ Look at the details of your transactions with the exchanges
++ Look at the details of your transactions with decentralized exchanges.
 + Retrieve and export a history of all your trades.
 
-Supported exchanges
+DeltaBalances runs fully client side, powered by [Etherscan](https://etherscan.io) and [Infura](https://infura.io).
+
+### Exchanges
+DeltaBalances is not affiliated with any of the exchanges mentioned below.
 + [EtherDelta](https://etherdelta.com) / [ForkDelta](https://forkdelta.github.io)
 + [Idex](https://idex.market) (No trade history)
 + [Token store](https://token.store)
 + [Decentrex](https://decentrex.com) (exchange discontinued)
++ [AirSwap](https://airswap.io)
++ [Kyber Network](https://kyber.network)
 
-0x Protocol Relayers, including:
+0x Project Relayers, including:
 + [DDEX](https://ddex.io/)
 + [RadarRelay](https://radarrelay.com/)
 + [Paradex](https://paradex.io/)
 + [Erc Dex](https://ercdex.com/)
 
-Direct exchanges:  
-+ [AirSwap](https://airswap.io)
-+ [Kyber Network](https://kyber.network)
 
-This website is not affiliated with any of the mentioned exchanges
+
+
 
 # Smart contract
 Want to check token balances in your Dapp?  

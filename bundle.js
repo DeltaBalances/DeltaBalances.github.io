@@ -2444,6 +2444,18 @@ DeltaBalances.prototype.loadWeb3 = function loadWeb3(wait, callback) {
     this.web3 = new Web3();
     this.web3.setProvider(undefined);
 
+    //backup blocknumber from etherscan, to check if web3 is up-to-date
+    utility.blockNumber(undefined, function (error, result) {
+        if (!error && result) {
+            const block = Number(result);
+            if (block > blocknum) {
+                blocknum = block;
+                console.log(`etherscan block: ${block}`);
+            }
+        }
+    });
+
+
     for (let i = 0; i < urls.length; i++) {
         let provider = urls[i];
 
@@ -2454,8 +2466,11 @@ DeltaBalances.prototype.loadWeb3 = function loadWeb3(wait, callback) {
                 if (block > blocknum) {
                     blocknum = block;
                     console.log(names[i] + ` block: ${block}`);
+                    delta.web3s.push(localWeb3);
+                } else if (block >= (blocknum - 5)) {
+                    console.log(names[i] + ` block: ${block}`);
+                    delta.web3s.push(localWeb3);
                 }
-                delta.web3s.push(localWeb3);
             } else {
                 console.log(names[i] + 'web3 connection failed');
             }

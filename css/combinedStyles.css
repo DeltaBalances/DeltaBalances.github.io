@@ -723,3 +723,7 @@ input[type=number] {
 .tooltip-inner {
   max-width: 500px;
 }
+
+.text75 {
+    font-size:75%;
+}

@@ -885,6 +885,7 @@
 						}
 					} else if (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw') {
 						obj2 = {
+                            Exchange: obj.exchange,
 							Type: obj.type.replace('Token ', ''),
 							Trade: '',
 							Token: obj.token,
@@ -895,6 +896,7 @@
 							Hash: filteredLogs[i].transactionHash,
 							Date: '??', // retrieved by later etherscan call
 							Block: _util.hexToDec(filteredLogs[i].blockNumber),
+                            Opponent:'',
 							Buyer: '',
 							Seller: '',
 							Fee: '',

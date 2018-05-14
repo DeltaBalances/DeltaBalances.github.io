@@ -14,6 +14,7 @@ DeltaBalances is not affiliated with any of the exchanges mentioned below.
 + [Decentrex](https://decentrex.com) (exchange discontinued)
 + [AirSwap](https://airswap.io)
 + [Kyber Network](https://kyber.network)
++ [OasisDex](https://oasisdex.com)
 
 0x Project Relayers, including:
 + [DDEX](https://ddex.io/)

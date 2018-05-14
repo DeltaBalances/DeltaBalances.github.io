@@ -831,7 +831,7 @@ let offlineStagingTokens = {
 
 
 
-// taken from forkdelta.github.io/config/main.json 2018-04-10
+// taken from forkdelta.github.io/config/main.json 2018-05-14
 let forkOfflineTokens = [
   {addr:"0x006bea43baa3f7a6f765f14f10a1a1b08334ef45",name:"STX",decimals:18},
   {addr:"0x009e864923b49263c7f10d19b7f8ab7a9a5aad33",name:"FKX",decimals:18},

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="View AirSwap trade history.">
+  <meta name="description" content="View decentralized exchange trade history.">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
@@ -32,7 +32,7 @@
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
   <script> 
-    var historyConfig = bundle.DeltaBalances.config.historyAirSwap;
+    var historyConfig = bundle.DeltaBalances.config.historyAll;
   </script>
   <script src="history.js"></script>
 
@@ -68,7 +68,9 @@
       <!-- mobile only logo -->
       <ul class="visible-xs nav navbar-nav pull-left navbar-logo" style="margin-left:0px; margin-top:5px;font-size:20px; height:30px; line-height:30px;">
         <li class="">
+
           <a href="index.html" class="dropdown">
+
             <span class="homeLink1">Delta</span>
             <span class="homeLink2">Balances</span>
           </a>
@@ -87,6 +89,7 @@
               </button>
             </span>
           </div>
+
         </li>
       </ul>
       <ul class="nav navbar-nav pull-right navbar-user">
@@ -148,7 +151,7 @@
             <span>Recent Transactions</span>
           </a>
         </li>
-        <li>
+        <li class="active">
           <a id="histNav" href="trades.html">
             <i class="sidebar-icon icon-book"></i>
             <span>Trade History</span>
@@ -161,7 +164,7 @@
           </a>
         </li>
         <li class="header">Single exchange</li>
-        <li class="active treeview menu-open">
+        <li class="treeview menu">
           <a href="#">
             <i class="icon-book"></i>
             <span>Exchange History</span>
@@ -190,7 +193,7 @@
                 <span>0x Protocol</span>
               </a>
             </li>
-            <li class="active">
+            <li>
               <a id="historyNav5" href="history5.html">
                 <i class="sidebar-icon icon-airswap"></i>
                 <span>AirSwap</span>
@@ -241,6 +244,7 @@
     <!-- /.sidebar -->
   </aside>
 
+
   <div class="wrapper">
 
     <!-- Content Wrapper. Contains page content -->
@@ -250,20 +254,22 @@
       <h1>
         Token balances
       </h1>
+  
     </section> -->
 
       <!-- Main content -->
       <section class="content container-fluid">
-
         <div class="row">
 
           <div class="col-md-12 col-lg-10" style="overflow:hidden;">
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body">
+
                 <div class="col-md-9" style="overflow:hidden;">
                   <h2>
-                    <i class="icon-airswap"></i> AirSwap History</h2>
+                    <i class=""></i> Decentralized Trade History</h2>
+
                   <div style="white-space:nowrap; overflow:hidden;">
                     <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
                     <div class="hidden-xs" style="padding-left: 3%; float:left;">
@@ -277,11 +283,11 @@
                 </div>
                 <div class="col-md-12">
                   <div class="col-md-5" style="overflow:hidden;">
-                    <h4 class="hidden">Operation types</h4>
+                    <h4>Operation types</h4>
 
                     <select style="display:inline; width:80%; " class="hidden form-control" id="typeSelect" onChange="changeTypes()">
                       <option value="0">Trades</option>
-                      <!-- <option value="1">Funds (Deposit/Withdraw)</option>
+                      <!--  <option value="1">Funds (Deposit/Withdraw)</option>
                       <option value="2">Trades + Funds</option> -->
                     </select>
                     <h4>Date range: </h4>
@@ -330,23 +336,20 @@
                   </div>
                   <div class="col-md-7" style="overflow:hidden;">
                     <h4>Info</h4>
-                    History for
-                    <a href="https://www.airswap.io/" target="_blank">AirSwap</a> at contract
-                    <a href="https://etherscan.io/address/0x8fd3121013a07c57f0d69646e86e7a4880b467b7" target="_blank">0x8fd31..</a>.
-                    <br>
-                    <br>
-
+                    This is the combined trade history for all supported Ethereum exchanges.
+                    <br> For a faster experience, use the history for a specific exchange.
                     <span class="visible-xs">
                       <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
                       <br>
                       <br>
                     </span>
-                    Trades are retrieved from the blockchain using Infura.
+                    <br>
+                    <br> Trades are retrieved from the blockchain using Infura.
                     <br>Large block ranges will take a long time to load.
                     <br>
                     <br> History is limited to trades with base (W)ETH or DAI, starting at block
                     <span id="minBlockLink"></span>
-                    <br> AirSwap has no trade fees.
+                    <br>
 
                   </div>
                   <div class="col-md-12">
@@ -406,11 +409,11 @@
             </div>
             <!-- /.box -->
           </div>
-
           <div class="col-md-12 col-lg-10">
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body">
+
                 <div id="">
                   <h2>History
                     <button id='loadingTransactions' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
@@ -431,9 +434,9 @@
                     <br>
                   </div>
                   <div class="col-md-6">
-                    <span class="label label-success">Buy</span> Traded WETH or DAI for Tokens.
+                    <span class="label label-success">Buy</span> Traded ETH for Tokens.
                     <br>
-                    <span class="label label-danger">Sell</span> Traded Tokens for WETH or DAI.
+                    <span class="label label-danger">Sell</span> Traded Tokens for ETH.
                     <br>
                   </div>
                 </div>
@@ -442,7 +445,50 @@
             </div>
             <!-- /.box -->
           </div>
+
+
+
+
+          <div class="col-md-12 col-lg-10">
+            <div class="box box-default">
+              <!-- /.box-header -->
+              <div class="box-body">
+                Trade History supports:
+                <br>
+                <ul>
+                  <li>Deposit style exchanges:
+                    <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
+                    <a href="https://forkdelta.github.io" target="_blank">ForkDelta</a>),
+                    <a href="https://token.store" target="_blank">Token Store</a> and   <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>
+                  </li>
+                  <li> 0x relayers:
+                    <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>,
+                    <a href="https://paradex.io/" target="_blank">Paradex</a>,
+                    <a href="https://ercdex.com/" target="_blank">ERC dEX</a>,
+                    <a href="https://sharkrelay.com" target="_blank">Shark Relay</a>,
+                    <a href="https://tokenjar.io" target="_blank">Token Jar</a>,
+                    <a href="https://idtexchange.com" target="_blank">IDT</a> and
+                    <a href="https://bamboorelay.com" target="_blank">BambooRelay</a>
+                  </li>
+                  <li> Other exchanges:
+                    <a href="https://airswap.io" target="_blank">AirSwap</a>,
+                    <a href="https://kyber.network" target="_blank">Kyber Network</a> and
+                    <a href="https://oasisdex.com" target="_blank">OasisDex</a>
+                  </li>
+                </ul>
+                The IDEX contract does not emit trade events and is not supported.
+              </div>
+              <!-- /.box-body -->
+            </div>
+
+          </div>
+
+          <!-- /.box -->
         </div>
+
+
+
+
       </section>
       <!-- /.content -->
     </div>
@@ -519,6 +565,7 @@
               <li>
                 <a onclick="loadSaved()" href="#">
                   <i id="savedImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
+
                   <div class="menu-info">
                     <h4 id="savedAddress" class="control-sidebar-subheading">0x12345678</h4>
                     <p>Saved</p>

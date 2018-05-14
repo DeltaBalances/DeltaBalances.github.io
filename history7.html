@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="View AirSwap trade history.">
+  <meta name="description" content="View OasisDex trade history.">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
@@ -32,7 +32,7 @@
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
   <script> 
-    var historyConfig = bundle.DeltaBalances.config.historyAirSwap;
+    var historyConfig = bundle.DeltaBalances.config.historyOasisDex;
   </script>
   <script src="history.js"></script>
 
@@ -190,7 +190,7 @@
                 <span>0x Protocol</span>
               </a>
             </li>
-            <li class="active">
+            <li>
               <a id="historyNav5" href="history5.html">
                 <i class="sidebar-icon icon-airswap"></i>
                 <span>AirSwap</span>
@@ -202,7 +202,7 @@
                 <span>Kyber Network</span>
               </a>
             </li>
-            <li>
+            <li class="active">
               <a id="historyNav7" href="history7.html">
                 <i class="sidebar-icon icon-oasis"></i>
                 <span>OasisDex</span>
@@ -263,7 +263,7 @@
               <div class="box-body">
                 <div class="col-md-9" style="overflow:hidden;">
                   <h2>
-                    <i class="icon-airswap"></i> AirSwap History</h2>
+                    <i class="icon-oasis"></i> OasisDex History</h2>
                   <div style="white-space:nowrap; overflow:hidden;">
                     <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
                     <div class="hidden-xs" style="padding-left: 3%; float:left;">
@@ -331,8 +331,8 @@
                   <div class="col-md-7" style="overflow:hidden;">
                     <h4>Info</h4>
                     History for
-                    <a href="https://www.airswap.io/" target="_blank">AirSwap</a> at contract
-                    <a href="https://etherscan.io/address/0x8fd3121013a07c57f0d69646e86e7a4880b467b7" target="_blank">0x8fd31..</a>.
+                    <a href="https://oasisdex.com" target="_blank">OasisDex</a> at contract
+                    <a href="https://etherscan.io/address/0x14fbca95be7e99c15cc2996c6c9d841e54b79425" target="_blank">0x14fbc..</a>.
                     <br>
                     <br>
 
@@ -344,10 +344,10 @@
                     Trades are retrieved from the blockchain using Infura.
                     <br>Large block ranges will take a long time to load.
                     <br>
-                    <br> History is limited to trades with base (W)ETH or DAI, starting at block
+                    <br> History is limited to trades with base WETH or DAI, starting at block
                     <span id="minBlockLink"></span>
-                    <br> AirSwap has no trade fees.
-
+                    <br> OasisDex has no trade fees.
+                    <br> <strong>Note:</strong> This does not yet support OasisDirect
                   </div>
                   <div class="col-md-12">
                     <br>

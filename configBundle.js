@@ -23,7 +23,7 @@ module.exports = {
     '0x173a2467cece1f752eb8416e337d0f0b58cad795': 'Erc Dex',
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX',
     '0x0000000000000000000000000000000000000000': 'Paradex',
-    '0x6f7ae872e995f98fcd2a7d3ba17b7ddfb884305f': 'TokenIon',
+    '0x6f7ae872e995f98fcd2a7d3ba17b7ddfb884305f': 'Tokenlon',
     '0x55890b06f0877a01bb5349d93b202961f8e27a9b': 'Shark Relay',
     '0x5e150a33ffa97a8d22f59c77ae5487b089ef62e9': 'TokenJar',
     '0x5dd835a893734b8d556eccf87800b76dda5aedc5': 'BambooRelay',
@@ -87,6 +87,32 @@ module.exports = {
     { m: "Apr 2018", blockFrom: 5357795, blockTo: 5534863 },
   ],
 
+  historyAll: {
+    exchange: 'DEX',
+    exchangeAddr: [
+      'contractEtherDeltaAddr',
+      'contractDecentrexAddr',
+      'contractTokenStoreAddr',
+      'contract0xAddr',
+      'contractOasisDexAddr',
+      'contractAirSwapAddr',
+      'contractKyberAddr'
+    ],
+    minBlock: 3154197,
+    maxBlock: undefined,
+    tradeTopic: [
+      '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d', //EtherDelta, Decentrex
+      '0x3314c351c2a2a45771640a1442b843167a4da29bd543612311c031bbfb4ffa98', //TokenStore
+      '0x0d0b9391970d9a25552f37d436d2aae2925e2bfe1b2a923754bada030c498cb3', //0x
+      '0x3383e3357c77fd2e3a4b30deea81179bc70a795d053d14d5b7f2f01d0fd4596f', //oasis
+      '0xe59c5e56d85b2124f5e7f82cb5fcc6d28a4a241a9bdd732704ac9d3b6bfc98ab', //airswap
+      '0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39' //kyber
+    ],
+    withdrawTopic: undefined,
+    depositTopic: undefined,
+    createTx: '0xc10fc67499a037b6c2f14ae0c63b659b05bd7b553378202f96e777dd4843130f',
+    userIndexed: false,
+  },
   historyEtherDelta: {
     exchange: 'EtherDelta',
     exchangeAddr: 'contractEtherDeltaAddr',
@@ -137,10 +163,10 @@ module.exports = {
     exchangeAddr: 'contractOasisDexAddr',
     minBlock: 4751582,
     maxBlock: undefined,
-    tradeTopic: '0x819e390338feffe95e2de57172d6faf337853dfd15c7a09a32d76f7fd2443875 ', // LogTrade , what about LogTake, LogMake?
+    tradeTopic: '0x3383e3357c77fd2e3a4b30deea81179bc70a795d053d14d5b7f2f01d0fd4596f', // LogTake
     withdrawTopic: undefined,
     depositTopic: undefined,
-    showRelayers: true,
+    showRelayers: false,
     createTx: '0xdfe4f91325cd74cce7d3f2d53cc0592af09ee74a58935523b404a02c1db9165f',
     userIndexed: false
   },

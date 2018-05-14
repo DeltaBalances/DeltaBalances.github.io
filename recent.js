@@ -626,14 +626,14 @@
 			function addTransactions(array) {
 				for (let i = 0; i < array.length; i++) {
 					let tx = array[i];
-					if (!outputHashes[tx.hash]) {
+					if (!outputHashes[tx.hash] || outputHashes[tx.hash].exchange == "") {
 
 						let from = tx.from.toLowerCase();
 						let to = tx.to.toLowerCase();
 						let myAddr = publicAddr.toLowerCase();
-                        let contract = tx.contractAddress;
-                        if(contract)
-                            contract = contract.toLowerCase();
+						let contract = tx.contractAddress;
+						if (contract)
+							contract = contract.toLowerCase();
 
 						//save etherscan block dates in cache for tx details & history
 						if (tx.blockNumber) {
@@ -702,10 +702,15 @@
 
 								let trans = undefined;
 								let exchange = obj.exchange;
-                                if(!exchange)
-                                    _delta.addressName(to, false);
-								if (contract && (!exchange || exchange.slice(0, 2) == '0x'))
-									exchange = _delta.addressName(from, false);
+								let exName = ''
+								if (!exchange) {
+									exName = _delta.addressName(to, false);
+									if (contract && exName.slice(0, 2) == '0x')
+										exName = _delta.addressName(from, false);
+									if (exName.slice(0, 2) !== '0x')
+										exchange = exName;
+								}
+
 
 								if (unpacked.name === 'deposit') {
 
@@ -725,6 +730,11 @@
 									exchange = _delta.addressName(from, false);
 									obj.type = obj.type.replace('Token ', '');
 									trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+								}
+								else if ((unpacked.name == 'kill' || unpacked.name == 'cancel') && unpacked.params.length == 1) {
+									trans = createOutputTransaction(obj.type, undefined, undefined, undefined, undefined, tx.hash, tx.timeStamp, undefined, undefined, tx.isError === '0', exchange);
+								} else if (unpacked.name == 'buy' && unpacked.params.length == 2) {
+									trans = createOutputTransaction(obj.type, undefined, undefined, undefined, undefined, tx.hash, tx.timeStamp, undefined, undefined, tx.isError === '0', exchange);
 								}
 								else if (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders' || unpacked.name === 'cancel') {
 									let cancelAmount = '';
@@ -753,13 +763,13 @@
 									}
 								}
 								else if (unpacked.name === 'approve') {
-                                    if(!exchange) {
-                                        if (_delta.isExchangeAddress(obj.to)) {
-                                            exchange = _delta.addressName(obj.to.toLowerCase(), false);
-                                        } else {
-                                            exchange = '';
-                                        }
-                                    }
+									if (!exchange) {
+										if (_delta.isExchangeAddress(obj.to)) {
+											exchange = _delta.addressName(obj.to.toLowerCase(), false);
+										} else {
+											exchange = '';
+										}
+									}
 									if (obj.amount.greaterThan(999999999999999))
 										obj.amount = '';
 									trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
@@ -770,9 +780,8 @@
 									|| unpacked.name === 'batchFillOrKillOrders'
 									|| unpacked.name === 'fillOrdersUpTo'
 								) {
-									if ( (!contract && (obj.maker == myAddr || obj.taker == myAddr))
-                                          || (contract && ( to == myAddr || from == myAddr)))
-                                      {
+									if ((!contract && (obj.maker == myAddr || obj.taker == myAddr))
+										|| (contract && (to == myAddr || from == myAddr))) {
 
 										if (obj.taker == '') {//from etherscan token event , admin took maker trade
 											if (obj.type == 'Taker Buy') {
@@ -798,9 +807,22 @@
 										}
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, price, tx.isError === '0', exchange);
 									}
+								} else if (unpacked.name === 'offer') {
+									let type = obj.type;
+									if (contract && to == myAddr) {
+										if (type === 'Buy offer')
+											type = 'Maker Sell';
+										else if (type === 'Sell offer') {
+											type = 'Maker Buy'
+										}
+										if (exchange == "") {
+											exchange = 'OasisDex ';
+										}
+									}
+									trans = createOutputTransaction(type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 								}
 
-								if (trans && !outputHashes[trans.Hash]) {
+								if (trans && (!outputHashes[trans.Hash] || outputHashes[trans.hash].type !== trans.type)) {
 									outputHashes[trans.Hash] = trans;
 								}
 							}
@@ -814,9 +836,10 @@
 
 			function createOutputTransaction(type, token, val, base, total, hash, timeStamp, unlisted, price, status, exchange) {
 
+				if (status === undefined)
+					status = true;
 				if (token) {
-					if (status === undefined)
-						status = true;
+
 					return {
 						Status: status,
 						Exchange: exchange,
@@ -826,6 +849,20 @@
 						Price: price,
 						Base: base,
 						Total: total,
+						Hash: hash,
+						Date: _util.toDateTime(timeStamp),
+						Info: window.location.origin + window.location.pathname + '/../tx.html#' + hash,
+					};
+				} else if (exchange === 'OasisDex ') {
+					return {
+						Status: status,
+						Exchange: exchange,
+						Type: type,
+						Token: '',
+						Amount: '',
+						Price: '',
+						Base: '',
+						Total: '',
 						Hash: hash,
 						Date: _util.toDateTime(timeStamp),
 						Info: window.location.origin + window.location.pathname + '/../tx.html#' + hash,
@@ -1036,10 +1073,10 @@
 					else if (cellValue == 'Withdraw' || cellValue == 'Unwrap ETH') {
 						row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
 					}
-					else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy') {
+					else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy' || cellValue == 'Cancel offer' || cellValue == 'Sell offer' || cellValue == 'Buy offer') {
 						row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
 					}
-					else if (cellValue == 'Taker Buy' || cellValue == 'Buy up to' || cellValue == 'Maker Buy') {
+					else if (cellValue == 'Taker Buy' || cellValue == 'Buy up to' || cellValue == 'Maker Buy' || cellValue == 'Fill offer') {
 						row$.append($('<td/>').html('<span class="label label-info" >' + cellValue + '</span>'));
 					}
 					else if (cellValue == 'Taker Sell' || cellValue == 'Sell up to' || cellValue == 'Maker Sell') {

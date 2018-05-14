@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="A tool to view Token store trade history.">
+  <meta name="description" content="View Token store trade history.">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
@@ -151,47 +151,72 @@
           </a>
         </li>
         <li>
+          <a id="histNav" href="trades.html">
+            <i class="sidebar-icon icon-book"></i>
+            <span>Trade History</span>
+          </a>
+        </li>
+        <li>
           <a id="txNav" href="tx.html">
             <i class="sidebar-icon icon-info"></i>
             <span>Transaction Info</span>
           </a>
         </li>
-        <li class="header">Exchange History</li>
-        <li>
-          <a id="historyNav" href="history.html">
-            <i class="sidebar-icon icon-etherdelta"></i>
-            <span>EtherDelta <span class="text75">(ForkDelta)</span></span>
+        <li class="header">Single exchange</li>
+        <li class="active treeview menu-open">
+          <a href="#">
+            <i class="icon-book"></i>
+            <span>Exchange History</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
           </a>
-        </li>
-        <li class="active">
-          <a id="historyNav2" href="history2.html">
-            <i class="sidebar-icon icon-tokenstore"></i>
-            <span>Token store</span>
-          </a>
-        </li>
-        <li>
-          <a id="historyNav4" href="history4.html">
-            <i class="sidebar-icon icon-zrx"></i>
-            <span>0x Protocol</span>
-          </a>
-        </li>
-        <li>
-          <a id="historyNav5" href="history5.html">
-            <i class="sidebar-icon icon-airswap"></i>
-            <span>AirSwap</span>
-          </a>
-        </li>
-        <li>
-          <a id="historyNav6" href="history6.html">
-            <i class="sidebar-icon icon-kyber"></i>
-            <span>Kyber Network</span>
-          </a>
-        </li>
-        <li>
-          <a id="historyNav3" href="history3.html">
-            <i class="sidebar-icon icon-decentrex"></i>
-            <span>Decentrex</span>
-          </a>
+          <ul class="treeview-menu">
+            <li>
+              <a id="historyNav" href="history.html">
+                <i class="sidebar-icon icon-etherdelta"></i>
+                <span>EtherDelta
+                  <span class="text75">(ForkDelta)</span>
+                </span>
+              </a>
+            </li>
+            <li class="active">
+              <a id="historyNav2" href="history2.html">
+                <i class="sidebar-icon icon-tokenstore"></i>
+                <span>Token store</span>
+              </a>
+            </li>
+            <li>
+              <a id="historyNav4" href="history4.html">
+                <i class="sidebar-icon icon-zrx"></i>
+                <span>0x Protocol</span>
+              </a>
+            </li>
+            <li>
+              <a id="historyNav5" href="history5.html">
+                <i class="sidebar-icon icon-airswap"></i>
+                <span>AirSwap</span>
+              </a>
+            </li>
+            <li>
+              <a id="historyNav6" href="history6.html">
+                <i class="sidebar-icon icon-kyber"></i>
+                <span>Kyber Network</span>
+              </a>
+            </li>
+            <li>
+              <a id="historyNav7" href="history7.html">
+                <i class="sidebar-icon icon-oasis"></i>
+                <span>OasisDex</span>
+              </a>
+            </li>
+            <li>
+              <a id="historyNav3" href="history3.html">
+                <i class="sidebar-icon icon-decentrex"></i>
+                <span>Decentrex</span>
+              </a>
+            </li>
+          </ul>
         </li>
         <li class="header">Links</li>
         <li>
@@ -436,8 +461,8 @@
       <p> Powered by
         <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
         <a target="_blank" href="https://infura.io/">Infura</a>
-        <br> Contact: issue on
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or message on
+        <br> Contact:
+        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or 
         <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
         <br> Buy me a beer:
         <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>

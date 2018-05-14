@@ -564,7 +564,7 @@
 						if (obj && !obj.error) {
 							if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 								unknownToken = true;
-							if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade') {
+							if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake') {
                                 obj.feeToken = obj.feeCurrency;
 								delete obj.feeCurrency;
 								delete obj.transType;
@@ -895,7 +895,7 @@
 				uniqueType = 'cancel';
 				wideOutput = true;
 			}
-			else if (uniqueType.indexOf(' up to') !== -1) {
+			else if (uniqueType.indexOf(' up to') !== -1 || uniqueType.indexOf('offer') !== -1) {
 				wideOutput = true;
 			}
 			if (!types[uniqueType])

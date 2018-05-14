@@ -1176,7 +1176,7 @@
 				}
 				else if (head == 'Opponent' || head == 'Buyer' || head == 'Seller') {
 					let url = '';
-					if (cellValue !== '')
+					if (cellValue && cellValue !== '')
 						url = _util.addressLink(cellValue, true, true);
 					row$.append($('<td/>').html(url));
 				}

@@ -1386,7 +1386,10 @@
 		var body = $(selector + ' tbody');
 		var columns = addAllColumnHeaders(myList, selector, loaded, headers);
 
+		var tbody$ = $('<tbody/>');
+
 		for (var i = 0; i < myList.length; i++) {
+
 			if (!showCustomTokens && myList[i].Unlisted)
 				continue;
 			var row$ = $('<tr/>');
@@ -1423,13 +1426,14 @@
 					row$.append($('<td/>').html(cellValue));
 				}
 			}
-			body.append(row$);
-			$("[data-toggle=popover]").popover();
-			$('[data-toggle=tooltip]').tooltip({
-				'placement': 'top',
-				'container': 'body'
-			});
+			tbody$.append(row$);
 		}
+		body.append(tbody$[0].innerHTML);
+		$("[data-toggle=popover]").popover();
+		$('[data-toggle=tooltip]').tooltip({
+			'placement': 'top',
+			'container': 'body'
+		});
 	}
 
 	var balanceHeaders = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'IDEX': 1, 'Token store': 1, 'Decentrex': 1, 'Total': 1, 'Value': 1, 'Bid': 1, 'Ask': 0, 'Est. ETH': 1 };
@@ -1593,7 +1597,7 @@
 		setStorage();
 		window.location.hash = "";
 		$('#walletInfo').addClass('hidden');
-		if(!publicAddr && !savedAddr && !metamaskAddr) {
+		if (!publicAddr && !savedAddr && !metamaskAddr) {
 			$('#userToggle').click();
 			$('#userToggle').addClass('hidden');
 		}

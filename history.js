@@ -885,7 +885,7 @@
 						}
 					} else if (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw') {
 						obj2 = {
-                            Exchange: obj.exchange,
+							Exchange: obj.exchange,
 							Type: obj.type.replace('Token ', ''),
 							Trade: '',
 							Token: obj.token,
@@ -896,7 +896,7 @@
 							Hash: filteredLogs[i].transactionHash,
 							Date: '??', // retrieved by later etherscan call
 							Block: _util.hexToDec(filteredLogs[i].blockNumber),
-                            Opponent:'',
+							Opponent: '',
 							Buyer: '',
 							Seller: '',
 							Fee: '',
@@ -1086,6 +1086,8 @@
 		var body = $(selector + ' tbody');
 		var columns = addAllColumnHeaders(myList, selector, loaded, headers);
 
+		var tbody$ = $('<tbody/>');
+
 		for (var i = 0; i < myList.length; i++) {
 			if (!showCustomTokens && myList[i].Unlisted)
 				continue;
@@ -1167,8 +1169,6 @@
 					} else {
 						row$.append($('<td/>').html('<span>' + cellValue + '</span>'));
 					}
-
-
 				}
 				else if (head == 'Hash') {
 					row$.append($('<td/>').html(_util.hashLink(cellValue, true, true)));
@@ -1195,15 +1195,14 @@
 					row$.append($('<td/>').html(cellValue));
 				}
 			}
-
-
-			body.append(row$);
-			$('[data-toggle=tooltip]').tooltip({
-				'placement': 'top',
-				'container': 'body'
-			});
-			$("[data-toggle=popover]").popover();
+			tbody$.append(row$);
 		}
+		body.append(tbody$[0].innerHTML);
+		$('[data-toggle=tooltip]').tooltip({
+			'placement': 'top',
+			'container': 'body'
+		});
+		$("[data-toggle=popover]").popover();
 	}
 
 	var tradeHeaders = { 'Exchange': 0, 'Type': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'Base': 1, 'Total': 1, 'Hash': 1, 'Date': 1, 'Opponent': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Info': 1 };

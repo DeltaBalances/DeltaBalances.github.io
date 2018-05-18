@@ -1045,6 +1045,8 @@
 		var body = $(selector + ' tbody');
 		var columns = addAllColumnHeaders(myList, selector, loaded, headers);
 
+		var tbody$ = $('<tbody/>');
+
 		for (var i = 0; i < myList.length; i++) {
 
 			var row$ = $('<tr/>');
@@ -1122,14 +1124,14 @@
 					row$.append($('<td/>').html(cellValue));
 				}
 			}
-
-			body.append(row$);
-			$("[data-toggle=popover]").popover();
-			$('[data-toggle=tooltip]').tooltip({
-				'placement': 'top',
-				'container': 'body'
-			});
+			tbody$.append(row$);
 		}
+		body.append(tbody$[0].innerHTML);
+		$("[data-toggle=popover]").popover();
+		$('[data-toggle=tooltip]').tooltip({
+			'placement': 'top',
+			'container': 'body'
+		});
 	}
 
 

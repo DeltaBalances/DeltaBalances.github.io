@@ -564,8 +564,8 @@
 						if (obj && !obj.error) {
 							if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 								unknownToken = true;
-							if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake') {
-                                obj.feeToken = obj.feeCurrency;
+							if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion') {
+								obj.feeToken = obj.feeCurrency;
 								delete obj.feeCurrency;
 								delete obj.transType;
 								delete obj.tradeType;
@@ -575,9 +575,9 @@
 								delete obj.relayer;
 								obj.feeToken = obj.feeCurrency;
 								delete obj.feeCurrency;
-							} else if(unpacked.name === 'LogCancel') {
-                                delete obj.relayer;
-                            }
+							} else if (unpacked.name === 'LogCancel') {
+								delete obj.relayer;
+							}
 							outputs.push(obj);
 						} else {
 							unknownEvents++;
@@ -600,12 +600,12 @@
 					for (let i = 0; i < obj.length; i++) {
 						if (obj[i] && obj[i].token && obj[i].token.name === "???" && obj[i].token.unknown)
 							unknownToken = true;
-                        if(obj[i].relayer)
-                            delete obj[i].relayer;
-                        if(obj[i].feeCurrency) {
-                            obj[i].feeToken = obj[i].feeCurrency;
+						if (obj[i].relayer)
+							delete obj[i].relayer;
+						if (obj[i].feeCurrency) {
+							obj[i].feeToken = obj[i].feeCurrency;
 							delete obj[i].feeCurrency;
-                        }
+						}
 					}
 				}
 				return obj;
@@ -670,10 +670,10 @@
 				sum += 'Status: transaction failed, you might not have had the right account balance left. Otherwise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br><br>';
 			} else if (transaction.input[0].type === 'Deposit' || transaction.input[0].type === 'Withdraw') {
 				sum += 'Status: transaction failed, you might not have had the right account balance left.<br>';
-			} 
-            else {
-                sum += 'Status: transaction failed.';
-            }
+			}
+			else {
+				sum += 'Status: transaction failed.<br>';
+			}
 		} else if (transaction.status === 'Failed') {
 			sum += 'Status: Exchange operation failed.<br>';
 		} else {
@@ -696,10 +696,10 @@
 					}
 				}
 			}
-            if(transaction.input[0].type.indexOf('aker') !== -1 && transaction.input[0].exchange == _delta.addressName(_delta.config.contractIdexAddr)) {
-                sum += '<br>Note: IDEX uses no transaction output events.';
-            }
-            
+			if (transaction.input[0].type.indexOf('aker') !== -1 && transaction.input[0].exchange == _delta.addressName(_delta.config.contractIdexAddr)) {
+				sum += '<br>Note: IDEX uses no transaction output events.';
+			}
+
 		} else if (transaction.output && transaction.output.length > 0) {
 			for (let i = 0; i < transaction.output.length; i++) {
 				if (transaction.output[i].note) {
@@ -920,12 +920,10 @@
 
 
 		$("table").tablesorter({
-			headers: { 0: { sorter: false }, 1: { sorter: false }, 2: { sorter: false }, 3: { sorter: false }, 4: { sorter: false }, 5: { sorter: false }, 6: { sorter: false }, 7: { sorter: false } },
 			widgets: ['scroller'],
 			widgetOptions: {
 				scroller_barWidth: 18,
 			},
-			sortList: [[0, 0]]
 		});
 		$("table thead th").data("sorter", false);
 
@@ -982,18 +980,18 @@
 				if (columns[keys[i]]) {
 
 					var cellValue = myList[i];
-					if (keys[i] == 'token' || keys[i] == 'base' || keys[i] == 'feeToken' || keys[i] == 'FeeToken ' || keys[i] == 'FeeToken'  || keys[i] == 'token In' || keys[i] == 'token Out') {
+					if (keys[i] == 'token' || keys[i] == 'base' || keys[i] == 'feeToken' || keys[i] == 'FeeToken ' || keys[i] == 'FeeToken' || keys[i] == 'token In' || keys[i] == 'token Out') {
 
 						let token = cellValue;
-                        if(token) {
-                            let popoverContents = _delta.makePopoverContents(token);
-                            let labelClass = 'label-warning';
-                            if (!token.unlisted && !token.unknown)
-                                labelClass = 'label-primary';
+						if (token) {
+							let popoverContents = _delta.makePopoverContents(token);
+							let labelClass = 'label-warning';
+							if (!token.unlisted && !token.unknown)
+								labelClass = 'label-primary';
 
-                            cellValue = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + '</a>';
-                        }
-                    }
+							cellValue = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + '</a>';
+						}
+					}
 					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice') {
 						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(5) + '</span>';
 					}

@@ -762,6 +762,13 @@
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 									}
 								}
+								else if (unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized') {
+									if (obj.type == 'Buy up to') {
+										trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
+									} else {
+										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
+									}
+								}
 								else if (unpacked.name === 'approve') {
 									if (!exchange) {
 										if (_delta.isExchangeAddress(obj.to)) {
@@ -822,10 +829,19 @@
 									trans = createOutputTransaction(type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 								}
 
-								if (trans && (!outputHashes[trans.Hash] || outputHashes[trans.hash].type !== trans.type)) {
+								if (trans && (!outputHashes[trans.Hash] || (outputHashes[trans.hash] && outputHashes[trans.hash].type !== trans.type))) {
 									outputHashes[trans.Hash] = trans;
 								}
 							}
+						}
+					}
+					// Ether token wrapping that uses fallback
+					else if (tx.input === '0x' && val.greaterThan(0) && _util.isWrappedETH(to)) {
+
+						let amount = _util.weiToEth(val, undefined);
+						let trans2 = createOutputTransaction("Wrap ETH", _delta.config.tokens[0], amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+						if (!outputHashes[trans2.Hash]) {
+							outputHashes[trans2.Hash] = trans2;
 						}
 					}
 				}

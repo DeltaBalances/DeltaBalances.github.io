@@ -15,15 +15,17 @@ DeltaBalances is not affiliated with any of the exchanges mentioned below.
 + [AirSwap](https://airswap.io)
 + [Kyber Network](https://kyber.network)
 + [OasisDex](https://oasisdex.com)
++ [Bancor](https://bancor.network) (No trade history)
 
 0x Project Relayers, including:
 + [DDEX](https://ddex.io/)
-+ [RadarRelay](https://radarrelay.com/)
++ [Radar Relay](https://radarrelay.com/)
 + [Paradex](https://paradex.io/)
-+ [Erc Dex](https://ercdex.com/)
-
-
-
++ [ERC dEX](https://ercdex.com/)
++ [Shark Relay](https://sharkrelay.com)
++ [Token Jar](https://tokenjar.io)
++ [IDT](https://idtexchange.com)
++ [Bamboo Relay](https://bamboorelay.com)
 
 
 # Smart contract

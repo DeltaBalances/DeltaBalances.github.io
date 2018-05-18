@@ -3778,9 +3778,20 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'note': ' Fill a trade order',
                 };
                 return obj;
-            } else if (unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized') {
+            } else if (unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized' || (unpacked.name === 'convert' && unpacked.params.length == 4)) {
                 //  function quickConvert(IERC20Token[] _path, uint256 _amount, uint256 _minReturn)
                 // function quickConvertPrioritized(IERC20Token[] _path, uint256 _amount, uint256 _minReturn, uint256 _block, uint256 _nonce, uint8 _v, bytes32 _r, bytes32 _s)
+
+                //convert(IERC20Token _fromToken, IERC20Token _toToken, uint256 _amount, uint256 _minReturn)
+
+                if (unpacked.name === 'convert') {
+                    let params2 = [];
+                    params2[0] = { value: [unpacked.params[0].value, unpacked.params[1].value] };
+                    params2[1] = { value: unpacked.params[2].value };
+                    params2[2] = { value: unpacked.params[3].value };
+                    unpacked.params = params2;
+                }
+
 
                 var tradeType = 'Sell';
                 var token = undefined;

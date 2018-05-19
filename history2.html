@@ -355,53 +355,31 @@
                   <div class="col-md-12 noPad">
                     <br>
                   </div>
-                  <div class="col-md-6 noPad" style="overflow:hidden;">
-                    <h4>Export trades:</h4>
-                    <ul>
-                      <li>Default V2 (CSV)
-                        <span id="downloadTrades">
-                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
-                        </span>
-                      </li>
-                      <li>Bitcoin.tax (CSV)
-                        <span id="downloadBitcoinTaxTrades">
-                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
-                        </span>
-                      </li>
-                      <li>Cointracking.info (CSV)
-                        <span id="downloadCointrackingTrades">
-                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
-                        </span>, (CustomExchange)
-                        <span id="downloadCointracking2Trades">
-                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
-                        </span>
-                      </li>
-                    </ul>
+                  <div id="exportTrades" class="col-md-6 noPad" style="overflow:hidden;">
+                    <h4>Export trades:
+                      <span id="downloadTradesBtn">
+                        <i class="fa dim fa-download" aria-hidden="true"></i>
+                      </span>
+                    </h4>
+                    <select id="downloadTrades" onchange="download1()" style="display:inline; width:65%; " class="form-control">
+                      <option value="0" disabled selected>Select export format</option>
+                      <option value="1">Default V2 (CSV)</option>
+                      <option value="2">Bitcoin.tax (CSV)</option>
+                      <option value="3">Cointracking.info (CSV)</option>
+                      <option value="4">Cointracking.info (CustomExchange)</option>
+                    </select>
                   </div>
-                  <div class="col-md-6 noPad" style="overflow:hidden;">
-                    <h4>Export funds (deposit/withdraw):</h4>
-                    <ul>
-                      <li>Default (CSV)
-                        <span id="downloadFunds">
-                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
-                        </span>
-                      </li>
-                      <!--
-                      <li>Bitcoin.tax (CSV)
-                        <span id="downloadBitcoinTaxFunds">
-                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
-                        </span>
-                      </li>-->
-                      <li>Cointracking.info (CSV)
-                        <span id="downloadCointrackingFunds">
-                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
-                          <!--  </span>, (CustomExchange)
-                        <span id="downloadCointracking2Funds">
-                          <i title="Data not loaded yet" class="fa fa-minus-circle" aria-hidden="true"></i>
-                        </span>
-                      </li>
-					  -->
-                    </ul>
+                  <div id="exportFunds" class="col-md-6 noPad" style="overflow:hidden;">
+                    <h4>Export funds (deposit/withdraw):
+                      <span id="downloadFundsBtn">
+                        <i class="fa dim fa-download" aria-hidden="true"></i>
+                      </span>
+                    </h4>
+                    <select id="downloadFunds" onchange="download2()" style="display:inline; width:65%; " class="form-control">
+                      <option value="0" disabled selected>Select export format</option>
+                      <option value="1">Default(CSV)</option>
+                      <option value="2">Cointracking.info (CSV)</option>
+                    </select>
                   </div>
                 </div>
               </div>

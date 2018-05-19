@@ -563,18 +563,32 @@ table.tablesorter th.tablesorter-headerUnSorted {
     }
 }
 
-
 @media (max-width: 767px) {
     .customWidth1
     {
         width:50%;
     }
+    
+    .s-fullwidth {
+        padding:0;
+    }
+    
+    .noPadM {
+        padding:0;
+    }
 }
 
 
-.tiny
-{
+.tiny {
     display:none;
+}
+
+.noPad {
+    padding:0;
+}
+
+.noPadTop {
+    padding-top:0;
 }
 
 @media (max-width: 500px) {
@@ -707,7 +721,7 @@ input[type=number] {
   display: inline-block;
   text-align:left;
 }
- 
+
 .icon-etherdelta:before { content: '\e800'; } /* '' */
 .icon-airswap:before { content: '\e801'; } /* '' */
 .icon-tokenstore:before { content: '\e802'; } /* '' */

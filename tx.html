@@ -255,76 +255,78 @@
 
         <div class="row">
 
-          <div class="col-md-12 col-lg-10">
+          <div class="col-md-12 col-lg-10 s-fullwidth">
             <div class="box box-default">
               <!-- /.box-header -->
-              <div class="box-body">
-                <h2> Transaction info
-                  <button id='loading' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
-                </h2>
-                <div id="emptyMsg" class="col-md-12">
-                  <h4>
-                    <strong>Enter your transaction hash</strong>
-                  </h4>
-                </div>
-                <div class="col-md-12" style="overflow:hidden;">
-                  <table class="hidden txOverviewTable table table-sm" cellspacing="0" cellpadding="0">
-                    <tr>
-                      <td> Hash</td>
-                      <td id='hash'>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td> From</td>
-                      <td id='from'></td>
-                    </tr>
-                    <tr>
-                      <td>To </td>
-                      <td id='to'></td>
-                    </tr>
-                  </table>
-                </div>
+              <div class="box-body noPadTop">
+                <div class="col-md-12 noPadM">
+                  <h2> Transaction info
+                    <button id='loading' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
+                  </h2>
+                  <div id="emptyMsg" class="col-md-12 noPad">
+                    <h4>
+                      <strong>Enter your transaction hash</strong>
+                    </h4>
+                  </div>
+                  <div class="col-md-12 noPad" style="overflow:hidden;">
+                    <table class="hidden txOverviewTable table table-sm" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td> Hash</td>
+                        <td id='hash'>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td> From</td>
+                        <td id='from'></td>
+                      </tr>
+                      <tr>
+                        <td>To </td>
+                        <td id='to'></td>
+                      </tr>
+                    </table>
+                  </div>
 
-                <div class="col-md-6">
-                  <table class="hidden txOverviewTable table table-sm" cellspacing="0" cellpadding="0">
-                    <tr>
-                      <td>Type</td>
-                      <td id='inputtype'></td>
-                    </tr>
-                    <tr>
-                      <td> Status</td>
-                      <td id='status'></td>
-                    </tr>
-                    <tr>
-                      <td>Date </td>
-                      <td id='time'></td>
-                    </tr>
-                    <tr>
-                      <td>ETH value </td>
-                      <td id='ethval'></td>
-                    </tr>
-                  </table>
-                </div>
+                  <div class="col-md-6 noPad">
+                    <table class="hidden txOverviewTable table table-sm" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td>Type</td>
+                        <td id='inputtype'></td>
+                      </tr>
+                      <tr>
+                        <td> Status</td>
+                        <td id='status'></td>
+                      </tr>
+                      <tr>
+                        <td>Date </td>
+                        <td id='time'></td>
+                      </tr>
+                      <tr>
+                        <td>ETH value </td>
+                        <td id='ethval'></td>
+                      </tr>
+                    </table>
+                  </div>
 
-                <div class="col-md-6">
-                  <table class="hidden txOverviewTable table table-sm" cellspacing="0" cellpadding="0">
-                    <tr>
-                      <td>Gas Price </td>
-                      <td id='gasgwei'></td>
-                    </tr>
-                    <tr>
-                      <td>Gas Used </td>
-                      <td id='gasusedlimit'></td>
-                    </tr>
-                    <tr>
-                      <td>Gas Cost </td>
-                      <td id='gascost'></td>
-                    </tr>
-                    <tr>
-                      <td>Nonce </td>
-                      <td id='nonce'></td>
-                    </tr>
-                  </table>
+                  <div class="col-md-6 noPad">
+                    <table class="hidden txOverviewTable table table-sm" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td>Gas Price </td>
+                        <td id='gasgwei'></td>
+                      </tr>
+                      <tr>
+                        <td>Gas Used </td>
+                        <td id='gasusedlimit'></td>
+                      </tr>
+                      <tr>
+                        <td>Gas Cost </td>
+                        <td id='gascost'></td>
+                      </tr>
+                      <tr>
+                        <td>Nonce </td>
+                        <td id='nonce'></td>
+                      </tr>
+                    </table>
+                  </div>
                 </div>
               </div>
               <!-- /.box-body -->
@@ -332,78 +334,88 @@
             <!-- /.box -->
           </div>
 
-          <div class="col-md-12 col-lg-10">
+          <div class="col-md-12 col-lg-10 s-fullwidth">
             <div class="box box-default">
               <!-- /.box-header -->
-              <div class="box-body">
-                <h2>Summary</h2>
-                <span id="summary"></span>
+              <div class="box-body noPadTop">
+                <div class="col-md-12 noPadM">
+                  <h2>Summary</h2>
+                  <span id="summary"></span>
+                </div>
               </div>
               <!-- /.box-body -->
             </div>
             <!-- /.box -->
           </div>
 
-          <div class="col-md-12 col-lg-10" style="padding:0;">
-            <div id="inputdiv" class="col-md-12 col-lg-6">
+          <div class="col-md-12 col-lg-10 noPad s-fullwidth">
+            <div id="inputdiv" class="col-md-12 col-lg-6 s-fullwidth">
               <div class="box box-default">
                 <!-- /.box-header -->
-                <div class="box-body">
-                  <h2>Input data </h2>
-                  <p> Transaction input sent to the blockchain, what you attempted to do.</p>
+                <div class="box-body noPadTop">
+                  <div class="col-md-12 noPadM">
+                    <h2>Input data </h2>
+                    <p> Transaction input sent to the blockchain, what you attempted to do.</p>
+                  </div>
                   <br>
-                  <div id="inputdata"></div>
+                  <div class="col-md-12 noPad">
+                    <div id="inputdata"></div>
+                  </div>
                 </div>
                 <!-- /.box-body -->
               </div>
               <!-- /.box -->
             </div>
-            <div id="outputdiv" class="col-md-12 col-lg-6">
+            <div id="outputdiv" class="col-md-12 col-lg-6 s-fullwidth">
               <div class="box box-default">
-                <!-- /.box-header -->
-                <div class="box-body">
-                  <h2>Output data </h2>
-                  <p>Transaction event logs on the blockchain, what actually happened. </p>
+                <div class="box-body noPadTop">
+                  <div class="col-md-12 noPadM">
+                    <h2>Output data </h2>
+                    <p>Transaction event logs on the blockchain, what actually happened. </p>
+                  </div>
                   <br>
-                  <div id="outputdata"></div>
+                  <div class="col-md-12 noPad">
+                    <div id="outputdata"></div>
+                  </div>
+                  <!-- /.box-body -->
                 </div>
-                <!-- /.box-body -->
+                <!-- /.box -->
               </div>
-              <!-- /.box -->
             </div>
           </div>
-
-          <div class="col-md-12 col-lg-10">
+          <div class="col-md-12 col-lg-10 s-fullwidth">
             <div class="box box-default">
-              <!-- /.box-header -->
               <div class="box-body">
-                Transaction Info supports:
-                <ul>
-                  <li>Deposit style exchanges:
-                    <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
-                    <a href="https://forkdelta.github.io" target="_blank">ForkDelta</a>),
-                    <a href="https://token.store" target="_blank">Token Store</a>,
-                    <a href="https://www.idex.market" target="_blank">IDEX</a> and   <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>(closed).
-                  </li>
-                   <li> 0x relayers:
-                    <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>,
-                    <a href="https://ddex.io" target="_blank">DDEX</a>,
-                    <a href="https://paradex.io/" target="_blank">Paradex</a>,
-                    <a href="https://ercdex.com/" target="_blank">ERC dEX</a>,
-                    <a href="https://sharkrelay.com" target="_blank">Shark Relay</a>,
-                    <a href="https://tokenjar.io" target="_blank">Token Jar</a>,
-                    <a href="https://idtexchange.com" target="_blank">IDT</a> and
-                    <a href="https://bamboorelay.com" target="_blank">BambooRelay</a>
-                  </li>
-                  <li> Other exchanges:
-                    <a href="https://airswap.io" target="_blank">AirSwap</a>,
-                    <a href="https://kyber.network" target="_blank">Kyber Network</a>,
-                    <a href="https://oasisdex.com" target="_blank">OasisDex</a> and
-                    <a href="https://www.bancor.network" target="_blank">Bancor</a>
-                  </li>
-                  <li>Erc20 Transfers</li>
-                  <li>Wrapped ETH</li>
-                </ul>
+                <div class="col-md-12 noPadM">
+                  Transaction Info supports:
+                  <ul>
+                    <li>Deposit style exchanges:
+                      <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
+                      <a href="https://forkdelta.github.io" target="_blank">ForkDelta</a>),
+                      <a href="https://token.store" target="_blank">Token Store</a>,
+                      <a href="https://www.idex.market" target="_blank">IDEX</a> and
+                      <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>(closed).
+                    </li>
+                    <li> 0x relayers:
+                      <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>,
+                      <a href="https://ddex.io" target="_blank">DDEX</a>,
+                      <a href="https://paradex.io/" target="_blank">Paradex</a>,
+                      <a href="https://ercdex.com/" target="_blank">ERC dEX</a>,
+                      <a href="https://sharkrelay.com" target="_blank">Shark Relay</a>,
+                      <a href="https://tokenjar.io" target="_blank">Token Jar</a>,
+                      <a href="https://idtexchange.com" target="_blank">IDT</a> and
+                      <a href="https://bamboorelay.com" target="_blank">BambooRelay</a>
+                    </li>
+                    <li> Other exchanges:
+                      <a href="https://airswap.io" target="_blank">AirSwap</a>,
+                      <a href="https://kyber.network" target="_blank">Kyber Network</a>,
+                      <a href="https://oasisdex.com" target="_blank">OasisDex</a> and
+                      <a href="https://www.bancor.network" target="_blank">Bancor</a>
+                    </li>
+                    <li>Erc20 Transfers</li>
+                    <li>Wrapped ETH</li>
+                  </ul>
+                </div>
               </div>
               <!-- /.box-body -->
             </div>
@@ -425,7 +437,7 @@
         <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
         <a target="_blank" href="https://infura.io/">Infura</a>
         <br> Contact:
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or 
+        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
         <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
         <br> Buy me a beer:
         <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>

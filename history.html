@@ -261,12 +261,12 @@
       <section class="content container-fluid">
         <div class="row">
 
-          <div class="col-md-12 col-lg-10" style="overflow:hidden;">
+          <div class="col-md-12 col-lg-10 s-fullwidth" style="overflow:hidden;">
             <div class="box box-default">
               <!-- /.box-header -->
-              <div class="box-body">
+              <div class="box-body noPadTop">
 
-                <div class="col-md-9" style="overflow:hidden;">
+                <div class="col-md-9 noPadM" style="overflow:hidden;">
                   <h2>
                     <i class="icon-etherdelta"></i> EtherDelta History</h2>
 
@@ -281,8 +281,8 @@
                   </div>
                   <br>
                 </div>
-                <div class="col-md-12">
-                  <div class="col-md-5" style="overflow:hidden;">
+                <div class="col-md-12 noPadM">
+                  <div class="col-md-5 noPad" style="overflow:hidden;">
                     <h4>Operation types</h4>
 
                     <select style="display:inline; width:80%; " class="form-control" id="typeSelect" onChange="changeTypes()">
@@ -334,7 +334,7 @@
                       <i class="fa fa-search" aria-hidden="true"></i>
                     </button>
                   </div>
-                  <div class="col-md-7" style="overflow:hidden;">
+                  <div class="col-md-7 noPad" style="overflow:hidden;">
                     <h4>Info</h4>
                     Supports
                     <a href="https://etherdelta.com" target="_blank">EtherDelta</a> and
@@ -357,10 +357,10 @@
                     <br>
 
                   </div>
-                  <div class="col-md-12">
+                  <div class="col-md-12 noPad">
                     <br>
                   </div>
-                  <div class="col-md-6" style="overflow:hidden;">
+                  <div class="col-md-6 noPad" style="overflow:hidden;">
                     <h4>Export trades:</h4>
                     <ul>
                       <li>Default V2 (CSV)
@@ -383,7 +383,7 @@
                       </li>
                     </ul>
                   </div>
-                  <div class="col-md-6" style="overflow:hidden;">
+                  <div class="col-md-6 noPad" style="overflow:hidden;">
                     <h4>Export funds (deposit/withdraw):</h4>
                     <ul>
                       <li>Default (CSV)
@@ -415,36 +415,39 @@
             <!-- /.box -->
           </div>
 
-          <div class="col-md-12 col-lg-10">
+          <div class="col-md-12 col-lg-10 s-fullwidth">
             <div class="box box-default">
               <!-- /.box-header -->
-              <div class="box-body">
-
-                <div id="">
+              <div class="box-body noPadTop">
+                <div class="col-md-12 noPadM">
                   <h2>History
                     <button id='loadingTransactions' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
                     <span style="padding-left:20px; vertical-align: middle;font-weight: 400; font-size: 0.5em;" id="blockProgress"></span>
                   </h2>
                   <br>
-                  <table class="tablesorter table table-striped" id="transactionsTable">
+                </div>
+                <div class="col-md-12 noPad">
+                  <table class="tablesorter table table-striped noPad" id="transactionsTable">
                     <thead></thead>
                     <tbody></tbody>
                   </table>
+                </div>
+                <div class="col-md-12 noPadM">
                   <br> Expecting to see more here? Increase the date range at the top.
                   <br>
                   <br>
-                  <div class="col-md-6">
-                    <span class="label label-info">Taker</span> Clicked an existing order.
-                    <br>
-                    <span class="label label-default">Maker</span> Made a new order.
-                    <br>
-                  </div>
-                  <div class="col-md-6">
-                    <span class="label label-success">Buy</span> Traded ETH for Tokens.
-                    <br>
-                    <span class="label label-danger">Sell</span> Traded Tokens for ETH.
-                    <br>
-                  </div>
+                </div>
+                <div class="col-md-6 noPadM">
+                  <span class="label label-info">Taker</span> Clicked an existing order.
+                  <br>
+                  <span class="label label-default">Maker</span> Made a new order.
+                  <br>
+                </div>
+                <div class="col-md-6 noPadM">
+                  <span class="label label-success">Buy</span> Traded ETH for Tokens.
+                  <br>
+                  <span class="label label-danger">Sell</span> Traded Tokens for ETH.
+                  <br>
                 </div>
               </div>
               <!-- /.box-body -->
@@ -468,7 +471,7 @@
         <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
         <a target="_blank" href="https://infura.io/">Infura</a>
         <br> Contact:
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or 
+        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
         <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
         <br> Buy me a beer:
         <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>

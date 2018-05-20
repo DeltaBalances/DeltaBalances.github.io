@@ -744,3 +744,30 @@ input[type=number] {
 .text75 {
     font-size:75%;
 }
+
+.btn-multi.active {
+    border-bottom: none;
+    background-color: #FFFFFF;
+    color: #444;
+    border-color: #ddd;
+    font-weight:600;
+}
+
+.btn-multi:active {
+    border-bottom: none;
+    background-color: #FFFFFF;
+    color: #444;
+    border-color: #ddd;
+    font-weight:600;
+}
+
+.btn-multi {
+    border-bottom: none;
+    background-color: #FFFFFF;
+    color: #555;
+    border-color: #FFFFFF;
+}
+
+.btn-multi:hover {
+     font-weight:600;
+}

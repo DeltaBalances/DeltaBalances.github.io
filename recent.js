@@ -36,7 +36,6 @@
 	var savedAddr = '';
 	var metamaskAddr = '';
 	var lastResult2 = undefined;
-	var lastResult3 = undefined;
 
 	// config
 	var tokenCount = 0; //auto loaded
@@ -45,6 +44,16 @@
 	var startblock = 0;
 	var endblock = 'latest';
 	var transactionDays = 5;
+
+
+	var displayFilter = {
+		Trades: 1,
+		DepWith: 1,
+		Cancel: 1,
+		Wrap: 1,
+		Approve: 0,
+		Transfer: 0
+	}
 
 	// placeholder
 	var transactionsPlaceholder = [
@@ -108,6 +117,24 @@
 		}
 
 		getStorage();
+
+		let displFilt = Object.keys(displayFilter);
+		for (let i = 0; i < displFilt.length; i++) {
+			let displ = displayFilter[displFilt[i]];
+			let id = '#' + displFilt[i];
+			if (displ) {
+				$(id).addClass('active');
+			} else {
+				$(id).removeClass('active');
+			}
+		}
+
+		$('#Trades').on("click", () => { toggleFilter('Trades'); });
+		$('#DepWith').on("click", () => { toggleFilter('DepWith'); });
+		$('#Cancel').on("click", () => { toggleFilter('Cancel'); });
+		$('#Wrap').on("click", () => { toggleFilter('Wrap'); });
+		$('#Approve').on("click", () => { toggleFilter('Approve'); });
+		$('#Transfer').on("click", () => { toggleFilter('Transfer'); });
 
 		$('#decimals').prop('checked', decimals);
 		checkDecimal();
@@ -228,7 +255,43 @@
 
 
 
+	function toggleFilter(str) {
+		displayFilter[str] = !displayFilter[str];
 
+		if (lastResult2) {
+			makeTable2(lastResult2);
+		} else {
+			placeholderTable();
+		}
+	}
+
+	function checkFilter(transType) {
+		if (transType) {
+			if (transType.indexOf('aker') !== -1 || transType.indexOf('up to') !== -1 || transType == 'Buy offer' || transType == 'Sell offer') {
+				return displayFilter.Trades;
+			}
+			else if (transType === 'Deposit' || transType === 'Withdraw') {
+				return displayFilter.DepWith;
+			}
+			else if (transType.indexOf('Cancel') !== -1) {
+				return displayFilter.Cancel;
+			}
+			else if (transType.indexOf('rap') !== -1) {
+				return displayFilter.Wrap;
+			}
+			else if (transType === 'Approve') {
+				return displayFilter.Approve;
+			}
+			else if (transType === 'In' || transType === 'Out' || transType.indexOf('Transfer') !== -1) {
+				return displayFilter.Transfer;
+			}
+			else {
+				return true;
+			}
+		} else {
+			return false;
+		}
+	}
 
 	function disableInput(disable) {
 		$('#refreshButton').prop('disabled', disable);
@@ -326,7 +389,6 @@
 		trigger_2 = true;
 
 		lastResult2 = undefined;
-		lastResult3 = undefined;
 
 		if (publicAddr) {
 			setStorage();
@@ -827,6 +889,14 @@
 										}
 									}
 									trans = createOutputTransaction(type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
+								} else if (unpacked.name === 'transfer') {
+									let newType = '';
+									if (obj.from == myAddr) {
+										newType = 'Out';
+									} else if (obj.to.toLowerCase() == myAddr) {
+										newType = 'In';
+									}
+									trans = createOutputTransaction(newType, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', '');
 								}
 
 								if (trans && (!outputHashes[trans.Hash] || (outputHashes[trans.hash] && outputHashes[trans.hash].type !== trans.type))) {
@@ -835,12 +905,56 @@
 							}
 						}
 					}
-					// Ether token wrapping that uses fallback
-					else if (tx.input === '0x' && val.greaterThan(0) && _util.isWrappedETH(to)) {
+					// not a recognized function call, but ETH or tokens still moved
+					else {
+						let trans2 = undefined;
+						let exchange = '';
 
-						let amount = _util.weiToEth(val, undefined);
-						let trans2 = createOutputTransaction("Wrap ETH", _delta.config.tokens[0], amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
-						if (!outputHashes[trans2.Hash]) {
+						//Ether transferred or unknown func accepting ETH
+						if (!contract && val.greaterThan(0)) {
+
+							let amount = _util.weiToEth(val, undefined);
+
+							// Ether token wrapping that uses fallback
+							if (_util.isWrappedETH(to)) {
+								trans2 = createOutputTransaction("Wrap ETH", _delta.config.tokens[0], amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+							} else {
+								//Ether transfer
+								if (tx.input !== '0x') {
+									exchange = 'unknown ';
+								}
+
+								if (to === myAddr) {
+									trans2 = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+								} else if (from === myAddr) {
+									trans2 = createOutputTransaction('Out', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+								}
+							}
+						}
+						//unknown source of token transfer
+						else if (contract) {
+							let newType = '';
+							if (from == myAddr) {
+								newType = 'Out';
+							} else if (to == myAddr) {
+								newType = 'In';
+							}
+
+							exchange = 'unknown ';
+
+							// do we know the token
+							if (_delta.uniqueTokens[contract.toLowerCase()]) {
+								let token = _delta.setToken(contract);
+								if (token) {
+
+									let dvsr = _delta.divisorFromDecimals(token.decimals);
+									let amount = _util.weiToEth(val, dvsr);
+									trans2 = createOutputTransaction(newType, token, amount, '', '', tx.hash, tx.timeStamp, token.unlisted, '', tx.isError === '0', exchange);
+								}
+							}
+						}
+
+						if (trans2 && trans2.Hash && !outputHashes[trans2.Hash]) {
 							outputHashes[trans2.Hash] = trans2;
 						}
 					}
@@ -919,11 +1033,14 @@
 
 	//transactions table
 	function makeTable2(result) {
+
+		let filtered = result.filter((res) => { return checkFilter(res.Type); });
+
 		$('#transactionsTable2 tbody').empty();
 		var loaded = table2Loaded;
 		if (changedDecimals)
 			loaded = false;
-		buildHtmlTable('#transactionsTable2', result, loaded, transactionHeaders);
+		buildHtmlTable('#transactionsTable2', filtered, loaded, transactionHeaders);
 		trigger2();
 
 	}
@@ -1051,7 +1168,6 @@
 
 			var row$ = $('<tr/>');
 
-
 			for (var colIndex = 0; colIndex < columns.length; colIndex++) {
 				var cellValue = myList[i][columns[colIndex]];
 				if (cellValue == null) cellValue = "";
@@ -1085,10 +1201,10 @@
 					}
 				}
 				else if (head == 'Type') {
-					if (cellValue == 'Deposit' || cellValue == 'Approve' || cellValue == 'Wrap ETH') {
+					if (cellValue == 'Deposit' || cellValue == 'Approve' || cellValue == 'Wrap ETH' || cellValue == 'In') {
 						row$.append($('<td/>').html('<span class="label label-success" >' + cellValue + '</span>'));
 					}
-					else if (cellValue == 'Withdraw' || cellValue == 'Unwrap ETH') {
+					else if (cellValue == 'Withdraw' || cellValue == 'Unwrap ETH' || cellValue == 'Out') {
 						row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
 					}
 					else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy' || cellValue == 'Cancel offer' || cellValue == 'Sell offer' || cellValue == 'Buy offer') {

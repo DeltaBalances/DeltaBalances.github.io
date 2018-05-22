@@ -395,7 +395,7 @@
 		showCustomTokens = $('#custom').prop('checked');
 		$('#customMessage').prop('hidden', showCustomTokens);
 		setStorage();
-		let maxcount = Object.keys(_delta.uniqueTokens).length;
+		let maxcount = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; }).length;
 		if (showCustomTokens) {
 			tokenCount = maxcount;
 			if (lastResult && loadedCustom) {
@@ -418,7 +418,7 @@
 	}
 
 	function showTokenCount() {
-		let maxcount = Object.keys(_delta.uniqueTokens).length;
+		let maxcount = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; }).length;
 		let currentcount = maxcount;
 		if (showCustomTokens) {
 			currentcount = maxcount;
@@ -609,8 +609,9 @@
 		$('#resultTable tbody').empty();
 		showLoading(true, false);
 
-		var allCount = Object.keys(_delta.uniqueTokens).length;
-		var allTokens = Object.values(_delta.uniqueTokens);
+
+		var allTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; });
+		var allCount = allTokens.length;
 		if (!showCustomTokens) {
 			tokenCount = _delta.config.tokens.length;
 		} else {
@@ -889,9 +890,9 @@
 		// select which tokens to be requested
 		var tokens2 = Object.keys(_delta.uniqueTokens);
 		if (addCustom && showCustomTokens) {
-			tokens2 = tokens2.filter((x) => { return _delta.uniqueTokens[x].unlisted });
+			tokens2 = tokens2.filter((x) => { return _delta.uniqueTokens[x].unlisted && !tokenBlacklist[x.addr]; });
 		} else if (!showCustomTokens) {
-			tokens2 = tokens2.filter((x) => { return !_delta.uniqueTokens[x].unlisted });
+			tokens2 = tokens2.filter((x) => { return !_delta.uniqueTokens[x].unlisted && !tokenBlacklist[x.addr]; });
 		}
 
 		//split in separate requests to match maxPerRequest
@@ -1097,8 +1098,8 @@
 
 		displayedBid = loadedBid >= 1 || loadedBid <= -1;
 
-		var allCount = Object.keys(_delta.uniqueTokens).length;
-		var allTokens = Object.values(_delta.uniqueTokens);
+		var allTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; });
+		var allCount = allTokens.length;
 
 		// get totals
 		for (var i = 0; i < allCount; i++) {

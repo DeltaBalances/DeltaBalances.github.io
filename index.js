@@ -50,6 +50,7 @@
 
 
 	var loadedBid = 0;
+	var failedBid = 0;
 
 	var loadedCustom = false;
 	var trigger_1 = false;
@@ -604,6 +605,7 @@
 		//disableInput(true);
 
 		loadedBid = 0;
+		failedBid = 0;
 
 		loadedCustom = false;
 		$('#resultTable tbody').empty();
@@ -803,78 +805,86 @@
 
 	function getPrices(rqid) {
 		var socketRetries = 0;
-		var urlRetries = 4; // disabled
+		const numRetries = 2;
+		var url1Retries = 0;
 		var pricesLoaded = false;
-		var numRetries = 4;
-
-		/*disable price request due to ED server issues */
-		/*	{ 
-				loadedBid = -1;
-				finishedBalanceRequest();
-				urlRetries = numRetries; //disable url request for now;
-		}*/
 
 		retrySocket();
-		//retryURL();
+		retryURL1();
 
-
+		//prices from forkdelta socket
 		function retrySocket() {
 			_delta.socketTicker((err, result, rid) => {
 				if (requestID <= rqid) {
 					if (!err && result) {
-						parsePrices(result);
-					} else if (loadedBid < 1 && socketRetries < numRetries) {
+						parsePrices(result, 'FD');
+					} else if (loadedBid < 2 && socketRetries < numRetries) {
 						socketRetries++;
 						retrySocket();
-					} else if (socketRetries >= numRetries && urlRetries >= numRetries) {
-						showError("Failed to retrieve EtherDelta Prices after 5 tries. Try again (later)");
-						loadedBid = -1;
+					} else if (socketRetries >= numRetries) {
+						showError("Failed to retrieve ForkDelta Prices after 3 tries. Prices may be less accurate.");
+						loadedBid++;
+						failedBid++;
 						finishedBalanceRequest();
 					}
 				}
 			}, rqid);
 		}
 
-		function retryURL() {
+		//prices from etherdelta https endpoint (includes more unlisted tokens)
+		function retryURL1() {
 			$.getJSON(_delta.config.apiServer + '/returnTicker').done((result) => {
 				if (requestID <= rqid) {
 					if (result) {
-						parsePrices(result);
-					} else if (loadedBid < 1 && urlRetries < numRetries) {
-						urlRetries++;
-						retryURL();
-					} else if (socketRetries >= numRetries && urlRetries >= numRetries) {
-						showError("Failed to retrieve EtherDelta Prices after 5 tries. Try again (later)");
-						loadedBid = -1;
+						parsePrices(result, 'ED');
+					} else if (loadedBid < 2 && url1Retries < numRetries) {
+						url1Retries++;
+						retryURL1();
+					} else if (url1Retries >= numRetries) {
+						showError("Failed to retrieve EtherDelta Prices after 3 tries. Prices may be less accurate.");
+						loadedBid++;
 						finishedBalanceRequest();
 					}
 				}
 			}).fail((result) => {
 				if (requestID <= rqid) {
-					if (loadedBid < 1 && urlRetries < numRetries) {
-						urlRetries++;
-						retryURL();
+					if (loadedBid < 2 && url1Retries < numRetries) {
+						url1Retries++;
+						retryURL1();
 					}
-					else if (socketRetries >= numRetries && urlRetries >= numRetries) {
-						showError("Failed to retrieve EtherDelta Prices after 5 tries. Try again (later)");
-						loadedBid = -1;
+					else if (url1Retries >= numRetries) {
+						showError("Failed to retrieve EtherDelta Prices after 3 tries. Try again (later)");
+						loadedBid++;
+						failedBid++;
 						finishedBalanceRequest();
 					}
 				}
 			});
 		}
 
-		function parsePrices(result) {
+		function parsePrices(result, source) {
 			var results = Object.values(result);
 			for (var i = 0; i < results.length; i++) {
-				var token = _delta.uniqueTokens[results[i].tokenAddr];
 
-				if (token && balances[token.addr]) {
-					balances[token.addr].Bid = Number(results[i].bid);
-					balances[token.addr].Ask = Number(results[i].ask);
+				if (source == 'ED' || source == 'FD') {
+					var token = _delta.uniqueTokens[results[i].tokenAddr];
+					if (token && balances[token.addr]) {
+						balances[token.addr][source + 'Bid'] = Number(results[i].bid);
+						balances[token.addr][source + 'Ask'] = Number(results[i].ask);
+					}
+				} else if (source == 'BIN') {
+
+					let priceAddr = _delta.binanceMap[results[i].symbol];
+					if (priceAddr) {
+						var token = _delta.uniqueTokens[priceAddr];
+						if (token && balances[token.addr]) {
+							balances[token.addr][source + 'Bid'] = Number(results[i].bidPrice);
+							balances[token.addr][source + 'Ask'] = Number(results[i].askPrice);
+						}
+					}
 				}
 			}
-			loadedBid = 1;
+			loadedBid++;
 			finishedBalanceRequest();
 			return;
 		}
@@ -1052,11 +1062,14 @@
 		//prices
 		{
 			progressString += '<span>Token prices:';
-			if (loadedBid == 0) {
-				progressString += '<span style="padding-left:3px;padding-right:30px" class="text-red"> No </span></span>';
-			} else if (loadedBid == 1) {
+			if (loadedBid < 2) {
+				progressString += '<span style="padding-left:3px;padding-right:30px" class="text-red"> Loading.. </span></span>';
+			} else if (failedBid == 0) {
 				progressString += '<span style="padding-left:3px;padding-right:30px" class="text-green"> Yes </span></span>';
-			} else {
+			} else if (failedBid == 1) {
+				progressString += '<span style="padding-left:3px;padding-right:30px" class="text-green"> 1/2 Failed </span></span>';
+			}
+			else {
 				progressString += '<span style="padding-left:3px;padding-right:30px" class="text-red"> Failed </span></span>';
 			}
 		}
@@ -1096,7 +1109,7 @@
 			exchanges[keys[i]].displayed = exchanges[keys[i]].loaded >= tokenCount || exchanges[keys[i]].loaded == -1;
 		}
 
-		displayedBid = loadedBid >= 1 || loadedBid <= -1;
+		displayedBid = loadedBid >= 2;
 
 		var allTokens = _delta.config.customTokens;
 		var allCount = allTokens.length;
@@ -1131,13 +1144,36 @@
 						sumToken = sumToken.plus(bal.Total);
 					}
 				}
-				else if ((bal.Bid || (useAsk && bal.Ask)) && bal.Total) {
+				else if ((bal.EDBid || bal.EDAsk || bal.FDBid || bal.FDAsk) && bal.Total) {
+
+					//case cade price sources in volume, Binance most accurate price
+					if (bal.EDBid)
+						bal.Bid = bal.EDBid;
+					if (bal.FDBid && (!bal.EDBid || bal.FDBid > bal.EDBid))
+						bal.Bid = bal.FDBid;
+					if (bal.BINBid)
+						bal.Bid = bal.BINBid;
+
+					if (bal.EDAsk)
+						bal.Ask = bal.EDAsk;
+					if (bal.FDAsk && (!bal.EDAsk || bal.FDAsk < bal.EDAsk))
+						bal.Ask = bal.FDAsk;
+					if (bal.BINAsk)
+						bal.Ask = bal.BINAsk;
+
 					// calculate estimate if not (wrapped) ETH
-					var val;
-					if (!useAsk)
-						val = bal.Total.times(bal.Bid);
-					else
-						val = bal.Total.times(bal.Ask);
+					var val = _delta.web3.toBigNumber(0);
+
+					if (useAsk) {
+						if (bal.Ask) {
+							val = bal.Total.times(bal.Ask);
+						}
+					} else {
+						if (bal.Bid) {
+							val = bal.Total.times(bal.Bid);
+						}
+					}
+
 					bal['Est. ETH'] = val;
 					sumToken = sumToken.plus(val);
 				}
@@ -1185,11 +1221,6 @@
 			clearOverviewHtml(false);
 			$('#downloadBalances').html('');
 		}
-
-
-		/*if (showCustomTokens)
-			lastResult3 = result;
-			*/
 
 		makeTable(result, hideZero); //calls trigger
 	}

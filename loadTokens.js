@@ -1,7 +1,6 @@
 // try to get updated token list from EtherDelta, ForkDelta and IDEX otherwise use own backup
 
 var etherDeltaConfig = offlineTokens;
-var stagingTokens = offlineStagingTokens;
 
 // dont get live etherdelta tokens, as they haven't been changed in >3 months
 /*
@@ -12,15 +11,7 @@ try {
 			}
 		});
 	} catch (err){} 
-try {
-		$.getJSON('https://etherdelta.github.io/config/staging.json', function(jsonData) {
-			if(jsonData && jsonData.tokens) {
-				stagingTokens = jsonData;
-			}
-		});
-	} catch (err) {} 
 */
-
 
 var forkDeltaConfig = forkOfflineTokens;
 try {

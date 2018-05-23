@@ -395,7 +395,7 @@
 		showCustomTokens = $('#custom').prop('checked');
 		$('#customMessage').prop('hidden', showCustomTokens);
 		setStorage();
-		let maxcount = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; }).length;
+		let maxcount = _delta.config.customTokens.length;
 		if (showCustomTokens) {
 			tokenCount = maxcount;
 			if (lastResult && loadedCustom) {
@@ -418,7 +418,7 @@
 	}
 
 	function showTokenCount() {
-		let maxcount = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; }).length;
+		let maxcount = _delta.config.customTokens.length;
 		let currentcount = maxcount;
 		if (showCustomTokens) {
 			currentcount = maxcount;
@@ -610,7 +610,7 @@
 		showLoading(true, false);
 
 
-		var allTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; });
+		var allTokens = _delta.config.customTokens;
 		var allCount = allTokens.length;
 		if (!showCustomTokens) {
 			tokenCount = _delta.config.tokens.length;
@@ -888,11 +888,11 @@
 	function getAllBalances(rqid, mode, addCustom) {
 
 		// select which tokens to be requested
-		var tokens2 = Object.keys(_delta.uniqueTokens);
+		var tokens2 = _delta.config.customTokens.map((x) => { return x.addr; });
 		if (addCustom && showCustomTokens) {
-			tokens2 = tokens2.filter((x) => { return _delta.uniqueTokens[x].unlisted && !tokenBlacklist[x.addr]; });
+			tokens2 = tokens2.filter((x) => { return _delta.uniqueTokens[x].unlisted; });
 		} else if (!showCustomTokens) {
-			tokens2 = tokens2.filter((x) => { return !_delta.uniqueTokens[x].unlisted && !tokenBlacklist[x.addr]; });
+			tokens2 = tokens2.filter((x) => { return !_delta.uniqueTokens[x].unlisted; });
 		}
 
 		//split in separate requests to match maxPerRequest
@@ -1098,7 +1098,7 @@
 
 		displayedBid = loadedBid >= 1 || loadedBid <= -1;
 
-		var allTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; });
+		var allTokens = _delta.config.customTokens;
 		var allCount = allTokens.length;
 
 		// get totals

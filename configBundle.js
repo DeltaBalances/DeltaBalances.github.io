@@ -42,7 +42,7 @@ module.exports = {
 
   ethAddr: '0x0000000000000000000000000000000000000000',
   apiServer: '',
-  apiServers: ['https://api.forkdelta.com', /*'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/],
+  apiServers: ['https://api.etherdelta.com', /*'https://api.forkdelta.com', 'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/],
   etherscanAPIKey: 'YHBUWV6P5B5ITKMI91JIRZZYBP1CG1V65R',
   infuraURL: 'https://mainnet.infura.io/DeltaBalances',
   web3URLs: {
@@ -52,7 +52,9 @@ module.exports = {
   },
   localNode: 'http://localhost:8545',
   tokens: [
-    // get them live from config.js
+    { addr: '0x0000000000000000000000000000000000000000', name: 'ETH', decimals: 18 },
+  ],
+  customTokens: [
     { addr: '0x0000000000000000000000000000000000000000', name: 'ETH', decimals: 18 },
   ],
 

@@ -2306,6 +2306,7 @@ function DeltaBalances() {
     this.socket = null;
     this.socketConnected = false;
     this.config = config;
+    this.binanceMap = {};
 }
 
 DeltaBalances.prototype.socketTicker = function socketTicker(callback, rqid) {
@@ -2455,6 +2456,14 @@ DeltaBalances.prototype.loadWeb3 = function loadWeb3(wait, callback) {
         }
     });
 
+    let timedOut = false;
+    setTimeout(function () {
+        if (detected >= 1 && !calledBack) {
+            console.log('web3 search timed out');
+            calledBack = true;
+            callback();
+        }
+    }, 2000);
 
     for (let i = 0; i < urls.length; i++) {
         let provider = urls[i];
@@ -2523,15 +2532,6 @@ DeltaBalances.prototype.initContracts = function initContracts(callback) {
 };
 
 DeltaBalances.prototype.initTokens = function (useBlacklist) {
-    //import of etherdelta config
-    if (etherDeltaConfig && etherDeltaConfig.tokens) {
-        _delta.config.tokens = etherDeltaConfig.tokens;
-    }
-    else {
-        showError('failed to load token data');
-        return;
-    }
-
 
     let smartKeys = Object.keys(smartRelays);
     let smartrelays = Object.values(smartRelays);
@@ -2544,17 +2544,72 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         }
     }
 
-    // note all listed tokens
+
+    //format list of all tokens like ED tokens
+    offlineCustomTokens = offlineCustomTokens.map((x) => {
+
+        let unlisted = true;
+        if (x.address && x.symbol) {
+            let addr = x.address.toLowerCase();
+            //make sure WETH appears listed 
+            if (utility.isWrappedETH(addr) || utility.isNonEthBase(addr)) {
+                unlisted = false;
+            }
+            var token = {
+                "name": utility.escapeHtml(x.symbol),
+                "addr": addr,
+                "unlisted": unlisted,
+                "decimals": x.decimal,
+            };
+            if (x.Binance) {
+                token.Binance = x.Binance;
+                token.unlisted = false;
+            }
+            return token;
+        } else {
+            return undefined;
+        }
+    });
+
+    // register all tokens (nearly all unlisted)
+    for (var i = 0; i < offlineCustomTokens.length; i++) {
+        var token = offlineCustomTokens[i];
+
+        if (token) {
+
+            if (token.Binance) {
+                //mapping for Binance API and urls
+                this.binanceMap[token.Binance] = token.addr;
+            }
+
+            if (this.uniqueTokens[token.addr]) {
+                if (token.Binance) {
+                    this.uniqueTokens[token.addr].Binance = token.Binance;
+                }
+                if (!token.unlisted) {
+                    this.uniqueTokens[token.addr].unlisted = false;
+                }
+            }
+            else {
+                this.uniqueTokens[token.addr] = token;
+            }
+        }
+    }
+
+    // note all listed ED tokens
     for (var i = 0; i < this.config.tokens.length; i++) {
         var token = this.config.tokens[i];
         if (token) {
             token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
             token.addr = token.addr.toLowerCase();
-            token.EtherDelta = true;
+            token.EtherDelta = token.name;
             token.unlisted = false;
             this.config.tokens[i] = token;
-            if ((!useBlacklist || (!useBlacklist || !tokenBlacklist[token.addr])) && !this.uniqueTokens[token.addr]) {
+            if (!this.uniqueTokens[token.addr]) {
                 this.uniqueTokens[token.addr] = token;
+            } else {
+                this.uniqueTokens[token.addr].unlisted = false;
+                this.uniqueTokens[token.addr].EtherDelta = token.name;
             }
         }
     }
@@ -2574,17 +2629,18 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
             token.addr = token.addr.toLowerCase();
             token.unlisted = false;
-            token.ForkDelta = true;
+            token.ForkDelta = token.name;
             if (this.uniqueTokens[token.addr]) {
-                this.uniqueTokens[token.addr].ForkDelta = true;
+                this.uniqueTokens[token.addr].ForkDelta = token.name;
+                this.uniqueTokens[token.addr].unlisted = false;
             }
-            else if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
+            else {
                 this.uniqueTokens[token.addr] = token;
-                this.config.tokens.push(token);
             }
         }
     }
 
+    //ddex listed tokens
     let ddexTokens = [];
     if (ddexConfig && ddexConfig.tokens) {
         ddexTokens = ddexConfig.tokens;
@@ -2600,89 +2656,38 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
 
             token.decimals = tok.decimals;
             token.unlisted = false;
-            token.DDEX = true;
-            token.DDEXname = token.name;
+            token.DDEX = token.name;
             if (this.uniqueTokens[token.addr]) {
-                this.uniqueTokens[token.addr].DDEX = true;
-                if (this.uniqueTokens[token.addr].name !== token.name) {
-                    this.uniqueTokens[token.addr].DDEXname = name;
-                }
+                this.uniqueTokens[token.addr].DDEX = token.name;
+                this.uniqueTokens[token.addr].unlisted = false;
             }
-            else if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
+            else {
                 this.uniqueTokens[token.addr] = token;
-                this.config.tokens.push(token);
             }
         }
     }
 
-    //format MEW tokens like ED tokens
-    offlineCustomTokens = offlineCustomTokens.map((x) => {
 
-        let unlisted = true;
-        if (x.address && x.symbol) {
-            let addr = x.address.toLowerCase();
-            //make sure WETH appears listed 
-            if (utility.isWrappedETH(addr)) {
-                unlisted = false;
-            }
-            return {
-                "name": utility.escapeHtml(x.symbol),
-                "addr": addr,
-                "unlisted": unlisted,
-                "decimals": x.decimal,
-            };
-        } else {
-            return this.config.tokens[0]; //filtered out next step
-        }
-    });
-    //filter out custom tokens that have been listed by now
-    this.config.customTokens = offlineCustomTokens.filter((x) => { return !(this.uniqueTokens[x.addr] && !(tokenBlacklist[x.addr])) });
-    // note custom tokens
-    for (var i = 0; i < this.config.customTokens.length; i++) {
-        var token = this.config.customTokens[i];
-        if (token && (!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
-            this.uniqueTokens[token.addr] = token;
-            if (!token.unlisted) {
-                this.config.tokens.push(token);
-            }
-        }
-    }
-
-    // treat tokens listed as staging as unlisted custom tokens
-    if (stagingTokens && stagingTokens.tokens) {
-        //filter tokens that we already know
-        var stageTokens = stagingTokens.tokens.filter((x) => { return !(this.uniqueTokens[x.addr]) });
-        for (var i = 0; i < stageTokens.length; i++) {
-            var token = stageTokens[i];
-            if (token) {
-                token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
-                token.addr = token.addr.toLowerCase();
-                token.unlisted = true;
-                if ((!useBlacklist || !tokenBlacklist[token.addr]) && !this.uniqueTokens[token.addr]) {
-                    this.uniqueTokens[token.addr] = token;
-                    this.config.customTokens.push(token);
-                }
-            }
-        }
-    }
 
     //check listing for idex
     for (var i = 0; i < idexConfig.length; i++) {
         var token = idexConfig[i];
-        token.address = token.addr.toLowerCase();
+        token.addr = token.addr.toLowerCase();
+        token.IDEX = token.name;
+        token.unlisted = false;
         if (this.uniqueTokens[token.addr]) {
-            this.uniqueTokens[token.addr].IDEX = true;
-            if (token.name !== this.uniqueTokens[token.addr].name) {
-                this.uniqueTokens[token.addr].IDEXname = token.name;
-            }
-            if (this.uniqueTokens[token.addr].unlisted) {
-                this.uniqueTokens[token.addr].unlisted = false;
-                this.config.tokens.push(this.uniqueTokens[token.addr]);
-            }
-
+            this.uniqueTokens[token.addr].IDEX = token.name;
+            this.uniqueTokens[token.addr].unlisted = false;
+        }
+        else {
+            this.uniqueTokens[token.addr] = token;
         }
     }
 
+    let ethAddr = this.config.ethAddr;
+    this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; });
+    let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !tokenBlacklist[x.addr] && x.addr !== ethAddr); });
+    this.config.tokens = [this.uniqueTokens[ethAddr]].concat(listedTokens);
 }
 
 DeltaBalances.prototype.setToken = function (address) {
@@ -2708,7 +2713,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
     try {
         if (unpacked && unpacked.name) {
             if (unpacked.name === 'transfer') {
-                var to = unpacked.params[0].value;
+                var to = unpacked.params[0].value.toLowerCase();
                 var rawAmount = unpacked.params[1].value;
                 var amount = new BigNumber(0);
                 var token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
@@ -2724,7 +2729,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'note': 'Give the token contract the order to transfer your tokens',
                         'token': token,
                         'amount': amount,
-                        'from': tx.from,
+                        'from': tx.from.toLowerCase(),
                         'to': to,
                         'unlisted': unlisted,
                     };
@@ -5157,16 +5162,14 @@ DeltaBalances.prototype.makePopoverContents = function (token) {
                 } else {
                     contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals;
                 }
-                contents += '<br> Trade on: <ul><li>' + utility.etherDeltaURL(token, true)
+                contents += '<br> Trade on: <ul style="list-style-type: none;"><li>'
+                    + utility.binanceURL(token, true)
+                    + '</li><li>' + utility.etherDeltaURL(token, true)
                     + '</li><li>' + utility.forkDeltaURL(token, true)
-                    + '</li><li>' + utility.tokenStoreURL(token, true) + '</li>';
-                if (token.IDEX) {
-                    contents += '<li>' + utility.idexURL(token, true) + '</li>';
-                }
-                if (token.DDEX) {
-                    contents += '<li>' + utility.ddexURL(token, true) + '</li>';
-                }
-                contents += '</ul>';
+                    + '</li><li>' + utility.tokenStoreURL(token, true)
+                    + '</li><li>' + utility.idexURL(token, true)
+                    + '</li><li>' + utility.ddexURL(token, true)
+                    + '</li></ul>';
 
             } else if (token.addr == this.config.ethAddr) {
                 contents = "Ether (not a token)<br> Decimals: 18";
@@ -27106,43 +27109,46 @@ module.exports = (config) => {
   utility.etherDeltaURL = function (tokenObj, html) {
     if (tokenObj) {
       var url = "https://etherdelta.com/#";
-      if (tokenObj.unlisted || !tokenObj.EtherDelta) {
+      var labelClass = "label-warning";
+      if (!tokenObj.EtherDelta) {
         url += tokenObj.addr + "-ETH";
       } else {
-        url += tokenObj.name + "-ETH";
+        url += tokenObj.EtherDelta + "-ETH";
+        labelClass = 'label-primary';
       }
     } else {
       url = '';
     }
 
     if (html) {
-      url = '<a href="' + url + '" target="_blank"> EtherDelta</a>';
+      url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">EtherDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
     }
     return url;
   }
 
   utility.forkDeltaURL = function (tokenObj, html) {
     var url = "https://forkdelta.github.io/#!/trade/";
-
+    var labelClass = "label-warning";
     if (tokenObj) {
-      if (tokenObj.unlisted || !tokenObj.ForkDelta) {
+      if (!tokenObj.ForkDelta) {
         url += tokenObj.addr + "-ETH";
       } else {
-        url += tokenObj.name + "-ETH";
+        url += tokenObj.ForkDelta + "-ETH";
+        labelClass = 'label-primary';
       }
     } else {
       url = '';
     }
 
     if (html) {
-      url = '<a href="' + url + '" target="_blank"> ForkDelta</a>';
+      url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">ForkDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
     }
     return url;
   }
 
   utility.tokenStoreURL = function (tokenObj, html) {
     var url = "https://token.store/trade/";
-
+    var labelClass = "label-warning";
     if (tokenObj) {
       url += tokenObj.addr;
     } else {
@@ -27150,44 +27156,71 @@ module.exports = (config) => {
     }
 
     if (html) {
-      url = '<a href="' + url + '" target="_blank"> Token store</a>';
+      url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Token store <i class="fa fa-external-link" aria-hidden="true"></i></a>';
     }
     return url;
   }
 
   utility.idexURL = function (tokenObj, html) {
     var url = "https://idex.market/eth/"
+    var labelClass = "label-primary";
 
-    if (tokenObj) {
-      if (tokenObj.IDEXname)
-        url += tokenObj.IDEXname;
-      else
-        url += tokenObj.name;
+    if (tokenObj && tokenObj.IDEX) {
+      url += tokenObj.IDEX;
     } else {
       url = '';
+      labelClass = 'label-default';
     }
 
     if (html) {
-      url = '<a href="' + url + '" target="_blank"> IDEX</a>';
+      if (url == '') {
+        url = '<span class="label ' + labelClass + '">IDEX</span>';
+      } else {
+        url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">IDEX <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+      }
     }
     return url;
   }
 
   utility.ddexURL = function (tokenObj, html) {
     var url = "https://ddex.io/trade/";
+    var labelClass = "label-primary";
 
-    if (tokenObj) {
-      if (tokenObj.DDEXname)
-        url += tokenObj.DDEXname;
-      else
-        url += tokenObj.name;
+    if (tokenObj && tokenObj.DDEX) {
+      url += tokenObj.DDEX + '-ETH';
     } else {
+      labelClass = 'label-default';
       url = '';
     }
-    if (url)
-      url += '-ETH';
+
     if (html) {
-      url = '<a href="' + url + '" target="_blank"> DDEX</a>';
+      if (url == '') {
+        url = '<span class="label ' + labelClass + '">DDEX</span>';
+      } else {
+        url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">DDEX <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+      }
+    }
+    return url;
+  }
+
+  utility.binanceURL = function (tokenObj, html) {
+    var url = "https://www.binance.com/?ref=10985752&symbol=";
+    var labelClass = "label-primary";
+
+    if (tokenObj && tokenObj.Binance && tokenObj.Binance.indexOf('ETH') !== -1) {
+      let name = tokenObj.Binance.replace("ETH", "_ETH");
+      url += name;
+    } else {
+      labelClass = 'label-default';
+      url = '';
+    }
+
+    if (html) {
+      if (url == '') {
+        url = '<span class="label ' + labelClass + '">Binance</span>';
+      } else {
+        url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Binance <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+      }
     }
     return url;
   }

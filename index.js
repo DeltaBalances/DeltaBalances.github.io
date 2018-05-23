@@ -342,8 +342,9 @@
 		setStorage();
 	}
 
-	function checkAsk() {
-		useAsk = $('#ask').prop('checked');
+	function selectPrice() {
+		let val = $('#priceSelect').val();
+		useAsk = Number(val) > 0;
 
 		$("#resultTable").trigger("destroy");
 		$('#resultTable tbody').html('');

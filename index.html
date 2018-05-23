@@ -346,9 +346,11 @@
                       <input class="checkbox checkbox-info" type="checkbox" onclick="checkDollars()" id="dollars">
                       <label for="dollars">Show total $ value</label>
                     </li>
-                    <li>
-                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkAsk()" id="ask">
-                      <label for="ask">Use 'ask' price for estimate value</label>
+                    <li> Price estimate:
+                      <select id="priceSelect" onchange="selectPrice()" style="display:inline; width:120px; " class="form-control">
+                        <option value="0" selected>Highest Bid</option>
+                        <option value="1">Lowest Ask</option>
+                      </select>
                     </li>
                   </ul>
                 </div>

@@ -651,6 +651,23 @@ input[type=number] {
 	overflow:hidden;
 	padding:0;
 	font-weight: normal;
+    
+    height: 30px;
+    line-height: 30px;
+    cursor: pointer;
+    margin-bottom:5px;
+}
+
+.exchange-box:hover {
+    color:yellow;
+}
+
+label.exchange-box div.box-header label {
+    cursor:pointer;
+}
+
+.bottom10M {
+    margin-bottom:10px;
 }
 
 .tablesorter .filtered {
@@ -741,8 +758,8 @@ input[type=number] {
   max-width: 500px;
 }
 
-.text75 {
-    font-size:75%;
+.text70 {
+    font-size:70%;
 }
 
 .btn-multi.active {

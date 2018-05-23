@@ -1074,17 +1074,21 @@
 
 		//prices
 		{
-			progressString += '<span>Token prices:';
+			progressString += '<span>Token prices:<span style="padding-left:3px;padding-right:30px" class="text-';
 			if (loadedBid < 2) {
-				progressString += '<span style="padding-left:3px;padding-right:30px" class="text-red"> Loading.. </span></span>';
+				if (running) {
+					progressString += 'red"> Loading..';
+				} else {
+					progressString += 'green"> No';
+				}
 			} else if (failedBid == 0) {
-				progressString += '<span style="padding-left:3px;padding-right:30px" class="text-green"> Yes </span></span>';
+				progressString += 'green"> Yes';
 			} else if (failedBid == 1) {
-				progressString += '<span style="padding-left:3px;padding-right:30px" class="text-green"> 1/2 Failed </span></span>';
+				progressString += 'green"> 1/2 Failed';
+			} else {
+				progressString += 'red"> Failed';
 			}
-			else {
-				progressString += '<span style="padding-left:3px;padding-right:30px" class="text-red"> Failed </span></span>';
-			}
+			progressString += '</span></span>';
 		}
 
 		$('#balanceProgress').html(progressString);

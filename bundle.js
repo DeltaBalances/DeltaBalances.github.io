@@ -2597,8 +2597,8 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     }
 
     // note all listed ED tokens
-    for (var i = 0; i < this.config.tokens.length; i++) {
-        var token = this.config.tokens[i];
+    for (var i = 0; i < etherDeltaConfig.tokens.length; i++) {
+        var token = etherDeltaConfig.tokens[i];
         if (token) {
             token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
             token.addr = token.addr.toLowerCase();
@@ -2666,8 +2666,6 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             }
         }
     }
-
-
 
     //check listing for idex
     for (var i = 0; i < idexConfig.length; i++) {

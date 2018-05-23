@@ -63,7 +63,7 @@
 	var useAsk = false;
 
 	var showCustomTokens = false;
-	var showDollars = true;
+	var showFiat = 'USD';
 
 
 	// user input & data
@@ -81,7 +81,8 @@
 	var walletWarningBalance = 0.003;
 
 	var balances = {};
-	var etherPrice = 0;
+	var etherPriceUSD = 0;
+	var etherPriceEUR = 0;
 
 	// placeholder
 	var balancesPlaceholder = {
@@ -99,6 +100,8 @@
 				Bid: '',
 				Ask: '',
 				'Est. ETH': '',
+				'USD': '',
+				'EUR': '',
 			},
 	};
 
@@ -134,7 +137,7 @@
 		$('#zero').prop('checked', hideZero);
 		$('#decimals').prop('checked', decimals);
 		$('#custom').prop('checked', showCustomTokens);
-		$('#dollars').prop('checked', showDollars);
+		$('#fiatSelect').val(Number(showFiat));
 
 
 		$('body').on('expanded.pushMenu collapsed.pushMenu', function () {
@@ -353,19 +356,27 @@
 
 		if (lastResult) {
 			finishedBalanceRequest();
-			//makeTable(lastResult, hideZero);
 		} else {
 			placeholderTable();
 		}
+
+		setStorage();
 	}
 
-	function checkDollars() {
-		showDollars = $('#dollars').prop('checked');
+	function selectFiat() {
+		let val = $('#fiatSelect').val();
+		showFiat = Number(val);
 
 		clearOverviewHtml(true);
+		$("#resultTable").trigger("destroy");
+		$('#resultTable tbody').html('');
+		$('#resultTable thead').html('');
+		table1Loaded = false;
 
-		if (showDollars && lastResult) {
+		if (lastResult) {
 			finishedBalanceRequest();
+		} else {
+			placeholderTable();
 		}
 		setStorage();
 	}
@@ -666,10 +677,11 @@
 	}
 
 	function getEtherPrice() {
-		$.getJSON('https://api.coinmarketcap.com/v1/ticker/ethereum/', result => {
+		$.getJSON('https://api.coinmarketcap.com/v2/ticker/1027/?convert=EUR', result => {
 
-			if (result && result[0].price_usd) {
-				etherPrice = result[0].price_usd;
+			if (result && result.data.quotes) {
+				etherPriceUSD = result.data.quotes.USD.price;
+				etherPriceEUR = result.data.quotes.EUR.price;
 			}
 		});
 
@@ -1130,6 +1142,8 @@
 				}
 
 				bal['Est. ETH'] = '';
+				bal['USD'] = '';
+				bal['EUR'] = '';
 
 				// ETH and  wrapped eth fixed at value of 1 ETH
 				if (_util.isWrappedETH(token.addr)) {
@@ -1195,6 +1209,17 @@
 
 		if (allDone) {
 
+			for (let i = 0; i < result.length; i++) {
+				if (result[i]['Est. ETH'] !== '') {
+					if (showFiat == 1) {
+						result[i]['USD'] = '$' + _util.commaNotation(result[i]['Est. ETH'].times(etherPriceUSD).toFixed(2));
+					} else if (showFiat == 2) {
+						result[i]['EUR'] = '€' + _util.commaNotation(result[i]['Est. ETH'].times(etherPriceEUR).toFixed(2));
+					}
+				}
+			}
+			lastResult = result;
+
 			$('#ethbalance').html('<span data-toggle="tooltip" title="' + sumETH.toString() + '">' + sumETH.toFixed(fixedDecimals) + ' ETH</span>');
 			$('#wethbalance').html('<span data-toggle="tooltip" title="' + sumWETH.toString() + '">' + sumWETH.toFixed(fixedDecimals) + ' ETH</span>');
 			$('#tokenbalance').html('<span data-toggle="tooltip" title="' + sumToken.toString() + '">' + sumToken.toFixed(fixedDecimals) + ' ETH</span>');
@@ -1206,11 +1231,16 @@
 				'container': 'body'
 			});
 
-			if (showDollars) {
-				$('#ethbalancePrice').html(" $" + _util.commaNotation((sumETH.times(etherPrice)).toFixed(2)));
-				$('#wethbalancePrice').html(" $" + _util.commaNotation((sumWETH.times(etherPrice)).toFixed(2)));
-				$('#tokenbalancePrice').html(" $" + _util.commaNotation((sumToken.times(etherPrice)).toFixed(2)));
-				$('#totalbalancePrice').html(" $" + _util.commaNotation((totalSumETH.times(etherPrice)).toFixed(2)));
+			if (showFiat == 1) {
+				$('#ethbalancePrice').html(" $" + _util.commaNotation((sumETH.times(etherPriceUSD)).toFixed(2)));
+				$('#wethbalancePrice').html(" $" + _util.commaNotation((sumWETH.times(etherPriceUSD)).toFixed(2)));
+				$('#tokenbalancePrice').html(" $" + _util.commaNotation((sumToken.times(etherPriceUSD)).toFixed(2)));
+				$('#totalbalancePrice').html(" $" + _util.commaNotation((totalSumETH.times(etherPriceUSD)).toFixed(2)));
+			} else if (showFiat == 2) {
+				$('#ethbalancePrice').html(" €" + _util.commaNotation((sumETH.times(etherPriceEUR)).toFixed(2)));
+				$('#wethbalancePrice').html(" €" + _util.commaNotation((sumWETH.times(etherPriceEUR)).toFixed(2)));
+				$('#tokenbalancePrice').html(" €" + _util.commaNotation((sumToken.times(etherPriceEUR)).toFixed(2)));
+				$('#totalbalancePrice').html(" €" + _util.commaNotation((totalSumETH.times(etherPriceEUR)).toFixed(2)));
 			}
 
 
@@ -1252,6 +1282,10 @@
 
 		balanceHeaders['Ask'] = useAsk;
 		balanceHeaders['Bid'] = !useAsk;
+
+		balanceHeaders['USD'] = showFiat == 1;
+		balanceHeaders['EUR'] = showFiat == 2;
+
 		buildHtmlTable('#resultTable', filtered, loaded, balanceHeaders);
 
 		trigger();
@@ -1283,7 +1317,7 @@
 			localStorage.setItem("customTokens", showCustomTokens);
 			localStorage.setItem("decimals", decimals);
 			localStorage.setItem("hideZero", hideZero);
-			localStorage.setItem('usd', showDollars);
+			localStorage.setItem('fiat', showFiat);
 
 			Object.keys(exchanges).forEach(function (key) {
 				localStorage.setItem(key, exchanges[key].enabled);
@@ -1294,12 +1328,12 @@
 	function getStorage() {
 		if (typeof (Storage) !== "undefined") {
 
-			if (localStorage.getItem("usd") === null) {
-				showDollars = true;
+			if (localStorage.getItem("fiat") === null) {
+				showFiat = '1';
 			} else {
-				showDollars = localStorage.getItem('usd');
-				if (showDollars === "false")
-					showDollars = false;
+				showFiat = localStorage.getItem('fiat');
+				if (!(showFiat == '1' || showFiat == '2'))
+					showFiat = '0';
 			}
 
 			if (localStorage.getItem("customTokens") === null) {
@@ -1368,13 +1402,24 @@
 
 	// final callback to sort table
 	function trigger() {
+
+		let keys = Object.keys(exchanges);
+		let totalIndex = 4;
+		for (let i = 0; i < keys.length; i++) {
+			if (!exchanges[keys[i]].enabled) {
+				totalIndex++;
+			}
+		}
+
 		if (table1Loaded) // reload existing table
 		{
 			$("#resultTable").trigger("update", [true, () => { }]);
 			$("#resultTable thead th").data("sorter", true);
-			//$("table").trigger("sorton", [[0,0]]);
+			//$("#resultTable").trigger("sorton", [[totalIndex, 1]]);
 
 		} else {
+
+
 			$("#resultTable thead th").data("sorter", true);
 			$("#resultTable").tablesorter({
 				widgets: ['scroller', 'filter'],
@@ -1391,7 +1436,6 @@
 			table1Loaded = true;
 		}
 
-		let keys = Object.keys(exchanges);
 		var allDisplayed = true;
 		for (let i = 0; i < keys.length; i++) {
 			if (!exchanges[keys[i]].displayed) {
@@ -1446,6 +1490,10 @@
 						row$.append($('<td/>').html(cellValue));
 					}
 				}
+				else if (head == 'USD' || head == 'EUR') {
+					var num = '<span style="color:gray">' + cellValue + '</span>';
+					row$.append($('<td/>').html(num));
+				}
 				else if (head == 'Name') {
 					let token = _delta.uniqueTokens[myList[i].Address];
 					let popoverContents = _delta.makePopoverContents(token);
@@ -1469,7 +1517,7 @@
 		});
 	}
 
-	var balanceHeaders = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'IDEX': 1, 'Token store': 1, 'Decentrex': 1, 'Total': 1, 'Value': 1, 'Bid': 1, 'Ask': 0, 'Est. ETH': 1 };
+	var balanceHeaders = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'IDEX': 1, 'Token store': 1, 'Decentrex': 1, 'Total': 1, 'Value': 1, 'Bid': 1, 'Ask': 0, 'Est. ETH': 1, 'USD': 0, 'EUR': 0 };
 
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain

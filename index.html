@@ -332,7 +332,6 @@
                       <input class="checkbox checkbox-info" type="checkbox" onclick="checkCustom()" id="custom">
                       <label for="custom">Show unlisted tokens </label>
                       <span id="tokencount"></span>
-                      <i class="hidden-xs fa fa-question" title="Unlisted tokens are not officially known on an exchange"></i>
                     </li>
                     <li>
                       <input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero">
@@ -343,15 +342,21 @@
                       <label for="decimals">Show more decimals</label>
                     </li>
                     <li>
-                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkDollars()" id="dollars">
-                      <label for="dollars">Show total $ value</label>
-                    </li>
-                    <li> Price estimate:
-                      <select id="priceSelect" onchange="selectPrice()" style="display:inline; width:120px; " class="form-control">
-                        <option value="0" selected>Highest Bid</option>
-                        <option value="1">Lowest Ask</option>
-                      </select>
-                    </li>
+                      Total Value:
+                      <li>
+                        <select id="fiatSelect" onchange="selectFiat()" style="display:inline; width:125px;" class="form-control">
+                          <option value="0">ETH</option>
+                          <option value="1" selected>ETH & USD</option>
+                          <option value="2">ETH & EUR</option>
+                        </select>
+                      </li>
+                      Price estimate:
+                      <li>
+                        <select id="priceSelect" onchange="selectPrice()" style="display:inline; width:125px;" class="form-control">
+                          <option value="0" selected>Highest Bid</option>
+                          <option value="1">Lowest Ask</option>
+                        </select>
+                      </li>
                   </ul>
                 </div>
               </div>

@@ -734,18 +734,30 @@
 
 				// internal tx (withdraw or unwrap ETH)
 				if (to === myAddr && !contract && from !== _delta.config.contractKyberAddr) {
+					var trans = undefined;
 					if (_delta.isExchangeAddress(from)) {
 						var val = _util.weiToEth(tx.value);
-						var trans = createOutputTransaction('Withdraw', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
-						if (trans && !outputHashes[trans.Hash]) {
-							outputHashes[trans.Hash] = trans;
-						}
+						trans = createOutputTransaction('Withdraw', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
 					} else if (_util.isWrappedETH(tx.from)) {
 						var val = _util.weiToEth(tx.value);
-						var trans = createOutputTransaction('Unwrap ETH', _delta.setToken(tx.from), val, _delta.config.tokens[0], val, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
-						if (trans && !outputHashes[trans.Hash]) {
-							outputHashes[trans.Hash] = trans;
+						trans = createOutputTransaction('Unwrap ETH', _delta.setToken(tx.from), val, _delta.config.tokens[0], val, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+					} else if (val.greaterThan(0)) {
+						let amount = _util.weiToEth(val, undefined);
+
+						let exchange = '';
+						//Ether transfer
+						if (tx.input !== '0x') {
+							exchange = 'unknown ';
 						}
+
+						if (to === myAddr) {
+							trans = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+						} else if (from === myAddr) {
+							trans = createOutputTransaction('Out', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+						}
+					}
+					if (trans && trans.Hash && !outputHashes[trans.Hash]) {
+						outputHashes[trans.Hash] = trans;
 					}
 				}
 				// token deposit/withdraw, trades, cancels

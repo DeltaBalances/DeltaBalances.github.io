@@ -484,7 +484,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 var exchange = '';
 
                 if (unpacked.name === 'deposit') {
-                    rawVal = tx.value;
+                    rawVal = new BigNumber(tx.value);
                     if (!utility.isWrappedETH(tx.to) && !badFromTo) {
                         type = 'Deposit';
                         let addrName = this.addressName(tx.to);
@@ -542,7 +542,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     return obj;
                 }
             }
-            else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken') {
+            else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || /* enclaves */ unpacked.name === 'withdrawBoth' || unpacked.name === 'depositBoth') {
                 var token = this.setToken(unpacked.params[0].value);
                 if (token && token.addr) {
                     var unlisted = token.unlisted;
@@ -561,7 +561,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         exchange = addrName;
                     }
 
-                    if (unpacked.name === 'withdrawToken') {
+                    if (unpacked.name === 'withdrawToken' || unpacked.name === 'withdrawBoth') {
                         type = 'Withdraw';
                         if (exchange) {
                             note = 'Request the ' + exchange + 'contracy to withdraw ' + token.name;
@@ -586,6 +586,23 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'amount': val,
                         'unlisted': unlisted,
                     };
+
+                    //enclaves dex , move tokens and ETH
+                    if (unpacked.name === 'withdrawBoth' || unpacked.name === 'depositBoth') {
+                        obj.type = 'Token & ETH ' + type;
+                        obj.base = this.setToken(this.config.ethAddr);
+
+
+                        let rawEthVal = new BigNumber(0);
+                        if (unpacked.name === 'withdrawBoth') {
+                            rawEthVal = new BigNumber(unpacked.params[2].value);
+                        } else {
+                            rawEthVal = new BigNumber(tx.value);
+                        }
+                        let ethVal = utility.weiToEth(rawEthVal);
+                        obj.baseAmount = ethVal;
+                    }
+
                     return obj;
                 }
             }
@@ -905,8 +922,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 };
                 return obj;
             }
-            // etherdelta/decentrex/tokenstore use 11, idex has 4
-            else if (!badFromTo && unpacked.name === 'trade' && (unpacked.params.length == 11 || unpacked.params.length == 4)) {
+            // etherdelta/decentrex/tokenstore use 11, idex has 4, enclaves has 12
+            else if (!badFromTo && (unpacked.name === 'trade' && (unpacked.params.length == 11 || unpacked.params.length == 12 || unpacked.params.length == 4) || unpacked.name === 'tradeEtherDelta')) {
 
                 let idex = false;
                 //make idex trades fit the old etherdelta format
@@ -1684,8 +1701,8 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
     else if (lcAddr === this.config.contractBancorQuickAddr || lcAddr === this.config.contractBancorQuick2Addr) {
         return 'BancorQuick ' + (showAddr ? lcAddr : '');
     }
-    else if (lcAddr === this.config.contractEnclavesAddr) {
-        return 'EnclavesDex ' + (showAddr ? lcAddr : '');
+    else if (lcAddr === this.config.contractEnclavesAddr || lcAddr === this.config.contractEnclaves2Addr) {
+        return 'Enclaves ' + (showAddr ? lcAddr : '');
     }
     else if (lcAddr == this.config.contractDecentrexAddr) {
         return 'Decentrex ' + (showAddr ? lcAddr : '');
@@ -1733,6 +1750,8 @@ DeltaBalances.prototype.isExchangeAddress = function (addr) {
         || lcAddr === this.config.contractAirSwapAddr
         || lcAddr === this.config.contractKyberAddr
         || lcAddr === this.config.contractOasisDexAddr
+        || lcAddr === this.config.contractEnclavesAddr
+        || lcAddr === this.config.contractEnclaves2Addr
     ) {
         return true;
     } else {
@@ -1749,7 +1768,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
     try {
         if (unpacked && unpacked.events) {
 
-            // etherdelta, decentrex, tokenstore, idex?
+            // etherdelta, decentrex, tokenstore, enclaves
             if (unpacked.name == 'Trade' && (unpacked.events.length == 6 || unpacked.events.length == 7)) {
                 var tradeType = 'Sell';
                 var token = undefined;
@@ -1786,6 +1805,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
 
                 var exchange = '';
                 let addrName = this.addressName(unpacked.address);
+
                 if (addrName.indexOf('0x') === -1) {
                     exchange = addrName;
                 }
@@ -1831,6 +1851,16 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
 
                     if (exchange == 'EtherDelta ' || exchange == 'Decentrex ' || exchange == 'Token store ') {
                         takerFee = new BigNumber(3000000000000000); //0.3% fee in wei
+                    } else if (exchange == 'Enclaves ') {
+                        let exchangeNum = Number(unpacked.events[6].value);
+
+                        //etherdelta proxy
+                        if (exchangeNum == 1) {
+                            takerFee = new BigNumber(3000000000000000); //0.3% fee in wei
+                        } else if (exchangeNum == 0) {
+                            //enclaves itself
+                            takerFee = new BigNumber(2000000000000000); //0.2% fee in wei
+                        }
                     }
 
                     let fee = new BigNumber(0);
@@ -2366,7 +2396,9 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     return obj;
                 }
             }
+            //etherdelta/decentrex, idex, enclaves 
             else if (unpacked.events.length >= 4 && (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw')) {
+
                 var type = unpacked.name;
                 var token = this.setToken(unpacked.events[0].value);
                 var user = unpacked.events[1].value;
@@ -2374,6 +2406,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var rawBalance = unpacked.events[3].value;
                 var exchange = '';
                 let addrName = this.addressName(unpacked.address);
+
                 if (addrName.indexOf('0x') === -1) {
                     exchange = addrName;
                 }
@@ -2459,7 +2492,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     return obj;
                 }
             }
-            // kyber cancel
+            // etherdelta, decentrex, kyber, enclaves   cancel
             else if (unpacked.name == 'Cancel') {
                 var cancelType = 'sell';
                 var token = undefined;

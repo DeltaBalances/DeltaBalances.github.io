@@ -795,9 +795,13 @@
 									}
 
 								}
-								else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken') {
+								else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || unpacked.name === 'depositBoth') {
 									obj.type = obj.type.replace('Token ', '');
-									trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+									if (unpacked.name !== 'depositBoth') {
+										trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+									} else {
+										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+									}
 								} else if (unpacked.name === 'adminWithdraw') {
 
 									//this is only in etherscan tx events
@@ -822,7 +826,7 @@
 									}
 									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, cancelAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 								}
-								else if (unpacked.name === 'trade' || unpacked.name === 'fill') {
+								else if (unpacked.name === 'trade' || unpacked.name === 'fill' || unpacked.name === 'tradeEtherDelta') {
 
 									if (unpacked.name === 'trade' && unpacked.params.length === 7) {
 										//kyber only

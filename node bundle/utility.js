@@ -173,7 +173,7 @@ module.exports = (config) => {
   };
 
   utility.initABIs = function () {
-    Decoder.addABI(bundle.DeltaBalances.config.etherDeltaAbi);
+
     Decoder.addABI(bundle.DeltaBalances.config.tokenAbi);
     Decoder.addABI(bundle.DeltaBalances.config.token2Abi);
     Decoder.addABI(bundle.DeltaBalances.config.tokenStoreAbi);
@@ -184,6 +184,11 @@ module.exports = (config) => {
     Decoder.addABI(bundle.DeltaBalances.config.kyberAbi);
     Decoder.addABI(bundle.DeltaBalances.config.bancorAbi);
     Decoder.addABI(bundle.DeltaBalances.config.bancor2Abi);
+    Decoder.addABI(bundle.DeltaBalances.config.enclavesAbi);
+    Decoder.addABI(bundle.DeltaBalances.config.enclaves2Abi);
+    // etherdelta last to fix overloading
+    Decoder.addABI(bundle.DeltaBalances.config.etherDeltaAbi);
+
     bundle.DeltaBalances.config.methodIDS = true;
   }
 

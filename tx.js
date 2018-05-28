@@ -547,41 +547,42 @@
 				var outputs = [];
 				var unknownEvents = 0;
 				var unpackedLogs = _util.processLogs(outputLogs);
+				if (unpackedLogs) {
+					for (let i = 0; i < unpackedLogs.length; i++) {
 
-				for (let i = 0; i < unpackedLogs.length; i++) {
+						let unpacked = unpackedLogs[i];
 
-					let unpacked = unpackedLogs[i];
-
-					if (!unpacked) {
-						unknownEvents++;
-						continue;
-					} else {
-
-						let myAddr = tx.from;
-						if (tx.to.toLowerCase() !== unpacked.address.toLowerCase() && unpacked.name !== 'Transfer' && unpacked.name !== 'Approve')
-							myAddr = tx.to.toLowerCase();
-						let obj = _delta.processUnpackedEvent(unpacked, myAddr);
-						if (obj && !obj.error) {
-							if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
-								unknownToken = true;
-							if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion') {
-								obj.feeToken = obj.feeCurrency;
-								delete obj.feeCurrency;
-								delete obj.transType;
-								delete obj.tradeType;
-							} else if (unpacked.name === 'LogFill') {
-								delete obj.transType;
-								delete obj.tradeType;
-								delete obj.relayer;
-								obj.feeToken = obj.feeCurrency;
-								delete obj.feeCurrency;
-							} else if (unpacked.name === 'LogCancel') {
-								delete obj.relayer;
-							}
-							outputs.push(obj);
-						} else {
+						if (!unpacked) {
 							unknownEvents++;
 							continue;
+						} else {
+
+							let myAddr = tx.from;
+							if (tx.to.toLowerCase() !== unpacked.address.toLowerCase() && unpacked.name !== 'Transfer' && unpacked.name !== 'Approve')
+								myAddr = tx.to.toLowerCase();
+							let obj = _delta.processUnpackedEvent(unpacked, myAddr);
+							if (obj && !obj.error) {
+								if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
+									unknownToken = true;
+								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion') {
+									obj.feeToken = obj.feeCurrency;
+									delete obj.feeCurrency;
+									delete obj.transType;
+									delete obj.tradeType;
+								} else if (unpacked.name === 'LogFill') {
+									delete obj.transType;
+									delete obj.tradeType;
+									delete obj.relayer;
+									obj.feeToken = obj.feeCurrency;
+									delete obj.feeCurrency;
+								} else if (unpacked.name === 'LogCancel') {
+									delete obj.relayer;
+								}
+								outputs.push(obj);
+							} else {
+								unknownEvents++;
+								continue;
+							}
 						}
 					}
 				}
@@ -736,8 +737,6 @@
 		var tradeCount = 0;
 		var zeroDecWarning = '';
 		if (transaction.output) {
-			// TODO fix this etherdelta only?
-			// output price can get wrong decimals if trading like 15e-10, so get price from input if possible. 
 			if (transaction.input && transaction.output.length == 1 && transaction.output.price) {
 				//transaction.output[0].price = transaction.input[0].price;
 				if (transaction.input[0]['order size'].greaterThan(transaction.output[0].amount)) {
@@ -749,12 +748,20 @@
 			//var received = _delta.web3.toBigNumber(0);
 
 			for (var i = 0; i < transaction.output.length; i++) {
-				if (transaction.output[i].type == 'Taker Buy') {
+				if (transaction.output[i].type == 'Taker Buy' || transaction.output[i].type == 'Taker Sell') {
 					if (transaction.output[i].token.decimals == 0 && !zeroDecWarning) {
 						zeroDecWarning = "<strong>Note: </strong> " + transaction.output[i].token.name + " has 0 decimals precision. Numbers might be lower than expected due to rounding. <br>";
 					}
 					tradeCount++;
-					sum += "Bought " + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " " + transaction.output[i].base.name + " each, " + transaction.output[i].baseAmount + " " + transaction.output[i].base.name + " in total. <br>";
+					let typeWord = "Bought ";
+					if (transaction.output[i].type == 'Taker Sell') {
+						typeWord = "Sold ";
+					}
+
+					// add description bought/sold  if not internal enclaves order
+					if (transaction.output[i].buyer !== _delta.config.contractEnclavesAddr && transaction.output[i].seller !== _delta.config.contractEnclavesAddr) {
+						sum += typeWord + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " " + transaction.output[i].base.name + " each, " + transaction.output[i].baseAmount + " " + transaction.output[i].base.name + " in total. <br>";
+					}
 					//spent = transaction.output[i].ETH.plus(spent);
 				}
 				else if (transaction.output[i].type == 'Taker Sell') {
@@ -894,6 +901,8 @@
 			else if (uniqueType.indexOf('cancel') !== -1) {
 				uniqueType = 'cancel';
 				wideOutput = true;
+			} else if (uniqueType === 'deposit' || uniqueType === 'token deposit' || uniqueType === 'withdraw' || uniqueType === 'token withdraw') {
+				uniqueType = 'depositWithdraw';
 			}
 			else if (uniqueType.indexOf(' up to') !== -1 || uniqueType.indexOf('offer') !== -1) {
 				wideOutput = true;

@@ -4025,6 +4025,12 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
     else if (lcAddr === this.config.contractEnclavesAddr || lcAddr === this.config.contractEnclaves2Addr) {
         return 'Enclaves ' + (showAddr ? lcAddr : '');
     }
+    else if (lcAddr === this.config.contractDexyAddr || lcAddr === this.config.contractDexy2Addr) {
+        return 'DEXY ' + (showAddr ? lcAddr : '');
+    }
+    else if (lcAddr == this.config.contractEthenAddr) {
+        return 'Ethen ' + (showAddr ? lcAddr : '');
+    }
     else if (lcAddr == this.config.contractDecentrexAddr) {
         return 'Decentrex ' + (showAddr ? lcAddr : '');
     } else if (lcAddr == this.config.idexAdminAddr) {
@@ -4072,7 +4078,10 @@ DeltaBalances.prototype.isExchangeAddress = function (addr) {
         || lcAddr === this.config.contractKyberAddr
         || lcAddr === this.config.contractOasisDexAddr
         || lcAddr === this.config.contractEnclavesAddr
-        || lcAddr === this.config.contractEnclaves2Addr
+        //    || lcAddr === this.config.contractEnclaves2Addr
+        //    || lcAddr === this.config.contractDexyAddr
+        //    || lcAddr === this.config.contractDexy2Addr
+        //    || lcAddr === this.config.contractEthenAddr
     ) {
         return true;
     } else {
@@ -27164,6 +27173,11 @@ module.exports = (config) => {
     Decoder.addABI(bundle.DeltaBalances.config.bancor2Abi);
     Decoder.addABI(bundle.DeltaBalances.config.enclavesAbi);
     Decoder.addABI(bundle.DeltaBalances.config.enclaves2Abi);
+
+    //Decoder.addABI(bundle.DeltaBalances.config.ethenAbi);
+    //Decoder.addABI(bundle.DeltaBalances.config.dexyAbi);
+    //Decoder.addABI(bundle.DeltaBalances.config.dexy2Abi);
+
     // etherdelta last to fix overloading
     Decoder.addABI(bundle.DeltaBalances.config.etherDeltaAbi);
 

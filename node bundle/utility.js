@@ -186,6 +186,11 @@ module.exports = (config) => {
     Decoder.addABI(bundle.DeltaBalances.config.bancor2Abi);
     Decoder.addABI(bundle.DeltaBalances.config.enclavesAbi);
     Decoder.addABI(bundle.DeltaBalances.config.enclaves2Abi);
+
+    //Decoder.addABI(bundle.DeltaBalances.config.ethenAbi);
+    //Decoder.addABI(bundle.DeltaBalances.config.dexyAbi);
+    //Decoder.addABI(bundle.DeltaBalances.config.dexy2Abi);
+
     // etherdelta last to fix overloading
     Decoder.addABI(bundle.DeltaBalances.config.etherDeltaAbi);
 

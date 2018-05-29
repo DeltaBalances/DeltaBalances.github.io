@@ -207,6 +207,18 @@ module.exports = {
     userIndexed: true,
     userTopic: 1
   },
+  historyEnclaves: {
+    exchange: 'Enclaves',
+    exchangeAddr: 'contractEnclavesAddr',
+    minBlock: 5446248,
+    maxBlock: undefined,
+    tradeTopic: '0x7b6c917cd708d6f749ab415a0f1aa5ced6110d03141d28e5b75e216ecb4e79f7', // Trade
+    withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
+    depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
+    showRelayers: false,
+    createTx: '0x9f314254a972db7d6967d929c3e576240b2bbfb7b24ff5b38ca73f83cb49c072',
+    userIndexed: false,
+  },
   wrappedETH: {
     "0x0000000000000000000000000000000000000000": 1, // EtherDelta, IDEX, tokenStore, Decentrex  reserved for ETH
     "0xe495bcacaf29a0eb00fb67b86e9cd2a994dd55d8": 1, // 0x style ?, deprecated

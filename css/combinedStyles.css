@@ -762,6 +762,10 @@ label.exchange-box div.box-header label {
     font-size:70%;
 }
 
+.text75 {
+  font-size:75%;
+}
+
 .btn-multi.active {
     border-bottom: none;
     background-color: #FFFFFF;

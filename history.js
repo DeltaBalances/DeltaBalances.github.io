@@ -637,12 +637,17 @@
 				let myTopicAddr = "0x000000000000000000000000" + publicAddr.slice(2).toLowerCase();
 				//for Kyber, add user topic to search for speedup
 				topics = [historyConfig.tradeTopic, myTopicAddr];
-			}
+			} 
 			else
 				topics = [historyConfig.tradeTopic];
 		}
 		else if (typeMode == 1) {
-			topics = [[historyConfig.depositTopic, historyConfig.withdrawTopic]];
+			if (historyConfig !== _delta.config.historyEnclaves) {
+				topics = [[historyConfig.depositTopic, historyConfig.withdrawTopic]];
+			} else {
+				let myTopicAddr = "0x000000000000000000000000" + publicAddr.slice(2).toLowerCase();
+				topics = [[historyConfig.depositTopic, historyConfig.withdrawTopic], undefined, myTopicAddr];
+			}
 		}
 		else {
 			topics = [[historyConfig.tradeTopic, historyConfig.depositTopic, historyConfig.withdrawTopic]];

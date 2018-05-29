@@ -1298,6 +1298,10 @@
 		balanceHeaders['USD'] = showFiat == 1;
 		balanceHeaders['EUR'] = showFiat == 2;
 
+		//count number off active exchanges
+		let numColumns = Object.values(exchanges).reduce((sum, ex) => { if(ex.enabled) return sum+1; else return sum;}, 0);
+		balanceHeaders['Total'] = numColumns > 1;
+
 		buildHtmlTable('#resultTable', filtered, loaded, balanceHeaders);
 
 		trigger();
@@ -1606,9 +1610,9 @@
 			var allBal = lastResult;
 			allBal = allBal.filter((x) => { return x.Total > 0; });
 
-			let bidText = 'EtherDelta Bid (ETH)';
+			let bidText = 'Bid (ETH)';
 			if (useAsk)
-				bidText = 'EtherDelta Ask (ETH)';
+				bidText = 'Ask (ETH)';
 
 			var AA = ['Token'];
 			Object.keys(exchanges).forEach(function (key) {
@@ -1644,7 +1648,7 @@
 
 				for (let j = 0; j < arr.length; j++) {
 					//remove exponential notation
-					if (A[0][j] == 'Wallet' || A[0][j] == 'EtherDelta' || A[0][j] == 'IDEX' || A[0][j] == 'Token store' || A[0][j] == 'Enclaves' || A[0][j] == 'Decentrex' || A[0][j] == 'Total' || A[0][j] == 'Estimated value (ETH)' || A[0][j] == 'EtherDelta Bid (ETH)' || A[0][j] == 'EtherDelta Ask (ETH)') {
+					if (A[0][j] == 'Wallet' || A[0][j] == 'EtherDelta' || A[0][j] == 'IDEX' || A[0][j] == 'Token store' || A[0][j] == 'Enclaves' || A[0][j] == 'Decentrex' || A[0][j] == 'Total' || A[0][j] == 'Estimated value (ETH)' || A[0][j] == 'Bid (ETH)' || A[0][j] == 'Ask (ETH)') {
 						if (arr[j] != '' && arr[j] != ' ')
 							arr[j] = _util.exportNotation(arr[j]);
 					}

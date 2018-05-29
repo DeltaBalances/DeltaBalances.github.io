@@ -764,14 +764,6 @@
 					}
 					//spent = transaction.output[i].ETH.plus(spent);
 				}
-				else if (transaction.output[i].type == 'Taker Sell') {
-					if (transaction.output[i].token.decimals == 0 && !zeroDecWarning) {
-						zeroDecWarning = "<strong>Note: </strong> " + transaction.output[i].token.name + " has 0 decimals precision. Numbers might be lower than expected due to rounding. <br>"
-					}
-					tradeCount++;
-					sum += "Sold " + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " " + transaction.output[i].base.name + " each, " + transaction.output[i].baseAmount + " " + transaction.output[i].base.name + " in total. <br>";
-					//	received = transaction.output[i].ETH.plus(received);
-				}
 				else if (transaction.output[i].type == "Deposit" || transaction.output[i].type == "Token Deposit") {
 					sum += "Deposited " + transaction.output[i].amount + " " + transaction.output[i].token.name + ", new exchange balance: " + transaction.output[i].balance + " " + transaction.output[i].token.name + '<br>';
 				}

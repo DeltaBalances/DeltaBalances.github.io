@@ -984,13 +984,11 @@
 					if (keys[i] == 'token' || keys[i] == 'base' || keys[i] == 'feeToken' || keys[i] == 'FeeToken ' || keys[i] == 'FeeToken' || keys[i] == 'token In' || keys[i] == 'token Out') {
 
 						let token = cellValue;
-						if (token) {
-							let popoverContents = _delta.makePopoverContents(token);
-							let labelClass = 'label-warning';
-							if (!token.unlisted && !token.unknown)
-								labelClass = 'label-primary';
-
-							cellValue = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + '</a>';
+						if(token) {
+							let popover = _delta.makeTokenPopover(token);
+							cellValue = popover;
+						} else {
+							cellValue = "";
 						}
 					}
 					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice') {

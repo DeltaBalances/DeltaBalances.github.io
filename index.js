@@ -1528,12 +1528,12 @@
 				}
 				else if (head == 'Name') {
 					let token = _delta.uniqueTokens[myList[i].Address];
-					let popoverContents = _delta.makePopoverContents(token);
-					let labelClass = 'label-warning';
-					if (!myList[i].Unlisted)
-						labelClass = 'label-primary';
-
-					row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + cellValue + '" data-container="body" data-content=\'' + popoverContents + '\'>' + cellValue + '</a>'));
+					if(token) {
+						let popover = _delta.makeTokenPopover(token);
+						row$.append($('<td/>').html(popover));
+					} else {
+						row$.append($('<td/>').html(""));
+					}
 				}
 				else {
 					row$.append($('<td/>').html(cellValue));

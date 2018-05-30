@@ -1205,15 +1205,11 @@
 				else if (head == 'Token' || head == 'Base') {
 
 					let token = cellValue;
-					if (token) {
-						let popoverContents = _delta.makePopoverContents(token);
-						let labelClass = 'label-warning';
-						if (!token.unlisted)
-							labelClass = 'label-primary';
-
-						row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + '</a>'));
+					if(token) {
+						let popover = _delta.makeTokenPopover(token);
+						row$.append($('<td/>').html(popover));
 					} else {
-						row$.append('<td> </td>');
+						row$.append($('<td/>').html(""));
 					}
 				}
 				else if (head == 'Type') {

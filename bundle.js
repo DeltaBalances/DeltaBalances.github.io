@@ -2590,6 +2590,9 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
                 "unlisted": unlisted,
                 "decimals": x.decimal,
             };
+            if (x.name) {
+                token.name2 = utility.escapeHtml(x.name);
+            }
             if (x.Binance) {
                 token.Binance = x.Binance;
                 token.unlisted = false;
@@ -5221,35 +5224,53 @@ DeltaBalances.prototype.startDeltaBalances = function startDeltaBalances(wait, c
     });
 };
 
-DeltaBalances.prototype.makePopoverContents = function (token) {
-    let contents = 'PlaceHolder';
-    try {
-        if (token && token.addr) {
-            if (!utility.isWrappedETH(token.addr)) {
-                if (!this.uniqueTokens[token.addr]) {
-                    contents = "Token unknown to DeltaBalances <br> Contract: " + utility.addressLink(token.addr, true, true);
-                } else {
-                    contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals;
-                }
-                contents += '<br> Trade on: <ul style="list-style-type: none;"><li>'
-                    + utility.binanceURL(token, true)
-                    + '</li><li>' + utility.etherDeltaURL(token, true)
-                    + '</li><li>' + utility.forkDeltaURL(token, true)
-                    + '</li><li>' + utility.tokenStoreURL(token, true)
-                    + '</li><li>' + utility.idexURL(token, true)
-                    + '</li><li>' + utility.ddexURL(token, true)
-                    + '</li></ul>';
+DeltaBalances.prototype.makeTokenPopover = function (token) {
 
-            } else if (token.addr == this.config.ethAddr) {
-                contents = "Ether (not a token)<br> Decimals: 18";
-            } else {
-                contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
-            }
+    if (token) {
+        let title = token.name;
+        if (token.name2) {
+            title += ' - ' + token.name2;
         }
-    } catch (e) {
-        console.log('error making popover ' + e);
+
+        let labelClass = 'label-warning';
+        if (!token.unlisted)
+            labelClass = 'label-primary';
+
+        let contents = 'PlaceHolder';
+        try {
+            if (token && token.addr) {
+                if (!utility.isWrappedETH(token.addr)) {
+                    if (!this.uniqueTokens[token.addr]) {
+                        contents = "Token unknown to DeltaBalances <br> Contract: " + utility.addressLink(token.addr, true, true);
+                    } else {
+                        contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals;
+                    }
+                    contents += '<br> Trade on: <ul style="list-style-type: none;"><li>'
+                        + utility.binanceURL(token, true)
+                        + '</li><li>' + utility.etherDeltaURL(token, true)
+                        + '</li><li>' + utility.forkDeltaURL(token, true)
+                        + '</li><li>' + utility.tokenStoreURL(token, true)
+                        + '</li><li>' + utility.idexURL(token, true)
+                        + '</li><li>' + utility.ddexURL(token, true)
+                        + '</li></ul>';
+
+                } else if (token.addr == this.config.ethAddr) {
+                    contents = "Ether (not a token)<br> Decimals: 18";
+                } else {
+                    contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
+                }
+            }
+        } catch (e) {
+            console.log('error making popover ' + e);
+        }
+
+        let popover = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + title + '" data-container="body" data-content=\'' + contents + '\'>' + token.name + '</a>';
+        return popover;
+    } else {
+        console.log('undefined token in popover');
+        return "";
     }
-    return contents;
+
 };
 
 const deltaBalances = new DeltaBalances();

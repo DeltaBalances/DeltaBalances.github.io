@@ -637,7 +637,7 @@
 				let myTopicAddr = "0x000000000000000000000000" + publicAddr.slice(2).toLowerCase();
 				//for Kyber, add user topic to search for speedup
 				topics = [historyConfig.tradeTopic, myTopicAddr];
-			} 
+			}
 			else
 				topics = [historyConfig.tradeTopic];
 		}
@@ -1137,14 +1137,8 @@
 						if (token.name == "") {
 							row$.append($('<td/>').html(""));
 						} else {
-							let popoverContents = _delta.makePopoverContents(token);
-							if (cellValue) {
-								let labelClass = 'label-warning';
-								if (!token.unlisted)
-									labelClass = 'label-primary';
-
-								row$.append($('<td/>').html('<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + token.name + '" data-container="body" data-content=\'' + popoverContents + '\'>' + token.name + '</a>'));
-							}
+							let popover = _delta.makeTokenPopover(token);
+							row$.append($('<td/>').html(popover));
 						}
 					}
 					else {

@@ -13,7 +13,7 @@
 	<!-- Bootstrap js -->
 	<script type="text/javascript" src="../js/jquery-3.2.1.min.js"></script>
 	<!--<script src="js/bootstrap.min.js"></script> -->
-	
+
 	<script src="../backupTokens.js"></script>
 
 	<!-- Bootstrap, bootstrap-theme, fontawesome & custom css -->
@@ -23,99 +23,107 @@
 
 <body>
 	A quick script to get a big list of tokens
-	<ul> 
-	<li> myetherwallet's ethTokens</li>
-	<li> myCrypto's ethTokens</li>
-	<li> Tokens deposited in exchange contracts accoring to ethplorer.io (Filter tokens on >=10 deposited and >=10 token holders.)</li>
+	<ul>
+		<li> myetherwallet's ethTokens</li>
+		<li> myCrypto's ethTokens</li>
+		<li> Tokens deposited in exchange contracts accoring to ethplorer.io (Filter tokens on >=10 deposited and >=10 token holders.)</li>
 
 	</ul>
-	
-	
+
+
 	<script>
 		var customTokens = {};
-		
+
 		function parseMewTokens(array) {
 			for (var i = 0; i < array.length; i++) {
 				var customToken = array[i];
 				if (customToken) {
 					customToken.symbol = escapeHtml(customToken.symbol);
-                    customToken.decimal = Number(customToken.decimal);
-					if(customToken.type)
-						delete customToken.type;	
-					customToken.address = customToken.address.toLowerCase();		
+					customToken.decimal = Number(customToken.decimal);
+					if (customToken.type)
+						delete customToken.type;
+					customToken.address = customToken.address.toLowerCase();
 					if (!customTokens[customToken.address]) {
 						customTokens[customToken.address] = customToken;
 					}
-				}			
+				}
 			}
 		}
-		
+
 		function parseEthplorer(response) {
 			for (let i = 0; i < response.tokens.length; i++) {
 				let tok = response.tokens[i].tokenInfo;
 				let addr = tok.address.toLowerCase();
 				if (!customTokens[addr] && tok.symbol && response.tokens[i].balance > 10 && tok.holdersCount > 10 && response.tokens[i].balance < Number(tok.totalSupply)) {
-					customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: Number(tok.decimals) };
-				} 
-                
-                if(customTokens[addr] && customTokens[addr].decimal !== tok.decimals) {
-                    customTokens[addr].decimal = Number(tok.decimals);
-                }
-                
-              /*  if(customTokens[addr] && customTokens[addr].symbol !== tok.symbol) {
-                    customTokens[addr].fixSymbol = tok.symbol;
-                }
-                */
+
+					if (tok.symbol !== tok.name) {
+						customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: Number(tok.decimals), name: escapeHtml(tok.name) };
+					} else {
+						customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: Number(tok.decimals) };
+					}
+				}
+
+				if (customTokens[addr] && !customTokens[addr].name && tok.symbol !== tok.name) {
+					customTokens[addr].name = escapeHtml(tok.name);
+				}
+
+				if (customTokens[addr] && customTokens[addr].decimal !== tok.decimals) {
+					customTokens[addr].decimal = Number(tok.decimals);
+				}
+
+				/*  if(customTokens[addr] && customTokens[addr].symbol !== tok.symbol) {
+					  customTokens[addr].fixSymbol = tok.symbol;
+				  }
+				  */
 			}
 		}
-		
+
 		//parse existing custom tokens from offlineCustomTokens (backupTokens.js)
 		parseMewTokens(offlineCustomTokens);
-		
-		
+
+
 		//get list of tokens from myetherwallet & mycrypto
 		function getCustomTokens() {
-		
+
 			$('#output').html('loading.... (slow)');
 			let mewTokens = undefined;
 			let mcTokens = undefined;
 			let ethplorerED = undefined;
 			let ethploredIdex = undefined;
 			let loaded = 0;
-			
+
 			function done() {
-			
-				if(loaded >= 4)
-				{
-					if(mewTokens && mcTokens && ethplorerED && ethploredIdex) {
+
+				if (loaded >= 4) {
+					if (mewTokens && mcTokens && ethplorerED && ethploredIdex) {
 						parseMewTokens(mewTokens);
 						parseMewTokens(mcTokens);
 						parseEthplorer(ethplorerED);
-						parseEthplorer(ethploredIdex);	
+						parseEthplorer(ethploredIdex);
 
 						let customTokensList = Object.values(customTokens);
-						
-						customTokensList = customTokensList.sort(function(a,b){
+
+						customTokensList = customTokensList.sort(function (a, b) {
 							return (a.symbol + a.address).localeCompare(b.symbol + b.address);
 						})
-						
+
 						let outputString = "[<br>";
-						for(let i = 0; i<customTokensList.length; i++) {
+						for (let i = 0; i < customTokensList.length; i++) {
 							let str = JSON.stringify(customTokensList[i]);
 							outputString += str + ",<br>";
 						}
 						outputString += "]";
-						outputString = outputString.replace(/"address"/g , "address");
-                        outputString = outputString.replace(/"symbol"/g, 'symbol');
+						outputString = outputString.replace(/"address"/g, "address");
+						outputString = outputString.replace(/"symbol"/g, 'symbol');
 						outputString = outputString.replace(/"decimal"/g, 'decimal');
-                        outputString = outputString.replace(/"Binance"/g, 'Binance');
-                        outputString = outputString.replace(/{ /g, '{');
-                        outputString = outputString.replace(/ }/g, '}');
-                        outputString = outputString.replace(/, /g, ',');
-                        outputString = outputString.replace(/: /g, ':');
-						
+						outputString = outputString.replace(/"Binance"/g, 'Binance');
+						outputString = outputString.replace(/{ /g, '{');
+						outputString = outputString.replace(/ }/g, '}');
+						outputString = outputString.replace(/, /g, ',');
+						outputString = outputString.replace(/: /g, ':');
+
 						$('#output').html(outputString);
-						
+
 					} else {
 						$('#output').html('something went wrong');
 					}
@@ -123,51 +131,51 @@
 					$('#output').html('loading... , loaded ' + loaded + '/4');
 				}
 			}
-			
-			
-			$.getJSON('https://rawgit.com/kvhnuke/etherwallet/mercury/app/scripts/tokens/ethTokens.json').done(function(data) {
+
+
+			$.getJSON('https://rawgit.com/kvhnuke/etherwallet/mercury/app/scripts/tokens/ethTokens.json?' + Date.now()).done(function (data) {
 				loaded++;
 				mewTokens = data;
 				done();
-			}).fail(function() {
+			}).fail(function () {
 				loaded++;
 				done();
 			});
-		
-			$.getJSON('https://rawgit.com/MyCryptoHQ/mycrypto.com/master/app/scripts/tokens/ethTokens.json').done(function(data) {		
+
+			$.getJSON('https://rawgit.com/MyCryptoHQ/mycrypto.com/master/app/scripts/tokens/ethTokens.json?' + Date.now()).done(function (data) {
 				loaded++;
 				mcTokens = data;
 				done();
-			}).fail(function() {
+			}).fail(function () {
 				loaded++;
 				done();
 			});
-			
-			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey=freekey').done(function(data) {		
+
+			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey=freekey').done(function (data) {
 				loaded++;
-				if(data && data.tokens)
+				if (data && data.tokens)
 					ethplorerED = data;
 				done();
-			}).fail(function() {
+			}).fail(function () {
 				loaded++;
 				done();
 			});
 
-			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208?apiKey=freekey').done(function(data) {		
+			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208?apiKey=freekey').done(function (data) {
 				loaded++;
-				if(data && data.tokens)
+				if (data && data.tokens)
 					ethploredIdex = data;
 				done();
-			}).fail(function() {
+			}).fail(function () {
 				loaded++;
 				done();
 			});
 
-			
-			
-		
+
+
+
 		}
-		
+
 
 		function escapeHtml(text) {
 			var map = {

@@ -85,7 +85,7 @@ let tokenBlacklist = {
 /* 
 Offline backup of tokens from MyEtherWallet,Mycrypto and Ethplorer.io
 Generated with tokengenerator.html
-2018-05-30
+2018-05-29
 */
 
 let offlineCustomTokens = [
@@ -2307,6 +2307,7 @@ let offlineCustomTokens = [
   {symbol:"NTC",address:"0xaebe5b3780860147de62bc67339f0386c4a13d87",decimal:18,name:"NTer Coin"},
   {symbol:"NTD",address:"0x290d7fa908f9b8fe86ac872f6dd417352b50f1ac",decimal:0,name:"NTD Token"},
   {symbol:"NTD",address:"0x7b05a9901a06e77a8462a5f532f388ad406c78c4",decimal:18,name:"NintendoCoin"},
+  {symbol:"NTICP",address:"0x798f81c00c0a1122370debc1e4df9567f3893e11",decimal:18,name:"Nitecoinpay"},
   {symbol:"NTK",address:"0x5d4d57cd06fa7fe99e26fdc481b468f77f05073c",decimal:18,name:"Netkoin"},
   {symbol:"NTK",address:"0x69beab403438253f13b6e92db91f7fb849258263",decimal:18,name:"NeuroToken",IDEX:"NTK"},
   {symbol:"NTO",address:"0x8a99ed8a1b204903ee46e733f2c1286f6d20b177",decimal:18,name:"Fujinto"},

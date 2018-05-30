@@ -1,6 +1,6 @@
 // try to get updated token list from EtherDelta, ForkDelta and IDEX otherwise use own backup
 
-var etherDeltaConfig = offlineTokens;
+var etherDeltaConfig = { tokens: [] };
 
 // dont get live etherdelta tokens, as they haven't been changed in >3 months
 /*
@@ -13,7 +13,7 @@ try {
 	} catch (err){} 
 */
 
-var forkDeltaConfig = forkOfflineTokens;
+var forkDeltaConfig = { tokens: [] };
 try {
 
     let forkData = sessionStorage.getItem('forkTokens1');
@@ -48,7 +48,7 @@ try {
 }
 
 
-var idexConfig = idexOfflineTokens;
+var idexConfig = [];
 try {
     let idexData = sessionStorage.getItem('idexTokens1');
     // only get live tokens if we haven't saved them this session already
@@ -73,7 +73,7 @@ try {
                 let tokens = [];
                 Object.keys(data).forEach(function (key) {
                     var token = data[key];
-                    tokens.push({ name: key, decimals: token.decimals, addr: token.address.trim() });
+                    tokens.push({ name: key, decimals: token.decimals, addr: token.address.trim(), name2: token.name });
                 });
                 if (tokens && tokens.length > 0) {
                     idexConfig = tokens;
@@ -88,7 +88,7 @@ try {
     console.log('IDEX live tokens loading error ' + err);
 }
 
-var ddexConfig = ddexOfflineTokens;
+var ddexConfig = [];
 try {
 
     let ddexData = sessionStorage.getItem('ddexTokens1');
@@ -112,7 +112,7 @@ try {
         $.getJSON('https://api.ddex.io/v2/tokens', function (jsonData) {
             if (jsonData && jsonData.data && jsonData.data.tokens && jsonData.data.tokens.length > 0) {
                 ddexConfig = jsonData.data;
-                ddexConfig.tokens.map((x) => { delete x.id; delete x.name;});
+                ddexConfig.tokens.map((x) => { delete x.id; delete x.name; });
                 let string = JSON.stringify(ddexConfig.tokens);
                 sessionStorage.setItem('ddexTokens1', string);
                 localStorage.setItem('ddexTokens2', string);

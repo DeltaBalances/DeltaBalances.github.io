@@ -272,10 +272,16 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             if (x.name) {
                 token.name2 = utility.escapeHtml(x.name);
             }
-            if (x.Binance) {
-                token.Binance = x.Binance;
-                token.unlisted = false;
+
+            let listedExchanges = ['EtherDelta', 'ForkDelta', 'IDEX', 'DDEX', 'Binance'];
+            for (let i = 0; i < listedExchanges.length; i++) {
+                let exchange = listedExchanges[i];
+                if (x[exchange]) {
+                    token[exchange] = x[exchange];
+                    token.unlisted = false;
+                }
             }
+
             return token;
         } else {
             return undefined;
@@ -294,9 +300,6 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             }
 
             if (this.uniqueTokens[token.addr]) {
-                if (token.Binance) {
-                    this.uniqueTokens[token.addr].Binance = token.Binance;
-                }
                 if (!token.unlisted) {
                     this.uniqueTokens[token.addr].unlisted = false;
                 }
@@ -307,90 +310,94 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         }
     }
 
-    // note all listed ED tokens
-    for (var i = 0; i < etherDeltaConfig.tokens.length; i++) {
-        var token = etherDeltaConfig.tokens[i];
-        if (token) {
-            token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
-            token.addr = token.addr.toLowerCase();
-            token.EtherDelta = token.name;
-            token.unlisted = false;
-            this.config.tokens[i] = token;
-            if (!this.uniqueTokens[token.addr]) {
-                this.uniqueTokens[token.addr] = token;
-            } else {
-                this.uniqueTokens[token.addr].unlisted = false;
-                this.uniqueTokens[token.addr].EtherDelta = token.name;
+    //check listed tokens with updated/cached exchange listings  (not in backupTokens.js)
+
+    try {
+        // check for listed tokens at forkdelta
+        let forkTokens = [];
+        if (forkDeltaConfig && forkDeltaConfig.tokens) {
+            forkTokens = forkDeltaConfig.tokens;
+        }
+        //forkTokens = forkTokens.filter((x) => { return !(this.uniqueTokens[x.addr]) });
+        for (var i = 0; i < forkTokens.length; i++) {
+            var token = forkTokens[i];
+            if (token) {
+                token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
+                token.addr = token.addr.toLowerCase();
+                token.unlisted = false;
+                token.ForkDelta = token.name;
+
+                if (token.fullName && token.fullName !== "") {
+                    token.name2 = token.fullName;
+                }
+
+                if (this.uniqueTokens[token.addr]) {
+                    this.uniqueTokens[token.addr].ForkDelta = token.name;
+                    this.uniqueTokens[token.addr].unlisted = false;
+
+                    if (token.name2 && !this.uniqueTokens[token.addr].name2) {
+                        this.uniqueTokens[token.addr].name2 = token.name2;
+                    }
+                }
+                else {
+                    this.uniqueTokens[token.addr] = token;
+                }
             }
         }
+    } catch (e) {
+        console.log('failed to parse ForkDelta token list');
     }
 
-    // check for listed tokens at forkdelta
-    let forkTokens = [];
-    if (forkDeltaConfig && forkDeltaConfig.tokens) {
-        forkTokens = forkDeltaConfig.tokens;
-    } else {
-        forkTokens = forkOfflineTokens;
+    try {
+        //ddex listed tokens
+        let ddexTokens = [];
+        if (ddexConfig && ddexConfig.tokens) {
+            ddexTokens = ddexConfig.tokens;
+        }
+        for (var i = 0; i < ddexTokens.length; i++) {
+            var tok = ddexTokens[i];
+            if (tok) {
+                let token = {};
+                token.addr = tok.address.toLowerCase();
+                token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
+
+                token.decimals = tok.decimals;
+                token.unlisted = false;
+                token.DDEX = token.name;
+                if (this.uniqueTokens[token.addr]) {
+                    this.uniqueTokens[token.addr].DDEX = token.name;
+                    this.uniqueTokens[token.addr].unlisted = false;
+                }
+                else {
+                    this.uniqueTokens[token.addr] = token;
+                }
+            }
+        }
+    } catch (e) {
+        console.log('failed to parse DDEX token list');
     }
 
-    //forkTokens = forkTokens.filter((x) => { return !(this.uniqueTokens[x.addr]) });
-    for (var i = 0; i < forkTokens.length; i++) {
-        var token = forkTokens[i];
-        if (token) {
-            token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
+    try {
+        //check listing for idex
+        for (var i = 0; i < idexConfig.length; i++) {
+            var token = idexConfig[i];
             token.addr = token.addr.toLowerCase();
+            token.IDEX = token.name;
             token.unlisted = false;
-            token.ForkDelta = token.name;
             if (this.uniqueTokens[token.addr]) {
-                this.uniqueTokens[token.addr].ForkDelta = token.name;
+                this.uniqueTokens[token.addr].IDEX = token.name;
                 this.uniqueTokens[token.addr].unlisted = false;
+
+                if (token.name2 && !this.uniqueTokens[token.addr].name2) {
+                    this.uniqueTokens[token.addr].name2 = token.name2;
+                }
             }
             else {
                 this.uniqueTokens[token.addr] = token;
             }
         }
-    }
-
-    //ddex listed tokens
-    let ddexTokens = [];
-    if (ddexConfig && ddexConfig.tokens) {
-        ddexTokens = ddexConfig.tokens;
-    } else {
-        ddexTokens = ddexOfflineTokens;
-    }
-    for (var i = 0; i < ddexTokens.length; i++) {
-        var tok = ddexTokens[i];
-        if (tok) {
-            let token = {};
-            token.addr = tok.address.toLowerCase();
-            token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
-
-            token.decimals = tok.decimals;
-            token.unlisted = false;
-            token.DDEX = token.name;
-            if (this.uniqueTokens[token.addr]) {
-                this.uniqueTokens[token.addr].DDEX = token.name;
-                this.uniqueTokens[token.addr].unlisted = false;
-            }
-            else {
-                this.uniqueTokens[token.addr] = token;
-            }
-        }
-    }
-
-    //check listing for idex
-    for (var i = 0; i < idexConfig.length; i++) {
-        var token = idexConfig[i];
-        token.addr = token.addr.toLowerCase();
-        token.IDEX = token.name;
-        token.unlisted = false;
-        if (this.uniqueTokens[token.addr]) {
-            this.uniqueTokens[token.addr].IDEX = token.name;
-            this.uniqueTokens[token.addr].unlisted = false;
-        }
-        else {
-            this.uniqueTokens[token.addr] = token;
-        }
+    } catch (e) {
+        console.log('failed to parse IDEX token list');
     }
 
     let ethAddr = this.config.ethAddr;

@@ -14,6 +14,7 @@
 	<script type="text/javascript" src="../js/jquery-3.2.1.min.js"></script>
 	<!--<script src="js/bootstrap.min.js"></script> -->
 
+    <script src="./exchangeTokens.js"></script>
 	<script src="../backupTokens.js"></script>
 
 	<!-- Bootstrap, bootstrap-theme, fontawesome & custom css -->
@@ -38,14 +39,87 @@
 			for (var i = 0; i < array.length; i++) {
 				var customToken = array[i];
 				if (customToken) {
-					customToken.symbol = escapeHtml(customToken.symbol);
-					customToken.decimal = Number(customToken.decimal);
-					if (customToken.type)
-						delete customToken.type;
-					customToken.address = customToken.address.toLowerCase();
-					if (!customTokens[customToken.address]) {
-						customTokens[customToken.address] = customToken;
+                    let token = {
+                        symbol : escapeHtml(customToken.symbol),
+                        address : customToken.address.toLowerCase(),
+                        decimal : Number(customToken.decimal),
+                        name: undefined
+                    };
+                    if(customToken.name) {
+                        token.name = escapeHtml(customToken.name);
+                    } else {
+                        delete token.name;
+                    }
+                    if(customToken.Binance) {
+                        token.Binance = customToken.Binance;
+                    }
+					
+					if (!customTokens[token.address]) {
+						customTokens[token.address] = token;
 					}
+				}
+			}
+		}
+        
+        function parseEDTokens(array, exchange) {
+			for (var i = 0; i < array.length; i++) {
+				let EDtoken = array[i];
+                if (EDtoken) {
+                
+                    if(!EDtoken.decimals)
+                        EDtoken.decimals = 0;
+                        
+                    let token = {
+                        symbol : escapeHtml(EDtoken.name),
+                        address : EDtoken.addr.toLowerCase(),
+                        decimal : Number(EDtoken.decimals), 
+                    };
+                    if(EDtoken.fullName && EDtoken.fullName !== "" && EDtoken.name != EDtoken.fullName) {
+                        token.name = escapeHtml(EDtoken.fullName);
+                    } else if(EDtoken.name2 && EDtoken.name2 !== "" && EDtoken.name != EDtoken.name2) {
+                        token.name = escapeHtml(EDtoken.name2);
+                    }
+                    
+                    
+                    token[exchange] = token.symbol;
+                    
+                    
+					if (!customTokens[token.address]) {
+						customTokens[token.address] = token;
+					} else {
+                        if(!customTokens[token.address][exchange]) {
+                            customTokens[token.address][exchange] = token.symbol;
+                        }
+                        if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
+                            customTokens[token.address].name = token.name;
+                        }
+                    }
+				}
+			}
+		}
+        
+         function parseDDEXTokens(array) {
+			for (var i = 0; i < array.length; i++) {
+				let ddexToken = array[i];
+                if (ddexToken) {
+                
+                    if(!ddexToken.decimals)
+                        ddexToken.decimals = 0;
+                        
+                    let token = {
+                        symbol : escapeHtml(ddexToken.symbol),
+                        address : ddexToken.address.toLowerCase(),
+                        decimal : Number(ddexToken.decimals),
+                    };
+                    token.DDEX = token.symbol;
+                    
+					if (!customTokens[token.address]) {
+						customTokens[token.address] = token;
+					} else {
+                        if(!customTokens[token.address].DDEX) {
+                            customTokens[token.address].DDEX = token.symbol;
+                        }
+                    }
 				}
 			}
 		}
@@ -57,9 +131,9 @@
 				if (!customTokens[addr] && tok.symbol && response.tokens[i].balance > 10 && tok.holdersCount > 10 && response.tokens[i].balance < Number(tok.totalSupply)) {
 
 					if (tok.symbol !== tok.name) {
-						customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: Number(tok.decimals), name: escapeHtml(tok.name) };
+						customTokens[addr] = { symbol: escapeHtml(tok.symbol), address: addr,  decimal: Number(tok.decimals), name: escapeHtml(tok.name) };
 					} else {
-						customTokens[addr] = { address: addr, symbol: escapeHtml(tok.symbol), decimal: Number(tok.decimals) };
+						customTokens[addr] = { symbol: escapeHtml(tok.symbol), address: addr, decimal: Number(tok.decimals) };
 					}
 				}
 
@@ -80,7 +154,13 @@
 
 		//parse existing custom tokens from offlineCustomTokens (backupTokens.js)
 		parseMewTokens(offlineCustomTokens);
-
+        
+        // parse exisiting tokens from etherdelta/forkdelta
+        parseEDTokens(EDofflineTokens, 'EtherDelta');
+        parseEDTokens(forkOfflineTokens, 'ForkDelta');
+        parseEDTokens(idexOfflineTokens, 'IDEX');
+        parseDDEXTokens(ddexOfflineTokens);
+        
 
 		//get list of tokens from myetherwallet & mycrypto
 		function getCustomTokens() {
@@ -116,7 +196,12 @@
 						outputString = outputString.replace(/"address"/g, "address");
 						outputString = outputString.replace(/"symbol"/g, 'symbol');
 						outputString = outputString.replace(/"decimal"/g, 'decimal');
+                        outputString = outputString.replace(/"name"/g, 'name');
 						outputString = outputString.replace(/"Binance"/g, 'Binance');
+                        outputString = outputString.replace(/"EtherDelta"/g, 'EtherDelta');
+                        outputString = outputString.replace(/"ForkDelta"/g, 'ForkDelta');
+                        outputString = outputString.replace(/"IDEX"/g, 'IDEX');
+                        outputString = outputString.replace(/"DDEX"/g, 'DDEX');
 						outputString = outputString.replace(/{ /g, '{');
 						outputString = outputString.replace(/ }/g, '}');
 						outputString = outputString.replace(/, /g, ',');

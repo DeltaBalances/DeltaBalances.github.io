@@ -1874,7 +1874,7 @@ let offlineCustomTokens = [
   {symbol:"IOST",address:"0xfa1a856cfa3409cfa145fa4e20eb270df3eb21ab",decimal:18,name:"IOSToken",Binance:"IOSTETH",EtherDelta:"IOST",IDEX:"IOST",DDEX:"IOST"},
   {symbol:"IoT",address:"0xc34b21f6f8e51cc965c2393b3ccfa3b82beb2403",decimal:6},
   {symbol:"IOTAG",address:"0x4eecbf6534d10957e53f4bfe1ae10df2021c1684",decimal:2,name:"IotaGold"},
-  {symbol:"IOTX",address:"0x6fb3e0a217407efff7ca062d46c26e5d60a14d69",decimal:18,name:"IoTeX Network",IDEX:"IOTX",DDEX:"IOTX"},
+  {symbol:"IOTX",address:"0x6fb3e0a217407efff7ca062d46c26e5d60a14d69",decimal:18,name:"IoTeX Network",Binance:"IOTX",IDEX:"IOTX",DDEX:"IOTX"},
   {symbol:"IOX",address:"0x7c817a4806d2dc1fc9c1f8057f6e9aa94a4d6c8e",decimal:18,name:"CoinstocksIO"},
   {symbol:"IOX",address:"0x96995863e238e78c177ddc5a0c462f1c453fe2ab",decimal:18,name:"CoinStocksToken"},
   {symbol:"IOX",address:"0xa91b36bc8f837e8ccf56e0fd1e352cafd6863553",decimal:18,name:"CoinstocksIO"},

@@ -272,6 +272,9 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             if (x.name) {
                 token.name2 = utility.escapeHtml(x.name);
             }
+            if (x.locked) {
+                token.locked = true;
+            }
 
             let listedExchanges = ['EtherDelta', 'ForkDelta', 'IDEX', 'DDEX', 'Binance'];
             for (let i = 0; i < listedExchanges.length; i++) {
@@ -2931,6 +2934,9 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     } else {
                         contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals;
                     }
+                    if (token.locked) {
+                        contents += '<br> <i class="text-red fa fa-lock" aria-hidden="true"></i> Token Locked or Paused.';
+                    }
                     contents += '<br> Trade on: <ul style="list-style-type: none;"><li>'
                         + utility.binanceURL(token, true)
                         + '</li><li>' + utility.etherDeltaURL(token, true)
@@ -2939,6 +2945,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                         + '</li><li>' + utility.idexURL(token, true)
                         + '</li><li>' + utility.ddexURL(token, true)
                         + '</li></ul>';
+
 
                 } else if (token.addr == this.config.ethAddr) {
                     contents = "Ether (not a token)<br> Decimals: 18";
@@ -2950,7 +2957,12 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
             console.log('error making popover ' + e);
         }
 
-        let popover = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + title + '" data-container="body" data-content=\'' + contents + '\'>' + token.name + '</a>';
+        let name = token.name;
+        if (token.locked) {
+            name += ' <i class="fa fa-lock" aria-hidden="true"></i>';
+        }
+        let popover = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + title + '" data-container="body" data-content=\'' + contents + '\'>' + name + '</a>';
+
         return popover;
     } else {
         console.log('undefined token in popover');

@@ -1278,7 +1278,7 @@ let offlineCustomTokens = [
   {symbol:"ENU",address:"0x275b69aa7c8c1d648a0557656bce1c286e69a29d",decimal:8,name:"Enumivo",ForkDelta:"ENU",DDEX:"ENU"},
   {symbol:"ENU",address:"0x9d444054afd5b7b7101e1195cc3eb4fa5a2c3e3e",decimal:18,name:"EnuMivo",locked:true},
   {symbol:"EOC",address:"0x4d98fe707cdf9c06c9a9e55a1633b2c2f54c0b91",decimal:18,name:"EosChain"},
-  {symbol:"EOS",address:"0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0",decimal:18,EtherDelta:"EOS",ForkDelta:"EOS",DDEX:"EOS"},
+  {symbol:"EOS",address:"0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0",decimal:18,locked:true,EtherDelta:"EOS",ForkDelta:"EOS",DDEX:"EOS"},
   {symbol:"eosDAC",address:"0x7e9e431a0b8c4d532c745b1043c7fa29a48d4fba",decimal:18,name:"Community Owned EOS Block Producer",locked:true,ForkDelta:"eosDAC",DDEX:"EOSDAC"},
   {symbol:"EOSG",address:"0x7b39940dbac110f1227d37c395675def270afcd7",decimal:0,name:"EOS GOLD"},
   {symbol:"EOSP",address:"0x1eda8487d6865d294423c6080d4c65b9ee28a514",decimal:18,name:"EOSPlus"},

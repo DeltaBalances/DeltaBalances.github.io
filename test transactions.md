@@ -230,7 +230,7 @@ sell
 `https://etherscan.io/tx/0x83922854f738b6b4051538ee8a5ad3913cd3a580c4fa094b1e58ff0bc605e1c0`
 
 ###### cancel
- `???`
+ method is depricated, all orders managment is doing off-chain
 
 
 ## DEXY

@@ -16,6 +16,7 @@ DeltaBalances is not affiliated with any of the exchanges mentioned below.
 + [Kyber Network](https://kyber.network)
 + [OasisDex](https://oasisdex.com)
 + [Bancor](https://bancor.network) (No trade history)
++ [Enclaves Dex](https://enclaves.io)
 
 0x Project Relayers, including:
 + [DDEX](https://ddex.io/)
@@ -26,6 +27,7 @@ DeltaBalances is not affiliated with any of the exchanges mentioned below.
 + [Token Jar](https://tokenjar.io)
 + [IDT](https://idtexchange.com)
 + [Bamboo Relay](https://bamboorelay.com)
++ [Tokenlon](https://tokenlon.token.im/tokenlon)
 
 
 # Smart contract

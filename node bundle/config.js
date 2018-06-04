@@ -116,7 +116,7 @@ module.exports = {
       'contractAirSwapAddr',
       'contractKyberAddr',
       'contractEnclavesAddr',
-    //  'contractEthenAddr',
+      'contractEthenAddr',
     ],
     minBlock: 3154197,
     maxBlock: undefined,
@@ -128,8 +128,8 @@ module.exports = {
       '0xe59c5e56d85b2124f5e7f82cb5fcc6d28a4a241a9bdd732704ac9d3b6bfc98ab', //airswap
       '0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39', //kyber
       '0x7b6c917cd708d6f749ab415a0f1aa5ced6110d03141d28e5b75e216ecb4e79f7', //enclaves
-    //  '0x165223f17116d321e4ef371cbdb122aa350ce59db46ff8f575874758c14a3ef0', // Ethen 1/2
-    //  '0xee7e85974085b8a74acdea8330a9e8c09680dccea6f6df360491edf22a27cc3b', // Ethen 2/2
+      '0x165223f17116d321e4ef371cbdb122aa350ce59db46ff8f575874758c14a3ef0', // Ethen 1/2 'Order'
+      '0xee7e85974085b8a74acdea8330a9e8c09680dccea6f6df360491edf22a27cc3b', // Ethen 2/2 'Trade'
     ],
     withdrawTopic: undefined,
     depositTopic: undefined,
@@ -228,6 +228,21 @@ module.exports = {
     depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
     showRelayers: false,
     createTx: '0x9f314254a972db7d6967d929c3e576240b2bbfb7b24ff5b38ca73f83cb49c072',
+    userIndexed: false
+  },
+  historyEthen: {
+    exchange: 'Ethen',
+    exchangeAddr: 'contractEthenAddr',
+    minBlock: 5354266,
+    maxBlock: undefined,
+    tradeTopic: [
+      '0x165223f17116d321e4ef371cbdb122aa350ce59db46ff8f575874758c14a3ef0', // Ethen 1/2 'Order'
+      '0xee7e85974085b8a74acdea8330a9e8c09680dccea6f6df360491edf22a27cc3b', // Ethen 2/2 'Trade'
+    ],
+    withdrawTopic: ['0xfd68f27313402be52d2f46b6d391b7b8657000a3062853a4be930f1281072a01', '0xa69fc39b702a6e8195370ae2252cc11b4445837cc4abe15ac39123f2f2d8770d'],
+    depositTopic: ['0xbb01c612a93e37305a5f1f7b8ed63ea61211be444f722915b9dc827c0bdbffcc','0x20d6bac8359f33d79581bfd2b0457cb189fda6d90fed287ddc9f2ba3eb124b67'],
+    showRelayers: false,
+    createTx: '0x9fc7d3e77c02fb00c537640114369ec5f1fbf748ac69a819c2d6dddbf08279b1',
     userIndexed: false
   },
   wrappedETH: {

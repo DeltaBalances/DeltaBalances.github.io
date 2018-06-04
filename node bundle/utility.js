@@ -180,6 +180,8 @@ module.exports = (config) => {
               if (log.combinedEvents) {
                 combinedLogs.push(log);
               }
+            } else {
+              combinedLogs.push(log);
             }
           }
 

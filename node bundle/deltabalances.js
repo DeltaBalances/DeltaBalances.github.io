@@ -1797,7 +1797,7 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
         return 'DEXY ' + (showAddr ? lcAddr : '');
     }
     else if (lcAddr == this.config.contractEthenAddr) {
-        return 'Ethen ' + (showAddr ? lcAddr : '');
+        return 'ETHEN ' + (showAddr ? lcAddr : '');
     }
     else if (lcAddr == this.config.contractDecentrexAddr) {
         return 'Decentrex ' + (showAddr ? lcAddr : '');

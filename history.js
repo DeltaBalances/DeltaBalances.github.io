@@ -631,7 +631,7 @@
 	function getTransactions(rqid) {
 
 		var topics = [];
-		if (typeMode == 0) {
+		if (typeMode == 0) { // Trades
 			// kyber and oasisdex, use address in topic filter for speedup
 			if (historyConfig.userIndexed && historyConfig.userTopic == 1) {
 				let myTopicAddr = "0x000000000000000000000000" + publicAddr.slice(2).toLowerCase();
@@ -641,16 +641,25 @@
 			else
 				topics = [historyConfig.tradeTopic];
 		}
-		else if (typeMode == 1) {
-			if (historyConfig !== _delta.config.historyEnclaves) {
+		else if (typeMode == 1) { // Funds
+			if (historyConfig == _delta.config.historyEthen) { //ethen.market only
+				let innerTopics = historyConfig.withdrawTopic.concat(historyConfig.depositTopic);
+				topics = [innerTopics];
+			}
+			else if (historyConfig !== _delta.config.historyEnclaves) { // all other withdraw/deposit exchanges
 				topics = [[historyConfig.depositTopic, historyConfig.withdrawTopic]];
-			} else {
+			} else { // enclavesdex only
 				let myTopicAddr = "0x000000000000000000000000" + publicAddr.slice(2).toLowerCase();
 				topics = [[historyConfig.depositTopic, historyConfig.withdrawTopic], undefined, myTopicAddr];
 			}
 		}
-		else {
-			topics = [[historyConfig.tradeTopic, historyConfig.depositTopic, historyConfig.withdrawTopic]];
+		else { // trades & funds
+			if (historyConfig == _delta.config.historyEthen) { //ethen.market only
+				let innerTopics = historyConfig.tradeTopic.concat(historyConfig.withdrawTopic.concat(historyConfig.depositTopic));
+				topics = [innerTopics];
+			} else { // all other deposit/withdraw exchanges
+				topics = [[historyConfig.tradeTopic, historyConfig.depositTopic, historyConfig.withdrawTopic]];
+			}
 		}
 
 		var start = startblock;
@@ -800,6 +809,23 @@
 
 			let filteredLogs;
 
+
+			let ethenOrders = {};
+			{
+				// Ethen.market only, deal with 2 events that need to be combined
+				// mark the hash if one of 2 events contains your address
+				if (historyConfig.exchangeAddr === 'contractEthenAddr' ||
+					(Array.isArray(historyConfig.exchangeAddr) && historyConfig.exchangeAddr.indexOf('contractEthenAddr') !== -1)
+				)
+					outputLogs.map((log) => {
+						if (log.address === _delta.config.contractEthenAddr) {
+							if (log.data.indexOf(addrrr) !== -1) {
+								ethenOrders[log.transactionHash] = true;
+							}
+						}
+					});
+			}
+
 			//kyber check only topic1
 			if (historyConfig == _delta.config.historyKyber) {
 				filteredLogs = outputLogs.filter((log) => {
@@ -816,7 +842,10 @@
 				filteredLogs = outputLogs.filter((log) => {
 					if (log.data.indexOf(addrrr) !== -1) {
 						return true;
-					} else if (log.topics.length <= 1) {
+					} else if (ethenOrders[log.transactionHash]) {
+						return true;
+					}
+					else if (log.topics.length <= 1) {
 						return false;
 					}
 					else {
@@ -846,7 +875,23 @@
 			for (let i = 0; i < unpackedLogs.length; i++) {
 
 				let unpacked = unpackedLogs[i];
-				if (!unpacked || unpacked.events.length < 4 || (unpacked.name != 'Trade' && unpacked.name != 'LogFill' && unpacked.name !== 'ExecuteTrade' && unpacked.name !== 'LogTake' && unpacked.name != 'Filled' && unpacked.name != 'Order' && unpacked.name != 'Deposit' && unpacked.name != 'Withdraw')) {
+				// dont spend time processing event if it isn't correct
+				if (!unpacked || unpacked.events.length < 3 ||
+					(
+						unpacked.name != 'Trade' &&
+						unpacked.name != 'LogFill' &&
+						unpacked.name !== 'ExecuteTrade' &&
+						unpacked.name !== 'LogTake' &&
+						unpacked.name != 'Filled' &&
+						unpacked.name != 'Order' &&
+						unpacked.name != 'Deposit' &&
+						unpacked.name != 'DepositToken' &&
+						unpacked.name != 'DepositEther' &&
+						unpacked.name != 'Withdraw' &&
+						unpacked.name != 'WithdrawToken' &&
+						unpacked.name != 'WithdrawEther'
+					)
+				) {
 					continue;
 				}
 
@@ -854,7 +899,8 @@
 				if (obj && !obj.error) {
 
 					var obj2 = undefined;
-					if (unpacked.name == 'Trade' || unpacked.name == 'LogFill' || unpacked.name == 'Filled' || unpacked.name == 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Order') {
+					// trades only
+					if (unpacked.name.indexOf('Deposit') === -1 && unpacked.name.indexOf('Withdraw') === -1) {
 						if (_util.isWrappedETH(obj.base.addr) || _util.isNonEthBase(obj.base.addr)) {
 
 							let opp = '';
@@ -892,7 +938,7 @@
 								tradeHeaders['Exchange'] = 1;
 							}
 						}
-					} else if (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw') {
+					} else { //Deposit / withdraw
 						obj2 = {
 							Exchange: obj.exchange,
 							Type: obj.type.replace('Token ', ''),

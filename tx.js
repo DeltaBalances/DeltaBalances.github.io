@@ -508,6 +508,7 @@
 				gasLimit: Number(tx.gas),
 				status: 'Pending',
 				input: parseInput(tx, tx.input),
+				rawInput: tx.input,
 			}
 
 			if (!pending) {
@@ -701,7 +702,12 @@
 				sum += '<br>Note: IDEX uses no transaction output events.';
 			}
 
-		} else if (transaction.output && transaction.output.length > 0) {
+		} else if (!transaction.input && transaction.rawInput == '0x') {
+			//regular ETH transfer, no funciton calls
+			let operation = 'Operation: Transferred ' + transaction.value.toString() + ' ETH from ' + _util.addressLink(transaction.from, true, true) + ' to ' + _util.addressLink(transaction.to, true, true) + '<br>';
+			sum += operation;
+		}
+		else if (transaction.output && transaction.output.length > 0) {
 			for (let i = 0; i < transaction.output.length; i++) {
 				if (transaction.output[i].note) {
 					let operation = 'Operation: ' + transaction.output[i].note + '<br>';
@@ -725,8 +731,8 @@
 				sum += '<strong>Warning</strong>, you sent tokens to the Exchange contract without a deposit. Nobody can access these tokens anymore, they are most likely lost forever. <br>';
 			}
 		}
-		if (!transaction.input && (!transaction.output || transaction.output.length == 0)) {
-			sum += 'This does not seem to be an exchange (EtherDelta, 0x, Decentrex, Token.store, Idex) transaction <br>';
+		else if (!transaction.input && transaction.rawInput !== '0x' && (!transaction.output || transaction.output.length == 0)) {
+			sum += 'This does not seem to be a transaction with a supported decentralized exchange. <br>';
 		}
 		if (checkOldED(transaction.to)) {
 			sum += 'This transaction is to an outdated EtherDelta contract, only use these to withdraw old funds.<br>';

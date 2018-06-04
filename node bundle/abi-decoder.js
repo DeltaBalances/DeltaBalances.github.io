@@ -196,7 +196,8 @@ function _decodeLogs(logs) {
         name: method.name,
         events: decodedParams,
         address: logItem.address,
-        blockNumber: logItem.blockNumber
+        blockNumber: logItem.blockNumber,
+        hash: logItem.transactionHash,
       };
     }
   });

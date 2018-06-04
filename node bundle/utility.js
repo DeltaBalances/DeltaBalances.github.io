@@ -134,7 +134,7 @@ module.exports = (config) => {
 
         try {
           let result = Decoder.decodeLogs(data);
-          return result;
+          return combineEvents(result);
         } catch (error) {
           console.log('error in decodeLogs ' + error);
           return undefined;
@@ -142,7 +142,7 @@ module.exports = (config) => {
       } else {
         try {
           let result = Decoder.decodeLogs(data);
-          return result;
+          return combineEvents(result);
         } catch (error) {
           console.log('error in decodeLogs ' + error);
           return undefined;
@@ -151,6 +151,45 @@ module.exports = (config) => {
     } else {
       return undefined;
     }
+
+
+    //combine 2 trade events for Ethen.market trades
+    function combineEvents(decodedLogs) {
+      let combinedLogs = [];
+
+      for (let i = 0; i < decodedLogs.length; i++) {
+        let log = decodedLogs[i];
+        if (log) {
+
+          if (log.address !== _delta.config.contractEthenAddr) {
+            combinedLogs.push(log);
+          } else {
+            if (log.name === 'Order' && log.events.length == 8) {
+
+              let j = i + 1;
+              //given the 'order' event, look in the same tx for 'trade' events to match the data
+              while (j < decodedLogs.length && decodedLogs[j].hash === decodedLogs[i].hash) {
+                let log2 = decodedLogs[j];
+                if (log2 && log2.address === _delta.config.contractEthenAddr && log2.name === 'Trade') {
+                  log.combinedEvents = [log2.events[0], log2.events[2], log2.events[3]];
+                  break;
+                } else {
+                  j++;
+                }
+              }
+              if (log.combinedEvents) {
+                combinedLogs.push(log);
+              }
+            }
+          }
+
+
+        }
+      }
+
+      return combinedLogs;
+    }
+
   };
 
   utility.processInput = function (data) {
@@ -186,8 +225,8 @@ module.exports = (config) => {
     Decoder.addABI(bundle.DeltaBalances.config.bancor2Abi);
     Decoder.addABI(bundle.DeltaBalances.config.enclavesAbi);
     Decoder.addABI(bundle.DeltaBalances.config.enclaves2Abi);
+    Decoder.addABI(bundle.DeltaBalances.config.ethenAbi);
 
-    //Decoder.addABI(bundle.DeltaBalances.config.ethenAbi);
     //Decoder.addABI(bundle.DeltaBalances.config.dexyAbi);
     //Decoder.addABI(bundle.DeltaBalances.config.dexy2Abi);
 

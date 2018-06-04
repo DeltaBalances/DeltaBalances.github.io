@@ -27,6 +27,7 @@ module.exports = {
     '0x55890b06f0877a01bb5349d93b202961f8e27a9b': 'Shark Relay',
     '0x5e150a33ffa97a8d22f59c77ae5487b089ef62e9': 'TokenJar',
     '0x5dd835a893734b8d556eccf87800b76dda5aedc5': 'BambooRelay',
+    '0xc22d5b2951db72b44cfb8089bb8cd374a3c354ea': 'OpenRelay',
   },
   contractOasisDexAddr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425',
   contractOasisDirectAddr: '0x793ebbe21607e4f04788f89c7a9b97320773ec59',
@@ -116,6 +117,7 @@ module.exports = {
       'contractAirSwapAddr',
       'contractKyberAddr',
       'contractEnclavesAddr',
+    //  'contractEthenAddr',
     ],
     minBlock: 3154197,
     maxBlock: undefined,
@@ -127,6 +129,8 @@ module.exports = {
       '0xe59c5e56d85b2124f5e7f82cb5fcc6d28a4a241a9bdd732704ac9d3b6bfc98ab', //airswap
       '0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39', //kyber
       '0x7b6c917cd708d6f749ab415a0f1aa5ced6110d03141d28e5b75e216ecb4e79f7', //enclaves
+    //  '0x165223f17116d321e4ef371cbdb122aa350ce59db46ff8f575874758c14a3ef0', // Ethen 1/2
+    //  '0xee7e85974085b8a74acdea8330a9e8c09680dccea6f6df360491edf22a27cc3b', // Ethen 2/2
     ],
     withdrawTopic: undefined,
     depositTopic: undefined,

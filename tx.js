@@ -565,7 +565,7 @@
 							if (obj && !obj.error) {
 								if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 									unknownToken = true;
-								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion') {
+								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion' || unpacked.name == 'Order') {
 									obj.feeToken = obj.feeCurrency;
 									delete obj.feeCurrency;
 									delete obj.transType;
@@ -990,7 +990,7 @@
 					if (keys[i] == 'token' || keys[i] == 'base' || keys[i] == 'feeToken' || keys[i] == 'FeeToken ' || keys[i] == 'FeeToken' || keys[i] == 'token In' || keys[i] == 'token Out') {
 
 						let token = cellValue;
-						if(token) {
+						if (token) {
 							let popover = _delta.makeTokenPopover(token);
 							cellValue = popover;
 						} else {

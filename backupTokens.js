@@ -47,6 +47,8 @@ let tokenBlacklist = {
   "0xa61f75a4cf36e54a774cddb0e0b185671d9b9a9a":"TTTT01",
   "0x3408424b1ea81d26094f04ac007e8cd00656b924":"TTTT02",
 
+  "0x0027449bf0887ca3e431d263ffdefb244d95b555":"NOT",
+
   //crap & spam
   "0xe200641890772fce8ee6edc5354ccea30ac92f49":"WHO",//unused
   "0xef6b4ce8c9bc83744fbcde2657b32ec18790458a":"PUC",//unused
@@ -2139,6 +2141,7 @@ let offlineCustomTokens = [
   {symbol:"MAYN",address:"0xab130bc7ff83192656a4b3079741c296615899c0",decimal:18,name:"Mayweather No",EtherDelta:"MAYN",ForkDelta:"MAYN"},
   {symbol:"MAYY",address:"0xbfa4d71a51b9e0968be4bc299f8ba6cbb2f86789",decimal:18,name:"Mayweather Yes",EtherDelta:"MAYY",ForkDelta:"MAYY"},
   {symbol:"MB",address:"0x64d2d66050c540116a02a49aeda827af67bb1475",decimal:18,name:"MonsterBit"},
+  {symbol:"MBGN",address:"0xdde19c145c1ee51b48f7a28e8df125da0cc440be",decimal:18,name:"Embiggen"},
   {symbol:"MBRS",address:"0x386467f1f3ddbe832448650418311a479eecfc57",decimal:0,name:"Embers",EtherDelta:"MBRS",ForkDelta:"MBRS",IDEX:"MBRS"},
   {symbol:"MBT",address:"0x33493d18bac3649f00163d3f0e1e2d374a7dd4c6",decimal:8,name:"Multibot"},
   {symbol:"MBTC",address:"0xf9b978cd0d25713440164b2430b0caf3debfed9d",decimal:18,name:"MAGIC BITCOIN"},
@@ -2365,6 +2368,7 @@ let offlineCustomTokens = [
   {symbol:"NODE",address:"0xac956c72c262e5405a84dac655d5f3bea7ae9534",decimal:2,name:"NodePower",IDEX:"NODE"},
   {symbol:"NOKU",address:"0x1fc52f1abade452dd4674477d4711951700b3d27",decimal:18,ForkDelta:"NOKU"},
   {symbol:"NOVA",address:"0x1a231df765d0f7674f55d20d022bcb38da794501",decimal:18,name:"NovaChain"},
+  {symbol:"NOT",address:"0x0027449bf0887ca3e431d263ffdefb244d95b555",decimal:18,name:"Not token"},
   {symbol:"NOX",address:"0xec46f8207d766012454c408de210bcbc2243e71c",decimal:18,name:"Nitro",EtherDelta:"NOX",IDEX:"NOX"},
   {symbol:"NPER",address:"0x4ce6b362bc77a24966dda9078f9cef81b3b886a7",decimal:18,EtherDelta:"NPER"},
   {symbol:"NPPI",address:"0x9b883f7508c4007008af2798a7266a2cdaa8ad26",decimal:4,name:"NewPiedPiperCoin"},
@@ -3124,6 +3128,7 @@ let offlineCustomTokens = [
   {symbol:"THC",address:"0x15f34ef123c06b3052cd4dc0ca5c55d7897a0c30",decimal:2,name:"TheHialeahCoin"},
   {symbol:"THDE",address:"0xbf8482594a4f0f5399bc7d49231de0c9bc11ff8d",decimal:18,name:"Thongdee"},
   {symbol:"THETA",address:"0x3883f5e181fccaf8410fa61e12b59bad963fb645",decimal:18,name:"Theta Token",Binance:"THETAETH",EtherDelta:"THETA",ForkDelta:"THETA",IDEX:"THETA",DDEX:"THETA"},
+  {symbol:"THOR",address:"0x2e59c87e9349242063793761780550374a3146cf",decimal:8,name:"Thor"},
   {symbol:"THR",address:"0x1cb3209d45b2a60b7fbca1ccdbf87f674237a4aa",decimal:4,name:"ThoreCoin"},
   {symbol:"THUG",address:"0xfe7b915a0baa0e79f85c5553266513f7c1c03ed0",decimal:18,name:"THUG LIFE Coin",ForkDelta:"THUG",DDEX:"THUG"},
   {symbol:"TI",address:"0xc7be5a250142c0000f990a09755958fe48dcb077",decimal:18,name:"TIGOV"},

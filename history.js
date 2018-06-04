@@ -846,7 +846,7 @@
 			for (let i = 0; i < unpackedLogs.length; i++) {
 
 				let unpacked = unpackedLogs[i];
-				if (!unpacked || unpacked.events.length < 4 || (unpacked.name != 'Trade' && unpacked.name != 'LogFill' && unpacked.name !== 'ExecuteTrade' && unpacked.name !== 'LogTake' && unpacked.name != 'Filled' && unpacked.name != 'Deposit' && unpacked.name != 'Withdraw')) {
+				if (!unpacked || unpacked.events.length < 4 || (unpacked.name != 'Trade' && unpacked.name != 'LogFill' && unpacked.name !== 'ExecuteTrade' && unpacked.name !== 'LogTake' && unpacked.name != 'Filled' && unpacked.name != 'Order' && unpacked.name != 'Deposit' && unpacked.name != 'Withdraw')) {
 					continue;
 				}
 
@@ -854,7 +854,7 @@
 				if (obj && !obj.error) {
 
 					var obj2 = undefined;
-					if (unpacked.name == 'Trade' || unpacked.name == 'LogFill' || unpacked.name == 'Filled' || unpacked.name == 'ExecuteTrade' || unpacked.name == 'LogTake') {
+					if (unpacked.name == 'Trade' || unpacked.name == 'LogFill' || unpacked.name == 'Filled' || unpacked.name == 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Order') {
 						if (_util.isWrappedETH(obj.base.addr) || _util.isNonEthBase(obj.base.addr)) {
 
 							let opp = '';

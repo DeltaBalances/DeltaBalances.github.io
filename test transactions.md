@@ -228,9 +228,8 @@ sell
 
 ###### trade
 `https://etherscan.io/tx/0x83922854f738b6b4051538ee8a5ad3913cd3a580c4fa094b1e58ff0bc605e1c0`
+`https://etherscan.io/tx/0x18abe908551e49e8d2c4ba41921683e05ac4d0372ee3b63cc3700d682ea82828`
 
-###### cancel
- `???`
 
 
 ## DEXY

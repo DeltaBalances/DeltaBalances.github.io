@@ -755,6 +755,10 @@ label.exchange-box div.box-header label {
 .icon-box:before { content: '\f187'; } /* '' */
 .icon-book:before { content: '\e808'; } /* '' */
 
+.icon-ethen {
+  padding-left:5px;
+}
+
 .tooltip-inner {
   max-width: 500px;
 }

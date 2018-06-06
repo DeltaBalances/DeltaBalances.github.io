@@ -702,12 +702,18 @@
 				sum += '<br>Note: IDEX uses no transaction output events.';
 			}
 
-		} else if (!transaction.input && transaction.rawInput == '0x') {
+		} else if (!transaction.input && (!transaction.output || transaction.output.length == 0) && transaction.rawInput == '0x') {
 			//regular ETH transfer, no funciton calls
 			let operation = 'Operation: Transferred ' + transaction.value.toString() + ' ETH from ' + _util.addressLink(transaction.from, true, true) + ' to ' + _util.addressLink(transaction.to, true, true) + '<br>';
 			sum += operation;
 		}
 		else if (transaction.output && transaction.output.length > 0) {
+
+			if (transaction.rawInput == '0x') {
+				let operation = 'Operation: Transferred ' + transaction.value.toString() + ' ETH from ' + _util.addressLink(transaction.from, true, true) + ' to ' + _util.addressLink(transaction.to, true, true) + '<br>';
+				sum += operation;
+			}
+
 			for (let i = 0; i < transaction.output.length; i++) {
 				if (transaction.output[i].note) {
 					let operation = 'Operation: ' + transaction.output[i].note + '<br>';
@@ -997,7 +1003,7 @@
 							cellValue = "";
 						}
 					}
-					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice' || keys[i] == 'fee' || keys[i] == 'takerFee' || keys[i] == 'makerFee' ) {
+					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice' || keys[i] == 'fee' || keys[i] == 'takerFee' || keys[i] == 'makerFee') {
 						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(5) + '</span>';
 					}
 					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'balance') {

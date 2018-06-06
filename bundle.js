@@ -2725,6 +2725,33 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         console.log('failed to parse IDEX token list');
     }
 
+
+
+    try {
+        //unknown tokens saved from etherscan responses
+        for (var i = 0; i < unknownTokenCache.length; i++) {
+            var token = unknownTokenCache[i];
+            token.addr = token.addr.toLowerCase();
+            token.name = utility.escapeHtml(token.name);
+            token.decimals = Number(token.decimals);
+            if (token.name2) {
+                token.name2 = utility.escapeHtml(token.name2);
+            }
+            token.unlisted = true;
+            if (this.uniqueTokens[token.addr]) {
+
+                if (token.name2 && !this.uniqueTokens[token.addr].name2) {
+                    this.uniqueTokens[token.addr].name2 = token.name2;
+                }
+            }
+            else {
+                this.uniqueTokens[token.addr] = token;
+            }
+        }
+    } catch (e) {
+        console.log('failed to parse unknown token list');
+    }
+
     let ethAddr = this.config.ethAddr;
     this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; });
     let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !tokenBlacklist[x.addr] && x.addr !== ethAddr); });
@@ -5409,9 +5436,11 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var val = utility.weiToEth(rawAmount, dvsr);
                 var unlisted = token.unlisted;
 
+                var note = 'Transferred ' + val.toString() + ' ' + token.name;
+
                 var obj = {
                     'type': 'Transfer',
-                    'note': 'Tokens transferred',
+                    'note': note,
                     'token': token,
                     'amount': val,
                     'from': from,

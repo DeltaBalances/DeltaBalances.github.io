@@ -18,7 +18,7 @@ try {
 
     let forkData = sessionStorage.getItem('forkTokens1');
     // only get live tokens if we haven't saved them this session already
-    if (forkData !== null && forkData) {
+    if (forkData !== undefined && forkData) {
         let parsed = JSON.parse(forkData);
         if (parsed && parsed.length > 0) {
             forkDeltaConfig.tokens = parsed;
@@ -27,7 +27,7 @@ try {
 
         // if we have saved data from a previous session, pre-load it
         let forkData2 = localStorage.getItem('forkTokens2');
-        if (forkData2 !== null && forkData2) {
+        if (forkData2 !== undefined && forkData2) {
             let parsed = JSON.parse(forkData2);
             if (parsed && parsed.length > forkDeltaConfig.length) {
                 forkDeltaConfig.tokens = parsed;
@@ -52,7 +52,7 @@ var idexConfig = [];
 try {
     let idexData = sessionStorage.getItem('idexTokens1');
     // only get live tokens if we haven't saved them this session already
-    if (idexData !== null && idexData) {
+    if (idexData !== undefined && idexData) {
         let parsed = JSON.parse(idexData);
         if (parsed && parsed.length > 0) {
             idexConfig = parsed;
@@ -61,7 +61,7 @@ try {
 
         // if we have saved data from a previous session, pre-load it
         let idexData2 = localStorage.getItem('idexTokens2');
-        if (idexData2 !== null && idexData2) {
+        if (idexData2 !== undefined && idexData2) {
             let parsed = JSON.parse(idexData2);
             if (parsed && parsed.length > idexConfig.length) {
                 idexConfig = parsed;
@@ -93,7 +93,7 @@ try {
 
     let ddexData = sessionStorage.getItem('ddexTokens1');
     // only get live tokens if we haven't saved them this session already
-    if (ddexData !== null && ddexData) {
+    if (ddexData !== undefined && ddexData) {
         let parsed = JSON.parse(ddexData);
         if (parsed && parsed.length > 0) {
             ddexConfig.tokens = parsed;
@@ -102,7 +102,7 @@ try {
 
         // if we have saved data from a previous session, pre-load it
         let ddexData2 = localStorage.getItem('ddexTokens2');
-        if (ddexData2 !== null && ddexData2) {
+        if (ddexData2 !== undefined && ddexData2) {
             let parsed = JSON.parse(ddexData2);
             if (parsed && parsed.length > ddexConfig.length) {
                 ddexConfig.tokens = parsed;
@@ -121,4 +121,17 @@ try {
     }
 } catch (err) {
     console.log('ddex live tokens loading error ' + err);
+}
+
+var unknownTokenCache = [];
+try {
+    let tokenData = localStorage.getItem('unknownTokens1');
+    if (tokenData !== null && tokenData) {
+        let parsed = JSON.parse(tokenData);
+        if (parsed && parsed.length > 0) {
+            unknownTokenCache = parsed;
+        }
+    }
+} catch (err) {
+    console.log('unknown tokens loading error ' + err);
 }

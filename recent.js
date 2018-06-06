@@ -749,6 +749,7 @@
 								name: _util.escapeHtml(tx.tokenSymbol),
 								name2: _util.escapeHtml(tx.tokenName),
 								decimals: Number(tx.tokenDecimal),
+								unlisted: true,
 							};
 							_delta.uniqueTokens[contract] = newToken;
 							newTokens.push(newToken);

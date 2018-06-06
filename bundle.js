@@ -27604,7 +27604,7 @@ module.exports = (config) => {
   }
 
   utility.binanceURL = function (tokenObj, html) {
-    var url = "https://www.binance.com/?ref=10985752&symbol=";
+    var url = "https://www.binance.com/trade.html?ref=10985752&symbol=";
     var labelClass = "label-primary";
 
     if (tokenObj && tokenObj.Binance && tokenObj.Binance.indexOf('ETH') !== -1) {

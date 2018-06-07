@@ -49,10 +49,10 @@
 	var displayFilter = {
 		Trades: 1,
 		DepWith: 1,
-		Cancel: 1,
+		Cancel: 0,
 		Wrap: 1,
 		Approve: 0,
-		Transfer: 0
+		Transfer: 1
 	}
 
 	// placeholder

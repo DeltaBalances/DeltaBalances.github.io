@@ -981,7 +981,7 @@ let offlineCustomTokens = [
   {symbol:"DASHC",address:"0xb15786fb80959a722deaf19eb360fcf7f3062687",decimal:18,name:"Dash Cash"},
   {symbol:"DASHG",address:"0x47d4375c9b83857d8ce478f70d0e63d746d3afe6",decimal:18,name:"Dashgold"},
   {symbol:"DAT",address:"0x81c9151de0c8bafcd325a57e3db5a5df1cebf79c",decimal:18,name:"DAT Token",EtherDelta:"DAT",ForkDelta:"DAT",IDEX:"DAT"},
-  {symbol:"DATA",address:"0x0cf0ee63788a0849fe5297f3407f701e122cc023",decimal:18,name:"DATAcoin",EtherDelta:"DATA",ForkDelta:"DATA",IDEX:"DATA"},
+  {symbol:"DATA",address:"0x0cf0ee63788a0849fe5297f3407f701e122cc023",decimal:18,name:"DATAcoin",Binance:"DATAETH",EtherDelta:"DATA",ForkDelta:"DATA",IDEX:"DATA"},
   {symbol:"DATA",address:"0x119b839a1b8bfb735f65dcae2307db70e66bbf0a",decimal:18,name:"DataCoin"},
   {symbol:"DATA",address:"0x1b5f21ee98eed48d292e8e2d3ed82b40a9728a22",decimal:18,name:"DataBroker DAO Token",locked:true},
   {symbol:"DATL",address:"0xedcd82784027001d7af57a34501c65a25f97fee4",decimal:18,name:"Datalife",EtherDelta:"DATL",ForkDelta:"DATL",IDEX:"DATL"},

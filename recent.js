@@ -744,15 +744,18 @@
 					contract = contract.toLowerCase();
 					try {
 						if (!_delta.uniqueTokens[contract]) {
-							let newToken = {
-								addr: contract,
-								name: _util.escapeHtml(tx.tokenSymbol),
-								name2: _util.escapeHtml(tx.tokenName),
-								decimals: Number(tx.tokenDecimal),
-								unlisted: true,
-							};
-							_delta.uniqueTokens[contract] = newToken;
-							newTokens.push(newToken);
+                            
+                            if(tx.tokenSymbol !== "" && tx.tokenDecimal !== "") {
+                                let newToken = {
+                                    addr: contract,
+                                    name: _util.escapeHtml(tx.tokenSymbol),
+                                    name2: _util.escapeHtml(tx.tokenName),
+                                    decimals: Number(tx.tokenDecimal),
+                                    unlisted: true,
+                                };
+                                _delta.uniqueTokens[contract] = newToken;
+                                newTokens.push(newToken);
+                            }
 						}
 					} catch (e) { }
 				}

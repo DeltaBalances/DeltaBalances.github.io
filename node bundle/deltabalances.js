@@ -409,21 +409,24 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         //unknown tokens saved from etherscan responses
         for (var i = 0; i < unknownTokenCache.length; i++) {
             var token = unknownTokenCache[i];
-            token.addr = token.addr.toLowerCase();
-            token.name = utility.escapeHtml(token.name);
-            token.decimals = Number(token.decimals);
-            if (token.name2) {
-                token.name2 = utility.escapeHtml(token.name2);
-            }
-            token.unlisted = true;
-            if (this.uniqueTokens[token.addr]) {
+            if (token.name && token.name !== "") {
 
-                if (token.name2 && !this.uniqueTokens[token.addr].name2) {
-                    this.uniqueTokens[token.addr].name2 = token.name2;
+                token.addr = token.addr.toLowerCase();
+                token.name = utility.escapeHtml(token.name);
+                token.decimals = Number(token.decimals);
+                if (token.name2) {
+                    token.name2 = utility.escapeHtml(token.name2);
                 }
-            }
-            else {
-                this.uniqueTokens[token.addr] = token;
+                token.unlisted = true;
+                if (this.uniqueTokens[token.addr]) {
+
+                    if (token.name2 && !this.uniqueTokens[token.addr].name2) {
+                        this.uniqueTokens[token.addr].name2 = token.name2;
+                    }
+                }
+                else {
+                    this.uniqueTokens[token.addr] = token;
+                }
             }
         }
     } catch (e) {

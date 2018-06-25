@@ -1800,7 +1800,7 @@ let offlineCustomTokens = [
   {symbol:"HAT-OLD",address:"0xc3972ac283b3a7a56125674631a5c254f7f373cf",decimal:12,name:"HawalaToken",EtherDelta:"HAT",ForkDelta:"HATOLD",IDEX:"HATOLD"},
   {symbol:"HAT",address:"0x9002d4485b7594e3e850f0a206713b305113f69e",decimal:12,name:"HawalaToken",ForkDelta:"HAT",IDEX:"HAT"},
   {symbol:"HAV",address:"0xc011a72400e58ecd99ee497cf89e3775d4bd732f",decimal:18,name:"Havven",IDEX:"HAV"},
-  {symbol:"HAV",address:"0xf244176246168f24e3187f7288edbca29267739b",decimal:18,name:"Havven",EtherDelta:"HAV",ForkDelta:"HAV"},
+  {symbol:"HAV-OLD",address:"0xf244176246168f24e3187f7288edbca29267739b",decimal:18,name:"Havven",locked:true,EtherDelta:"HAV",ForkDelta:"HAV"},
   {symbol:"HBT",address:"0xdd6c68bb32462e01705011a4e2ad1a60740f217f",decimal:15,name:"Hubiits",EtherDelta:"HBT",ForkDelta:"HBT",IDEX:"HBT",DDEX:"HBT"},
   {symbol:"HBU",address:"0x1a6c513119245123512705d9c4664109c6f90e9c",decimal:0,name:"Heebu Token"},
   {symbol:"HBZ",address:"0xe34e1944e776f39b9252790a0527ebda647ae668",decimal:18,name:"Helbiz Token",EtherDelta:"HBZ",IDEX:"HBZ"},

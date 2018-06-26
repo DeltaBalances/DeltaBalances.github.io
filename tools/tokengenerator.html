@@ -129,6 +129,33 @@
 				}
 			}
 		}
+        
+        function parseRadarTokens(array) {
+			for (var i = 0; i < array.length; i++) {
+				let radarToken = array[i];
+                if (radarToken) {
+                
+                    if(!radarToken.decimals)
+                        radarToken.decimals = 0;
+                        
+                    let token = {
+                        symbol : escapeHtml(radarToken.symbol),
+                        address : radarToken.address.toLowerCase(),
+                        decimal : Number(radarToken.decimals),
+                        name: escapeHtml(radarToken.name)
+                    };
+                    token.Radar = token.symbol;
+                    
+					if (!customTokens[token.address]) {
+						customTokens[token.address] = token;
+					} else {
+                        if(!customTokens[token.address].Radar) {
+                            customTokens[token.address].Radar = token.symbol;
+                        }
+                    }
+				}
+			}
+		}
 
 		function parseEthplorer(response) {
 			for (let i = 0; i < response.tokens.length; i++) {
@@ -166,24 +193,58 @@
         parseEDTokens(forkOfflineTokens, 'ForkDelta');
         parseEDTokens(idexOfflineTokens, 'IDEX');
         parseDDEXTokens(ddexOfflineTokens);
+        parseRadarTokens(radarOfflineTokens);
         
+        outputParse();
+        
+        function outputParse() {
+            let customTokensList = Object.values(customTokens);
 
+            customTokensList = customTokensList.sort(function (a, b) {
+                return (a.symbol + a.address).localeCompare(b.symbol + b.address);
+            })
+
+            let outputString = "[<br>";
+            for (let i = 0; i < customTokensList.length; i++) {
+                let str = JSON.stringify(customTokensList[i]);
+                outputString += str + ",<br>";
+            }
+            outputString += "]";
+            outputString = outputString.replace(/"address"/g, "address");
+            outputString = outputString.replace(/"symbol"/g, 'symbol');
+            outputString = outputString.replace(/"decimal"/g, 'decimal');
+            outputString = outputString.replace(/"name"/g, 'name');
+            outputString = outputString.replace(/"locked"/g, 'locked');
+            outputString = outputString.replace(/"Binance"/g, 'Binance');
+            outputString = outputString.replace(/"EtherDelta"/g, 'EtherDelta');
+            outputString = outputString.replace(/"ForkDelta"/g, 'ForkDelta');
+            outputString = outputString.replace(/"IDEX"/g, 'IDEX');
+            outputString = outputString.replace(/"DDEX"/g, 'DDEX');
+            outputString = outputString.replace(/"Radar"/g, 'Radar');
+            outputString = outputString.replace(/{ /g, '{');
+            outputString = outputString.replace(/ }/g, '}');
+            outputString = outputString.replace(/, /g, ',');
+            outputString = outputString.replace(/: /g, ':');
+
+            $('#output').html(outputString);
+        }
+        
 		//get list of tokens from myetherwallet & mycrypto
 		function getCustomTokens() {
 
 			$('#output').html('loading.... (slow)');
-			let mewTokens = undefined;
-			let mcTokens = undefined;
+		//	let mewTokens = undefined;
+		//	let mcTokens = undefined;
 			let ethplorerED = undefined;
 			let ethploredIdex = undefined;
 			let loaded = 0;
 
 			function done() {
 
-				if (loaded >= 4) {
-					if (mewTokens && mcTokens && ethplorerED && ethploredIdex) {
-						parseMewTokens(mewTokens);
-						parseMewTokens(mcTokens);
+				if (loaded >= 2) {
+					if (/*mewTokens && mcTokens &&*/ ethplorerED && ethploredIdex) {
+						//parseMewTokens(mewTokens);
+						//parseMewTokens(mcTokens);
 						parseEthplorer(ethplorerED);
 						parseEthplorer(ethploredIdex);
 
@@ -220,12 +281,12 @@
 						$('#output').html('something went wrong');
 					}
 				} else {
-					$('#output').html('loading... , loaded ' + loaded + '/4');
+					$('#output').html('loading... , loaded ' + loaded + '/2');
 				}
 			}
 
 
-			$.getJSON('https://rawgit.com/kvhnuke/etherwallet/mercury/app/scripts/tokens/ethTokens.json?' + Date.now()).done(function (data) {
+		/*	$.getJSON('https://rawgit.com/kvhnuke/etherwallet/mercury/app/scripts/tokens/ethTokens.json?' + Date.now()).done(function (data) {
 				loaded++;
 				mewTokens = data;
 				done();
@@ -242,6 +303,7 @@
 				loaded++;
 				done();
 			});
+            */
 
 			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey=freekey').done(function (data) {
 				loaded++;
@@ -262,10 +324,6 @@
 				loaded++;
 				done();
 			});
-
-
-
-
 		}
 
 

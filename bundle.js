@@ -2725,7 +2725,34 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         console.log('failed to parse IDEX token list');
     }
 
+    try {
+        //radar listed tokens
+        let radarTokens = [];
+        if (radarConfig && radarConfig.length > 0) {
+            radarTokens = radarConfig;
+        }
+        for (var i = 0; i < radarTokens.length; i++) {
+            var tok = radarTokens[i];
+            if (tok) {
+                let token = {};
+                token.addr = tok.address.toLowerCase();
+                token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
 
+                token.decimals = Number(tok.decimals);
+                token.unlisted = false;
+                token.Radar = token.name.toUpperCase();
+                if (this.uniqueTokens[token.addr]) {
+                    this.uniqueTokens[token.addr].Radar = token.Radar;
+                    this.uniqueTokens[token.addr].unlisted = false;
+                }
+                else {
+                    this.uniqueTokens[token.addr] = token;
+                }
+            }
+        }
+    } catch (e) {
+        console.log('failed to parse Radar token list');
+    }
 
     try {
         //unknown tokens saved from etherscan responses
@@ -4153,7 +4180,7 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
     }
     else if (lcAddr == this.config.contractDecentrexAddr) {
         return 'Decentrex ' + (showAddr ? lcAddr : '');
-    } else if (lcAddr == this.config.idexAdminAddr) {
+    } else if (lcAddr == this.config.idexAdminAddr || lcAddr == this.config.idexAdminAddr2) {
         return 'IDEX admin ' + (showAddr ? lcAddr : '');
     }
     else if (lcAddr == this.config.ddexAdminAddr) {
@@ -5537,6 +5564,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                         + '</li><li>' + utility.tokenStoreURL(token, true)
                         + '</li><li>' + utility.idexURL(token, true)
                         + '</li><li>' + utility.ddexURL(token, true)
+                        + '</li><li>' + utility.radarURL(token, true)
                         + '</li></ul>';
 
 
@@ -27657,6 +27685,26 @@ module.exports = (config) => {
     return url;
   }
 
+  utility.radarURL = function (tokenObj, html) {
+    var url = "https://app.radarrelay.com/";
+    var labelClass = "label-primary";
+
+    if (tokenObj && tokenObj.Radar) {
+      url += tokenObj.Radar + '/WETH';
+    } else {
+      labelClass = 'label-default';
+      url = '';
+    }
+
+    if (html) {
+      if (url == '') {
+        url = '<span class="label ' + labelClass + '">RadarRelay</span>';
+      } else {
+        url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">RadarRelay <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+      }
+    }
+    return url;
+  }
 
   utility.hashLink = function (hash, html, short) {
     var url = 'https://etherscan.io/tx/' + hash;

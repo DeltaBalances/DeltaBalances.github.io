@@ -358,6 +358,26 @@ module.exports = (config) => {
     return url;
   }
 
+  utility.radarURL = function (tokenObj, html) {
+    var url = "https://app.radarrelay.com/";
+    var labelClass = "label-primary";
+
+    if (tokenObj && tokenObj.Radar) {
+      url += tokenObj.Radar + '/WETH';
+    } else {
+      labelClass = 'label-default';
+      url = '';
+    }
+
+    if (html) {
+      if (url == '') {
+        url = '<span class="label ' + labelClass + '">RadarRelay</span>';
+      } else {
+        url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">RadarRelay <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+      }
+    }
+    return url;
+  }
 
   utility.hashLink = function (hash, html, short) {
     var url = 'https://etherscan.io/tx/' + hash;

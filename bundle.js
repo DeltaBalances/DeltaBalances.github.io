@@ -2598,7 +2598,7 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
                 token.locked = true;
             }
 
-            let listedExchanges = ['EtherDelta', 'ForkDelta', 'IDEX', 'DDEX', 'Binance'];
+            let listedExchanges = ['EtherDelta', 'ForkDelta', 'IDEX', 'DDEX', 'Binance', 'Radar'];
             for (let i = 0; i < listedExchanges.length; i++) {
                 let exchange = listedExchanges[i];
                 if (x[exchange]) {

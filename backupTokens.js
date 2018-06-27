@@ -3575,7 +3575,7 @@ let offlineCustomTokens = [
   {symbol:"VRT",address:"0x2496477fb081a0ee9d62e7c32d897872f28ae86c",decimal:9,name:"VRT token"},
   {symbol:"VRTY",address:"0x87e960f996e789ca2c8415fc449e4720adbe0497",decimal:12,name:"VERITY",ForkDelta:"VRTY"},
   {symbol:"VRX",address:"0x7c9a714eda794944ce6bfb274b65e012221a8a61",decimal:18,name:"VRON"},
-  {symbol:"VSL",address:"0x5c543e7ae0a1104f78406c340e9c64fd9fce5170",decimal:0,name:"vSlice",EtherDelta:"VSL",ForkDelta:"VSL",IDEX:"VSL"},
+  {symbol:"VSL",address:"0x5c543e7ae0a1104f78406c340e9c64fd9fce5170",decimal:18,name:"vSlice",EtherDelta:"VSL",ForkDelta:"VSL",IDEX:"VSL"},
   {symbol:"VSM-OLD",address:"0x82665764ea0b58157e1e5e9bab32f68c76ec0cdf",decimal:0,name:"VOISE",EtherDelta:"VSMOLD",ForkDelta:"VSMOLD"},
   {symbol:"VST",address:"0x552ed8253f341fb770e8badff5a0e0ee2fd57b43",decimal:18,name:"Vestarin",IDEX:"VST"},
   {symbol:"VTC",address:"0x9073d050fa90fe910b74e2b1eb7efe5a016eaa05",decimal:18,name:"VERDICT"},

@@ -1078,7 +1078,7 @@ let offlineCustomTokens = [
   {symbol:"DFS",address:"0x45ed02e374aef2e4b34c04e86ad9d45891d10751",decimal:18,name:"Digital Fantasy Sports",IDEX:"DFS",Radar:"DFS"},
   {symbol:"DFT",address:"0xa95c34ef5a4cdd780d3414455149b086f865fc7a",decimal:18,name:"DomenForum.net"},
   {symbol:"DFZ",address:"0x3cd4048167142120a796b446a2a45d1b856c5ef7",decimal:18,name:"DAFZO"},
-  {symbol:"DGD",address:"0xe0b7927c4af23765cb51314a0e0521a9645f0e2a",decimal:0,name:"Digix DAO",Binance:"DGDETH",EtherDelta:"DGD",ForkDelta:"DGD",IDEX:"DGD",Radar:"DGD"},
+  {symbol:"DGD",address:"0xe0b7927c4af23765cb51314a0e0521a9645f0e2a",decimal:9,name:"Digix DAO",Binance:"DGDETH",EtherDelta:"DGD",ForkDelta:"DGD",IDEX:"DGD",Radar:"DGD"},
   {symbol:"DGPT",address:"0xf6cfe53d6febaeea051f400ff5fc14f0cbbdaca1",decimal:18,name:"DigiPulse Token",EtherDelta:"DGPT",ForkDelta:"DGPT",IDEX:"DGPT",Radar:"DGPT"},
   {symbol:"DGS",address:"0x6aedbf8dff31437220df351950ba2a3362168d1b",decimal:8,name:"Dragonglass",ForkDelta:"DGS"},
   {symbol:"DGT",address:"0x8b9c35c79af5319c70dd9a3e3850f368822ed64e",decimal:18,name:"Dogetoken",EtherDelta:"DGT",ForkDelta:"DGT",IDEX:"DGT"},

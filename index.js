@@ -870,19 +870,26 @@
 
 		//prices from etherdelta https endpoint (includes more unlisted tokens)
 		function retryURL1() {
-			$.getJSON(_delta.config.apiServer + '/returnTicker').done((result) => {
-				if (requestID <= rqid) {
-					if (result) {
-						parsePrices(result, 'ED');
-					} else if (loadedBid < 2 && url1Retries < numRetries) {
-						url1Retries++;
-						retryURL1();
-					} else if (url1Retries >= numRetries) {
-						showError("Failed to retrieve EtherDelta Prices after 3 tries. Prices may be less accurate.");
-						loadedBid++;
-						finishedBalanceRequest();
+
+			$.ajax({
+				dataType: "json",
+				url: _delta.config.apiServer + '/returnTicker',
+				data: "",
+				success: (result) => {
+					if (requestID <= rqid) {
+						if (result) {
+							parsePrices(result, 'ED');
+						} else if (loadedBid < 2 && url1Retries < numRetries) {
+							url1Retries++;
+							retryURL1();
+						} else if (url1Retries >= numRetries) {
+							showError("Failed to retrieve EtherDelta Prices after 3 tries. Prices may be less accurate.");
+							loadedBid++;
+							finishedBalanceRequest();
+						}
 					}
-				}
+				},
+				timeout: 2500
 			}).fail((result) => {
 				if (requestID <= rqid) {
 					if (loadedBid < 2 && url1Retries < numRetries) {
@@ -890,7 +897,7 @@
 						retryURL1();
 					}
 					else if (url1Retries >= numRetries) {
-						showError("Failed to retrieve EtherDelta Prices after 3 tries. Try again (later)");
+					//	showError("Failed to retrieve EtherDelta Prices after 3 tries. Try again (later)");
 						loadedBid++;
 						failedBid++;
 						finishedBalanceRequest();

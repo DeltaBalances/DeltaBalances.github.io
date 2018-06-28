@@ -1098,6 +1098,13 @@
 	//transactions table
 	function makeTable2(result) {
 
+    
+        //hide popovers
+        $('[data-toggle="popover"]').each(function () {
+            $(this).popover('hide');
+            $(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+        });
+    
 		let filtered = result.filter((res) => { return checkFilter(res.Type); });
 
 		$('#transactionsTable2 tbody').empty();

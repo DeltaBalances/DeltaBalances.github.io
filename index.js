@@ -1289,6 +1289,12 @@
 	//balances table
 	function makeTable(result, hideZeros) {
 
+		//hide popovers
+		$('[data-toggle="popover"]').each(function () {
+			$(this).popover('hide');
+			$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+		});
+
 		$('#resultTable tbody').empty();
 		var filtered = result;
 		var loaded = table1Loaded;

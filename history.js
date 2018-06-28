@@ -999,6 +999,13 @@
 
 	//balances table
 	function makeTable(result) {
+        
+        //hide popovers
+        $('[data-toggle="popover"]').each(function () {
+            $(this).popover('hide');
+            $(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+        });
+        
 		checkBlockDates(result);
 		$('#transactionsTable tbody').empty();
 		var filtered = result;

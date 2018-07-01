@@ -123,6 +123,41 @@ try {
     console.log('ddex live tokens loading error ' + err);
 }
 
+var radarConfig = [];
+try {
+
+    let radarData = sessionStorage.getItem('radarTokens1');
+    // only get live tokens if we haven't saved them this session already
+    if (radarData !== undefined && radarData) {
+        let parsed = JSON.parse(radarData);
+        if (parsed && parsed.length > 0) {
+            radarConfig = parsed;
+        }
+    } else {
+
+        // if we have saved data from a previous session, pre-load it
+        let radarData2 = localStorage.getItem('radarTokens2');
+        if (radarData2 !== undefined && radarData2) {
+            let parsed = JSON.parse(radarData2);
+            if (parsed && parsed.length > radarConfig.length) {
+                radarData2 = parsed;
+            }
+        }
+
+        $.getJSON('https://api.radarrelay.com/v0/tokens', function (jsonData) {
+            if (jsonData && jsonData.length > 0) {
+                jsonData = jsonData.filter((x) => { return x.active; });
+                radarConfig = jsonData.map((x) => { return { symbol: x.symbol, address: x.address, decimals: x.decimals, name: x.name } });
+                let string = JSON.stringify(radarConfig);
+                sessionStorage.setItem('radarTokens1', string);
+                localStorage.setItem('radarTokens2', string);
+            }
+        });
+    }
+} catch (err) {
+    console.log('radar relay live tokens loading error ' + err);
+}
+
 var unknownTokenCache = [];
 try {
     let tokenData = localStorage.getItem('unknownTokens1');

@@ -28,6 +28,7 @@ module.exports = {
     '0x5dd835a893734b8d556eccf87800b76dda5aedc5': 'BambooRelay',
     '0xc22d5b2951db72b44cfb8089bb8cd374a3c354ea': 'OpenRelay',
     '0x8124071f810d533ff63de61d0c98db99eeb99d64': 'STAR BIT',
+    '0x4524baa98f9a3b9dec57caae7633936ef96bd708': 'LedgerDex',
   },
   contractOasisDexAddr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425',
   contractOasisDirectAddr: '0x793ebbe21607e4f04788f89c7a9b97320773ec59',
@@ -105,6 +106,7 @@ module.exports = {
     { m: "Mar 2018", blockFrom: 5174125, blockTo: 5357795 },
     { m: "Apr 2018", blockFrom: 5357795, blockTo: 5534863 },
     { m: "May 2018", blockFrom: 5534863, blockTo: 5710964 },
+    { m: "Jun 2018", blockFrom: 5710964, blockTo: 5883490 },
   ],
 
   historyAll: {

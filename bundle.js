@@ -4120,6 +4120,136 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     return obj;
                 }
             }
+            //ethex.market taker trade
+            else if (unpacked.name == 'takeBuyOrder' || unpacked.name == 'takeSellOrder') {
+                let maker = unpacked.params[unpacked.params.length - 1].value.toLowerCase();
+                let taker = ''
+                if (badFromTo && unpacked.name == 'takeSellOrder') {
+                    taker = tx.to.toLowerCase();
+                } else {
+                    taker = tx.from.toLowerCase();
+                }
+
+                let base = this.setToken(this.config.ethAddr);
+                let token = this.setToken(unpacked.params[0].value);
+                let tradeType = '';
+                if (unpacked.name == 'takeSellOrder') {
+                    tradeType = 'Buy';
+                } else {
+                    tradeType = 'Sell';
+                }
+
+                let exchange = '';
+                let addrName = !badFromTo ? this.addressName(tx.to) : this.addressName(this.config.contractEthexAddr); //assume ethex, no address in etherscan token event
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                }
+
+                if (token && base) {
+                    let tokenAmount = utility.weiToEth(new BigNumber(unpacked.params[1].value), this.divisorFromDecimals(token.decimals));
+                    let baseAmount = utility.weiToEth(unpacked.params[2].value, this.divisorFromDecimals(base.decimals));
+
+                    var price = new BigNumber(0);
+                    if (tokenAmount.greaterThan(0)) {
+                        price = baseAmount.div(tokenAmount);
+                    }
+
+                    var orderSize = tokenAmount;
+
+                    // less than full base amount
+                    if (unpacked.name == 'takeSellOrder' && new BigNumber(unpacked.params[2].value) !== new BigNumber(tx.value)) {
+                        baseAmount = utility.weiToEth(unpacked.params[2].value, this.divisorFromDecimals(base.decimals));
+                        tokenAmount = baseAmount.div(price);
+                    }
+                    //less than full token amount
+                    else if (unpacked.name == 'takeBuyOrder' && unpacked.params[1].value !== unpacked.params[3].value) {
+                        tokenAmount = utility.weiToEth(new BigNumber(unpacked.params[3].value), this.divisorFromDecimals(token.decimals));
+                        baseAmount = tokenAmount.times(price);
+                    }
+
+                    return {
+                        'type': 'Taker ' + tradeType,
+                        'exchange': exchange,
+                        'note': utility.addressLink(taker, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
+                        'token': token,
+                        'amount': tokenAmount,
+                        'price': price,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'order size': orderSize,
+                        'unlisted': token.unlisted,
+                        'maker': maker,
+                        'taker': taker,
+                    };
+                }
+            }
+            //ethex maker  trade offer
+            else if (unpacked.name == 'makeSellOrder' || unpacked.name == 'makeBuyOrder' || unpacked.name == 'cancelAllSellOrders' || unpacked.name == 'cancelAllBuyOrders') {
+
+                let base = this.setToken(this.config.ethAddr);
+                let token = this.setToken(unpacked.params[0].value);
+                let tradeType = '';
+
+                let rawETH = undefined;
+                if (unpacked.name.indexOf('Sell') !== -1) {
+                    rawETH = new BigNumber(unpacked.params[2].value);
+                    tradeType = 'Sell';
+                } else {
+                    if (unpacked.name.slice(0, 6) == 'cancel') {
+                        rawETH = new BigNumber(unpacked.params[2].value);
+                    } else {
+                        rawETH = new BigNumber(tx.value);
+                    }
+                    tradeType = 'Buy';
+                }
+
+                let maker = tx.from.toLowerCase();
+
+                let exchange = '';
+                let addrName = this.addressName(tx.to);
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                }
+
+                if (base && token) {
+
+                    let tokenAmount = utility.weiToEth(new BigNumber(unpacked.params[1].value), this.divisorFromDecimals(token.decimals));
+                    let baseAmount = utility.weiToEth(rawETH, this.divisorFromDecimals(base.decimals));
+
+                    var price = new BigNumber(0);
+                    if (tokenAmount.greaterThan(0)) {
+                        price = baseAmount.div(tokenAmount);
+                    }
+
+                    if (unpacked.name.slice(0, 6) !== 'cancel') {
+                        return {
+                            'type': tradeType + ' offer',
+                            'exchange': exchange,
+                            'note': utility.addressLink(maker, true, true) + ' created a trade offer',
+                            'token': token,
+                            'amount': tokenAmount,
+                            'price': price,
+                            'base': base,
+                            'baseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                            'maker': maker,
+                        };
+                    } else {
+                        return {
+                            'type': 'Cancel ' + tradeType,
+                            'exchange': exchange,
+                            'note': utility.addressLink(maker, true, true) + ' cancelled a trade offer',
+                            'token': token,
+                            'amount': tokenAmount,
+                            'price': price,
+                            'base': base,
+                            'baseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                            'maker': maker,
+                        };
+                    }
+                }
+            }
         } else {
             return undefined;
         }
@@ -4178,6 +4308,9 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
     else if (lcAddr == this.config.contractEthenAddr) {
         return 'ETHEN ' + (showAddr ? lcAddr : '');
     }
+    else if (lcAddr == this.config.contractEthexAddr) {
+        return 'ETHEX ' + (showAddr ? lcAddr : '');
+    }
     else if (lcAddr == this.config.contractDecentrexAddr) {
         return 'Decentrex ' + (showAddr ? lcAddr : '');
     } else if (lcAddr == this.config.idexAdminAddr || lcAddr == this.config.idexAdminAddr2) {
@@ -4232,6 +4365,7 @@ DeltaBalances.prototype.isExchangeAddress = function (addr) {
         //    || lcAddr === this.config.contractDexyAddr
         //    || lcAddr === this.config.contractDexy2Addr
         || lcAddr === this.config.contractEthenAddr
+        || lcAddr === this.config.contractEthexAddr
     ) {
         return true;
     } else {
@@ -5513,6 +5647,129 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 };
                 return obj;
             }
+            //ethex taker trade 
+            else if (unpacked.name == 'TakeBuyOrder' || unpacked.name == 'TakeSellOrder') {
+                let maker = ''
+                let taker = ''
+                let tradeType = '';
+                if (unpacked.name == 'TakeSellOrder') {
+                    tradeType = 'Buy';
+                    maker = unpacked.events[6].value.toLowerCase();
+                    taker = unpacked.events[5].value.toLowerCase();
+                } else {
+                    tradeType = 'Sell';
+                    maker = unpacked.events[5].value.toLowerCase();
+                    taker = unpacked.events[6].value.toLowerCase();
+                }
+
+                let base = this.setToken(this.config.ethAddr);
+                let token = this.setToken(unpacked.events[1].value);
+
+                let exchange = '';
+                let addrName = this.addressName(unpacked.address);
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                }
+
+
+                if (token && base) {
+                    let tokenAmount = utility.weiToEth(new BigNumber(unpacked.events[2].value), this.divisorFromDecimals(token.decimals));
+                    let baseAmount = utility.weiToEth(unpacked.events[3].value, this.divisorFromDecimals(base.decimals));
+
+                    var price = new BigNumber(0);
+                    if (tokenAmount.greaterThan(0)) {
+                        price = baseAmount.div(tokenAmount);
+                    }
+
+                    // less than full base amount
+                    if (unpacked.name == 'TakeSellOrder' && unpacked.events[3].value !== unpacked.events[4].value) {
+                        baseAmount = utility.weiToEth(unpacked.events[4].value, this.divisorFromDecimals(base.decimals));
+                        tokenAmount = baseAmount.div(price);
+                    }
+                    //less than full token amount
+                    else if (unpacked.name == 'TakeBuyOrder' && unpacked.events[2].value !== unpacked.events[4].value) {
+                        tokenAmount = utility.weiToEth(new BigNumber(unpacked.events[4].value), this.divisorFromDecimals(token.decimals));
+                        baseAmount = tokenAmount.times(price);
+                    }
+
+                    return {
+                        'type': 'Taker ' + tradeType,
+                        'exchange': exchange,
+                        'note': utility.addressLink(taker, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
+                        'token': token,
+                        'amount': tokenAmount,
+                        'price': price,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        'maker': maker,
+                        'taker': taker,
+                        'feeCurrency': base,
+                        'fee': '',
+                    };
+                }
+            }
+            //ethex maker  trade offer
+            else if (unpacked.name == 'MakeSellOrder' || unpacked.name == 'MakeBuyOrder' || unpacked.name == 'CancelSellOrder' || unpacked.name == 'CancelBuyOrder') {
+
+                let base = this.setToken(this.config.ethAddr);
+                let token = this.setToken(unpacked.events[1].value);
+                let tradeType = '';
+
+                if (unpacked.name.indexOf('Sell') !== -1) {
+                    tradeType = 'Sell';
+                } else {
+                    tradeType = 'Buy';
+                }
+
+                let maker = unpacked.events[4].value.toLowerCase();
+
+                let exchange = '';
+                let addrName = this.addressName(unpacked.address);
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                }
+
+                if (base && token) {
+
+                    let tokenAmount = utility.weiToEth(new BigNumber(unpacked.events[2].value), this.divisorFromDecimals(token.decimals));
+                    let baseAmount = utility.weiToEth(new BigNumber(unpacked.events[3].value), this.divisorFromDecimals(base.decimals));
+
+                    var price = new BigNumber(0);
+                    if (tokenAmount.greaterThan(0)) {
+                        price = baseAmount.div(tokenAmount);
+                    }
+
+                    if (unpacked.name.indexOf('Cancel') == -1) {
+                        return {
+                            'type': tradeType + ' offer',
+                            'exchange': exchange,
+                            'note': utility.addressLink(maker, true, true) + ' created a trade offer',
+                            'token': token,
+                            'amount': tokenAmount,
+                            'price': price,
+                            'base': base,
+                            'baseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                            'maker': maker,
+                        };
+                    } else {
+                        return {
+                            'type': 'Cancel ' + tradeType,
+                            'exchange': exchange,
+                            'note': utility.addressLink(maker, true, true) + ' cancelled a trade offer',
+                            'token': token,
+                            'amount': tokenAmount,
+                            'price': price,
+                            'base': base,
+                            'baseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                            'maker': maker,
+                        };
+                    }
+                }
+            }
+
             // Order ?
         } else {
             return { 'error': 'unknown event output' };
@@ -27555,6 +27812,7 @@ module.exports = (config) => {
     Decoder.addABI(bundle.DeltaBalances.config.enclavesAbi);
     Decoder.addABI(bundle.DeltaBalances.config.enclaves2Abi);
     Decoder.addABI(bundle.DeltaBalances.config.ethenAbi);
+    Decoder.addABI(bundle.DeltaBalances.config.ethexAbi);
 
     //Decoder.addABI(bundle.DeltaBalances.config.dexyAbi);
     //Decoder.addABI(bundle.DeltaBalances.config.dexy2Abi);

@@ -228,6 +228,7 @@ module.exports = (config) => {
     Decoder.addABI(bundle.DeltaBalances.config.enclavesAbi);
     Decoder.addABI(bundle.DeltaBalances.config.enclaves2Abi);
     Decoder.addABI(bundle.DeltaBalances.config.ethenAbi);
+    Decoder.addABI(bundle.DeltaBalances.config.ethexAbi);
 
     //Decoder.addABI(bundle.DeltaBalances.config.dexyAbi);
     //Decoder.addABI(bundle.DeltaBalances.config.dexy2Abi);

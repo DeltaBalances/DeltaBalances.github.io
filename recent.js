@@ -744,24 +744,24 @@
 					contract = contract.toLowerCase();
 					try {
 						if (!_delta.uniqueTokens[contract]) {
-                            
-                            if(tx.tokenSymbol !== "" && tx.tokenDecimal !== "") {
-                                let newToken = {
-                                    addr: contract,
-                                    name: _util.escapeHtml(tx.tokenSymbol),
-                                    name2: _util.escapeHtml(tx.tokenName),
-                                    decimals: Number(tx.tokenDecimal),
-                                    unlisted: true,
-                                };
-                                _delta.uniqueTokens[contract] = newToken;
-                                newTokens.push(newToken);
-                            }
+
+							if (tx.tokenSymbol !== "" && tx.tokenDecimal !== "") {
+								let newToken = {
+									addr: contract,
+									name: _util.escapeHtml(tx.tokenSymbol),
+									name2: _util.escapeHtml(tx.tokenName),
+									decimals: Number(tx.tokenDecimal),
+									unlisted: true,
+								};
+								_delta.uniqueTokens[contract] = newToken;
+								newTokens.push(newToken);
+							}
 						}
 					} catch (e) { }
 				}
 
 				// internal tx (withdraw or unwrap ETH)
-				if (to === myAddr && !contract && from !== _delta.config.contractKyberAddr) {
+				if (to === myAddr && !contract && from !== _delta.config.contractKyberAddr && from !== _delta.config.contractEthexAddr) {
 					var trans = undefined;
 					if (_delta.isExchangeAddress(from)) {
 						var val = _util.weiToEth(tx.value);
@@ -840,7 +840,7 @@
 								} else if (unpacked.name == 'buy' && unpacked.params.length == 2) {
 									trans = createOutputTransaction(obj.type, undefined, undefined, undefined, undefined, tx.hash, tx.timeStamp, undefined, undefined, tx.isError === '0', exchange);
 								}
-								else if (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders' || unpacked.name === 'cancel') {
+								else if (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders' || unpacked.name === 'cancel' || unpacked.name == 'cancelAllSellorders' || unpacked.name == 'cancelAllBuyOrders') {
 									let cancelAmount = '';
 									if (obj.baseAmount)
 										cancelAmount = obj.baseAmount;
@@ -865,6 +865,16 @@
 										// other trade
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 									}
+								} else if (unpacked.name == 'takeSellOrder' || unpacked.name == 'takeBuyOrder' || unpacked.name == 'makeSellorder' || unpacked.name == 'makeBuyOrder') {
+
+									if (obj.maker == myAddr) {// maker trade from etherscan token event
+										if (obj.type == 'Taker Buy') {
+											obj.type = 'Maker Sell';
+										} else if (obj.type == 'Taker Sell') {
+											obj.type = 'Maker Buy';
+										}
+									}
+									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 								}
 								else if (unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized') {
 									if (obj.type == 'Buy up to') {
@@ -950,6 +960,7 @@
 						let trans2 = undefined;
 						let exchange = '';
 
+
 						//Ether transferred or unknown func accepting ETH
 						if (!contract && val.greaterThan(0)) {
 
@@ -990,7 +1001,9 @@
 							}
 						}
 
-						addTransaction(trans2);
+						if (from !== _delta.config.contractEthexAddr) { // ethex ETH returns from internal tx give false positive
+							addTransaction(trans2);
+						}
 
 					}
 				}
@@ -1098,13 +1111,13 @@
 	//transactions table
 	function makeTable2(result) {
 
-    
-        //hide popovers
-        $('[data-toggle="popover"]').each(function () {
-            $(this).popover('hide');
-            $(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
-        });
-    
+
+		//hide popovers
+		$('[data-toggle="popover"]').each(function () {
+			$(this).popover('hide');
+			$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+		});
+
 		let filtered = result.filter((res) => { return checkFilter(res.Type); });
 
 		$('#transactionsTable2 tbody').empty();
@@ -1280,7 +1293,7 @@
 					else if (cellValue == 'Withdraw' || cellValue == 'Unwrap ETH' || cellValue == 'Out') {
 						row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
 					}
-					else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy' || cellValue == 'Cancel offer' || cellValue == 'Sell offer' || cellValue == 'Buy offer') {
+					else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy' || cellValue == 'Cancel offer' || cellValue == 'Sell offer' || cellValue == 'Buy offer' || cellValue == 'Cancel Sell' || cellValue == 'Cancel Buy') {
 						row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
 					}
 					else if (cellValue == 'Taker Buy' || cellValue == 'Buy up to' || cellValue == 'Maker Buy' || cellValue == 'Fill offer' || cellValue == 'Trade') {

@@ -777,6 +777,11 @@
 						if (tx.input !== '0x') {
 							exchange = 'unknown ';
 						}
+						if (_delta.config.exchangeWallets[from]) {
+							exchange = _delta.config.exchangeWallets[from];
+						} else if (_delta.config.exchangeWallets[to]) {
+							exchange = _delta.config.exchangeWallets[to];
+						}
 
 						if (to === myAddr) {
 							trans = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
@@ -948,7 +953,14 @@
 									} else if (obj.to.toLowerCase() == myAddr) {
 										newType = 'In';
 									}
-									trans = createOutputTransaction(newType, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', '');
+									let exch = '';
+									if (_delta.config.exchangeWallets[from]) {
+										exch = _delta.config.exchangeWallets[from];
+									} else if (_delta.config.exchangeWallets[to]) {
+										exch = _delta.config.exchangeWallets[to];
+									}
+
+									trans = createOutputTransaction(newType, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exch);
 								}
 
 								addTransaction(trans);
@@ -974,6 +986,11 @@
 								if (tx.input !== '0x') {
 									exchange = 'unknown ';
 								}
+								if (_delta.config.exchangeWallets[from]) {
+									exchange = _delta.config.exchangeWallets[from];
+								} else if (_delta.config.exchangeWallets[to]) {
+									exchange = _delta.config.exchangeWallets[to];
+								}
 
 								if (to === myAddr) {
 									trans2 = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
@@ -992,6 +1009,11 @@
 							}
 
 							exchange = 'unknown ';
+							if (_delta.config.exchangeWallets[from]) {
+								exchange = _delta.config.exchangeWallets[from];
+							} else if (_delta.config.exchangeWallets[to]) {
+								exchange = _delta.config.exchangeWallets[to];
+							}
 
 							let token = _delta.setToken(contract);
 							if (token) {

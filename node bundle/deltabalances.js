@@ -1814,29 +1814,38 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 DeltaBalances.prototype.addressName = function (addr, showAddr) {
     var lcAddr = addr.toLowerCase();
 
+    let name = '';
+
     if (this.uniqueTokens[addr]) {
-        return this.uniqueTokens[addr].name + " Contract " + (showAddr ? lcAddr : '');
+        name = this.uniqueTokens[addr].name + " Contract ";
     }
     else if (this.uniqueTokens[lcAddr]) {
-        return this.uniqueTokens[lcAddr].name + " Contract " + (showAddr ? lcAddr : '');
+        name = this.uniqueTokens[lcAddr].name + " Contract ";
     }
-
-    let exchanges = Object.values(this.config.exchangeContracts);
-    for (let i = 0; i < exchanges.length; i++) {
-        let ex = exchanges[i];
-        if (ex.addr === lcAddr) {
-            return ex.name + (showAddr ? lcAddr : '');
+    else if (this.config.zrxRelayers[lcAddr]) {
+        name = this.config.zrxRelayers[lcAddr] + ' Admin ';
+    } else if (this.config.admins[lcAddr]) {
+        name = this.config.admins[lcAddr] + ' ';
+    } else if (this.config.exchangeWallets[lcAddr]) {
+        name = this.config.exchangeWallets[lcAddr] + ' ';
+    }
+    else {
+        let exchanges = Object.values(this.config.exchangeContracts);
+        for (let i = 0; i < exchanges.length; i++) {
+            let ex = exchanges[i];
+            if (ex.addr === lcAddr) {
+                name = ex.name;
+                break;
+            }
         }
     }
 
-    if (this.config.zrxRelayers[lcAddr]) {
-        return this.config.zrxRelayers[lcAddr] + ' fee addr';
-    } else if (this.config.admins[lcAddr]) {
-        return this.config.admins[lcAddr];
+    if (name !== '') {
+        return name + (showAddr ? lcAddr : '');
+    } else {
+        // no known alias, return address
+        return lcAddr;
     }
-
-    // no known alias, return address
-    return lcAddr;
 };
 
 DeltaBalances.prototype.isTokenAddress = function (addr) {

@@ -26,43 +26,43 @@
 				enabled: true,
 				loaded: 0,
 				displayed: 0,
-				contract: _delta.config.contractEtherDeltaAddrs[0].addr
+				contract: _delta.config.exchangeContracts.EtherDelta.addr
 			},
 			'IDEX': {
 				enabled: false,
 				loaded: 0,
 				displayed: 0,
-				contract: _delta.config.contractIdexAddr
+				contract: _delta.config.exchangeContracts.Idex.addr
 			},
 			'Token store': {
 				enabled: false,
 				loaded: 0,
 				displayed: 0,
-				contract: _delta.config.contractTokenStoreAddr
+				contract: _delta.config.exchangeContracts.TokenStore.addr
 			},
 			'Enclaves': {
 				enabled: false,
 				loaded: 0,
 				displayed: 0,
-				contract: _delta.config.contractEnclavesAddr
+				contract: _delta.config.exchangeContracts.Enclaves.addr
 			},
 			'Decentrex': {
 				enabled: false,
 				loaded: 0,
 				displayed: 0,
-				contract: _delta.config.contractDecentrexAddr
+				contract: _delta.config.exchangeContracts.Decentrex.addr
 			},
 			'Ethen': {
 				enabled: false,
 				loaded: 0,
 				displayed: 0,
-				contract: _delta.config.contractEthenAddr
+				contract: _delta.config.exchangeContracts.Ethen.addr
 			},
 			'DEXY': {
 				enabled: false,
 				loaded: 0,
 				displayed: 0,
-				contract: _delta.config.contractDexyAddr
+				contract: _delta.config.exchangeContracts.Dexy.addr
 			},
 		};
 
@@ -207,14 +207,6 @@
 			if (!$('#refreshButtonSearch').is(e.target)) {
 				hideError();
 			}
-		});
-
-
-		// contract change
-		$('#contractSelect').change(e => {
-			_delta.changeContract(e.target.selectedIndex);
-			if (document.getElementById('address').value !== '')
-				myClick();
 		});
 
 		resetExLoadingState();
@@ -897,7 +889,7 @@
 						retryURL1();
 					}
 					else if (url1Retries >= numRetries) {
-					//	showError("Failed to retrieve EtherDelta Prices after 3 tries. Try again (later)");
+						//	showError("Failed to retrieve EtherDelta Prices after 3 tries. Try again (later)");
 						loadedBid++;
 						failedBid++;
 						finishedBalanceRequest();
@@ -990,7 +982,7 @@
 				_util.call(
 					web3Provider,
 					_delta.contractDeltaBalance,
-					_delta.config.contractDeltaBalanceAddr,
+					_delta.config.DeltaBalanceAddr,
 					funcName,
 					args,
 					(err, result) => {
@@ -1541,7 +1533,7 @@
 				}
 				else if (head == 'Name') {
 					let token = _delta.uniqueTokens[myList[i].Address];
-					if(token) {
+					if (token) {
 						let popover = _delta.makeTokenPopover(token);
 						row$.append($('<td/>').html(popover));
 					} else {
@@ -1595,43 +1587,6 @@
 		}
 		columnSet = Object.keys(columnSet);
 		return columnSet;
-	}
-
-
-	// contract selector
-	function createSelect() {
-		var div = document.getElementById("selectDiv");
-
-		//Create array of options to be added
-		var array = _delta.config.contractEtherDeltaAddrs.map(x => { return x.addr; });
-
-		//Create and append select list
-		var selectList = document.createElement("select");
-		selectList.id = "contractSelect";
-		var liveGroup = document.createElement("optgroup");
-		liveGroup.label = "EtherDelta - Active";
-		var oldGroup = document.createElement("optgroup");
-		oldGroup.label = "EtherDelta - Outdated - withdraw funds";
-
-
-
-		//Create and append the options
-		for (var i = 0; i < array.length; i++) {
-			var option = document.createElement("option");
-			option.value = i;
-			option.text = array[i];
-			if (i == 0) {
-				liveGroup.appendChild(option);
-			} else {
-				oldGroup.appendChild(option);
-			}
-		}
-
-
-		selectList.appendChild(liveGroup);
-		selectList.appendChild(oldGroup);
-		div.appendChild(selectList);
-		selectList.selectedIndex = 0;
 	}
 
 	function downloadBalances() {

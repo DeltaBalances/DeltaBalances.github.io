@@ -761,7 +761,7 @@
 				}
 
 				// internal tx (withdraw or unwrap ETH)
-				if (to === myAddr && !contract && from !== _delta.config.contractKyberAddr && from !== _delta.config.contractEthexAddr) {
+				if (to === myAddr && !contract && from !== _delta.config.exchangeContracts.Kyber.addr && from !== _delta.config.exchangeContracts.Ethex.addr) {
 					var trans = undefined;
 					if (_delta.isExchangeAddress(from)) {
 						var val = _util.weiToEth(tx.value);
@@ -1001,7 +1001,7 @@
 							}
 						}
 
-						if (from !== _delta.config.contractEthexAddr) { // ethex ETH returns from internal tx give false positive
+						if (from !== _delta.config.exchangeContracts.Ethex.addr) { // ethex ETH returns from internal tx give false positive
 							addTransaction(trans2);
 						}
 

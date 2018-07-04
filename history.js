@@ -674,14 +674,13 @@
 
 		var tradeLogResult = [];
 		var contractAddr = '';
-		let addrVarName = historyConfig.exchangeAddr;
-		if (Array.isArray(addrVarName)) {
+		if (Array.isArray(historyConfig.exchange)) {
 			contractAddr = [];
-			for (let i = 0; i < addrVarName.length; i++) {
-				contractAddr.push(_delta.config[addrVarName[i]]);
+			for (let i = 0; i < historyConfig.exchange.length; i++) {
+				contractAddr.push(_delta.config.exchangeContracts[historyConfig.exchange[i]].addr);
 			}
 		} else {
-			contractAddr = _delta.config[addrVarName];
+			contractAddr = _delta.config.exchangeContracts[historyConfig.exchange].addr;
 		}
 
 		var reqAmount = 0;
@@ -814,11 +813,11 @@
 			{
 				// Ethen.market only, deal with 2 events that need to be combined
 				// mark the hash if one of 2 events contains your address
-				if (historyConfig.exchangeAddr === 'contractEthenAddr' ||
-					(Array.isArray(historyConfig.exchangeAddr) && historyConfig.exchangeAddr.indexOf('contractEthenAddr') !== -1)
+				if (historyConfig.exchange === 'Ethen' ||
+					(Array.isArray(historyConfig.exchange) && historyConfig.exchange !== 'Ethen')
 				)
 					outputLogs.map((log) => {
-						if (log.address === _delta.config.contractEthenAddr) {
+						if (log.address === _delta.config.exchangeContracts.Ethen.Addr) {
 							if (log.data.indexOf(addrrr) !== -1) {
 								ethenOrders[log.transactionHash] = true;
 							}
@@ -999,19 +998,19 @@
 
 	//balances table
 	function makeTable(result) {
-        
-        //hide popovers
-        $('[data-toggle="popover"]').each(function () {
-            $(this).popover('hide');
-            $(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
-        });
-        
+
+		//hide popovers
+		$('[data-toggle="popover"]').each(function () {
+			$(this).popover('hide');
+			$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+		});
+
 		checkBlockDates(result);
 		$('#transactionsTable tbody').empty();
 		var filtered = result;
 		var loaded = tableLoaded;
 
-		if (historyConfig.showRelayers || Array.isArray(historyConfig.exchangeAddr)) {
+		if (historyConfig.showRelayers || Array.isArray(historyConfig.exchange)) {
 			tradeHeaders['Exchange'] = 1;
 		}
 		buildHtmlTable('#transactionsTable', filtered, loaded, tradeHeaders);
@@ -1109,7 +1108,7 @@
 		} else {
 			$("#transactionsTable thead th").data("sorter", true);
 			let defaultSortIndex = 7;
-			if (historyConfig.showRelayers || Array.isArray(historyConfig.exchangeAddr))
+			if (historyConfig.showRelayers || Array.isArray(historyConfig.exchange))
 				defaultSortIndex = 8;
 			$("#transactionsTable").tablesorter({
 				textExtraction: {

@@ -7,10 +7,20 @@ BigNumber.config({ ERRORS: false });
 module.exports = (config) => {
   const utility = {};
 
+  //give readable value, given a divisor (or eth divisor=undefined)
   utility.weiToEth = function weiToEth(wei, divisorIn) {
     const divisor = !divisorIn ? 1000000000000000000 : divisorIn;
     return (new BigNumber(wei).div(divisor));
   };
+
+  //give readable value given a wei amount and a token object
+  utility.weiToToken = function weiToToken(wei, token) {
+    let divisor = new BigNumber(1000000000000000000);
+    if (token && token.decimals !== undefined) {
+      divisor = new BigNumber(Math.pow(10, token.decimals));
+    }
+    return new BigNumber(wei).div(divisor);
+  }
 
   // token is ether or wrapped ether
   utility.isWrappedETH = function (address) {
@@ -30,10 +40,11 @@ module.exports = (config) => {
     return false;
   };
 
+  //name for a 0x relayer based on feerecipient address
   utility.relayName = function (address) {
     let name = '';
     if (address) {
-      name = bundle.DeltaBalances.config.contract0xRelayers[address];
+      name = bundle.DeltaBalances.config.zrxRelayers[address];
       if (!name) {
         name = 'Unknown 0x';
       }
@@ -43,10 +54,7 @@ module.exports = (config) => {
 
   //remove exponential notation 1e-8  etc.
   utility.exportNotation = function (num) {
-
-    //.replace(/\.?0+$/,""); // rounded to 20 decimals, no trailing 0
-    //https://stackoverflow.com/questions/3612744/remove-insignificant-trailing-zeros-from-a-number
-
+    //.replace(/\.?0+$/,""); // rounded to 20 decimals, no trailing 0 //https://stackoverflow.com/questions/3612744/remove-insignificant-trailing-zeros-from-a-number
     num = new BigNumber(num).toFixed(20);
     return num.replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1');
   };
@@ -61,7 +69,6 @@ module.exports = (config) => {
   };
 
   utility.getURL = function getURL(url, callback) {
-
     jQuery.get(url).done((result) => {
       if (result)
         callback(undefined, result);
@@ -70,18 +77,9 @@ module.exports = (config) => {
     }).fail((xhr, status, error) => {
       callback(error, undefined);
     });
-    /* 
-     request.get(url, options, (err, httpResponse, body) => {
-         if (err) {
-             callback(err, undefined);
-         } else {
-             callback(undefined, body);
-         }
-     }); */
   };
 
   utility.postURL = function postURL(url, contents, callback) {
-
     jQuery.post(url, contents).done((result) => {
       if (result)
         callback(undefined, result);
@@ -100,7 +98,6 @@ module.exports = (config) => {
       '"': '&quot;',
       "'": '&#039;'
     };
-
     return text.replace(/[&<>"']/g, function (m) { return map[m]; });
   }
 
@@ -122,8 +119,8 @@ module.exports = (config) => {
     }
   };
 
+  //decode tx receipt logs
   utility.processLogs = function (data) {
-
     if (!bundle.DeltaBalances.config.methodIDS) {
       this.initABIs();
     }
@@ -152,7 +149,6 @@ module.exports = (config) => {
       return undefined;
     }
 
-
     //combine 2 trade events for Ethen.market trades
     function combineEvents(decodedLogs) {
       let combinedLogs = [];
@@ -161,7 +157,7 @@ module.exports = (config) => {
         let log = decodedLogs[i];
         if (log) {
 
-          if (log.address !== _delta.config.contractEthenAddr) {
+          if (log.address !== _delta.config.exchangeContracts.Ethen.addr) {
             combinedLogs.push(log);
           } else {
             if (log.name === 'Order' && log.events.length == 8) {
@@ -170,7 +166,7 @@ module.exports = (config) => {
               //given the 'order' event, look in the same tx for 'trade' events to match the data
               while (j < decodedLogs.length && decodedLogs[j].hash === decodedLogs[i].hash) {
                 let log2 = decodedLogs[j];
-                if (log2 && log2.address === _delta.config.contractEthenAddr && log2.name === 'Trade') {
+                if (log2 && log2.address === _delta.config.exchangeContracts.Ethen.addr && log2.name === 'Trade') {
                   log.combinedEvents = [log2.events[0], log2.events[2], log2.events[3]];
                   break;
                 } else {
@@ -184,18 +180,14 @@ module.exports = (config) => {
               combinedLogs.push(log);
             }
           }
-
-
         }
       }
-
       return combinedLogs;
     }
-
   };
 
+  //decode tx input data
   utility.processInput = function (data) {
-
     if (!bundle.DeltaBalances.config.methodIDS) {
       this.initABIs();
     }
@@ -213,29 +205,15 @@ module.exports = (config) => {
     }
   };
 
+  // configure whiche ABIs are used to decode input
   utility.initABIs = function () {
+    let abis = Object.values(bundle.DeltaBalances.config.ABIs);
 
-    Decoder.addABI(bundle.DeltaBalances.config.tokenAbi);
-    Decoder.addABI(bundle.DeltaBalances.config.token2Abi);
-    Decoder.addABI(bundle.DeltaBalances.config.tokenStoreAbi);
-    Decoder.addABI(bundle.DeltaBalances.config.idexAbi);
-    Decoder.addABI(bundle.DeltaBalances.config.zeroxAbi);
-    Decoder.addABI(bundle.DeltaBalances.config.oasisDexAbi);
-    Decoder.addABI(bundle.DeltaBalances.config.airSwapAbi);
-    Decoder.addABI(bundle.DeltaBalances.config.kyberAbi);
-    Decoder.addABI(bundle.DeltaBalances.config.bancorAbi);
-    Decoder.addABI(bundle.DeltaBalances.config.bancor2Abi);
-    Decoder.addABI(bundle.DeltaBalances.config.enclavesAbi);
-    Decoder.addABI(bundle.DeltaBalances.config.enclaves2Abi);
-    Decoder.addABI(bundle.DeltaBalances.config.ethenAbi);
-    Decoder.addABI(bundle.DeltaBalances.config.ethexAbi);
-
-    //Decoder.addABI(bundle.DeltaBalances.config.dexyAbi);
-    //Decoder.addABI(bundle.DeltaBalances.config.dexy2Abi);
-
+    for (let i = 0; i < abis.length; i++) {
+      Decoder.addABI(abis[i]);
+    }
     // etherdelta last to fix overloading
-    Decoder.addABI(bundle.DeltaBalances.config.etherDeltaAbi);
-
+    Decoder.addABI(bundle.DeltaBalances.config.ABIs.EtherDelta);
     bundle.DeltaBalances.config.methodIDS = true;
   }
 
@@ -298,7 +276,6 @@ module.exports = (config) => {
   utility.idexURL = function (tokenObj, html) {
     var url = "https://idex.market/eth/"
     var labelClass = "label-primary";
-
     if (tokenObj && tokenObj.IDEX) {
       url += tokenObj.IDEX;
     } else {
@@ -319,7 +296,6 @@ module.exports = (config) => {
   utility.ddexURL = function (tokenObj, html) {
     var url = "https://ddex.io/trade/";
     var labelClass = "label-primary";
-
     if (tokenObj && tokenObj.DDEX) {
       url += tokenObj.DDEX + '-ETH';
     } else {
@@ -340,7 +316,6 @@ module.exports = (config) => {
   utility.binanceURL = function (tokenObj, html) {
     var url = "https://www.binance.com/trade.html?ref=10985752&symbol=";
     var labelClass = "label-primary";
-
     if (tokenObj && tokenObj.Binance && tokenObj.Binance.indexOf('ETH') !== -1) {
       let name = tokenObj.Binance.replace("ETH", "_ETH");
       url += name;
@@ -404,7 +379,18 @@ module.exports = (config) => {
     return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
   };
 
-
+  utility.tokenLink = function (addr, html, short) {
+    var url = 'https://etherscan.io/token/' + addr;
+    if (!html)
+      return url
+    var displayText = addr;
+    if (short)
+      displayText = displayText.slice(0, 6) + '..';
+    else {
+      displayText = bundle.DeltaBalances.addressName(addr, !short);
+    }
+    return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
+  };
 
   utility.call = function call(web3In, contract, address, functionName, args, callback) {
     function proxy(retries) {
@@ -470,7 +456,6 @@ module.exports = (config) => {
   //inclusive for start and end
   // can handle ranges of 5k-10k blocks
   utility.getTradeLogs = function getTradeLogs(web3In, contractAddress, topics, startblock, endblock, rpcID, callback) {
-
     if (!Array.isArray(topics)) {
       topics = [topics];
     }
@@ -516,7 +501,6 @@ module.exports = (config) => {
   };
 
   utility.txReceipt = function txReceipt(web3In, txHash, callback, index) {
-
     if (web3In && web3In.currentProvider) {
       web3In.eth.getTransactionReceipt(txHash, (err, result) => {
         if (!err && result && result.blockNumber) {
@@ -577,7 +561,6 @@ module.exports = (config) => {
         }
       });
     }
-
   };
 
   utility.blockNumber = function blockNumber(web3In, callback) {
@@ -605,7 +588,6 @@ module.exports = (config) => {
         }
       });
     }
-
   };
 
   utility.decToHex = function decToHex(dec, lengthIn) {
@@ -627,7 +609,6 @@ module.exports = (config) => {
     return (new BigNumber(dec)).toString(16);
   };
 
-
   utility.hexToDec = function hexToDec(hexStrIn, length) {
     // length implies this is a two's complement number
     let hexStr = hexStrIn;
@@ -640,7 +621,6 @@ module.exports = (config) => {
     const answer = utility.convertBase(hexStr, 16, 10);
     return answer > max / 2 ? max : answer;
   };
-
 
   utility.convertBase = function convertBase(str, fromBase, toBase) {
     const digits = utility.parseToDigitsArray(str, fromBase);
@@ -662,7 +642,6 @@ module.exports = (config) => {
     return out;
   };
 
-
   utility.parseToDigitsArray = function parseToDigitsArray(str, base) {
     const digits = str.split('');
     const ary = [];
@@ -673,7 +652,6 @@ module.exports = (config) => {
     }
     return ary;
   };
-
 
   utility.add = function add(x, y, base) {
     const z = [];
@@ -723,7 +701,6 @@ module.exports = (config) => {
   };
 
   utility.createUTCOffset = function (date) {
-
     if (!date)
       return "";
 
@@ -760,7 +737,6 @@ module.exports = (config) => {
         min = d.getMinutes(),
         sec = d.getSeconds();
 
-
       if (month.length < 2) month = '0' + month;
       if (day.length < 2) day = '0' + day;
       if (hour < 10) hour = '0' + hour;
@@ -792,7 +768,6 @@ module.exports = (config) => {
         min = d.getMinutes(),
         sec = d.getSeconds();
 
-
       if (month.length < 2) month = '0' + month;
       if (day.length < 2) day = '0' + day;
       if (hour < 10) hour = '0' + hour;
@@ -808,23 +783,17 @@ module.exports = (config) => {
     }
   };
 
-
   utility.getMetamaskAddress = function () {
     // Checking if Web3 has been injected by the browser (Mist/MetaMask)
     if (typeof web3 !== 'undefined') {
-
       // Use the browser's ethereum provider
       var provider = web3.currentProvider;
       var localWeb3 = new Web3(web3.currentProvider);
       if (localWeb3.eth.accounts.length > 0) {
         return localWeb3.eth.accounts[0].toLowerCase();
       }
-
     }
     return '';
   };
-
-
-
   return utility;
 };

@@ -698,7 +698,7 @@
 					}
 				}
 			}
-			if (transaction.input[0].type.indexOf('aker') !== -1 && transaction.input[0].exchange == _delta.addressName(_delta.config.contractIdexAddr)) {
+			if (transaction.input[0].type.indexOf('aker') !== -1 && transaction.input[0].exchange == _delta.config.exchangeContracts.Idex.name) {
 				sum += '<br>Note: IDEX uses no transaction output events.';
 			}
 
@@ -771,7 +771,7 @@
 					}
 
 					// add description bought/sold  if not internal enclaves order
-					if (transaction.output[i].buyer !== _delta.config.contractEnclavesAddr && transaction.output[i].seller !== _delta.config.contractEnclavesAddr) {
+					if (transaction.output[i].buyer !== _delta.config.exchangeContracts.Enclaves.addr && transaction.output[i].seller !== _delta.config.exchangeContracts.Enclaves.addr) {
 						sum += typeWord + transaction.output[i].amount + " " + transaction.output[i].token.name + " for " + transaction.output[i].price + " " + transaction.output[i].base.name + " each, " + transaction.output[i].baseAmount + " " + transaction.output[i].base.name + " in total. <br>";
 					}
 					//spent = transaction.output[i].ETH.plus(spent);
@@ -943,8 +943,6 @@
 		$("table thead th").removeClass("tablesorter-headerUnSorted");
 		$("table thead th").removeClass("tablesorter-headerDesc");
 		$("table thead th").removeClass("tablesorter-headerAsc");
-
-
 	}
 
 	function hideInput() {
@@ -959,8 +957,9 @@
 
 	function checkOldED(addr) {
 		var lcAddr = addr.toLowerCase();
-		for (var i = 0; i < _delta.config.contractEtherDeltaAddrs.length; i++) {
-			if (lcAddr == _delta.config.contractEtherDeltaAddrs[i].addr) {
+		let contracts = Object.values(_delta.config.exchangeContracts);
+		for (var i = 0; i < contracts.length; i++) {
+			if (lcAddr == contracts[i].addr && contracts[i].name == 'EtherDelta-OLD') {
 				return i > 0;
 			}
 		}
@@ -1004,7 +1003,7 @@
 						}
 					}
 					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice' || keys[i] == 'fee' || keys[i] == 'takerFee' || keys[i] == 'makerFee') {
-						if(cellValue !== "")
+						if (cellValue !== "")
 							cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(5) + '</span>';
 					}
 					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'balance') {

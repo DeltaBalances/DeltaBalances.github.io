@@ -1220,11 +1220,15 @@
 
 			localStorage.setItem("decimals", decimals);
 
-			// new tokens found in etherscan token transfer responses
-			if (unknownTokenCache && unknownTokenCache.length > 0) {
-				localStorage.getItem('unknownTokens1');
-				let string = JSON.stringify(unknownTokenCache);
-				localStorage.setItem('unknownTokens1', string);
+			try {
+				// new tokens found in etherscan token transfer responses
+				if (unknownTokenCache && unknownTokenCache.length > 0) {
+					localStorage.getItem('unknownTokens1');
+					let string = JSON.stringify(unknownTokenCache);
+					localStorage.setItem('unknownTokens1', string);
+				}
+			} catch (e) {
+				console.log('failed token cache');
 			}
 		}
 	}

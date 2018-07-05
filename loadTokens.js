@@ -1,4 +1,5 @@
-// try to get updated token list from EtherDelta, ForkDelta and IDEX otherwise use own backup
+// try to get updated token list from ForkDelta, IDEX, DDEX and Radar Relay, otherwise use own backup
+// EtherDelta disabled due to token update inactivity
 
 var etherDeltaConfig = { tokens: [] };
 
@@ -46,7 +47,6 @@ try {
 } catch (err) {
     console.log('forkdelta live tokens loading error ' + err);
 }
-
 
 var idexConfig = [];
 try {

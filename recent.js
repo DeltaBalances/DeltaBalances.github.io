@@ -1062,11 +1062,12 @@
 					}
 				}
 			}
-
-			if (unknownTokenCache && unknownTokenCache.length >= 0) {
-				unknownTokenCache = unknownTokenCache.concat(newTokens);
-				setStorage();
-			}
+			try {
+				if (unknownTokenCache && unknownTokenCache.length >= 0) {
+					unknownTokenCache = unknownTokenCache.concat(newTokens);
+					setStorage();
+				}
+			} catch (e) { console.log('failed to set token cache');}
 			done();
 
 			function addTransaction(transs) {

@@ -4203,12 +4203,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var maker = unpacked.events[4].value.toLowerCase();
                 var taker = unpacked.events[5].value.toLowerCase();
 
-                var transType = '';
-
-                if (taker === myAddr)
-                    transType = 'Taker';
-                else if (maker === myAddr)
+                var transType = 'Taker';
+                if (maker === myAddr) {
                     transType = 'Maker';
+                }
 
                 let tokenGet = this.setToken(unpacked.events[0].value);
                 let tokenGive = this.setToken(unpacked.events[2].value);
@@ -4361,10 +4359,9 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 }
 
                 var transType = 'Taker';
-                if (taker === myAddr)
-                    transType = 'Taker';
-                else if (maker === myAddr)
+                if (maker === myAddr) {
                     transType = 'Maker';
+                }
 
 
                 var exchange = '';
@@ -4496,12 +4493,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var token = undefined;
                 var base = undefined;
 
-                var transType = '';
-
-                if (taker === myAddr)
-                    transType = 'Taker';
-                else if (maker === myAddr)
+                var transType = 'Taker';
+                if (maker === myAddr) {
                     transType = 'Maker';
+                }
 
 
                 if (utility.isWrappedETH(takerToken.addr) || (!utility.isWrappedETH(makerToken.addr) && utility.isNonEthBase(makerToken.addr))) // get eth  -> sell
@@ -4602,12 +4597,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var token = undefined;
                 var base = undefined;
 
-                var transType = '';
-
-                if (taker === myAddr)
-                    transType = 'Taker';
-                else if (maker === myAddr)
+                var transType = 'Taker';
+                if (maker === myAddr) {
                     transType = 'Maker';
+                }
 
 
                 if (utility.isWrappedETH(takerToken.addr) || (!utility.isWrappedETH(makerToken.addr) && utility.isNonEthBase(makerToken.addr))) // get eth  -> sell
@@ -4706,12 +4699,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var token = undefined;
                 var base = undefined;
 
-                var transType = '';
-
-                if (taker === myAddr)
-                    transType = 'Taker';
-                else if (maker === myAddr)
+                var transType = 'Taker';
+                if (maker === myAddr) {
                     transType = 'Maker';
+                }
 
 
                 if (utility.isWrappedETH(takerToken.addr) || (!utility.isWrappedETH(makerToken.addr) && utility.isNonEthBase(makerToken.addr))) // get eth  -> sell
@@ -4757,10 +4748,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     }
 
                     let fee = new BigNumber(0);
-                    if (transType === 'Taker') {
-                        fee = takerFee;
-                    } else if (transType === 'Maker') {
+                    if (transType === 'Maker') {
                         fee = makerFee;
+                    } else {
+                        fee = takerFee;
                     }
 
                     return {
@@ -5268,12 +5259,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var token = undefined;
                 var base = undefined;
 
-                var transType = '';
-
-                if (taker === myAddr)
-                    transType = 'Taker';
-                else if (maker === myAddr)
+                var transType = 'Taker';
+                if (maker === myAddr) {
                     transType = 'Maker';
+                }
 
 
                 if (utility.isWrappedETH(takerToken.addr) || (!utility.isWrappedETH(makerToken.addr) && utility.isNonEthBase(makerToken.addr))) // get eth  -> sell

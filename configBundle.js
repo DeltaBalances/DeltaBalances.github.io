@@ -5,6 +5,7 @@ module.exports = {
 
   DeltaBalanceAddr: '0x3e25f0ba291f202188ae9bda3004a7b3a803599a',
   exchangeContracts: {
+    // supportedDex toggles whether recent.js sees them as Exchanges
     EtherDelta: { addr: '0x8d12a197cb00d4747a1fe03395095ce2a5cc6819', name: 'EtherDelta ', supportedDex: true },
     EtherDelta2: { addr: '0x373c55c277b866a69dc047cad488154ab9759466', name: 'EtherDelta-OLD ', supportedDex: true },
     EtherDelta3: { addr: '0x4aea7cf559f67cedcad07e12ae6bc00f07e8cf65', name: 'EtherDelta-OLD ', supportedDex: true },
@@ -18,7 +19,7 @@ module.exports = {
     OasisDex: { addr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425', name: 'OasisDex ', supportedDex: true },
     OasisDirect: { addr: '0x793ebbe21607e4f04788f89c7a9b97320773ec59', name: 'OasisDirect ', supportedDex: false },
     AirSwap: { addr: '0x8fd3121013a07c57f0d69646e86e7a4880b467b7', name: 'AirSwap ', supportedDex: true },
-    Kyber: { addr: '0x964f35fae36d75b1e72770e244f6595b68508cf5', name: 'Kyber Network', supportedDex: true },
+    Kyber: { addr: '0x964f35fae36d75b1e72770e244f6595b68508cf5', name: 'Kyber Network ', supportedDex: true },
     KyberReserve: { addr: '0x63825c174ab367968ec60f061753d3bbd36a0d8f', name: 'Kyber Reserve ', supportedDex: false },
     BancorQuick: { addr: '0xcf1cc6ed5b653def7417e3fa93992c3ffe49139b', name: 'Bancor ', supportedDex: true },
     BancorQuick2: { addr: '0xf87a7ec94884f44d9de33d36b73f42c7c0dd38b1', name: 'Bancor ', supportedDex: true },
@@ -28,6 +29,9 @@ module.exports = {
     Dexy: { addr: '0x54b0de285c15d27b0daa687bcbf40cea68b2807f', name: 'Dexy ', supportedDex: false },
     Dexy2: { addr: '0x9d160e257f1dff52ec81d5a4e7326dd82e144177', name: 'Dexy ', supportedDex: false },
     Ethex: { addr: '0xb746aed479f18287dc8fc202fe06f25f1a0a60ae', name: 'ETHEX ', supportedDex: true },
+    Totle: { addr: '0xd94c60e2793ad587400d86e4d6fd9c874f0f79ef', name: 'Totle ', supportedDex: true },
+    Totle2: { addr: '0x98db9047e80260b407ffbc67543f9a010ef0fc6a', name: 'Totle-OLD ', supportedDex: true },
+    EasyTrade: { addr: '0x9ae4ed3bf7a3a529afbc126b4541c0d636d455f6', name: 'EasyTrade ', supportedDex: true },
   },
   //token attributes for exchanges that makes tokens show up as listed
   listedExchanges: ['EtherDelta', 'ForkDelta', 'IDEX', 'DDEX', 'Binance', 'Radar'],

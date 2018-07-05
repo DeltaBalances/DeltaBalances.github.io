@@ -584,6 +584,8 @@
 	}
 
 	function getTransactions(rqid) {
+		outputHashes = {};
+
 		transLoaded = 0;
 		var transResult = [];
 		var inTransResult = [];
@@ -691,12 +693,14 @@
 					// only parse tx if..
 					if (
 						!outputHashes[tx.hash] ||  // we don't know it yet
+						outputHashes[tx.hash].Incomplete ||
 						outputHashes[tx.hash].exchange == "" || // we parsed it with no detected exchange, different source might help
-						(tx.contractAddress &&
+						(tx.contractAddress && //token transfer event
 							(outputHashes[tx.hash].Token.unknown ||  //parsed it but didn't know token, we get new token data from etherscan transfer events
 								outputHashes[tx.hash].Token.addr === _delta.config.ethAddr // we parsed ETH, now we see a token transfer
 							)
-						)
+						) ||
+						(tx.type == "call") //internal eth transfer
 					) {
 
 						let from = tx.from.toLowerCase();
@@ -737,8 +741,11 @@
 				var to = tx.to.toLowerCase();
 				var val = _delta.web3.toBigNumber(tx.value);
 				var myAddr = publicAddr.toLowerCase();
+
 				//only on token transfer events
 				var contract = tx.contractAddress;
+				var internal = tx.type == "call" || tx.gasUsed == "0"; //from internal tx request
+
 				if (contract) {
 					tx.isError = '0';  // token events have no error param
 					contract = contract.toLowerCase();
@@ -761,14 +768,24 @@
 				}
 
 				// internal tx (withdraw or unwrap ETH)
-				if (to === myAddr && !contract && from !== _delta.config.exchangeContracts.Kyber.addr && from !== _delta.config.exchangeContracts.Ethex.addr) {
+				if (to === myAddr && !contract && internal && from !== _delta.config.exchangeContracts.Kyber.addr) {
 					var trans = undefined;
-					if (_delta.isExchangeAddress(from)) {
-						var val = _util.weiToEth(tx.value);
-						trans = createOutputTransaction('Withdraw', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
-					} else if (_util.isWrappedETH(tx.from)) {
+
+					if (_util.isWrappedETH(tx.from)) {
 						var val = _util.weiToEth(tx.value);
 						trans = createOutputTransaction('Unwrap ETH', _delta.setToken(tx.from), val, _delta.config.tokens[0], val, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+					}
+					// IDEX withdraw, only found in internal tx
+					if (_delta.config.exchangeContracts.Idex.addr == from) {
+						var val = _util.weiToEth(tx.value);
+						trans = createOutputTransaction('Withdraw', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
+					}
+					// used to detect airswap fails that send back the same ETH amount
+					else if (_delta.config.exchangeContracts.AirSwap.addr == from && val.greaterThan(0)) {
+						var val = _util.weiToEth(tx.value);
+						trans = createOutputTransaction('In', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', _delta.config.exchangeContracts.AirSwap.name);
+						trans.Incomplete = true; //should be a tx with acutal input
+
 					} else if (val.greaterThan(0)) {
 						let amount = _util.weiToEth(val, undefined);
 
@@ -777,19 +794,24 @@
 						if (tx.input !== '0x') {
 							exchange = 'unknown ';
 						}
-						if (_delta.config.exchangeWallets[from]) {
-							exchange = _delta.config.exchangeWallets[from];
-						} else if (_delta.config.exchangeWallets[to]) {
-							exchange = _delta.config.exchangeWallets[to];
+						// do we know an alias, but not a token
+						if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
+							exchange = _delta.addressName(to);
+						} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
+							exchange = _delta.addressName(from);
 						}
 
 						if (to === myAddr) {
 							trans = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+							trans.Incomplete = true;
 						} else if (from === myAddr) {
 							trans = createOutputTransaction('Out', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+							trans.Incomplete = true;
 						}
 					}
-					addTransaction(trans);
+					if (trans) {
+						addTransaction(trans);
+					}
 				}
 				// token deposit/withdraw, trades, cancels
 				else {
@@ -818,13 +840,19 @@
 
 
 								if (unpacked.name === 'deposit') {
-
 									if (obj.type === 'Wrap ETH') {
 										trans = createOutputTransaction(obj.type, obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
 									} else {
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(to, false));
 									}
+								}
+								else if (unpacked.name === 'withdraw') {
 
+									if (obj.type === 'Unwrap ETH') {
+										trans = createOutputTransaction(obj.type, obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+									} else {
+										trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(to, false));
+									}
 								}
 								else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || unpacked.name === 'depositBoth') {
 									obj.type = obj.type.replace('Token ', '');
@@ -986,17 +1014,22 @@
 								if (tx.input !== '0x') {
 									exchange = 'unknown ';
 								}
-								if (_delta.config.exchangeWallets[from]) {
-									exchange = _delta.config.exchangeWallets[from];
-								} else if (_delta.config.exchangeWallets[to]) {
-									exchange = _delta.config.exchangeWallets[to];
+
+								// do we know an alias, but not a token
+								if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
+									exchange = _delta.addressName(to);
+								} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
+									exchange = _delta.addressName(from);
 								}
 
 								if (to === myAddr) {
 									trans2 = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+									trans2.Incomplete = true;
 								} else if (from === myAddr) {
 									trans2 = createOutputTransaction('Out', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+									trans2.Incomplete = true;
 								}
+
 							}
 						}
 						//unknown source of token transfer
@@ -1009,10 +1042,11 @@
 							}
 
 							exchange = 'unknown ';
-							if (_delta.config.exchangeWallets[from]) {
-								exchange = _delta.config.exchangeWallets[from];
-							} else if (_delta.config.exchangeWallets[to]) {
-								exchange = _delta.config.exchangeWallets[to];
+							// do we know an alias, but not a token
+							if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
+								exchange = _delta.addressName(to);
+							} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
+								exchange = _delta.addressName(from);
 							}
 
 							let token = _delta.setToken(contract);
@@ -1020,13 +1054,11 @@
 								let dvsr = _delta.divisorFromDecimals(token.decimals);
 								let amount = _util.weiToEth(val, dvsr);
 								trans2 = createOutputTransaction(newType, token, amount, '', '', tx.hash, tx.timeStamp, token.unlisted, '', tx.isError === '0', exchange);
+								trans2.Incomplete = true;
 							}
 						}
 
-						if (from !== _delta.config.exchangeContracts.Ethex.addr) { // ethex ETH returns from internal tx give false positive
-							addTransaction(trans2);
-						}
-
+						addTransaction(trans2);
 					}
 				}
 			}
@@ -1042,15 +1074,30 @@
 					// don't know it, or know it without knowing the token
 					if (!outputHashes[transs.Hash] || (transs.Type === outputHashes[transs.Hash].Type && outputHashes[transs.Hash].Token.unknown)) {
 						outputHashes[transs.Hash] = transs;
-					} else if (outputHashes[transs.Hash].Token.addr !== transs.Token.addr || transs.Type !== outputHashes[transs.Hash].Type) { // we parsed a different token
+					}
+					// we parsed a different token the second time   (etherscan regular tx input vs erc20 event )
+					else if (outputHashes[transs.Hash].Token.addr !== transs.Token.addr || transs.Type !== outputHashes[transs.Hash].Type) {
 
+						let exchange = 'unknown ';
+						if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
+							exchange = _delta.addressName(to);
+						} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
+							exchange = _delta.addressName(from);
+						}
 						// detect where one token goes in and another goes out in same tx
 						if (transs.Type == 'In' && outputHashes[transs.Hash].Type == 'Out') {
-							let newTrans = createOutputTransaction('Trade', transs.Token, transs.Amount, outputHashes[transs.Hash].Token, outputHashes[transs.Hash].Amount, tx.hash, tx.timeStamp, transs.Token.unlisted, '', tx.isError === '0', 'unknown ');
+							let newTrans = createOutputTransaction('Trade', transs.Token, transs.Amount, outputHashes[transs.Hash].Token, outputHashes[transs.Hash].Amount, tx.hash, tx.timeStamp, transs.Token.unlisted, '', tx.isError === '0', exchange);
 							outputHashes[transs.Hash] = newTrans;
 						} else if (transs.Type == 'Out' && outputHashes[transs.Hash].Type == 'In') {
-							let newTrans = createOutputTransaction('Trade', outputHashes[transs.Hash].Token, outputHashes[transs.Hash].Amount, transs.Token, transs.Amount, tx.hash, tx.timeStamp, outputHashes[transs.Hash].Token.unlisted, '', tx.isError === '0', 'unknown ');
+							let newTrans = createOutputTransaction('Trade', outputHashes[transs.Hash].Token, outputHashes[transs.Hash].Amount, transs.Token, transs.Amount, tx.hash, tx.timeStamp, outputHashes[transs.Hash].Token.unlisted, '', tx.isError === '0', exchange);
 							outputHashes[transs.Hash] = newTrans;
+						}
+						// detect AirSwap sending back the same amount
+						else if (outputHashes[transs.Hash].Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'In' && outputHashes[transs.Hash].Type == 'Taker Buy' && String(transs.Amount) == String(outputHashes[transs.Hash].Total)) {
+							outputHashes[transs.Hash].Status = false;
+						} else if (transs.Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'Taker Buy' && outputHashes[transs.Hash].Type == 'In' && String(transs.Total) == String(outputHashes[transs.Hash].Amount)) {
+							transs.Status = false;
+							outputHashes[transs.Hash] = transs;
 						}
 						else { // more than 1 in, 1 out, just display tx multiple times
 							let newHash = transs.Hash;

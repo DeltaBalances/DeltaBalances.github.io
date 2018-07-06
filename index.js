@@ -126,7 +126,6 @@
 			},
 	};
 
-
 	init();
 
 	$(document).ready(function () {
@@ -160,17 +159,6 @@
 		$('#custom').prop('checked', showCustomTokens);
 		$('#fiatSelect').val(Number(showFiat));
 
-
-		$('body').on('expanded.pushMenu collapsed.pushMenu', function () {
-			// Add delay to trigger code only after the pushMenu animation completes
-			setTimeout(function () {
-				$("#resultTable").trigger("update", [true, () => { }]);
-				$("#resultTable").trigger("applyWidgets");
-			}, 300);
-		});
-
-
-
 		// detect enter & keypresses in input
 		$('#address').keypress(function (e) {
 			if (e.keyCode == 13) {
@@ -183,18 +171,11 @@
 		});
 
 		$(window).resize(function () {
-			$("#resultTable").trigger("applyWidgets");
-
-			//hide popovers
-			$('[data-toggle="popover"]').each(function () {
-				$(this).popover('hide');
-				$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
-			});
-
+			hidePopovers();
 			checkCollapseSettings();
 		});
 
-		//dismiss popovers on click outside
+
 		$('body').on('click', function (e) {
 			$('[data-toggle="popover"]').each(function () {
 				//the 'is' for buttons that trigger popups
@@ -208,6 +189,7 @@
 				hideError();
 			}
 		});
+
 
 		resetExLoadingState();
 		Object.keys(exchanges).forEach(function (key) {
@@ -250,6 +232,13 @@
 			$('#userToggle').addClass('hidden');
 			$('#address').focus();
 		}
+	}
+
+	function hidePopovers() {
+		$('[data-toggle="popover"]').each(function () {
+			$(this).popover('hide');
+			$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+		});
 	}
 
 	function checkCollapseSettings() {
@@ -304,10 +293,11 @@
 		} else {
 			$(boxId).addClass('box-warning');
 		}
-		$("#resultTable").trigger("destroy");
-		$('#resultTable tbody').html('');
-		$('#resultTable thead').html('');
-		table1Loaded = false;
+		/*	$("#resultTable").trigger("destroy");
+			$('#resultTable tbody').html('');
+			$('#resultTable thead').html('');
+			table1Loaded = false;
+			*/
 
 		if (exchanges[name].enabled != enabled) {
 			exchanges[name].enabled = enabled;
@@ -351,7 +341,7 @@
 		changeZero = true;
 		hideZero = $('#zero').prop('checked');
 		if (lastResult) {
-			$('#resultTable tbody').empty();
+			//$('#resultTable tbody').empty();
 			makeTable(lastResult, hideZero);
 		}
 		changeZero = false;
@@ -361,11 +351,6 @@
 	function selectPrice() {
 		let val = $('#priceSelect').val();
 		useAsk = Number(val) > 0;
-
-		$("#resultTable").trigger("destroy");
-		$('#resultTable tbody').html('');
-		$('#resultTable thead').html('');
-		table1Loaded = false;
 
 		if (lastResult) {
 			finishedBalanceRequest();
@@ -381,10 +366,6 @@
 		showFiat = Number(val);
 
 		clearOverviewHtml(true);
-		$("#resultTable").trigger("destroy");
-		$('#resultTable tbody').html('');
-		$('#resultTable thead').html('');
-		table1Loaded = false;
 
 		if (lastResult) {
 			finishedBalanceRequest();
@@ -401,14 +382,7 @@
 		decimals = $('#decimals').prop('checked');
 
 		fixedDecimals = decimals ? 8 : 3;
-
-		$('#resultTable tbody').empty();
-		$('#resultTable thead').empty();
-
-
 		if (lastResult) {
-			//table1Loaded = false;
-			//	table2Loaded = false;
 			finishedBalanceRequest();
 		} else {
 			placeholderTable();
@@ -431,7 +405,6 @@
 				// load only added custom tokens if listed already loaded
 				getBalances(requestID, false, true);
 			}
-
 		}
 		else {
 			tokenCount = _delta.config.tokens.length;
@@ -633,7 +606,7 @@
 		failedBid = 0;
 
 		loadedCustom = false;
-		$('#resultTable tbody').empty();
+		//	$('#resultTable tbody').empty();
 		showLoading(true, false);
 
 
@@ -1288,11 +1261,12 @@
 	//balances table
 	function makeTable(result, hideZeros) {
 
-		//hide popovers
-		$('[data-toggle="popover"]').each(function () {
-			$(this).popover('hide');
-			$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
-		});
+		hidePopovers();
+
+		if (table1Loaded) {
+			$("#resultTable").dataTable().fnDestroy();
+			table1Loaded = false;
+		}
 
 		$('#resultTable tbody').empty();
 		var filtered = result;
@@ -1302,7 +1276,7 @@
 
 		if (hideZeros) {
 			filtered = result.filter(x => {
-				return (Number(x.Total) > 0 || x.Name === 'ETH');
+				return (Number(x.Total) > 0 || x.Address === _delta.config.ethAddr);
 			});
 		}
 		/*
@@ -1448,30 +1422,41 @@
 			}
 		}
 
-		if (table1Loaded) // reload existing table
-		{
-			$("#resultTable").trigger("update", [true, () => { }]);
-			$("#resultTable thead th").data("sorter", true);
-			//$("#resultTable").trigger("sorton", [[totalIndex, 1]]);
+		$('#resultTable').DataTable({
+			"paging": false,
+			"ordering": true,
+			//"info": true,
+			"scrollY": "60vh",
+			"scrollX": true,
+			"scrollCollapse": true,
+			fixedColumns: {
+				leftColumns: 1
+			},
+			aoColumnDefs: [
+				{ bSearchable: true, aTargets: [0] },
+				{ bSearchable: false, aTargets: ['_all'] }
+			],
+			"language": {
+				"search": '<i class="fa fa-search"></i>',
+				"searchPlaceholder": " Token Symbol / Name",
+				"zeroRecords": "No balances loaded",
+				"info": "Showing _TOTAL_ balances",
+				"infoEmpty": "No balances found",
+				"infoFiltered": "(filtered from _MAX_ )"
+			},
+			"initComplete": function (settings, json) {
+				setTimeout(function () {
+					$("[data-toggle=popover]").popover();
+				}, 200);
 
-		} else {
+				$('[data-toggle=tooltip]').tooltip({
+					'placement': 'top',
+					'container': 'body'
+				});
+			}
+		});
+		table1Loaded = true;
 
-
-			$("#resultTable thead th").data("sorter", true);
-			$("#resultTable").tablesorter({
-				widgets: ['scroller', 'filter'],
-				widgetOptions: {
-					filter_external: '.search',
-					filter_defaultFilter: { 0: '~{query}' },
-					filter_columnFilters: false,
-					filter_placeholder: { search: 'Search...' },
-					scroller_height: 500,
-				},
-				sortList: [[0, 0]]
-			});
-
-			table1Loaded = true;
-		}
 
 		var allDisplayed = true;
 		for (let i = 0; i < keys.length; i++) {
@@ -1535,7 +1520,11 @@
 					let token = _delta.uniqueTokens[myList[i].Address];
 					if (token) {
 						let popover = _delta.makeTokenPopover(token);
-						row$.append($('<td/>').html(popover));
+						let search = token.name;
+						if (token.name2) {
+							search += ' ' + token.name2;
+						}
+						row$.append($('<td data-sort="' + token.name + '" data-search="' + search + '"/>').html(popover));
 					} else {
 						row$.append($('<td/>').html(""));
 					}
@@ -1547,11 +1536,6 @@
 			tbody$.append(row$);
 		}
 		body.append(tbody$[0].innerHTML);
-		$("[data-toggle=popover]").popover();
-		$('[data-toggle=tooltip]').tooltip({
-			'placement': 'top',
-			'container': 'body'
-		});
 	}
 
 	var balanceHeaders = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'IDEX': 1, 'Token store': 1, 'Enclaves': 1, 'Decentrex': 1, 'DEXY': 1, 'Ethen': 1, 'Total': 1, 'Value': 1, 'Bid': 1, 'Ask': 0, 'Est. ETH': 1, 'USD': 0, 'EUR': 0 };

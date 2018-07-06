@@ -58,9 +58,9 @@
 	// placeholder
 	var transactionsPlaceholder = [
 		{
-			Exchange: 'Placeholder',
 			Type: 'Taker',
 			Trade: 'Sell',
+			Exchange: 'Placeholder',
 			Token: { "name": "Token", "addr": "" },
 			Amount: 0,
 			Price: 0,
@@ -79,9 +79,9 @@
 			Unlisted: true,
 		},
 		/*{
-			Exchange: '',
 			Type: 'Deposit',
 			Trade: '',
+			Exchange: '',
 			Token: { "name": "Token", "addr": "0x00" },
 			Amount: 0,
 			Price: '',
@@ -168,22 +168,8 @@
 			}
 		});
 
-		$('body').on('expanded.pushMenu collapsed.pushMenu', function () {
-			// Add delay to trigger code only after the pushMenu animation completes
-			setTimeout(function () {
-				$("#transactionsTable").trigger("update", [true, () => { }]);
-				$("#transactionsTable").trigger("applyWidgets");
-			}, 300);
-		});
-
 		$(window).resize(function () {
-			$("#transactionsTable").trigger("applyWidgets");
-
-			//hide popovers
-			$('[data-toggle="popover"]').each(function () {
-				$(this).popover('hide');
-				$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
-			});
+			hidePopovers();
 		});
 
 		//dismiss popovers on click outside
@@ -281,6 +267,13 @@
 		}
 	}
 
+	function hidePopovers() {
+		$('[data-toggle="popover"]').each(function () {
+			$(this).popover('hide');
+			$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+		});
+	}
+
 	function hideLoading(trans) {
 		if (!publicAddr) {
 			trans = true;
@@ -359,7 +352,6 @@
 
 		showLoading(true);
 
-		$('#transactionsTable tbody').empty();
 		if (blocknum > 0) // blocknum also retrieved on page load, reuse it
 		{
 			console.log('blocknum re-used');
@@ -623,7 +615,7 @@
 	}
 
 	function setBlockProgress(loaded, max, trades, start, end) {
-		let progressString = 'Loaded ' + loaded + '/' + max + ' blocks, found ' + trades + ' relevant transactions';
+		let progressString = 'Loaded ' + loaded + '/' + max + ' blocks';
 		$('#blockProgress').html(progressString);
 	}
 
@@ -909,9 +901,9 @@
 								opp = obj.buyer;
 							}
 							obj2 = {
-								Exchange: obj.exchange,
 								Type: obj.transType,
 								Trade: obj.tradeType,
+								Exchange: obj.exchange,
 								Token: obj.token,
 								Amount: obj.amount,
 								Price: obj.price,
@@ -939,9 +931,9 @@
 						}
 					} else { //Deposit / withdraw
 						obj2 = {
-							Exchange: obj.exchange,
 							Type: obj.type.replace('Token ', ''),
 							Trade: '',
+							Exchange: obj.exchange,
 							Token: obj.token,
 							Amount: obj.amount,
 							Price: '',
@@ -999,11 +991,12 @@
 	//balances table
 	function makeTable(result) {
 
-		//hide popovers
-		$('[data-toggle="popover"]').each(function () {
-			$(this).popover('hide');
-			$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
-		});
+		hidePopovers();
+
+		if (tableLoaded) {
+			$("#transactionsTable").dataTable().fnDestroy();
+			tableLoaded = false;
+		}
 
 		checkBlockDates(result);
 		$('#transactionsTable tbody').empty();
@@ -1099,30 +1092,49 @@
 
 	// final callback to sort table
 	function trigger() {
-		if (tableLoaded) // reload existing table
-		{
-			$("#transactionsTable").trigger("update", [true, () => { }]);
-			$("#transactionsTable thead th").data("sorter", true);
-			//$("table").trigger("sorton", [[0,0]]);
-
-		} else {
-			$("#transactionsTable thead th").data("sorter", true);
-			let defaultSortIndex = 7;
-			if (historyConfig.showRelayers || Array.isArray(historyConfig.exchange))
-				defaultSortIndex = 8;
-			$("#transactionsTable").tablesorter({
-				textExtraction: {
-					2: function (node, table, cellIndex) { return $(node).find("a").text(); },
-				},
-				widgets: ['scroller'],
-				widgetOptions: {
-					scroller_height: 500,
-				},
-				sortList: [[defaultSortIndex, "d"]]
-			});
-
-			tableLoaded = true;
+		let defaultSort = 9;
+		if (!tradeHeaders['Exchange']) {
+			defaultSort = 8;
 		}
+		$('#transactionsTable').DataTable({
+			"paging": false,
+			"ordering": true,
+			//"info": true,
+			"scrollY": "75vh",
+			"scrollX": true,
+			"scrollCollapse": true,
+			"order": [[defaultSort, "desc"]],
+			fixedColumns: {
+				leftColumns: 1
+			},
+			aoColumnDefs: [
+				{ bSearchable: true, aTargets: [1] },
+				{ bSearchable: true, aTargets: [2] },
+				{ bSearchable: true, aTargets: [3] },
+				{ bSearchable: true, aTargets: [6] },
+				{ bSearchable: true, aTargets: [8] },
+				{ bSearchable: false, aTargets: ['_all'] },
+			],
+			"language": {
+				"search": '<i class="fa fa-search"></i>',
+				"searchPlaceholder": "Type, Exchange, Token, Hash",
+				"zeroRecords": "No events loaded",
+				"info": "Showing _TOTAL_ event(s)",
+				"infoEmpty": "No events found",
+				"infoFiltered": "(filtered from _MAX_ )"
+			},
+			"initComplete": function (settings, json) {
+				setTimeout(function () {
+					$("[data-toggle=popover]").popover();
+				}, 200);
+
+				$('[data-toggle=tooltip]').tooltip({
+					'placement': 'top',
+					'container': 'body'
+				});
+			}
+		});
+
 		if (displayedLogs)
 			trigger1 = true;
 
@@ -1190,7 +1202,12 @@
 							row$.append($('<td/>').html(""));
 						} else {
 							let popover = _delta.makeTokenPopover(token);
-							row$.append($('<td/>').html(popover));
+							let search = token.name;
+							if (token.name2) {
+								search += ' ' + token.name2;
+							}
+							row$.append($('<td data-sort="' + token.name + '" data-search="' + search + '"/>').html(popover));
+
 						}
 					}
 					else {
@@ -1275,6 +1292,10 @@
 
 		if (!loaded) {
 			header1.empty();
+		}
+
+		if (myList.length == 0) {
+			myList = transactionsPlaceholder;
 		}
 
 		for (var i = 0; i < myList.length; i++) {

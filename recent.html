@@ -15,8 +15,12 @@
   <!-- CSS:  Bootstrap, adminLTE, fontawesome & custom -->
   <link href="css/combinedStyles.css" rel="stylesheet">
 
-  <!-- JS  jquery + tablesorter -->
-  <script src="js/jquery.tablesorter.combined.min.js"></script>
+  <!-- JS  jquery -->
+  <script src="js/jquery-3.2.1.min.js"></script>
+
+  <!-- JS  datatables -->
+  <script src="js/jquery.dataTables.fixed.min.js"></script>
+
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
   <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
 
@@ -310,58 +314,19 @@
                   <h2>Recent Transactions
                     <button id='loadingTransactions2' onclick="getTrans()" class="fa fa-refresh" style="display:none;"></button>
                   </h2>
-                  <p>Up to 1000 recent transactions (from etherscan), filtered to show decentralized exchanges </p>
-                  <p>
-                    <strong>Note: </strong> This page does not include all maker trades, Go to the
-                    <strong>
-                      History
-                    </strong> pages for a full trade history</p>
+                  <p>Up to 1000 recent transactions (from etherscan), filtered to show decentralized exchanges.
+                    <br>
+                    <strong>Note: </strong> This page does not include maker trades for deposit exchanges, Go to Exchange history
+                    for a full trade history</p>
                   <br>
                 </div>
-                <div class="hidden-xs hidden-sm col-md-3 noPadM">
-                  <br>
-                  <br>
-                  <input type="checkbox">
-                  <span class="label label-success">Type</span> Deposit or Wrap token.
-                  <br>
-                  <span class="label label-danger">Type</span> Withdraw or Unwrap token.
-                  <br>
-                  <span class="label label-default">Type</span> Cancel or place (unfilled) order.
-                  <br>
-                  <span class="label label-info">Type</span> Execute Trade
-                  <br>
-                </div>
-                <br>
                 <div class="col-md-12 noPad">
-                  <div class="btn-group" data-toggle="buttons">
-
-                    <label id="Trades" class="btn btn-xs btn-flat btn-multi">
-                      <input type="checkbox" value=""> Trades
-                    </label>
-                    <label id="DepWith" class="btn btn-xs btn-flat btn-multi">
-                      <input type="checkbox"> Deposit-Withdraw
-                    </label>
-                    <label id="Cancel" class="btn btn-xs btn-flat btn-multi">
-                      <input type="checkbox"> Cancel
-                    </label>
-                    <label id="Wrap" class="btn btn-xs btn-flat btn-multi">
-                      <input type="checkbox"> Wrap ETH
-                    </label>
-                    <label id="Approve" class="btn btn-xs btn-flat btn-multi">
-                      <input type="checkbox"> Approve
-                    </label>
-                    <label id="Transfer" class="btn btn-xs btn-flat btn-multi">
-                      <input type="checkbox"> Transfer
-                    </label>
-                  </div>
-
-
-                  <table class="tablesorter table table-striped" id="transactionsTable2">
+                  <table class="table table-striped" id="transactionsTable2" style="width:100%">
                     <thead></thead>
                     <tbody></tbody>
                   </table>
                 </div>
-                <div class="visible-xs visible-sm col-md-4 noPadM">
+                <div class="col-md-4 noPadM">
                   <br>
                   <br>
                   <input type="checkbox">
@@ -390,10 +355,10 @@
                   <ul>
                     <li>Deposit style exchanges:
                       <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
-                      <a href="https://forkdelta.github.io" target="_blank">ForkDelta</a>), 
-                      <a href="https://token.store" target="_blank">Token Store</a>, 
-                      <a href="https://www.enclaves.io" target="_blank">EnclavesDex</a>, 
-                      <a href="https://www.ethen.market" target="_blank">ETHEN</a> and 
+                      <a href="https://forkdelta.github.io" target="_blank">ForkDelta</a>),
+                      <a href="https://token.store" target="_blank">Token Store</a>,
+                      <a href="https://www.enclaves.io" target="_blank">EnclavesDex</a>,
+                      <a href="https://www.ethen.market" target="_blank">ETHEN</a> and
                       <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>.
                     </li>
                     <li> 0x relayers:
@@ -404,7 +369,7 @@
                       <a href="https://sharkrelay.com" target="_blank">Shark Relay</a>,
                       <a href="https://tokenjar.io" target="_blank">Token Jar</a>,
                       <a href="https://idtexchange.com" target="_blank">IDT</a>,
-                      <a href="https://bamboorelay.com" target="_blank">BambooRelay</a> and 
+                      <a href="https://bamboorelay.com" target="_blank">BambooRelay</a> and
                       <a href="https://tokenlon.token.im/tokenlon" target="_blank">Tokenlon</a>.
                     </li>
                     <li> Other exchanges:

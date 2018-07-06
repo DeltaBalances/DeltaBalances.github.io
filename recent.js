@@ -59,14 +59,14 @@
 	var transactionsPlaceholder = [
 		{
 			Status: true,
-			Exchange: 'EtherDelta',
 			Type: 'Deposit',
+			Exchange: 'Placeholder',
 			Token: _delta.config.tokens[0],
 			Amount: 0,
 			Price: '',
 			Base: _delta.config.tokens[0],
 			Total: 0,
-			Hash: '',
+			Hash: '0xH4SH',
 			Date: _util.toDateTimeNow(),
 			Info: window.location.origin + window.location.pathname + '/../tx.html#',
 		}
@@ -118,24 +118,6 @@
 
 		getStorage();
 
-		let displFilt = Object.keys(displayFilter);
-		for (let i = 0; i < displFilt.length; i++) {
-			let displ = displayFilter[displFilt[i]];
-			let id = '#' + displFilt[i];
-			if (displ) {
-				$(id).addClass('active');
-			} else {
-				$(id).removeClass('active');
-			}
-		}
-
-		$('#Trades').on("click", () => { toggleFilter('Trades'); });
-		$('#DepWith').on("click", () => { toggleFilter('DepWith'); });
-		$('#Cancel').on("click", () => { toggleFilter('Cancel'); });
-		$('#Wrap').on("click", () => { toggleFilter('Wrap'); });
-		$('#Approve').on("click", () => { toggleFilter('Approve'); });
-		$('#Transfer').on("click", () => { toggleFilter('Transfer'); });
-
 		$('#decimals').prop('checked', decimals);
 		checkDecimal();
 
@@ -150,22 +132,9 @@
 			}
 		});
 
-		$('body').on('expanded.pushMenu collapsed.pushMenu', function () {
-			// Add delay to trigger code only after the pushMenu animation completes
-			setTimeout(function () {
-				$("#transactionsTable2").trigger("update", [true, () => { }]);
-				$("#transactionsTable2").trigger("applyWidgets");
-			}, 300);
-		});
 
 		$(window).resize(function () {
-			$("#transactionsTable2").trigger("applyWidgets");
-
-			//hide popovers
-			$('[data-toggle="popover"]').each(function () {
-				$(this).popover('hide');
-				$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
-			});
+			hidePopovers();
 		});
 
 		//dismiss popovers on click outside
@@ -182,16 +151,6 @@
 				hideError();
 			}
 		});
-
-
-		// contract change
-		$('#contractSelect').change(e => {
-			_delta.changeContract(e.target.selectedIndex);
-			if (document.getElementById('address').value !== '')
-				myClick();
-		});
-
-
 
 		placeholderTable();
 
@@ -239,13 +198,7 @@
 		setStorage();
 		fixedDecimals = decimals ? 8 : 3;
 
-
-		$('#transactionsTable2 tbody').empty();
-		$('#transactionsTable2 thead').empty();
-
 		if (lastResult2) {
-
-
 			makeTable2(lastResult2);
 		} else {
 			placeholderTable();
@@ -411,8 +364,6 @@
 			//disableInput(true);
 
 			showLoading(false, true);
-
-			$('#transactionsTable2 tbody').empty();
 
 			if (blocknum > 0) // blocknum also retrieved on page load, reuse it
 			{
@@ -1067,7 +1018,7 @@
 					unknownTokenCache = unknownTokenCache.concat(newTokens);
 					setStorage();
 				}
-			} catch (e) { console.log('failed to set token cache');}
+			} catch (e) { console.log('failed to set token cache'); }
 			done();
 
 			function addTransaction(transs) {
@@ -1119,8 +1070,8 @@
 
 					return {
 						Status: status,
-						Exchange: exchange,
 						Type: type,
+						Exchange: exchange,
 						Token: token,
 						Amount: val,
 						Price: price,
@@ -1133,8 +1084,8 @@
 				} else if (exchange === 'OasisDex ') {
 					return {
 						Status: status,
-						Exchange: exchange,
 						Type: type,
+						Exchange: exchange,
 						Token: '',
 						Amount: '',
 						Price: '',
@@ -1176,17 +1127,23 @@
 		$('#error').hide();
 	}
 
+	function hidePopovers() {
+		$('[data-toggle="popover"]').each(function () {
+			$(this).popover('hide');
+			$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+		});
+	}
 
 
 	//transactions table
 	function makeTable2(result) {
 
+		hidePopovers();
 
-		//hide popovers
-		$('[data-toggle="popover"]').each(function () {
-			$(this).popover('hide');
-			$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
-		});
+		if (table2Loaded) {
+			$("#transactionsTable2").dataTable().fnDestroy();
+			table2Loaded = false;
+		}
 
 		let filtered = result.filter((res) => { return checkFilter(res.Type); });
 
@@ -1196,12 +1153,10 @@
 			loaded = false;
 		buildHtmlTable('#transactionsTable2', filtered, loaded, transactionHeaders);
 		trigger2();
-
 	}
 
 	function placeholderTable() {
-		var result2 = transactionsPlaceholder;
-		makeTable2(result2);
+		makeTable2([]);
 	}
 
 
@@ -1286,24 +1241,48 @@
 
 	// final callback to sort table
 	function trigger2() {
-		if (table2Loaded) // reload existing table
-		{
-			$("#transactionsTable2").trigger("update", [true, () => { }]);
-			$("#transactionsTable2 thead th").data("sorter", true);
-			//$("table").trigger("sorton", [[0,0]]);
-		} else {
-			$("#transactionsTable2 thead th").data("sorter", true);
-			$("#transactionsTable2").tablesorter({
-				widgets: ['scroller'],
-				widgetOptions: {
-					scroller_height: 1000,
-					scroller_barWidth: 18,
-					scroller_upAfterSort: true,
-				},
-				sortList: [[9, 1], [2, 0]]
-			});
-			table2Loaded = true;
-		}
+		$('#transactionsTable2').DataTable({
+			"paging": false,
+			"ordering": true,
+			//"info": true,
+			"scrollY": "80vh",
+			"scrollX": true,
+			"scrollCollapse": true,
+			"order": [[9, "desc"]],
+			"dom": '<"toolbar">frtip',
+			fixedColumns: {
+				leftColumns: 2
+			},
+			aoColumnDefs: [
+				{ bSearchable: true, aTargets: [1] },
+				{ bSearchable: true, aTargets: [2] },
+				{ bSearchable: true, aTargets: [3] },
+				{ bSearchable: true, aTargets: [6] },
+				{ bSearchable: true, aTargets: [8] },
+				{ bSearchable: false, aTargets: ['_all'] },
+			],
+			"language": {
+				"search": '<i class="fa fa-search"></i>',
+				"searchPlaceholder": "Type, Exchange, Token, Hash",
+				"zeroRecords": "No transactions loaded",
+				"info": "Showing _TOTAL_ transactions",
+				"infoEmpty": "No transactions found",
+				"infoFiltered": "(filtered from _MAX_ )"
+			},
+			"initComplete": function (settings, json) {
+				setTimeout(function () {
+					$("[data-toggle=popover]").popover();
+				}, 200);
+
+				$('[data-toggle=tooltip]').tooltip({
+					'placement': 'top',
+					'container': 'body'
+				});
+			}
+		});
+
+		activateFilters();
+
 
 		trigger_2 = transLoaded >= 3;
 
@@ -1320,6 +1299,48 @@
 		table2Loaded = true;
 	}
 
+	function activateFilters() {
+		$("div.toolbar").html(`
+			<div class="btn-group" data-toggle="buttons">
+				<label id="Trades" class="btn btn-xs btn-flat btn-multi">
+				<input type="checkbox" value=""> Trades
+				</label>
+				<label id="DepWith" class="btn btn-xs btn-flat btn-multi">
+				<input type="checkbox"> Deposit-Withdraw
+				</label>
+				<label id="Cancel" class="btn btn-xs btn-flat btn-multi">
+				<input type="checkbox"> Cancel
+				</label>
+				<label id="Wrap" class="btn btn-xs btn-flat btn-multi">
+				<input type="checkbox"> Wrap ETH
+				</label>
+				<label id="Approve" class="btn btn-xs btn-flat btn-multi">
+				<input type="checkbox"> Approve
+				</label>
+				<label id="Transfer" class="btn btn-xs btn-flat btn-multi">
+				<input type="checkbox"> Transfer
+				</label>
+			</div>`
+		);
+
+		let displFilt = Object.keys(displayFilter);
+		for (let i = 0; i < displFilt.length; i++) {
+			let displ = displayFilter[displFilt[i]];
+			let id = '#' + displFilt[i];
+			if (displ) {
+				$(id).addClass('active');
+			} else {
+				$(id).removeClass('active');
+			}
+		}
+
+		$('#Trades').on("click", () => { toggleFilter('Trades'); });
+		$('#DepWith').on("click", () => { toggleFilter('DepWith'); });
+		$('#Cancel').on("click", () => { toggleFilter('Cancel'); });
+		$('#Wrap').on("click", () => { toggleFilter('Wrap'); });
+		$('#Approve').on("click", () => { toggleFilter('Approve'); });
+		$('#Transfer').on("click", () => { toggleFilter('Transfer'); });
+	}
 
 	// Builds the HTML Table out of myList.
 	function buildHtmlTable(selector, myList, loaded, headers) {
@@ -1355,7 +1376,11 @@
 					let token = cellValue;
 					if (token) {
 						let popover = _delta.makeTokenPopover(token);
-						row$.append($('<td/>').html(popover));
+						let search = token.name;
+						if (token.name2) {
+							search += ' ' + token.name2;
+						}
+						row$.append($('<td data-sort="' + token.name + '" data-search="' + search + '"/>').html(popover));
 					} else {
 						row$.append($('<td/>').html(""));
 					}
@@ -1428,6 +1453,9 @@
 			header1.empty();
 		}
 
+		if (myList.length == 0) {
+			myList = transactionsPlaceholder;
+		}
 		for (var i = 0; i < myList.length; i++) {
 			var rowHash = myList[i];
 			for (var key in rowHash) {

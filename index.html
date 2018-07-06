@@ -15,10 +15,17 @@
   <!-- CSS:  Bootstrap, adminLTE, fontawesome & custom -->
   <link href="css/combinedStyles.css" rel="stylesheet">
 
-  <!-- JS  jquery + tablesorter -->
-  <script src="js/jquery.tablesorter.combined.min.js"></script>
+  <!-- JS  jquery -->
+  <script src="js/jquery-3.2.1.min.js"></script>
+
+  <!-- JS  datatables -->
+  <script src="js/jquery.dataTables.fixed.min.js"></script>
+
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
   <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
+
+
+
 
   <!-- JS socketIO  for exchange prices -->
   <script src="js/socket.io.js" defer></script>
@@ -434,15 +441,17 @@
                 <div class="col-md-12 noPadM">
                   <h2>Balances
                     <button id='loadingBalances' onclick="getBalances()" class="fa fa-refresh" style="display:none;"></button>
-                    <span class="pull-right" style="display:inline-block; vertical-align: middle;font-weight: 400; font-size: 0.5em;">
+                    <!-- <span class="pull-right" style="display:inline-block; vertical-align: middle;font-weight: 400; font-size: 0.5em;">
                       <input style="width:110px;" id="tablesearcher" class="search form-control" data-column="0" type="search" placeholder="filter tokens">
                     </span>
+                    -->
                   </h2>
                   <span id="balanceProgress"> 0 Balances loaded</span>
                   <br>
                 </div>
+                <!-- <div class="col-md-12 noPad"> -->
                 <div class="col-md-12 noPad">
-                  <table class="tablesorter table table-striped" id="resultTable">
+                  <table class="table table-striped" id="resultTable" style="width:100%">
                     <thead></thead>
                     <tbody></tbody>
                   </table>
@@ -478,8 +487,8 @@
                   <a href="https://www.enclaves.io" target="_blank">EnclavesDex</a> and
                   <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>.
                   <br>Wallet balances include tokens traded on: 0x Relayers,
-                  <a href="https://airswap.io" target="_blank">AirSwap</a>, 
-                  <a href="https://kyber.network" target="_blank">Kyber Network</a> and 
+                  <a href="https://airswap.io" target="_blank">AirSwap</a>,
+                  <a href="https://kyber.network" target="_blank">Kyber Network</a> and
                   <a href="https://www.bancor.network" target="_blank">Bancor</a>.
                 </div>
                 <!-- /.box-body -->

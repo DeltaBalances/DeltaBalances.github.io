@@ -15,8 +15,12 @@
   <!-- CSS:  Bootstrap, adminLTE, fontawesome & custom -->
   <link href="css/combinedStyles.css" rel="stylesheet">
 
-  <!-- JS  jquery + tablesorter -->
-  <script src="js/jquery.tablesorter.combined.min.js"></script>
+  <!-- JS  jquery -->
+  <script src="js/jquery-3.2.1.min.js"></script>
+
+  <!-- JS  datatables -->
+  <script src="js/jquery.dataTables.fixed.min.js"></script>
+
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
   <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
 
@@ -408,10 +412,9 @@
                     <button id='loadingTransactions' onclick="myClick()" class="fa fa-refresh" style="display:none;"></button>
                     <span style="padding-left:20px; vertical-align: middle;font-weight: 400; font-size: 0.5em;" id="blockProgress"></span>
                   </h2>
-                  <br>
                 </div>
                 <div class="col-md-12 noPad">
-                  <table class="tablesorter table table-striped noPad" id="transactionsTable">
+                  <table class="table table-striped noPad" id="transactionsTable" style="width:100%">
                     <thead></thead>
                     <tbody></tbody>
                   </table>
@@ -466,15 +469,15 @@
                       <a href="https://sharkrelay.com" target="_blank">Shark Relay</a>,
                       <a href="https://tokenjar.io" target="_blank">Token Jar</a>,
                       <a href="https://idtexchange.com" target="_blank">IDT</a>,
-                      <a href="https://bamboorelay.com" target="_blank">BambooRelay</a> and 
+                      <a href="https://bamboorelay.com" target="_blank">BambooRelay</a> and
                       <a href="https://tokenlon.token.im/tokenlon" target="_blank">Tokenlon</a>.
-                      
+
                     </li>
                     <li> Other exchanges:
                       <a href="https://airswap.io" target="_blank">AirSwap</a>,
-                      <a href="https://kyber.network" target="_blank">Kyber Network</a> and 
+                      <a href="https://kyber.network" target="_blank">Kyber Network</a> and
                       <a href="https://oasisdex.com" target="_blank">OasisDex</a>.
-                      
+
                     </li>
                   </ul>
                   IDEX and Bancor trade history is not supported.

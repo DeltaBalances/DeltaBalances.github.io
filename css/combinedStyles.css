@@ -252,7 +252,11 @@ table.DTFC_Cloned thead,table.DTFC_Cloned tfoot{background-color:white}div.DTFC_
   }
   
 
-  
+  .box-default {
+    box-shadow: 0 1px rgba(0,0,0,.1), 0 1px 4px rgba(0,0,0,.12);
+    border-radius: 2px;
+    border-top: none;
+  }
 
  /* Random css */
  
@@ -851,10 +855,25 @@ th, td {
   white-space: nowrap;
 }
 
-.dataTables_filter input {
+.dataTables_filter label{
+  font-weight: normal;
+  color:black;
+}
+
+.dataTables_filter input{
   font-weight: normal;
   color:black;
   width: 200px; 
+  border-radius: 0;
+  box-shadow: none;
+  border-color: #d2d6de;
+  font-size: 14px;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
 }
 
 .toolbar {

@@ -1267,7 +1267,7 @@
 				{ bSearchable: false, aTargets: ['_all'] },
 			],
 			"language": {
-				"search": '<i class="fa fa-search"></i>',
+				"search": '<i class="dim fa fa-search"></i>',
 				"searchPlaceholder": "Type, Exchange, Token, Hash",
 				"zeroRecords": "No transactions loaded",
 				"info": "Showing _TOTAL_ transactions",

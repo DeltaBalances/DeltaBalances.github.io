@@ -143,8 +143,7 @@
 				//the 'is' for buttons that trigger popups
 				//the 'has' for icons within a button that triggers a popup
 				if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
-					$(this).popover('hide');
-					$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+					hidePopover(this);
 				}
 			});
 			if (!$('#refreshButtonSearch').is(e.target)) {
@@ -1129,9 +1128,15 @@
 
 	function hidePopovers() {
 		$('[data-toggle="popover"]').each(function () {
-			$(this).popover('hide');
-			$(this).data("bs.popover").inState = { click: false, hover: false, focus: false };
+			hidePopover(this);
 		});
+	}
+
+	function hidePopover(element) {
+		try {
+			$(element).popover('hide');
+			$(element).data("bs.popover").inState = { click: false, hover: false, focus: false };
+		} catch (e) { }
 	}
 
 

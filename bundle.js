@@ -4777,10 +4777,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
             }
             //Bancor trade
             else if (unpacked.name == 'Conversion') {
-                //2 variants
+                //3 variants
                 //Conversion (index_topic_1 address _fromToken, index_topic_2 address _toToken, index_topic_3 address _trader, uint256 _amount, uint256 _return, uint256 _currentPriceN, uint256 _currentPriceD)
                 //Conversion (index_topic_1 address _fromToken, index_topic_2 address _toToken, index_topic_3 address _trader, uint256 _amount, uint256 _return, int256 _conversionFee, uint256 _currentPriceN, uint256 _currentPriceD)
-
+                //Conversion (index_topic_1 address _fromToken, index_topic_2 address _toToken, index_topic_3 address _trader, uint256 _amount, uint256 _return, int256 _conversionFee)
 
 
                 //  let maker = unpacked.events[0].value.toLowerCase();
@@ -4848,7 +4848,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     let feeCurrency = '';
 
                     //variant that includes fee
-                    if (unpacked.events.length == 8) {
+                    if (unpacked.events.length == 8 || unpacked.events.length == 6) {
                         feeCurrency = makerToken;
                         let rawFee = new BigNumber(unpacked.events[5].value);
                         if (token == makerToken) {

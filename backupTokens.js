@@ -1121,7 +1121,7 @@ let offlineCustomTokens = [
   {symbol:"DEK",address:"0x15e5c9aa71b8154806038aefc587cfe19b0bc5d6",decimal:18,name:"Deck Coin"},
   {symbol:"DEL",address:"0x02b9806a64cb05f02aa8dcc1c178b88159a61304",decimal:18,name:"Delphi",EtherDelta:"DEL",ForkDelta:"DEL",IDEX:"DEL"},
   {symbol:"DEL",address:"0x346c3be6aebebaf5cb766a75adc9827efbb7e41a",decimal:18,name:"Delphi"},
-  {symbol:"DENT",address:"0x3597bfd533a99c9aa083587b074434e61eb0a258",decimal:8,EtherDelta:"DENT",ForkDelta:"DENT",IDEX:"DENT",Radar:"DENT"},
+  {symbol:"DENT",address:"0x3597bfd533a99c9aa083587b074434e61eb0a258",decimal:8,Binance:"DENTETH",EtherDelta:"DENT",ForkDelta:"DENT",IDEX:"DENT",Radar:"DENT"},
   {symbol:"DEPO",address:"0x7cf271966f36343bf0150f25e5364f7961c58201",decimal:0,name:"CRYPTODEPOZIT"},
   {symbol:"DES",address:"0x81a803d28ee340e8c3805362374703ffcbb8c0e2",decimal:8,name:"Decentralized Escrow Service"},
   {symbol:"DET",address:"0x7d49eaac4c70abc1a659122f08c0806ae44703ef",decimal:18,name:"Dragon Exchange",EtherDelta:"DET",ForkDelta:"DET"},

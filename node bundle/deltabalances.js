@@ -3059,17 +3059,35 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
             }
             //ethex taker trade 
             else if (unpacked.name == 'TakeBuyOrder' || unpacked.name == 'TakeSellOrder') {
-                let maker = ''
-                let taker = ''
+                let maker = '';
+                let taker = '';
+                let buyer = '';
+                let seller = '';
                 let tradeType = '';
+                let transType = 'Taker'
+
                 if (unpacked.name == 'TakeSellOrder') {
                     tradeType = 'Buy';
                     maker = unpacked.events[6].value.toLowerCase();
                     taker = unpacked.events[5].value.toLowerCase();
+                    buyer = taker;
+                    seller = maker;
+
+                    if (maker == myAddr) {
+                        tradeType = 'Sell';
+                        transType = 'Maker';
+                    }
                 } else {
                     tradeType = 'Sell';
                     maker = unpacked.events[5].value.toLowerCase();
                     taker = unpacked.events[6].value.toLowerCase();
+                    seller = taker;
+                    buyer = maker;
+
+                    if (maker == myAddr) {
+                        tradeType = 'Buy';
+                        transType = 'Maker';
+                    }
                 }
 
                 let base = this.setToken(this.config.ethAddr);
@@ -3103,7 +3121,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     }
 
                     return {
-                        'type': 'Taker ' + tradeType,
+                        'type': transType + ' ' + tradeType,
                         'exchange': exchange,
                         'note': utility.addressLink(taker, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
                         'token': token,
@@ -3112,10 +3130,15 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                         'base': base,
                         'baseAmount': baseAmount,
                         'unlisted': token.unlisted,
-                        'maker': maker,
-                        'taker': taker,
+                        //  'maker': maker,
+                        //  'taker': taker,
+                        'buyer': buyer,
+                        'seller': seller,
                         'feeCurrency': base,
                         'fee': '',
+                        'transType': transType,
+                        'tradeType': tradeType,
+
                     };
                 }
             }
@@ -3160,6 +3183,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                             'baseAmount': baseAmount,
                             'unlisted': token.unlisted,
                             'maker': maker,
+                            'transType': 'Maker',
+                            'tradeType': tradeType,
                         };
                     } else {
                         return {

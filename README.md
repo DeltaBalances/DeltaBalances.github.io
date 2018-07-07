@@ -18,6 +18,7 @@ DeltaBalances is not affiliated with any of the exchanges mentioned below.
 + [Bancor](https://bancor.network) (No trade history)
 + [Enclaves Dex](https://enclaves.io)
 + [ETHEN](https://ethen.market) (No balances yet)
++ [ETHEX](https://ethex.market)
 
 0x Project Relayers, including:
 + [DDEX](https://ddex.io/)

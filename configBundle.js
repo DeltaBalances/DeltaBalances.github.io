@@ -185,6 +185,7 @@ module.exports = {
       'Kyber',
       'Enclaves',
       'Ethen',
+      'Ethex',
     ],
     minBlock: 3154197,
     maxBlock: undefined,
@@ -198,6 +199,8 @@ module.exports = {
       '0x7b6c917cd708d6f749ab415a0f1aa5ced6110d03141d28e5b75e216ecb4e79f7', //enclaves
       '0x165223f17116d321e4ef371cbdb122aa350ce59db46ff8f575874758c14a3ef0', // Ethen 1/2 'Order'
       '0xee7e85974085b8a74acdea8330a9e8c09680dccea6f6df360491edf22a27cc3b', // Ethen 2/2 'Trade'
+      '0x4a42a397fcad5d4d60ebf2e7cf663489e687e9c6d2d2cf518488fc78044815ba', // Ethex take sell
+      '0x8de9ee05a363c847bda3ed15fc9011be60b55c7cf2e7c024c173859ed2d3760c', // Ethex take buy
     ],
     withdrawTopic: undefined,
     depositTopic: undefined,
@@ -309,8 +312,8 @@ module.exports = {
     minBlock: 5026534,
     maxBlock: undefined,
     tradeTopic: [
-      '0x4a42a397fcad5d4d60ebf2e7cf663489e687e9c6d2d2cf518488fc78044815ba', // take sell'
-      '0x8de9ee05a363c847bda3ed15fc9011be60b55c7cf2e7c024c173859ed2d3760c', // take buy'
+      '0x4a42a397fcad5d4d60ebf2e7cf663489e687e9c6d2d2cf518488fc78044815ba', // take sell
+      '0x8de9ee05a363c847bda3ed15fc9011be60b55c7cf2e7c024c173859ed2d3760c', // take buy
     ],
     withdrawTopic: undefined,
     depositTopic: undefined,

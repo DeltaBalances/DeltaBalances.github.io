@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="View decentralized exchange (DEX) trade history.">
+  <meta name="description" content="View and export Ethex.market trade history.">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
@@ -36,7 +36,7 @@
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
   <script> 
-    var historyConfig = bundle.DeltaBalances.config.historyAll;
+    var historyConfig = bundle.DeltaBalances.config.historyEthex;
   </script>
   <script src="history.js"></script>
 
@@ -72,9 +72,7 @@
       <!-- mobile only logo -->
       <ul class="visible-xs nav navbar-nav pull-left navbar-logo" style="margin-left:0px; margin-top:5px;font-size:20px; height:30px; line-height:30px;">
         <li class="">
-
           <a href="index.html" class="dropdown">
-
             <span class="homeLink1">Delta</span>
             <span class="homeLink2">Balances</span>
           </a>
@@ -93,7 +91,6 @@
               </button>
             </span>
           </div>
-
         </li>
       </ul>
       <ul class="nav navbar-nav pull-right navbar-user">
@@ -155,7 +152,7 @@
             <span>Recent Transactions</span>
           </a>
         </li>
-        <li class="active">
+        <li>
           <a id="histNav" href="trades.html">
             <i class="sidebar-icon icon-book"></i>
             <span>Trade History</span>
@@ -168,7 +165,7 @@
           </a>
         </li>
         <li class="header">Single exchange</li>
-        <li class="treeview menu">
+        <li class="active treeview menu-open">
           <a href="#">
             <i class="icon-book"></i>
             <span>Exchange History</span>
@@ -221,10 +218,16 @@
                 <span>EnclavesDex</span>
               </a>
             </li>
-            <li>
+            <li >
               <a id="historyNav9" href="history9.html">
                 <strong class="sidebar-icon icon-ethen"> E</strong>
                 <span>ETHEN</span>
+              </a>
+            </li>
+            <li class="active">
+              <a id="historyNav10" href="history10.html">
+                 <i class="sidebar-icon icon-ethex"></i>
+                <span>ETHEX</span>
               </a>
             </li>
             <li>
@@ -260,7 +263,6 @@
     <!-- /.sidebar -->
   </aside>
 
-
   <div class="wrapper">
 
     <!-- Content Wrapper. Contains page content -->
@@ -270,22 +272,20 @@
       <h1>
         Token balances
       </h1>
-  
     </section> -->
 
       <!-- Main content -->
       <section class="content container-fluid">
+
         <div class="row">
 
           <div class="col-md-12 col-lg-10 s-fullwidth" style="overflow:hidden;">
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body noPadTop">
-
                 <div class="col-md-9 noPadM" style="overflow:hidden;">
                   <h2>
-                    <i class=""></i> Decentralized Trade History</h2>
-
+                    <!-- <i class="icon-"></i> -->ETHEX History</h2>
                   <div style="white-space:nowrap; overflow:hidden;">
                     <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
                     <div class="hidden-xs" style="padding-left: 3%; float:left;">
@@ -299,12 +299,12 @@
                 </div>
                 <div class="col-md-12 noPadM">
                   <div class="col-md-5 noPad" style="overflow:hidden;">
-                    <h4 class="hidden">Operation types</h4>
+                    <h4 class="hidden" >Operation types</h4>
 
                     <select style="display:inline; width:80%; " class="hidden form-control" id="typeSelect" onChange="changeTypes()">
                       <option value="0">Trades</option>
-                      <!--  <option value="1">Funds (Deposit/Withdraw)</option>
-                      <option value="2">Trades + Funds</option> -->
+                      <option value="1">Funds (Deposit/Withdraw)</option>
+                      <option value="2">Trades + Funds</option>
                     </select>
                     <h4>Date range: </h4>
                     <span id="selectedBlocks">Selected block range:</span>
@@ -352,21 +352,23 @@
                   </div>
                   <div class="col-md-7 noPad" style="overflow:hidden;">
                     <h4>Info</h4>
-                    This is the combined trade history for all supported Ethereum exchanges.
-                    <br> For a faster experience, use the history for a specific exchange.
+                    History for
+                    <a href="https://ethex.market" target="_blank">ETHEX</a> at contract
+                    <a href="https://etherscan.io/address/0xb746aed479f18287dc8fc202fe06f25f1a0a60ae" target="_blank">0xb746..</a>.
+                    <br>
+                    <br>
+
                     <span class="visible-xs">
                       <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
                       <br>
                       <br>
                     </span>
-                    <br>
-                    <br> Trades are retrieved from the blockchain using Infura.
+                    Trades are retrieved from the blockchain using Infura.
                     <br>Large block ranges will take a long time to load.
                     <br>
-                    <br> History is limited to trades with base (W)ETH or DAI, starting at block
+                    <br> History is limited to trades with base ETH, starting at block
                     <span id="minBlockLink"></span>
                     <br>
-
                   </div>
                   <div class="col-md-12 noPad">
                     <br>
@@ -385,7 +387,7 @@
                       <option value="4">Cointracking.info (CustomExchange)</option>
                     </select>
                   </div>
-                  <div id="exportFunds" class="hidden col-md-6 noPad" style="overflow:hidden;">
+                  <div id="exportFunds" class="col-md-6 noPad hidden" style="overflow:hidden;">
                     <h4>Export funds (deposit/withdraw):
                       <span id="downloadFundsBtn">
                         <i class="fa dim fa-download" aria-hidden="true"></i>
@@ -403,6 +405,7 @@
             </div>
             <!-- /.box -->
           </div>
+
           <div class="col-md-12 col-lg-10 s-fullwidth">
             <div class="box box-default">
               <!-- /.box-header -->
@@ -424,13 +427,13 @@
                   <br>
                   <br>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 noPadM">
                   <span class="label label-info">Taker</span> Clicked an existing order.
                   <br>
                   <span class="label label-default">Maker</span> Made a new order.
                   <br>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-6 noPadM">
                   <span class="label label-success">Buy</span> Traded ETH for Tokens.
                   <br>
                   <span class="label label-danger">Sell</span> Traded Tokens for ETH.
@@ -441,59 +444,7 @@
             </div>
             <!-- /.box -->
           </div>
-
-
-
-
-          <div class="col-md-12 col-lg-10 s-fullwidth">
-            <div class="box box-default">
-              <!-- /.box-header -->
-              <div class="box-body">
-                <div class="col-md-12 noPadM">
-                  Trade History supports:
-                  <br>
-                  <ul>
-                    <li>Deposit style exchanges:
-                      <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
-                      <a href="https://forkdelta.github.io" target="_blank">ForkDelta</a>),
-                      <a href="https://token.store" target="_blank">Token Store</a>,
-                      <a href="https://www.enclaves.io" target="_blank">EnclavesDex</a>,
-                      <a href="https://www.ethen.market" target="_blank">ETHEN</a> and
-                      <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>.
-                    </li>
-                    <li> 0x relayers:
-                      <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>,
-                      <a href="https://ddex.io" target="_blank">DDEX</a>,
-                      <a href="https://paradex.io/" target="_blank">Paradex</a>,
-                      <a href="https://ercdex.com/" target="_blank">ERC dEX</a>,
-                      <a href="https://sharkrelay.com" target="_blank">Shark Relay</a>,
-                      <a href="https://tokenjar.io" target="_blank">Token Jar</a>,
-                      <a href="https://idtexchange.com" target="_blank">IDT</a>,
-                      <a href="https://bamboorelay.com" target="_blank">BambooRelay</a> and
-                      <a href="https://tokenlon.token.im/tokenlon" target="_blank">Tokenlon</a>.
-
-                    </li>
-                    <li> Other exchanges:
-                      <a href="https://airswap.io" target="_blank">AirSwap</a>,
-                      <a href="https://kyber.network" target="_blank">Kyber Network</a>
-                      <a href="https://oasisdex.com" target="_blank">OasisDex</a> and
-                      <a href="https://www.ethex.market" target="_blank">ETHEX</a>.
-                    </li>
-                  </ul>
-                  IDEX and Bancor trade history is not supported.
-                </div>
-              </div>
-              <!-- /.box-body -->
-            </div>
-
-          </div>
-
-          <!-- /.box -->
         </div>
-
-
-
-
       </section>
       <!-- /.content -->
     </div>
@@ -570,7 +521,6 @@
               <li>
                 <a onclick="loadSaved()" href="#">
                   <i id="savedImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
-
                   <div class="menu-info">
                     <h4 id="savedAddress" class="control-sidebar-subheading">0x12345678</h4>
                     <p>Saved</p>

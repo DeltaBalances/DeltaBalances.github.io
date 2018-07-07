@@ -885,7 +885,9 @@
 						unpacked.name != 'DepositEther' &&
 						unpacked.name != 'Withdraw' &&
 						unpacked.name != 'WithdrawToken' &&
-						unpacked.name != 'WithdrawEther'
+						unpacked.name != 'WithdrawEther' &&
+						unpacked.name != 'TakeSellOrder' &&
+						unpacked.name != 'TakeBuyOrder'
 					)
 				) {
 					continue;

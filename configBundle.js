@@ -102,6 +102,7 @@ module.exports = {
     '0x390de26d772d2e2005c6d1d24afc902bae37a4bb': 'Upbit',
     '0xf73c3c65bde10bf26c2e1763104e609a41702efe': 'Bibox',
     '0xf5bec430576ff1b82e44ddb5a1c93f6f9d0884f3': 'Yobit',
+    '0x2b5634c42055806a59e9107ed44d43c426e58258': 'KuCoin',
   },
   ethAddr: '0x0000000000000000000000000000000000000000',
   // non ETH/WETH  base currency (like DAI)

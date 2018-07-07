@@ -721,21 +721,23 @@
 				if (to === myAddr && !contract && internal && from !== _delta.config.exchangeContracts.Kyber.addr) {
 					var trans = undefined;
 
-					if (_util.isWrappedETH(tx.from)) {
+					if (_util.isWrappedETH(from)) {
 						var val = _util.weiToEth(tx.value);
 						trans = createOutputTransaction('Unwrap ETH', _delta.setToken(tx.from), val, _delta.config.tokens[0], val, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
 					}
-					// IDEX withdraw, only found in internal tx
-					if (_delta.config.exchangeContracts.Idex.addr == from) {
-						var val = _util.weiToEth(tx.value);
-						trans = createOutputTransaction('Withdraw', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
-					}
-					// used to detect airswap fails that send back the same ETH amount
-					else if (_delta.config.exchangeContracts.AirSwap.addr == from && val.greaterThan(0)) {
-						var val = _util.weiToEth(tx.value);
-						trans = createOutputTransaction('In', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', _delta.config.exchangeContracts.AirSwap.name);
-						trans.Incomplete = true; //should be a tx with acutal input
+					else if (_delta.isExchangeAddress(from)) {
+						// IDEX withdraw, only found in internal tx
+						if (_delta.config.exchangeContracts.Idex.addr == from) {
+							var val = _util.weiToEth(tx.value);
+							trans = createOutputTransaction('Withdraw', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
+						}
+						// used to detect airswap fails that send back the same ETH amount
+						else if (_delta.config.exchangeContracts.AirSwap.addr == from && val.greaterThan(0)) {
+							var val = _util.weiToEth(tx.value);
+							trans = createOutputTransaction('In', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', _delta.config.exchangeContracts.AirSwap.name);
+							trans.Incomplete = true; //should be a tx with acutal input
 
+						}
 					} else if (val.greaterThan(0)) {
 						let amount = _util.weiToEth(val, undefined);
 

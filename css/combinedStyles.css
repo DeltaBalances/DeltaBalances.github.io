@@ -481,6 +481,19 @@ table.tablesorter th.tablesorter-headerUnSorted {
   border-right: 1px solid #ddd;
 }
 
+
+#balanceProgress, #balanceProgress_wrapper div, #balanceProgress td {
+  border:none !important;
+} 
+
+#balanceProgress {
+  padding: 0px;
+}
+
+#balanceProgress_wrapper .dataTables_scrollHead {
+  display:none;
+}
+
 /*
 #resultTable td:nth-last-child(2)
 {

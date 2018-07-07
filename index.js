@@ -13,6 +13,7 @@
 
 	// loading states
 	var table1Loaded = false;
+	var progressTableLoaded = false;
 
 	var exchanges =
 		{
@@ -1054,30 +1055,37 @@
 	}
 
 	function setBalanceProgress() {
-		let progressString = '<span style="padding-left:10px;padding-right:30px">Loaded: </span>';
-		let changed = false;
+
+
+		if (progressTableLoaded) {
+			$("#balanceProgress").dataTable().fnDestroy();
+			progressTableLoaded = false;
+		}
+
+
+
+		let loadingState = {
+		}
+
 		let keys = Object.keys(exchanges);
 		for (let i = 0; i < keys.length; i++) {
-
 			if (exchanges[keys[i]].enabled) {
-				if (changed)
-					progressString +=
-						changed = true;
 				var numLoaded = exchanges[keys[i]].loaded;
-				progressString += '<span>' + keys[i] + ":";
+				let progressString = '<span style="white-space:normal">' + keys[i] + " ";
 
 				if (numLoaded >= tokenCount) {
-					progressString += '<span style="padding-left:3px;padding-right:30px" class="text-green">';
+					progressString += '<span class="text-green">';
 				} else {
-					progressString += '<span style="padding-left:3px;padding-right:30px" class="text-red">';
+					progressString += '<span class="text-red">';
 				}
 				progressString += Math.min(exchanges[keys[i]].loaded, tokenCount) + '/' + tokenCount + '</span></span> ';
+				loadingState[keys[i]] = progressString;
 			}
 		}
 
 		//prices
 		{
-			progressString += '<span>Token prices:<span style="padding-left:3px;padding-right:30px" class="text-';
+			let progressString = '<span style="white-space:normal">Prices <span style="white-space:nowrap"class="text-';
 			if (loadedBid < 2) {
 				if (running) {
 					progressString += 'red"> Loading..';
@@ -1092,9 +1100,42 @@
 				progressString += 'red"> Failed';
 			}
 			progressString += '</span></span>';
+			loadingState['Total'] = progressString; //abuse balance headers for making a table
 		}
 
-		$('#balanceProgress').html(progressString);
+		$('#balanceProgress thead').empty();
+		$('#balanceProgress tbody').empty();
+
+
+		var body = $('#balanceProgress tbody');
+		var header = $('#balanceProgress thead');
+		var headerTr$ = $('<tr/>');
+		var tbody$ = $('<tbody/>');
+		var row$ = $('<tr/>');
+		keys = Object.keys(loadingState);
+		let values = Object.values(loadingState);
+		for (let i = 0; i < values.length; i++) {
+			headerTr$.append($('<th/>'));
+			row$.append($('<td/>').html(values[i]));
+		}
+		header.append(headerTr$);
+		$('#balanceProgress').append(header);
+		tbody$.append(row$);
+		body.append(tbody$[0].innerHTML);
+
+		$('#balanceProgress').DataTable({
+			"paging": false,
+			"ordering": false,
+			"searching": false,
+			"scrollX":true,
+			"info": false,
+			"language": {
+				"zeroRecords": "0 Balances loaded",
+			},
+		});
+
+		progressTableLoaded = true;
+
 	}
 
 

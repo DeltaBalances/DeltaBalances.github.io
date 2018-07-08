@@ -2570,7 +2570,7 @@ let offlineCustomTokens = [
   {symbol:"NANOCOIN",address:"0x9401089f3e8d11d7e4dea76c1755e6b75489884a",decimal:18,name:"Nano Coin"},
   {symbol:"NANOD",address:"0x0c1336ce56f1e78904f7dbbd5761d4e792feec51",decimal:18,name:"NANO DARK"},
   {symbol:"NAO",address:"0xc6b014274d7406641711fb8889f93f4f11dec810",decimal:18,name:"normikaivo",EtherDelta:"NAO",ForkDelta:"NAO"},
-  {symbol:"NAS",address:"0x5d65d971895edc438f465c17db6992698a52318d",decimal:18,name:"Nebulas Token",Binance:"NASETH",EtherDelta:"NAS",ForkDelta:"NAS",IDEX:"NAS"},
+  {symbol:"NAS",address:"0x5d65d971895edc438f465c17db6992698a52318d",decimal:18,name:"Nebulas Token",EtherDelta:"NAS",ForkDelta:"NAS",IDEX:"NAS"},
   {symbol:"NAT",address:"0x22467d25320dda37f254b0f56309c2bce673ba62",decimal:18,name:"nametoken"},
   {symbol:"NAVI",address:"0x588047365df5ba589f923604aac23d673555c623",decimal:18,name:"NaviToken",IDEX:"NAVI"},
   {symbol:"NAVI",address:"0xc15a399c4ea7815fe36857c9e290ee452a5d6b21",decimal:18,name:"BoatPilot Token",DDEX:"NAVY"},

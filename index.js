@@ -67,14 +67,14 @@
 			},
 		};
 
-
 	var loadedBid = 0;
 	var failedBid = 0;
 	var displayedBid = 0;
 
-	var loadedCustom = false;
 	var trigger_1 = false;
 	var running = false;
+	var runningCustom = false;
+	var runningListed = false;
 
 	// settings
 	var hideZero = true;
@@ -83,6 +83,7 @@
 	var useAsk = false;
 
 	var showCustomTokens = false;
+	var showListed = true;
 	var showFiat = 'USD';
 
 
@@ -134,18 +135,25 @@
 		readyInit();
 	});
 
+	//initialize independent of html dom
 	function init() {
-		_delta.startDeltaBalances(true, () => {
-			_delta.initTokens(true);
+		_delta.initTokens(true);
+		tokenCount = getTokenCount();
 
-			showTokenCount();//checkCustom();
+		_delta.startDeltaBalances(true, () => {
+			_delta.initTokens(true); // do it again in case a token listed loaded very quickly (don't wait for them)
+			tokenCount = getTokenCount();
 			initiated = true;
 			if (autoStart)
 				myClick();
 		});
 	}
 
+	// initialize on page ready
 	function readyInit() {
+
+
+		checkCollapseSettings(true);
 
 		//get metamask address as possbile input (if available)
 		metamaskAddr = _util.getMetamaskAddress();
@@ -155,10 +163,8 @@
 		}
 		getStorage();
 
-		showTokenCount();
 		$('#zero').prop('checked', hideZero);
 		$('#decimals').prop('checked', decimals);
-		$('#custom').prop('checked', showCustomTokens);
 		$('#fiatSelect').val(Number(showFiat));
 
 		// detect enter & keypresses in input
@@ -197,10 +203,9 @@
 		Object.keys(exchanges).forEach(function (key) {
 			initExchangeBox(key);
 		});
-		setBalanceProgress();
-		placeholderTable();
 
-		checkCollapseSettings();
+		placeholderTable();
+		setBalanceProgress();
 
 		// url parameter ?addr=0x... /#0x..
 		var addr = ''
@@ -249,15 +254,35 @@
 		} catch (e) { }
 	}
 
-	function checkCollapseSettings() {
-		let width = $(window).width();
-		if (width < 991) {
+	function checkCollapseSettings(init) {
+		//check bootstrap classes for visibility
+		var envs = ['xs', 'sm', 'md', 'lg'];
+		var env = '';
+		var $el = $('<div>');
+		$el.appendTo($('body'));
+
+		for (var i = envs.length - 1; i >= 0; i--) {
+			env = envs[i];
+
+			$el.addClass('hidden-' + env);
+			if ($el.is(':hidden')) {
+				$el.remove();
+				break;
+			}
+		}
+
+		if (env == 'xs' || env == 'sm') {
 			if ($('#setting-body').is(":visible")) {
-				$("[data-widget='collapse']").click();
+				$('#collapseSettings').click();
+			}
+			if (init) {
+				$('#settingbox').addClass('collapsed-box');
+				$('#settingToggleIcon').removeClass('fa-minus');
+				$('#settingToggleIcon').addClass('fa-plus');
 			}
 		} else {
 			if (!$('#setting-body').is(":visible")) {
-				$("[data-widget='collapse']").click();
+				$('#collapseSettings').click();
 			}
 		}
 	}
@@ -320,9 +345,8 @@
 						balanceHeaders[name] = exchanges[name].enabled;
 						finishedBalanceRequest();
 					} else {
-
 						// load new exchange only, keep old
-						getBalances(requestID, true, false);
+						getBalances(true, false);
 					}
 				}
 			} else {
@@ -399,40 +423,64 @@
 		setStorage();
 	}
 
-	function checkCustom() {
-		showCustomTokens = $('#custom').prop('checked');
-		$('#customMessage').prop('hidden', showCustomTokens);
-		setStorage();
-		let maxcount = _delta.config.customTokens.length;
-		if (showCustomTokens) {
-			tokenCount = maxcount;
-			if (lastResult && loadedCustom) {
-				finishedBalanceRequest();
-			}
-			else if (publicAddr) {
-				// load only added custom tokens if listed already loaded
-				getBalances(requestID, false, true);
-			}
+	function checkListing() {
+		showCustomTokens = $('#showUnlisted').prop('checked');
+		showListed = $('#showListed').prop('checked');
+		if (!running) {
+			tokenCount = getTokenCount();
+			setBalanceProgress();
 		}
-		else {
-			tokenCount = _delta.config.tokens.length;
 
-			if (lastResult) {
-				finishedBalanceRequest();
+		setStorage();
+
+		let loadedCustom = true;
+		let loadedListed = true;
+		Object.keys(exchanges).forEach(function (name) {
+			if (exchanges[name].enabled) {
+				if (!exchanges[name].completedUnlisted)
+					loadedCustom = false;
+				if (!exchanges[name].completedListed)
+					loadedListed = false;
 			}
-		}
-		showTokenCount();
+		});
+
+		//slightly delay to allow toggle to animate
+		setTimeout(function () {
+			if (lastResult && !running) {
+				if (loadedCustom && loadedListed) { // we already have all data
+					finishedBalanceRequest();
+				} else if (loadedListed && !showCustomTokens) { // we already have all (non unlisted) data
+					finishedBalanceRequest();
+				} else if (showCustomTokens && !loadedCustom && (!showListed || loadedListed)) {
+					getBalances(false, true); // load only unlisted tokens
+				} else {  // just load everything
+					getBalances(false, false);
+				}
+			} else if (running) {
+				//clicked when never finished loading yet, and settings are different, just reload everything
+				if ((!runningCustom && showCustomTokens) || (!runningListed && showListed)) {
+					getBalances(false, false);
+				}
+			}
+		}, 110);
+		return;
 	}
 
-	function showTokenCount() {
-		let maxcount = _delta.config.customTokens.length;
-		let currentcount = maxcount;
+	function getTokenCount() {
+		let listed = _delta.config.tokens.length;
+		let unlisted = _delta.config.customTokens.length - listed;
+		let currentcount = 0;
 		if (showCustomTokens) {
-			currentcount = maxcount;
-		} else {
-			currentcount = _delta.config.tokens.length;
+			currentcount += unlisted;
 		}
-		$('#tokencount').html(" " + currentcount + "/" + maxcount);
+		if (showListed) {
+			currentcount += listed;
+		}
+		if (currentcount == 0) {
+			currentcount = 1; //load only ETH
+		}
+		//$('#tokencount').html(" " + currentcount + "/" + maxcount);
+		return currentcount;
 	}
 
 	function disableInput(disable) {
@@ -501,8 +549,7 @@
 	}
 
 	function myClick() {
-		if (running)
-			requestID++;
+
 		if (!initiated) {
 			autoStart = true;
 			return;
@@ -532,9 +579,7 @@
 		}
 	}
 
-	function getAll(autoload, rqid) {
-		running = true;
-
+	function getAll(autoload) {
 		trigger_1 = true;
 
 		lastResult = undefined;
@@ -542,8 +587,7 @@
 		if (publicAddr) {
 			setStorage();
 			window.location.hash = publicAddr;
-			getBalances(rqid, false, false);
-
+			getBalances(false, false);
 		} else {
 			running = false;
 		}
@@ -555,6 +599,10 @@
 			exchanges[name].loaded = exchanges[name].enabled ? 0 : -1;
 			exchanges[name].displayed = !exchanges[name].enabled;
 			balanceHeaders[name] = exchanges[name].enabled;
+			exchanges[name].loadedUnlisted = 0;
+			exchanges[name].completedUnlisted = false;
+			exchanges[name].loadedListed = 0;
+			exchanges[name].completedListed = false;
 		}
 
 		Object.keys(exchanges).forEach(function (key) {
@@ -562,15 +610,30 @@
 		});
 	}
 
-	function appendExLoadingState(addCustom) {
+	function appendExLoadingState() {
 
 		function setLoad(name) {
-			if (exchanges[name].enabled && ((addCustom && exchanges[name].loaded >= _delta.config.tokens.length) || (!addCustom && exchanges[name].loaded >= tokenCount))) {
-				exchanges[name].displayed = false;
+			if (exchanges[name].enabled) {
+				exchanges[name].loaded = 0;
+				if (showCustomTokens)
+					exchanges[name].loaded += exchanges[name].loadedUnlisted;
+				if (showListed || (!showListed && !showCustomTokens))
+					exchanges[name].loaded += exchanges[name].loadedListed;
 			} else {
-				exchanges[name].loaded = exchanges[name].enabled ? 0 : -1;
-				exchanges[name].displayed = !exchanges[name].enabled;
+				exchanges[name].loaded = -1;
 			}
+			exchanges[name].displayed = !exchanges[name].enabled;
+			//	if(!addCustom) {
+
+			//	} else {
+
+			//	}
+			//	if (exchanges[name].enabled && ((addCustom && exchanges[name].loaded >= _delta.config.tokens.length) || (!addCustom && exchanges[name].loaded >= tokenCount))) {
+			//		exchanges[name].displayed = false;
+			//	} else {
+			//		exchanges[name].loaded = exchanges[name].enabled ? 0 : -1;
+
+			//	}
 			balanceHeaders[name] = exchanges[name].enabled;
 		}
 
@@ -594,14 +657,34 @@
 		$('#totalbalancePrice').html('');
 	}
 
-	function getBalances(rqid, appendExchange, appendCustom) {
-		if (!rqid)
-			rqid = requestID;
-		if (!trigger_1)
+	function getBalances(appendExchange, appendCustom) {
+		if (!publicAddr)
 			return;
 
-		if (!appendExchange && !appendCustom)
+		requestID++;
+		running = true;
+		runningListed = showListed;
+		runningCustom = showCustomTokens;
+
+		let rqid = requestID;
+
+		//		if (!trigger_1)
+		//			return;
+
+		let loadedCustom = true;
+		let loadedListed = true;
+		Object.keys(exchanges).forEach(function (name) {
+			if (exchanges[name].enabled) {
+				if (!exchanges[name].completedUnlisted)
+					loadedCustom = false;
+				if (!exchanges[name].completedListed)
+					loadedListed = false;
+			}
+		});
+
+		if (!appendExchange && !appendCustom && !(lastResult && showListed && !loadedListed)) {
 			balances = {};
+		}
 
 		clearOverviewHtml(false);
 
@@ -613,30 +696,29 @@
 		loadedBid = 0;
 		failedBid = 0;
 
-		loadedCustom = false;
 		//	$('#resultTable tbody').empty();
 		showLoading(true, false);
-
-
-		var allTokens = _delta.config.customTokens;
-		var allCount = allTokens.length;
-		if (!showCustomTokens) {
-			tokenCount = _delta.config.tokens.length;
-		} else {
-			tokenCount = allCount;
-		}
 
 		if (!appendExchange && !appendCustom)
 			resetExLoadingState();
 		else
-			appendExLoadingState(appendCustom);
+			appendExLoadingState();
+
+		tokenCount = getTokenCount();
+
+		let logcount = tokenCount;
+		if (appendCustom)
+			logcount -= _delta.config.tokens.length;
+		console.log('preparing to retrieve balances for ' + logcount + ' tokens');
+
+
 
 		setBalanceProgress();
 
 		if (!appendExchange && !appendCustom) {
-			for (var i = 0; i < allCount; i++) {
-				var token = allTokens[i];
-				if (token)
+			for (let i = 0; i < _delta.config.customTokens.length; i++) {
+				let token = _delta.config.customTokens[i];
+				if (token && !balances[token.addr])
 					initBalance(token);
 			}
 		}
@@ -681,7 +763,6 @@
 				etherPriceEUR = result.data.quotes.EUR.price;
 			}
 		});
-
 	}
 
 
@@ -915,12 +996,16 @@
 	function getAllBalances(rqid, mode, addCustom) {
 
 		// select which tokens to be requested
-		var tokens2 = _delta.config.customTokens.map((x) => { return x.addr; });
+		var tokens2 = _delta.config.customTokens;
 		if (addCustom && showCustomTokens) {
-			tokens2 = tokens2.filter((x) => { return _delta.uniqueTokens[x].unlisted; });
-		} else if (!showCustomTokens) {
-			tokens2 = tokens2.filter((x) => { return !_delta.uniqueTokens[x].unlisted; });
+			tokens2 = tokens2.filter((x) => { return x.unlisted; }); // only custom tokens
+		} else if (!showCustomTokens && showListed) {
+			tokens2 = tokens2.filter((x) => { return !x.unlisted; }); // only listed tokens
+		} else if (!showCustomTokens && !showListed) {
+			tokens2 = [_delta.config.tokens[0]]; // only ETH
 		}
+
+		tokens2 = tokens2.map((x) => { return x.addr; });
 
 		//split in separate requests to match maxPerRequest
 		for (var i = 0; i < tokens2.length; i += maxPerRequest) {
@@ -943,22 +1028,23 @@
 			var success = false;
 			var totalTries = 0;
 
-			if (web3Index >= _delta.web3s.length) {
-				web3Index = 0;
-			}
-
 			//get balances from 2 web3 sources at once, use the fastest response
 			// web3 provider (infura, myetherapi, mycryptoapi) or etherscan
-			makeCall(_delta.web3s[web3Index], mode, functionName, arguments, 0);
-			makeCall(web3Index >= _delta.web3s.length ? undefined : _delta.web3s[web3Index], mode, functionName, arguments, 0);
+			makeCall(mode, functionName, arguments, 0);
+			makeCall(mode, functionName, arguments, 0);
 
+			function makeCall(exName, funcName, args, retried) {
 
-			function makeCall(web3Provider, exName, funcName, args, retried) {
-
+				if (web3Index < _delta.web3s.length) {
+					web3Provider = _delta.web3s[web3Index];
+					web3Index++;
+				} else {
+					web3Provider = undefined;
+					web3Index = 0;
+				}
 				if (completed || requestID > rqid)
 					return;
-				if (web3Provider)
-					web3Index++;
+
 
 				_util.call(
 					web3Provider,
@@ -969,53 +1055,45 @@
 					(err, result) => {
 						if (success || requestID > rqid)
 							return;
-
 						completed++;
 
 						const returnedBalances = result;
 
-						if (!err && returnedBalances && returnedBalances.length > 0) {
-							loadedCustom = showCustomTokens;
-							for (var i = 0; i < tokens.length; i++) {
-								var token = _delta.uniqueTokens[tokens[i]];
-								var div = _delta.divisorFromDecimals(token.decimals);
+						if (!err && returnedBalances && returnedBalances.length == tokens.length) {
 
-								if (funcName == 'walletBalances' || funcName == 'deltaBalances') {
-									balances[token.addr][exName] = _util.weiToEth(returnedBalances[i], div);
-									if (exchanges[exName].loaded >= 0)
-										exchanges[exName].loaded++;
+							if (!success) {
+								success = true;
+							}
+							if (funcName == 'walletBalances' || funcName == 'deltaBalances') {
+								if (exchanges[exName].enabled) {
+
+									for (let i = 0; i < tokens.length; i++) {
+										let token = _delta.uniqueTokens[tokens[i]];
+
+										if (token && balances[token.addr]) {
+											balances[token.addr][exName] = _util.weiToToken(returnedBalances[i], token);
+											exchanges[exName].loaded++;
+											if (token.unlisted) {
+												exchanges[exName].loadedUnlisted++;
+											} else {
+												exchanges[exName].loadedListed++;
+											}
+
+										} else {
+											console.log('received unrequested token balance');
+										}
+									}
 									if (exchanges[exName].loaded >= tokenCount)
 										finishedBalanceRequest();
-
-									success = true;
-								}/* else { //both wallet & etherdelta
-									var j = i * 2;
-									balances[token.addr].EtherDelta = _util.weiToEth(returnedBalances[j], div);
-									balances[token.addr].Wallet = _util.weiToEth(returnedBalances[j + 1], div);
-									loadedW++;
-									loadedED++;
-									if (loadedED >= tokenCount && loadedW >= tokenCount)
-										finishedBalanceRequest();
-								} */
+								}
+							} else {
+								console.log('unexpected funcName');
 							}
 						}
-						else if (completed >= 2) // both requests returned
+						else if (!success && completed >= 2) // both requests returned with bad response
 						{
 							const retryAmount = 2;
-							if (retried < retryAmount) //retry both etherscan and infura 3 times
-							{
-								totalTries++;
-								console.log('retrying request');
-								if (web3Index >= _delta.web3s.length) {
-									web3Index = 0;
-								}
-
-								makeCall(_delta.web3s[web3Index], exName, funcName, args, retried + 1);
-								makeCall(web3Index >= _delta.web3s.length ? undefined : _delta.web3s[web3Index], exName, funcName, args, retried + 1);
-								return;
-							}
-							else if (totalTries >= retryAmount * 2) {
-
+							if (totalTries >= retryAmount * 2) { //if we retried too much, show an error
 								if (funcName == 'walletBalances') {
 									showError('Failed to load all Wallet balances after 3 tries, try again later');
 									exchanges[exName].loaded = -1;
@@ -1026,6 +1104,12 @@
 									exchanges[exName].loaded = -1;
 									finishedBalanceRequest();
 								}
+							}
+							else if (retried < retryAmount) //retry up to 3 times per request
+							{
+								totalTries++;
+								makeCall(exName, funcName, args, retried + 1);
+								return;
 							}
 						}
 					}
@@ -1073,7 +1157,7 @@
 				var numLoaded = exchanges[keys[i]].loaded;
 				let progressString = '<span style="white-space:normal">' + keys[i] + " ";
 
-				if (numLoaded >= tokenCount) {
+				if (numLoaded >= tokenCount || (!lastResult && !running)) {
 					progressString += '<span class="text-green">';
 				} else {
 					progressString += '<span class="text-red">';
@@ -1127,7 +1211,7 @@
 			"paging": false,
 			"ordering": false,
 			"searching": false,
-			"scrollX":true,
+			"scrollX": true,
 			"info": false,
 			"language": {
 				"zeroRecords": "0 Balances loaded",
@@ -1141,11 +1225,11 @@
 
 	// callback when balance request completes
 	function finishedBalanceRequest() {
-		//check if all requests are complete
 		let keys = Object.keys(exchanges);
 
-		var noneDone = true;
-		var allDone = true;
+		//check if all requests are complete
+		let noneDone = true;
+		let allDone = true;
 		for (let i = 0; i < keys.length; i++) {
 			if (exchanges[keys[i]].loaded >= tokenCount || exchanges[keys[i]].loaded == -1) {
 				if (exchanges[keys[i]].enabled)
@@ -1161,26 +1245,29 @@
 		if (noneDone)
 			return;
 
-
-		var sumETH = _delta.web3.toBigNumber(0);
-		var sumWETH = _delta.web3.toBigNumber(0);
-		var sumToken = _delta.web3.toBigNumber(0);
+		let sumETH = _delta.web3.toBigNumber(0);
+		let sumWETH = _delta.web3.toBigNumber(0);
+		let sumToken = _delta.web3.toBigNumber(0);
 
 		for (let i = 0; i < keys.length; i++) {
-			exchanges[keys[i]].displayed = exchanges[keys[i]].loaded >= tokenCount || exchanges[keys[i]].loaded == -1;
+			if (exchanges[keys[i]].enabled)
+				exchanges[keys[i]].displayed = exchanges[keys[i]].loaded >= tokenCount || exchanges[keys[i]].loaded == -1;
 		}
 
 		displayedBid = loadedBid >= 2;
 
-		var allTokens = _delta.config.customTokens;
-		var allCount = allTokens.length;
+		let allTokens = _delta.config.customTokens.filter((t) => { return (showListed && !t.unlisted) || (showCustomTokens && t.unlisted) });
+		if (allTokens.length == 0) {
+			allTokens = [_delta.config.tokens[0]];
+		}
+		let allCount = allTokens.length;
 
 		// get totals
-		for (var i = 0; i < allCount; i++) {
-			var token = allTokens[i];
-			var bal = balances[token.addr];
-			if (bal) {
+		for (let i = 0; i < allCount; i++) {
+			let token = allTokens[i];
+			let bal = balances[token.addr];
 
+			if (bal) {
 				bal.Total = _delta.web3.toBigNumber(0);
 				for (let i = 0; i < keys.length; i++) {
 					if (exchanges[keys[i]].enabled && exchanges[keys[i]].loaded >= tokenCount) {
@@ -1240,22 +1327,29 @@
 					bal['Est. ETH'] = val;
 					sumToken = sumToken.plus(val);
 				}
-
 				if (!bal.Bid) {
 					bal.Bid = '';
 				}
 				if (!bal.Ask) {
 					bal.Ask = '';
 				}
-
 				balances[token.addr] = bal;
 			}
 		}
 
-		var result = Object.values(balances);
+		let result = allTokens.map((t) => { return balances[t.addr]; }).filter((t) => { return t });
 		lastResult = result;
 
 		if (allDone) {
+
+			Object.keys(exchanges).forEach(function (name) {
+				if (exchanges[name].enabled) {
+					if (showCustomTokens)
+						exchanges[name].completedUnlisted = true;
+					if (showListed)
+						exchanges[name].completedListed = true;
+				}
+			});
 
 			for (let i = 0; i < result.length; i++) {
 				if (result[i]['Est. ETH'] !== '') {
@@ -1291,12 +1385,9 @@
 				$('#totalbalancePrice').html(" €" + _util.commaNotation((totalSumETH.times(etherPriceEUR)).toFixed(2)));
 			}
 
-
 			$('#downloadBalances').html('');
 			downloadBalances();
-
 		} else {
-
 			clearOverviewHtml(false);
 			$('#downloadBalances').html('');
 		}
@@ -1332,7 +1423,7 @@
 		{
 			filtered = result.filter(x => {
 				return !(x.Unlisted);
-            });
+			});
 		} */
 
 		balanceHeaders['Ask'] = useAsk;
@@ -1374,6 +1465,7 @@
 			}
 
 			localStorage.setItem("customTokens", showCustomTokens);
+			localStorage.setItem("listedTokens", showListed);
 			localStorage.setItem("decimals", decimals);
 			localStorage.setItem("hideZero", hideZero);
 			localStorage.setItem('fiat', showFiat);
@@ -1398,21 +1490,28 @@
 			if (localStorage.getItem("customTokens") === null) {
 				showCustomTokens = false;
 			} else {
-				var custom = localStorage.getItem('customTokens');
+				let custom = localStorage.getItem('customTokens');
 				showCustomTokens = custom === "true";
+			}
+
+			if (localStorage.getItem("listedTokens") === null) {
+				showListed = true;
+			} else {
+				let listed = localStorage.getItem('listedTokens');
+				showListed = listed === "true";
 			}
 
 			if (localStorage.getItem("hideZero") === null) {
 				hideZero = true;
 			} else {
-				var zero = localStorage.getItem('hideZero');
+				let zero = localStorage.getItem('hideZero');
 				hideZero = zero === "true";
 			}
 
 			if (localStorage.getItem("decimals") === null) {
 				decimals = false;
 			} else {
-				var dec = localStorage.getItem('decimals');
+				let dec = localStorage.getItem('decimals');
 				decimals = dec === "true";
 			}
 
@@ -1428,7 +1527,7 @@
 
 			// check for saved address
 			if (localStorage.getItem("address") !== null) {
-				var addr = localStorage.getItem("address");
+				let addr = localStorage.getItem("address");
 				if (addr && addr.length == 42) {
 					savedAddr = addr;
 					addr = getAddress(addr);
@@ -1444,7 +1543,7 @@
 
 			// check for session address between pages
 			if (sessionStorage.getItem("address") !== null) {
-				var addr = sessionStorage.getItem("address");
+				let addr = sessionStorage.getItem("address");
 				if (addr && addr.length == 42) {
 					addr = getAddress(addr);
 					if (addr) {
@@ -1484,6 +1583,7 @@
 				{ bSearchable: true, aTargets: [0] },
 				{ bSearchable: false, aTargets: ['_all'] }
 			],
+			"dom": '<"toolbar">frtip',
 			"language": {
 				"search": '<i class="dim fa fa-search"></i>',
 				"searchPlaceholder": " Token Symbol / Name",
@@ -1504,6 +1604,9 @@
 			}
 		});
 		table1Loaded = true;
+
+		updateToggleToolbar();
+
 
 
 		var allDisplayed = true;
@@ -1527,6 +1630,24 @@
 		table1Loaded = true;
 	}
 
+	function updateToggleToolbar() {
+		let numberListed = _delta.config.customTokens.filter((x) => { return !x.unlisted }).length;
+		let numberUnlisted = _delta.config.customTokens.filter((x) => { return x.unlisted }).length;
+		$("div.toolbar").html(`<label style="margin-left:25px; class="checkbox-inline"> <input type="checkbox" id="showListed" checked data-toggle="toggle" data-style="fast" data-width="100" data-on="Listed (` + numberListed + `)" data-off="Listed <strike>(` + numberListed + `)</strike>"
+			data-onstyle="primary" data-offstyle="default" data-size="mini"> </label>
+			<label class="checkbox-inline"> <input type="checkbox" id="showUnlisted" checked data-toggle="toggle" data-style="fast" data-width="100" data-on="Unlisted (`+ numberUnlisted + `)" data-off="Unlisted <strike>(` + numberUnlisted + `)</strike>"
+			data-onstyle="warning" data-offstyle="default" data-size="mini"> </label>`);
+
+		$("#showListed").unbind();
+		$("#showUnlisted").unbind();
+
+		$('#showUnlisted').prop('checked', showCustomTokens);
+		$('#showListed').prop('checked', showListed);
+		$('[data-toggle=toggle]').bootstrapToggle();
+
+		$('#showListed').change(checkListing);
+		$('#showUnlisted').change(checkListing);
+	}
 
 	// Builds the HTML Table out of myList.
 	function buildHtmlTable(selector, myList, loaded, headers) {

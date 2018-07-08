@@ -22,8 +22,9 @@
   <script src="js/jquery.dataTables.fixed.min.js"></script>
 
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
-  <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
+  <script src="js/bootstrap.adminlte.blockies.min.js"></script>
 
+  <script src="js/bootstrap-toggle.min.js"></script>
 
 
 
@@ -331,36 +332,23 @@
           </div>
 
           <div class="col-sm-12 col-md-4 col-lg-3 s-fullwidth">
-            <div class="box box-default bottom10M">
+            <div id="settingbox" class="box box-default bottom10M">
               <!-- /.box-header -->
               <div class="box-header noPadTop">
                 <div class="col-md-12 noPadM">
                   <h3>Settings</h3>
                 </div>
                 <div class="box-tools pull-right">
-                  <button type="button" class="btn btn-box-tool hidden-md hidden-lg" data-widget="collapse">
-                    <i class="fa fa-minus"></i>
+                  <button id="collapseSettings" type="button" class="btn btn-box-tool" data-widget="collapse">
+                    <i id="settingToggleIcon" class="fa fa-minus"></i>
                   </button>
 
                 </div>
-              </div>
+                </div>
               <div id="setting-body" class="box-body noPadTop">
                 <div class="col-md-12 noPadM">
                   <ul class="list-unstyled">
-                    <li>
-                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkCustom()" id="custom">
-                      <label for="custom">Show unlisted tokens </label>
-                      <span id="tokencount"></span>
-                    </li>
-                    <li>
-                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero">
-                      <label for="zero">Hide zero balances</label>
-                    </li>
-                    <li>
-                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
-                      <label for="decimals">Show more decimals</label>
-                    </li>
-                    <li>
+                   <li>
                       Total Value:
                       <li>
                         <select id="fiatSelect" onchange="selectFiat()" style="display:inline; width:125px;" class="form-control">
@@ -376,6 +364,16 @@
                           <option value="1">Lowest Ask</option>
                         </select>
                       </li>
+                    <li>
+                    <br>
+                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero">
+                      <label for="zero">Hide zero balances</label>
+                    </li>
+                    <li>
+                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
+                      <label for="decimals">Show more decimals</label>
+                    </li>
+                   
                   </ul>
                 </div>
               </div>

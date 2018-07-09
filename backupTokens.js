@@ -2901,7 +2901,7 @@ let offlineCustomTokens = [
   {symbol:"REN",address:"0x8901ac6c5d58d6cf270dee73ace28efac6d4d67d",decimal:18,name:"RepublicProtocol"},
   {symbol:"RENT",address:"0x64c86899bc02dd9af823b131e5acd4369f72bd39",decimal:18,name:"Rent Token",EtherDelta:"RENT",ForkDelta:"RENT"},
   {symbol:"REP-OLD",address:"0x48c80f1f4d53d5951e5d5438b54cba84f29f32a5",decimal:18,name:"Augur Reputation",locked:true},
-  {symbol:"REP",address:"0xe94327d07fc17907b4db788e5adf2ed424addff6",decimal:18,name:"Augur Reputation",Binance:"REPETH",EtherDelta:"REP",ForkDelta:"REP",IDEX:"REP",Radar:"REP"},
+  {symbol:"REP",address:"0xe94327d07fc17907b4db788e5adf2ed424addff6",decimal:18,name:"Augur Reputation",locked:true,Binance:"REPETH",EtherDelta:"REP",ForkDelta:"REP",IDEX:"REP",Radar:"REP"},
   {symbol:"REPUX",address:"0x4d305c2334c02e44ac592bbea681ba4cc1576de3",decimal:18,name:"RepuX",IDEX:"REPUX"},
   {symbol:"REQ",address:"0x8f8221afbb33998d8584a2b05749ba73c37a938a",decimal:18,name:"Request Token",Binance:"REQETH",EtherDelta:"REQ",ForkDelta:"REQ",IDEX:"REQ",DDEX:"REQ",Radar:"REQ"},
   {symbol:"RESO055",address:"0x3dbfa746dae5214acab3304376bec7fbf526841d",decimal:18,name:"Unrefined Amethyst",blocked:1},

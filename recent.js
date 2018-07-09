@@ -11,6 +11,7 @@
 
 	// loading states
 	var table2Loaded = false;
+	var recentTable = undefined;
 
 
 	var loadedCustom = false;
@@ -1148,7 +1149,7 @@
 		hidePopovers();
 
 		if (table2Loaded) {
-			$("#transactionsTable2").dataTable().fnDestroy();
+			recentTable.destroy();
 			table2Loaded = false;
 		}
 
@@ -1248,7 +1249,8 @@
 
 	// final callback to sort table
 	function trigger2() {
-		$('#transactionsTable2').DataTable({
+		
+		recentTable = $('#transactionsTable2').DataTable({
 			"paging": false,
 			"ordering": true,
 			//"info": true,

@@ -926,3 +926,16 @@ th, td {
   -webkit-transition: left 0.05s; 
 }
 
+.togglebox {
+  margin-bottom:5px;
+}
+
+.togglebox1 {
+  margin-left:25px;
+}
+@media (max-width: 774px) {
+  .togglebox1 {
+    margin-left:10px;
+  }
+}
+

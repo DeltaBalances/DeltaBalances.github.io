@@ -13,6 +13,7 @@
 
 	// loading states
 	var tableLoaded = false;
+	var historyTable = undefined;
 	var loadedLogs = 0;
 	var displayedLogs = false;
 
@@ -1001,7 +1002,7 @@
 		hidePopovers();
 
 		if (tableLoaded) {
-			$("#transactionsTable").dataTable().fnDestroy();
+			historyTable.destroy();
 			tableLoaded = false;
 		}
 
@@ -1103,7 +1104,8 @@
 		if (!tradeHeaders['Exchange']) {
 			defaultSort = 8;
 		}
-		$('#transactionsTable').DataTable({
+		
+		historyTable = $('#transactionsTable').DataTable({
 			"paging": false,
 			"ordering": true,
 			//"info": true,

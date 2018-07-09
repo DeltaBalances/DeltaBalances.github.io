@@ -14,6 +14,8 @@
 	// loading states
 	var table1Loaded = false;
 	var progressTableLoaded = false;
+	var balanceTable = undefined;
+	var progressTable = undefined;
 
 	var exchanges =
 		{
@@ -84,6 +86,7 @@
 
 	var showCustomTokens = false;
 	var showListed = true;
+	var showSpam = false;
 	var showFiat = 'USD';
 
 
@@ -326,11 +329,6 @@
 		} else {
 			$(boxId).addClass('box-warning');
 		}
-		/*	$("#resultTable").trigger("destroy");
-			$('#resultTable tbody').html('');
-			$('#resultTable thead').html('');
-			table1Loaded = false;
-			*/
 
 		if (exchanges[name].enabled != enabled) {
 			exchanges[name].enabled = enabled;
@@ -373,7 +371,6 @@
 		changeZero = true;
 		hideZero = $('#zero').prop('checked');
 		if (lastResult) {
-			//$('#resultTable tbody').empty();
 			makeTable(lastResult, hideZero);
 		}
 		changeZero = false;
@@ -421,6 +418,21 @@
 		}
 		changedDecimals = false;
 		setStorage();
+	}
+
+
+	function checkSpam() {
+		let newSpam = $('#showSpam').prop('checked');
+		if (newSpam !== showSpam) {
+			showSpam = newSpam;
+			if (showCustomTokens) {
+				if (lastResult) {
+					makeTable(lastResult, hideZero);
+				} else if (!running) {
+					placeholderTable();
+				}
+			}
+		}
 	}
 
 	function checkListing() {
@@ -488,6 +500,10 @@
 		// $("#address").prop("disabled", disable);
 		$("#loadingBalances").prop("disabled", disable);
 		$("#tablesearcher").prop("disabled", disable);
+		$("#showListed").prop("disabled", disable);
+		$("#showUnlisted").prop("disabled", disable);
+		$("#showSpam").prop("disabled", disable);
+
 		if (disable)
 			$('#loadingBalances').addClass('dim');
 		else
@@ -696,7 +712,6 @@
 		loadedBid = 0;
 		failedBid = 0;
 
-		//	$('#resultTable tbody').empty();
 		showLoading(true, false);
 
 		if (!appendExchange && !appendCustom)
@@ -1140,15 +1155,12 @@
 
 	function setBalanceProgress() {
 
-
-		if (progressTableLoaded) {
-			$("#balanceProgress").dataTable().fnDestroy();
-			progressTableLoaded = false;
+		let loadingState = {
 		}
 
-
-
-		let loadingState = {
+		if (progressTableLoaded) {
+			progressTable.destroy();
+			progressTableLoaded = false;
 		}
 
 		let keys = Object.keys(exchanges);
@@ -1207,7 +1219,7 @@
 		tbody$.append(row$);
 		body.append(tbody$[0].innerHTML);
 
-		$('#balanceProgress').DataTable({
+		progressTable = $('#balanceProgress').DataTable({
 			"paging": false,
 			"ordering": false,
 			"searching": false,
@@ -1217,9 +1229,7 @@
 				"zeroRecords": "0 Balances loaded",
 			},
 		});
-
 		progressTableLoaded = true;
-
 	}
 
 
@@ -1402,20 +1412,28 @@
 
 		hidePopovers();
 
+
 		if (table1Loaded) {
-			$("#resultTable").dataTable().fnDestroy();
+			balanceTable.destroy();
 			table1Loaded = false;
 		}
 
 		$('#resultTable tbody').empty();
-		var filtered = result;
+		$('#resultTable thead').empty();
+
 		var loaded = table1Loaded;
+		var filtered = result;
 		if (changedDecimals)
 			loaded = false;
 
 		if (hideZeros) {
-			filtered = result.filter(x => {
+			filtered = filtered.filter(x => {
 				return (Number(x.Total) > 0 || x.Address === _delta.config.ethAddr);
+			});
+		}
+		if (!showSpam && showCustomTokens) {
+			filtered = filtered.filter(x => {
+				return !_delta.uniqueTokens[x.Address].spam;
 			});
 		}
 		/*
@@ -1569,7 +1587,12 @@
 			}
 		}
 
-		$('#resultTable').DataTable({
+		/*	if (balanceTable) {
+				balanceTable.destroy();
+				balanceTable = undefined;
+			} */
+
+		balanceTable = $('#resultTable').DataTable({
 			"paging": false,
 			"ordering": true,
 			//"info": true,
@@ -1607,8 +1630,6 @@
 
 		updateToggleToolbar();
 
-
-
 		var allDisplayed = true;
 		for (let i = 0; i < keys.length; i++) {
 			if (!exchanges[keys[i]].displayed) {
@@ -1626,27 +1647,31 @@
 			requestID++;
 			buttonLoading(true, true);
 		}
-
-		table1Loaded = true;
 	}
 
 	function updateToggleToolbar() {
 		let numberListed = _delta.config.customTokens.filter((x) => { return !x.unlisted }).length;
 		let numberUnlisted = _delta.config.customTokens.filter((x) => { return x.unlisted }).length;
-		$("div.toolbar").html(`<label style="margin-left:25px; class="checkbox-inline"> <input type="checkbox" id="showListed" checked data-toggle="toggle" data-style="fast" data-width="100" data-on="Listed (` + numberListed + `)" data-off="Listed <strike>(` + numberListed + `)</strike>"
+		$("div.toolbar").html(`<label  class="togglebox togglebox1 checkbox-inline"> <input type="checkbox" id="showListed" checked data-toggle="toggle" data-style="fast" data-width="100" data-on="Listed (` + numberListed + `)" data-off="Listed <strike>(` + numberListed + `)</strike>"
 			data-onstyle="primary" data-offstyle="default" data-size="mini"> </label>
-			<label class="checkbox-inline"> <input type="checkbox" id="showUnlisted" checked data-toggle="toggle" data-style="fast" data-width="100" data-on="Unlisted (`+ numberUnlisted + `)" data-off="Unlisted <strike>(` + numberUnlisted + `)</strike>"
-			data-onstyle="warning" data-offstyle="default" data-size="mini"> </label>`);
+			<label class="togglebox checkbox-inline"> <input type="checkbox" id="showUnlisted" data-toggle="toggle" data-style="fast" data-width="100" data-on="Unlisted (`+ numberUnlisted + `)" data-off="Unlisted <strike>(` + numberUnlisted + `)</strike>"
+			data-onstyle="warning" data-offstyle="default" data-size="mini"> </label>
+			<label class="togglebox checkbox-inline"> <input type="checkbox" id="showSpam" data-toggle="toggle" data-style="fast" data-width="100" data-on="Unlisted spam" data-off="Unlisted spam"
+			data-onstyle="warning" data-offstyle="default" data-size="mini"> </label>`
+		);
 
+		$("#showSpam").unbind();
 		$("#showListed").unbind();
 		$("#showUnlisted").unbind();
 
 		$('#showUnlisted').prop('checked', showCustomTokens);
 		$('#showListed').prop('checked', showListed);
+		$('#showSpam').prop('checked', showSpam);
 		$('[data-toggle=toggle]').bootstrapToggle();
 
 		$('#showListed').change(checkListing);
 		$('#showUnlisted').change(checkListing);
+		$('#showSpam').change(checkSpam);
 	}
 
 	// Builds the HTML Table out of myList.

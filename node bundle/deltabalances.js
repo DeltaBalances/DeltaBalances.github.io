@@ -226,6 +226,15 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             if (x.locked) {
                 token.locked = true;
             }
+            if (x.blocked) {
+                token.blocked = x.blocked;
+            }
+            if (x.killed) {
+                token.killed = true;
+            }
+            if (x.spam) {
+                token.spam = true;
+            }
 
             for (let i = 0; i < _delta.config.listedExchanges.length; i++) {
                 let exchange = _delta.config.listedExchanges[i];
@@ -403,8 +412,8 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     }
 
     let ethAddr = this.config.ethAddr;
-    this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr]; });
-    let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !tokenBlacklist[x.addr] && x.addr !== ethAddr); });
+    this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr] && !x.blocked && !x.killed; });
+    let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !x.killed && !x.blocked && !tokenBlacklist[x.addr] && x.addr !== ethAddr); });
     this.config.tokens = [this.uniqueTokens[ethAddr]].concat(listedTokens);
 }
 
@@ -3259,7 +3268,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     } else {
                         contents = 'Contract: ' + utility.tokenLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals;
                     }
-                    if (token.locked) {
+                    if (token.locked || token.killed) {
                         contents += '<br> <i class="text-red fa fa-lock" aria-hidden="true"></i> Token Locked or Paused.';
                     }
                     contents += '<br><br> Trade centralized: <br><table class="popoverTable"><tr><td>' + utility.binanceURL(token, true) + '</td></tr></table>';

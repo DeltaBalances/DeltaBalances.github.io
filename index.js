@@ -445,7 +445,17 @@
 	}
 
 	function checkListing() {
-		showCustomTokens = $('#showUnlisted').prop('checked');
+		let showCustomTokens2 = $('#showUnlisted').prop('checked');
+		if (showCustomTokens && !showCustomTokens2) { // turn unlisted off
+			if (table1Loaded) {
+				$('#showSpam').bootstrapToggle('destroy');
+			}
+		} else if (!showCustomTokens && showCustomTokens2) { //turn unlisted on
+			if (table1Loaded) {
+				$('#showSpam').bootstrapToggle();
+			}
+		}
+		showCustomTokens = showCustomTokens2;
 		showListed = $('#showListed').prop('checked');
 		if (!running) {
 			tokenCount = getTokenCount();
@@ -1602,7 +1612,7 @@
 				},
 				aoColumnDefs: [
 					{ bSearchable: true, aTargets: [0] },
-					{ bSearchable: false, aTargets: ['_all'] },
+					{ bSearchable: false, aTargets: ['_all'] }
 				],
 				"dom": '<"toolbar">frtip',
 				"language": {
@@ -1617,6 +1627,7 @@
 			updateToggleToolbar();
 			table1Loaded = true;
 		}
+
 		balanceTable.clear();
 		if (dataSet.length > 0) {
 			for (let i = 0; i < dataSet.length; i++) {
@@ -1669,10 +1680,6 @@
 			data-onstyle="warning" data-offstyle="default" data-size="mini"> </label>`
 		);
 
-		$("#showSpam").unbind();
-		$("#showListed").unbind();
-		$("#showUnlisted").unbind();
-
 		$('#showUnlisted').prop('checked', showCustomTokens);
 		$('#showListed').prop('checked', showListed);
 		$('#showSpam').prop('checked', showSpam);
@@ -1681,6 +1688,10 @@
 		$('#showListed').change(checkListing);
 		$('#showUnlisted').change(checkListing);
 		$('#showSpam').change(checkSpam);
+
+		if (!showCustomTokens) {
+			$('#showSpam').bootstrapToggle('destroy');
+		}
 	}
 
 	// Builds the HTML Table out of myList.

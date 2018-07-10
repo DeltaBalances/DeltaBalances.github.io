@@ -1,3 +1,5 @@
+//https://datatables.net/examples/api/show_hide.html
+
 {
 	// shorthands
 	var _delta = bundle.DeltaBalances;
@@ -729,6 +731,17 @@
 
 
 		setBalanceProgress();
+		if (table1Loaded) {
+			let headers = getColumnHeaders(Object.values(balancesPlaceholder), balanceHeaders);
+
+			balanceTable.clear();
+			for (let i = 0; i < headers.length; i++) {
+				let enabled = balanceHeaders[headers[i].title];
+				let column = balanceTable.column(i).visible(enabled);
+			}
+			balanceTable.columns.adjust().fixedColumns().relayout().draw();
+		}
+
 
 		if (!appendExchange && !appendCustom) {
 			for (let i = 0; i < _delta.config.customTokens.length; i++) {
@@ -1158,11 +1171,6 @@
 		let loadingState = {
 		}
 
-		if (progressTableLoaded) {
-			progressTable.destroy();
-			progressTableLoaded = false;
-		}
-
 		let keys = Object.keys(exchanges);
 		for (let i = 0; i < keys.length; i++) {
 			if (exchanges[keys[i]].enabled) {
@@ -1176,60 +1184,83 @@
 				}
 				progressString += Math.min(exchanges[keys[i]].loaded, tokenCount) + '/' + tokenCount + '</span></span> ';
 				loadingState[keys[i]] = progressString;
+			} else {
+				loadingState[keys[i]] = '';
 			}
 		}
 
 		//prices
 		{
-			let progressString = '<span style="white-space:normal">Prices <span style="white-space:nowrap"class="text-';
+			let progressString2 = '<span style="white-space:normal">Prices <span style="white-space:nowrap"class="text-';
 			if (loadedBid < 2) {
 				if (running) {
-					progressString += 'red"> Loading..';
+					progressString2 += 'red"> Loading..';
 				} else {
-					progressString += 'green"> No';
+					progressString2 += 'green"> No';
 				}
 			} else if (failedBid == 0) {
-				progressString += 'green"> Yes';
+				progressString2 += 'green"> Yes';
 			} else if (failedBid == 1) {
-				progressString += 'green"> 1/2 Failed';
+				progressString2 += 'green"> 1/2 Failed';
 			} else {
-				progressString += 'red"> Failed';
+				progressString2 += 'red"> Failed';
 			}
-			progressString += '</span></span>';
-			loadingState['Total'] = progressString; //abuse balance headers for making a table
+			progressString2 += '</span></span>';
+			loadingState['Prices'] = progressString2;
 		}
 
-		$('#balanceProgress thead').empty();
-		$('#balanceProgress tbody').empty();
 
 
-		var body = $('#balanceProgress tbody');
-		var header = $('#balanceProgress thead');
-		var headerTr$ = $('<tr/>');
-		var tbody$ = $('<tbody/>');
-		var row$ = $('<tr/>');
-		keys = Object.keys(loadingState);
+		if (!progressTableLoaded) {
+
+			var body = $('#balanceProgress tbody');
+			var header = $('#balanceProgress thead');
+			var headerTr$ = $('<tr/>');
+			var tbody$ = $('<tbody/>');
+			var row$ = $('<tr/>');
+			let values = Object.values(loadingState);
+			for (let i = 0; i < values.length; i++) {
+				headerTr$.append($('<th/>'));
+				row$.append($('<td/>'));
+			}
+
+			header.append(headerTr$);
+			$('#balanceProgress').append(header);
+			tbody$.append(row$);
+			body.append(tbody$[0].innerHTML);
+
+			progressTable = $('#balanceProgress').DataTable({
+				"paging": false,
+				"ordering": false,
+				"searching": false,
+				"scrollX": true,
+				"info": false,
+				"language": {
+					"zeroRecords": "0 Balances loaded",
+				},
+			});
+			progressTableLoaded = true;
+		}
+
+		let row2$ = $('<tr/>');
 		let values = Object.values(loadingState);
 		for (let i = 0; i < values.length; i++) {
-			headerTr$.append($('<th/>'));
-			row$.append($('<td/>').html(values[i]));
+			row2$.append($('<td/>').html(values[i]));
 		}
-		header.append(headerTr$);
-		$('#balanceProgress').append(header);
-		tbody$.append(row$);
-		body.append(tbody$[0].innerHTML);
 
-		progressTable = $('#balanceProgress').DataTable({
-			"paging": false,
-			"ordering": false,
-			"searching": false,
-			"scrollX": true,
-			"info": false,
-			"language": {
-				"zeroRecords": "0 Balances loaded",
-			},
-		});
-		progressTableLoaded = true;
+		progressTable.clear();
+		progressTable.rows.add(row2$);
+
+		let keys2 = Object.keys(loadingState);
+		for (let i = 0; i < keys2.length; i++) { //enable, disable exchanges (prices always enabled)
+			if (keys2[i] !== 'Prices') {
+				progressTable.column(i).visible(exchanges[keys2[i]].enabled);
+			} else {
+				progressTable.column(i).visible(true);
+			}
+		}
+
+		progressTable.columns.adjust().draw();
 	}
 
 
@@ -1249,8 +1280,8 @@
 			}
 		}
 
-		setBalanceProgress();
 		clearOverviewHtml(false);
+		setBalanceProgress();
 
 		if (noneDone)
 			return;
@@ -1412,19 +1443,8 @@
 
 		hidePopovers();
 
-
-		if (table1Loaded) {
-			balanceTable.destroy();
-			table1Loaded = false;
-		}
-
-		$('#resultTable tbody').empty();
-		$('#resultTable thead').empty();
-
 		var loaded = table1Loaded;
 		var filtered = result;
-		if (changedDecimals)
-			loaded = false;
 
 		if (hideZeros) {
 			filtered = filtered.filter(x => {
@@ -1454,9 +1474,12 @@
 		let numColumns = Object.values(exchanges).reduce((sum, ex) => { if (ex.enabled) return sum + 1; else return sum; }, 0);
 		balanceHeaders['Total'] = numColumns > 1;
 
-		buildHtmlTable('#resultTable', filtered, loaded, balanceHeaders);
-
-		trigger();
+		let headers = getColumnHeaders(filtered, balanceHeaders);
+		if (!table1Loaded) {
+			makeInitTable('#resultTable', headers, balancesPlaceholder);
+		}
+		let tableData = buildTableRows(filtered, headers);
+		trigger(tableData, headers);
 	}
 
 
@@ -1577,7 +1600,7 @@
 
 
 	// final callback to sort table
-	function trigger() {
+	function trigger(dataSet, tableHeaders) {
 
 		let keys = Object.keys(exchanges);
 		let totalIndex = 4;
@@ -1587,48 +1610,55 @@
 			}
 		}
 
-		/*	if (balanceTable) {
-				balanceTable.destroy();
-				balanceTable = undefined;
-			} */
+		if (!table1Loaded) {
 
-		balanceTable = $('#resultTable').DataTable({
-			"paging": false,
-			"ordering": true,
-			//"info": true,
-			"scrollY": "60vh",
-			"scrollX": true,
-			"scrollCollapse": true,
-			fixedColumns: {
-				leftColumns: 1
-			},
-			aoColumnDefs: [
-				{ bSearchable: true, aTargets: [0] },
-				{ bSearchable: false, aTargets: ['_all'] }
-			],
-			"dom": '<"toolbar">frtip',
-			"language": {
-				"search": '<i class="dim fa fa-search"></i>',
-				"searchPlaceholder": " Token Symbol / Name",
-				"zeroRecords": "No balances loaded",
-				"info": "Showing _TOTAL_ balances",
-				"infoEmpty": "No balances found",
-				"infoFiltered": "(filtered from _MAX_ )"
-			},
-			"initComplete": function (settings, json) {
-				setTimeout(function () {
-					$("[data-toggle=popover]").popover();
-				}, 200);
+			balanceTable = $('#resultTable').DataTable({
+				"paging": false,
+				"ordering": true,
+				//"info": true,
+				"scrollY": "60vh",
+				"scrollX": true,
+				"scrollCollapse": true,
+				fixedColumns: {
+					leftColumns: 1
+				},
+				aoColumnDefs: [
+					{ bSearchable: true, aTargets: [0] },
+					{ bSearchable: false, aTargets: ['_all'] }
+				],
+				"dom": '<"toolbar">frtip',
+				"language": {
+					"search": '<i class="dim fa fa-search"></i>',
+					"searchPlaceholder": " Token Symbol / Name",
+					"zeroRecords": "No balances loaded",
+					"info": "Showing _TOTAL_ balances",
+					"infoEmpty": "No balances found",
+					"infoFiltered": "(filtered from _MAX_ )"
+				},
+			});
+			updateToggleToolbar();
+			table1Loaded = true;
+		}
 
-				$('[data-toggle=tooltip]').tooltip({
-					'placement': 'top',
-					'container': 'body'
-				});
+		balanceTable.clear();
+		if (dataSet.length > 0) {
+			for (let i = 0; i < dataSet.length; i++) {
+				balanceTable.rows.add(dataSet[i]);
 			}
-		});
-		table1Loaded = true;
+		}
 
-		updateToggleToolbar();
+		for (let i = 0; i < tableHeaders.length; i++) {
+			let enabled = balanceHeaders[tableHeaders[i].title];
+			let column = balanceTable.column(i).visible(enabled);
+		}
+
+		balanceTable.columns.adjust().fixedColumns().relayout().draw();
+
+		$("[data-toggle=popover]").popover();
+		$('[data-toggle=tooltip]').tooltip({
+			'placement': 'top',
+			'container': 'body'
+		});
 
 		var allDisplayed = true;
 		for (let i = 0; i < keys.length; i++) {
@@ -1638,7 +1668,6 @@
 		}
 		allDisplayed = allDisplayed && displayedBid;
 		trigger_1 = allDisplayed;
-
 
 		if (trigger_1) {
 			disableInput(false);
@@ -1650,8 +1679,10 @@
 	}
 
 	function updateToggleToolbar() {
+
 		let numberListed = _delta.config.customTokens.filter((x) => { return !x.unlisted }).length;
 		let numberUnlisted = _delta.config.customTokens.filter((x) => { return x.unlisted }).length;
+
 		$("div.toolbar").html(`<label  class="togglebox togglebox1 checkbox-inline"> <input type="checkbox" id="showListed" checked data-toggle="toggle" data-style="fast" data-width="100" data-on="Listed (` + numberListed + `)" data-off="Listed <strike>(` + numberListed + `)</strike>"
 			data-onstyle="primary" data-offstyle="default" data-size="mini"> </label>
 			<label class="togglebox checkbox-inline"> <input type="checkbox" id="showUnlisted" data-toggle="toggle" data-style="fast" data-width="100" data-on="Unlisted (`+ numberUnlisted + `)" data-off="Unlisted <strike>(` + numberUnlisted + `)</strike>"
@@ -1675,11 +1706,8 @@
 	}
 
 	// Builds the HTML Table out of myList.
-	function buildHtmlTable(selector, myList, loaded, headers) {
-		var body = $(selector + ' tbody');
-		var columns = addAllColumnHeaders(myList, selector, loaded, headers);
-
-		var tbody$ = $('<tbody/>');
+	function buildTableRows(myList, headers) {
+		let resultTable = [];
 
 		for (var i = 0; i < myList.length; i++) {
 
@@ -1687,11 +1715,11 @@
 				continue;
 			var row$ = $('<tr/>');
 
-
-			for (var colIndex = 0; colIndex < columns.length; colIndex++) {
-				var cellValue = myList[i][columns[colIndex]];
+			for (var colIndex = 0; colIndex < headers.length; colIndex++) {
+				var cellValue = myList[i][headers[colIndex].title];
 				if (cellValue == null) cellValue = "";
-				var head = columns[colIndex];
+				var head = headers[colIndex].title;
+
 
 				if (head == 'Total' || head == 'EtherDelta' || head == 'Decentrex' || head == 'Token store' || head == 'IDEX' || head == 'Enclaves' || head == 'DEXY' || head == 'Ethen' || head == 'Wallet' || head == 'Bid' || head == 'Ask' || head == 'Est. ETH') {
 					if (cellValue !== "" && cellValue !== undefined) {
@@ -1727,9 +1755,9 @@
 					row$.append($('<td/>').html(cellValue));
 				}
 			}
-			tbody$.append(row$);
+			resultTable.push(row$);
 		}
-		body.append(tbody$[0].innerHTML);
+		return resultTable;
 	}
 
 	var balanceHeaders = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'IDEX': 1, 'Token store': 1, 'Enclaves': 1, 'Decentrex': 1, 'DEXY': 1, 'Ethen': 1, 'Total': 1, 'Value': 1, 'Bid': 1, 'Ask': 0, 'Est. ETH': 1, 'USD': 0, 'EUR': 0 };
@@ -1737,34 +1765,58 @@
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.
-	function addAllColumnHeaders(myList, selector, loaded, headers) {
+	function getColumnHeaders(myList, headers) {
 		var columnSet = {};
+		var columns = [];
 
-		if (!loaded)
-			$(selector + ' thead').empty();
+		// ensure header is a digit 1, 0
+		Object.keys(headers).map((k) => { headers[k] = Number(headers[k]); });
 
-		var header1 = $(selector + ' thead');
-		var headerTr$ = $('<tr/>');
-
-		if (!loaded) {
-			header1.empty();
+		if (myList.length == 0) {
+			myList = balancesPlaceholder;
 		}
-
 		for (var i = 0; i < myList.length; i++) {
 			var rowHash = myList[i];
 			for (var key in rowHash) {
-				if (!columnSet[key] && headers[key]) {
+				if (!columnSet[key] && headers[key] >= 0) {
 					columnSet[key] = 1;
-					headerTr$.append($('<th/>').html(key));
+					columns.push({ title: key });
 				}
 			}
 		}
-		if (!loaded) {
+		return columns;
+	}
+
+	function makeInitTable(selector, headers, placeholderData) {
+
+		if (!table1Loaded) {
+			var header1 = $(selector + ' thead');
+			var headerTr$ = $('<tr/>');
+
+			for (let i = 0; i < headers.length; i++) {
+				let head = headers[i].title;
+				headerTr$.append($('<th/>').html(head));
+			}
+
 			header1.append(headerTr$);
 			$(selector).append(header1);
+
+			var body = $(selector + ' tbody');
+			var tbody$ = $('<tbody/>');
+			var row$ = $('<tr/>');
+			for (var colIndex = 0; colIndex < headers.length; colIndex++) {
+				var cellValue = placeholderData[headers[colIndex].title];
+				var head = headers[colIndex].title;
+
+				if (head == 'Name') {
+					row$.append($('<td data-sort="" data-search=""/>'));
+				} else {
+					row$.append($('<td/>'));
+				}
+			}
+			tbody$.append(row$);
+			body.append(tbody$[0].innerHTML);
 		}
-		columnSet = Object.keys(columnSet);
-		return columnSet;
 	}
 
 	function downloadBalances() {

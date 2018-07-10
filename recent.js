@@ -346,6 +346,9 @@
 		if (publicAddr) {
 			setStorage();
 			window.location.hash = publicAddr;
+			if(table2Loaded) {
+				recentTable.clear().draw();
+			}
 			getTrans(rqid);
 
 		} else {
@@ -1148,23 +1151,22 @@
 
 		hidePopovers();
 
-		if (table2Loaded) {
-			recentTable.destroy();
-			table2Loaded = false;
-		}
-
 		let filtered = result.filter((res) => { return checkFilter(res.Type); });
 
-		$('#transactionsTable2 tbody').empty();
 		var loaded = table2Loaded;
 		if (changedDecimals)
 			loaded = false;
-		buildHtmlTable('#transactionsTable2', filtered, loaded, transactionHeaders);
-		trigger2();
+
+		let headers = getColumnHeaders(filtered, transactionHeaders);
+		if (!table2Loaded) {
+			makeInitTable('#transactionsTable2', headers, transactionsPlaceholder);
+		}
+		let tableData = buildTableRows(filtered, headers);
+		trigger2(tableData);
 	}
 
 	function placeholderTable() {
-		makeTable2([]);
+		makeTable2(transactionsPlaceholder);
 	}
 
 
@@ -1248,50 +1250,55 @@
 
 
 	// final callback to sort table
-	function trigger2() {
-		
-		recentTable = $('#transactionsTable2').DataTable({
-			"paging": false,
-			"ordering": true,
-			//"info": true,
-			"scrollY": "80vh",
-			"scrollX": true,
-			"scrollCollapse": true,
-			"order": [[9, "desc"]],
-			"dom": '<"toolbar">frtip',
-			fixedColumns: {
-				leftColumns: 2
-			},
-			aoColumnDefs: [
-				{ bSearchable: true, aTargets: [1] },
-				{ bSearchable: true, aTargets: [2] },
-				{ bSearchable: true, aTargets: [3] },
-				{ bSearchable: true, aTargets: [6] },
-				{ bSearchable: true, aTargets: [8] },
-				{ bSearchable: false, aTargets: ['_all'] },
-			],
-			"language": {
-				"search": '<i class="dim fa fa-search"></i>',
-				"searchPlaceholder": "Type, Exchange, Token, Hash",
-				"zeroRecords": "No transactions loaded",
-				"info": "Showing _TOTAL_ transactions",
-				"infoEmpty": "No transactions found",
-				"infoFiltered": "(filtered from _MAX_ )"
-			},
-			"initComplete": function (settings, json) {
-				setTimeout(function () {
-					$("[data-toggle=popover]").popover();
-				}, 200);
+	function trigger2(dataSet) {
 
-				$('[data-toggle=tooltip]').tooltip({
-					'placement': 'top',
-					'container': 'body'
-				});
+		if (!table2Loaded) {
+
+			recentTable = $('#transactionsTable2').DataTable({
+				"paging": false,
+				"ordering": true,
+				//"info": true,
+				"scrollY": "80vh",
+				"scrollX": true,
+				"scrollCollapse": true,
+				"order": [[9, "desc"]],
+				"dom": '<"toolbar">frtip',
+				fixedColumns: {
+					leftColumns: 2
+				},
+				aoColumnDefs: [
+					{ bSearchable: true, aTargets: [1] },
+					{ bSearchable: true, aTargets: [2] },
+					{ bSearchable: true, aTargets: [3] },
+					{ bSearchable: true, aTargets: [6] },
+					{ bSearchable: true, aTargets: [8] },
+					{ bSearchable: false, aTargets: ['_all'] },
+				],
+				"language": {
+					"search": '<i class="dim fa fa-search"></i>',
+					"searchPlaceholder": "Type, Exchange, Token, Hash",
+					"zeroRecords": "No transactions loaded",
+					"info": "Showing _TOTAL_ transactions",
+					"infoEmpty": "No transactions found",
+					"infoFiltered": "(filtered from _MAX_ )"
+				},
+			});
+			table2Loaded = true;
+			activateFilters();
+		}
+
+		recentTable.clear();
+		if (dataSet.length > 0) {
+			for (let i = 0; i < dataSet.length; i++) {
+				recentTable.rows.add(dataSet[i]);
 			}
-		});
-
-		activateFilters();
-
+			recentTable.columns.adjust().fixedColumns().relayout().draw();;
+			$("[data-toggle=popover]").popover();
+			$('[data-toggle=tooltip]').tooltip({
+				'placement': 'top',
+				'container': 'body'
+			});
+		}
 
 		trigger_2 = transLoaded >= 3;
 
@@ -1305,7 +1312,6 @@
 		else {
 			hideLoading(trigger_2, trigger_2);
 		}
-		table2Loaded = true;
 	}
 
 	function activateFilters() {
@@ -1352,20 +1358,18 @@
 	}
 
 	// Builds the HTML Table out of myList.
-	function buildHtmlTable(selector, myList, loaded, headers) {
-		var body = $(selector + ' tbody');
-		var columns = addAllColumnHeaders(myList, selector, loaded, headers);
+	function buildTableRows(myList, columns) {
 
-		var tbody$ = $('<tbody/>');
+		let resultTable = [];
 
 		for (var i = 0; i < myList.length; i++) {
 
 			var row$ = $('<tr/>');
 
 			for (var colIndex = 0; colIndex < columns.length; colIndex++) {
-				var cellValue = myList[i][columns[colIndex]];
+				var cellValue = myList[i][columns[colIndex].title];
 				if (cellValue == null) cellValue = "";
-				var head = columns[colIndex];
+				var head = columns[colIndex].title;
 
 				if (head == 'Amount' || head == 'Price' || head == "Total") {
 					if (cellValue !== "" && cellValue !== undefined) {
@@ -1434,14 +1438,9 @@
 					row$.append($('<td/>').html(cellValue));
 				}
 			}
-			tbody$.append(row$);
+			resultTable.push(row$);
 		}
-		body.append(tbody$[0].innerHTML);
-		$("[data-toggle=popover]").popover();
-		$('[data-toggle=tooltip]').tooltip({
-			'placement': 'top',
-			'container': 'body'
-		});
+		return resultTable;
 	}
 
 
@@ -1449,18 +1448,9 @@
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.
-	function addAllColumnHeaders(myList, selector, loaded, headers) {
+	function getColumnHeaders(myList, headers) {
 		var columnSet = {};
-
-		if (!loaded)
-			$(selector + ' thead').empty();
-
-		var header1 = $(selector + ' thead');
-		var headerTr$ = $('<tr/>');
-
-		if (!loaded) {
-			header1.empty();
-		}
+		var columns = [];
 
 		if (myList.length == 0) {
 			myList = transactionsPlaceholder;
@@ -1470,18 +1460,47 @@
 			for (var key in rowHash) {
 				if (!columnSet[key] && headers[key]) {
 					columnSet[key] = 1;
-					if (key === 'Status')
-						key = '<i title="Transaction status" class="fa fa-check"></i>'
-					headerTr$.append($('<th/>').html(key));
+					columns.push({ title: key });
 				}
 			}
 		}
-		if (!loaded) {
+		return columns;
+	}
+
+	function makeInitTable(selector, headers, placeholderData) {
+
+		if (!table2Loaded) {
+			var header1 = $(selector + ' thead');
+			var headerTr$ = $('<tr/>');
+
+			for (let i = 0; i < headers.length; i++) {
+				let head = headers[i].title;
+				if (head == 'Status') {
+					head = '<i title="Transaction status" class="fa fa-check"></i>';
+				}
+				headerTr$.append($('<th/>').html(head));
+			}
+
 			header1.append(headerTr$);
 			$(selector).append(header1);
+
+
+			var body = $(selector + ' tbody');
+			var tbody$ = $('<tbody/>');
+			var row$ = $('<tr/>');
+			for (var colIndex = 0; colIndex < headers.length; colIndex++) {
+				var cellValue = placeholderData[headers[colIndex].title];
+				var head = headers[colIndex].title;
+
+				if (head == 'Token') {
+					row$.append($('<td data-sort="" data-search=""/>'));
+				} else {
+					row$.append($('<td/>'));
+				}
+			}
+			tbody$.append(row$);
+			body.append(tbody$[0].innerHTML);
 		}
-		columnSet = Object.keys(columnSet);
-		return columnSet;
 	}
 
 	function forget() {

@@ -362,6 +362,9 @@
 		{
 			console.log('blocknum re-used');
 			startblock = getStartBlock();
+			if (tableLoaded) {
+				historyTable.clear().draw();
+			}
 			getTransactions(rqid);
 		}
 		else {
@@ -370,6 +373,9 @@
 				if (num) {
 					blocknum = num;
 					startblock = getStartBlock();
+				}
+				if (tableLoaded) {
+					historyTable.clear().draw();
 				}
 				getTransactions(rqid);
 			});
@@ -1001,21 +1007,20 @@
 
 		hidePopovers();
 
-		if (tableLoaded) {
-			historyTable.destroy();
-			tableLoaded = false;
-		}
-
 		checkBlockDates(result);
-		$('#transactionsTable tbody').empty();
 		var filtered = result;
 		var loaded = tableLoaded;
 
 		if (historyConfig.showRelayers || Array.isArray(historyConfig.exchange)) {
 			tradeHeaders['Exchange'] = 1;
 		}
-		buildHtmlTable('#transactionsTable', filtered, loaded, tradeHeaders);
-		trigger();
+
+		let headers = getColumnHeaders(filtered, tradeHeaders);
+		if (!tableLoaded) {
+			makeInitTable('#transactionsTable', headers, transactionsPlaceholder);
+		}
+		let tableData = buildTableRows(filtered, headers);
+		trigger(tableData);
 	}
 
 	// save address for next time
@@ -1099,50 +1104,57 @@
 	}
 
 	// final callback to sort table
-	function trigger() {
+	function trigger(dataSet) {
+
 		let defaultSort = 9;
 		if (!tradeHeaders['Exchange']) {
 			defaultSort = 8;
 		}
-		
-		historyTable = $('#transactionsTable').DataTable({
-			"paging": false,
-			"ordering": true,
-			//"info": true,
-			"scrollY": "75vh",
-			"scrollX": true,
-			"scrollCollapse": true,
-			"order": [[defaultSort, "desc"]],
-			fixedColumns: {
-				leftColumns: 1
-			},
-			aoColumnDefs: [
-				{ bSearchable: true, aTargets: [1] },
-				{ bSearchable: true, aTargets: [2] },
-				{ bSearchable: true, aTargets: [3] },
-				{ bSearchable: true, aTargets: [6] },
-				{ bSearchable: true, aTargets: [8] },
-				{ bSearchable: false, aTargets: ['_all'] },
-			],
-			"language": {
-				"search": '<i class="dim fa fa-search"></i>',
-				"searchPlaceholder": "Type, Exchange, Token, Hash",
-				"zeroRecords": "No events loaded",
-				"info": "Showing _TOTAL_ event(s)",
-				"infoEmpty": "No events found",
-				"infoFiltered": "(filtered from _MAX_ )"
-			},
-			"initComplete": function (settings, json) {
-				setTimeout(function () {
-					$("[data-toggle=popover]").popover();
-				}, 200);
 
-				$('[data-toggle=tooltip]').tooltip({
-					'placement': 'top',
-					'container': 'body'
-				});
+		if (!tableLoaded) {
+			historyTable = $('#transactionsTable').DataTable({
+				"paging": false,
+				"ordering": true,
+				//"info": true,
+				"scrollY": "75vh",
+				"scrollX": true,
+				"scrollCollapse": true,
+				"order": [[defaultSort, "desc"]],
+				fixedColumns: {
+					leftColumns: 1
+				},
+				aoColumnDefs: [
+					{ bSearchable: true, aTargets: [1] },
+					{ bSearchable: true, aTargets: [2] },
+					{ bSearchable: true, aTargets: [3] },
+					{ bSearchable: true, aTargets: [6] },
+					{ bSearchable: true, aTargets: [8] },
+					{ bSearchable: false, aTargets: ['_all'] },
+				],
+				"language": {
+					"search": '<i class="dim fa fa-search"></i>',
+					"searchPlaceholder": "Type, Exchange, Token, Hash",
+					"zeroRecords": "No events loaded",
+					"info": "Showing _TOTAL_ event(s)",
+					"infoEmpty": "No events found",
+					"infoFiltered": "(filtered from _MAX_ )"
+				},
+			});
+			tableLoaded = true;
+		}
+
+		historyTable.clear();
+		if (dataSet.length > 0) {
+			for (let i = 0; i < dataSet.length; i++) {
+				historyTable.rows.add(dataSet[i]);
 			}
-		});
+			historyTable.columns.adjust().fixedColumns().relayout().draw();;
+			$("[data-toggle=popover]").popover();
+			$('[data-toggle=tooltip]').tooltip({
+				'placement': 'top',
+				'container': 'body'
+			});
+		}
 
 		if (displayedLogs)
 			trigger1 = true;
@@ -1159,27 +1171,24 @@
 		else {
 			hideLoading(trigger1);
 		}
-		tableLoaded = true;
+
 	}
 
 
 	// Builds the HTML Table out of myList.
-	function buildHtmlTable(selector, myList, loaded, headers) {
-		var body = $(selector + ' tbody');
-		var columns = addAllColumnHeaders(myList, selector, loaded, headers);
-
-		var tbody$ = $('<tbody/>');
+	function buildTableRows(myList, headers) {
+		let resultTable = [];
 
 		for (var i = 0; i < myList.length; i++) {
-			if (!showCustomTokens && myList[i].Unlisted)
-				continue;
+			
+			/*if (!showCustomTokens && myList[i].Unlisted)
+				continue;*/
 			var row$ = $('<tr/>');
 
-			for (var colIndex = 0; colIndex < columns.length; colIndex++) {
-				var head = columns[colIndex];
-				var cellValue = myList[i][head];
-
-				if (cellValue === null) cellValue = "";
+			for (var colIndex = 0; colIndex < headers.length; colIndex++) {
+				var cellValue = myList[i][headers[colIndex].title];
+				if (cellValue == null) cellValue = "";
+				var head = headers[colIndex].title;
 
 
 				if (head == 'Amount' || head == 'Price' || head == 'Fee' || head == 'Total') {
@@ -1276,52 +1285,64 @@
 					row$.append($('<td/>').html(cellValue));
 				}
 			}
-			tbody$.append(row$);
+			resultTable.push(row$);
 		}
-		body.append(tbody$[0].innerHTML);
-		$('[data-toggle=tooltip]').tooltip({
-			'placement': 'top',
-			'container': 'body'
-		});
-		$("[data-toggle=popover]").popover();
+		return resultTable;
 	}
 
 	var tradeHeaders = { 'Exchange': 0, 'Type': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'Base': 1, 'Total': 1, 'Hash': 1, 'Date': 1, 'Opponent': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Info': 1 };
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.
-	function addAllColumnHeaders(myList, selector, loaded, headers) {
+	function getColumnHeaders(myList, headers) {
 		var columnSet = {};
-
-		if (!loaded)
-			$(selector + ' thead').empty();
-
-		var header1 = $(selector + ' thead');
-		var headerTr$ = $('<tr/>');
-
-		if (!loaded) {
-			header1.empty();
-		}
+		var columns = [];
 
 		if (myList.length == 0) {
 			myList = transactionsPlaceholder;
 		}
-
 		for (var i = 0; i < myList.length; i++) {
 			var rowHash = myList[i];
 			for (var key in rowHash) {
-				if (!columnSet[key] && (headers[key])) {
+				if (!columnSet[key] && headers[key]) {
 					columnSet[key] = 1;
-					headerTr$.append($('<th/>').html(key));
+					columns.push({ title: key });
 				}
 			}
 		}
-		if (!loaded) {
+		return columns;
+	}
+
+	function makeInitTable(selector, headers, placeholderData) {
+
+		if (!tableLoaded) {
+			var header1 = $(selector + ' thead');
+			var headerTr$ = $('<tr/>');
+
+			for (let i = 0; i < headers.length; i++) {
+				let head = headers[i].title;
+				headerTr$.append($('<th/>').html(head));
+			}
 			header1.append(headerTr$);
 			$(selector).append(header1);
+
+
+			var body = $(selector + ' tbody');
+			var tbody$ = $('<tbody/>');
+			var row$ = $('<tr/>');
+			for (var colIndex = 0; colIndex < headers.length; colIndex++) {
+				var cellValue = placeholderData[headers[colIndex].title];
+				var head = headers[colIndex].title;
+
+				if (head == 'Token') {
+					row$.append($('<td data-sort="" data-search=""/>'));
+				} else {
+					row$.append($('<td/>'));
+				}
+			}
+			tbody$.append(row$);
+			body.append(tbody$[0].innerHTML);
 		}
-		columnSet = Object.keys(columnSet);
-		return columnSet;
 	}
 
 

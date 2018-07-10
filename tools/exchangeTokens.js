@@ -2954,7 +2954,12 @@ let idexOfflineTokens = [
   {"name":"GOT","decimals":18,"addr":"0x423b5f62b328d0d6d44870f4eee316befa0b2df5","name2":"GoToken"},
   {"name":"VAI","decimals":18,"addr":"0xd4078bdb652610ad5383a747d130cbe905911102","name2":"VIOLET"},
   {"name":"MFT","decimals":18,"addr":"0xdf2c7238198ad8b389666574f2d8bc411a4b7428","name2":"Mainframe"},
-  {"name":"ZXC","decimals":18,"addr":"0x83e2be8d114f9661221384b3a50d24b96a5653f5","name2":"0xcert Protocol"}
+  {"name":"ZXC","decimals":18,"addr":"0x83e2be8d114f9661221384b3a50d24b96a5653f5","name2":"0xcert Protocol"},
+  {"name":"MAS","decimals":18,"addr":"0x23ccc43365d9dd3882eab88f43d515208f832430","name2":"Midas Protocol"},
+  {"name":"ESS","decimals":18,"addr":"0xfc05987bd2be489accf0f509e44b0145d68240f7","name2":"ESSENTIA"},
+  {"name":"IONC","decimals":6,"addr":"0xbddc4fe9b07ad7243abffaec9ef35daac4a3f95c","name2":"IonChain"},
+  {"name":"FXY","decimals":18,"addr":"0xa024e8057eec474a9b2356833707dd0579e26ef3","name2":"Fixy Network"},
+  {"name":"BITX","decimals":18,"addr":"0xff2b3353c3015e9f1fbf95b9bda23f58aa7ce007","name2":"BitScreenerToken"}
 ]; // end idexOfflineTokens
 
 
@@ -2981,6 +2986,7 @@ let ddexOfflineTokens = [
   {"symbol":"GBC","address":"0xc8058d59e208399b76e66da1ec669dd6b1bee2ea","decimals":10},
   {"symbol":"IFTC","address":"0xaab29ecc3783acb436a6679919f22d30932e93f2","decimals":18},
   {"symbol":"LOOM","address":"0xa4e8c3ec456107ea67d3075bf9e3df3a75823db0","decimals":18},
+  {"symbol":"EDU","address":"0x2a22e5cca00a3d63308fa39f29202eb1b39eef52","decimals":18},
   {"symbol":"ZCO","address":"0x2008e3057bd734e10ad13c9eae45ff132abc1722","decimals":8},
   {"symbol":"NBAI","address":"0x17f8afb63dfcdcc90ebe6e84f060cc306a98257d","decimals":18},
   {"symbol":"DAI","address":"0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359","decimals":18},
@@ -3026,13 +3032,11 @@ let ddexOfflineTokens = [
   {"symbol":"ASTOR","address":"0x63c94b6221b4021b564f4563ec72688655b2604a","decimals":3},
   {"symbol":"ELEM","address":"0xada00d9468c54a17564e33058bdd9451f75462ad","decimals":10},
   {"symbol":"EON","address":"0x3032b9e916a575db2d5a0c865f413a82891bd260","decimals":18},
-  {"symbol":"NPXS","address":"0xa15c7ebe1f07caf6bff097d8a589fb8ac49ae5b3","decimals":18},
   {"symbol":"DAN","address":"0x9b70740e708a083c6ff38df52297020f5dfaa5ee","decimals":10},
   {"symbol":"OMG","address":"0xd26114cd6ee289accf82350c8d8487fedb8a0c07","decimals":18},
   {"symbol":"RFR","address":"0xd0929d411954c47438dc1d871dd6081f5c5e149c","decimals":4},
   {"symbol":"EVE","address":"0x923108a439c4e8c2315c4f6521e5ce95b44e9b4c","decimals":18},
   {"symbol":"RDN","address":"0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6","decimals":18},
-  {"symbol":"THUG","address":"0xfe7b915a0baa0e79f85c5553266513f7c1c03ed0","decimals":18},
   {"symbol":"ABT","address":"0xb98d4c97425d9908e66e53a6fdf673acca0be986","decimals":18},
   {"symbol":"EBTC","address":"0xeb7c20027172e5d143fb030d50f91cece2d1485d","decimals":8},
   {"symbol":"XPST","address":"0x35c896b1700e344a81b95b6bc1d4d95b4503699c","decimals":18},
@@ -3127,7 +3131,6 @@ let ddexOfflineTokens = [
 
 let radarOfflineTokens = [
   {"symbol":"DPP","address":"0x01b3ec4aae1b8729529beb4965f27d008788b0eb","decimals":18,"name":"DA Power Play"},
-  {"symbol":"HAV","address":"0x01da95f253122636d0776017311892835a15d9dd","decimals":18,"name":"Havven"},
   {"symbol":"FLLW","address":"0x0200412995f1bafef0d3f97c4e28ac2515ec1ece","decimals":18,"name":"FollowCoin"},
   {"symbol":"STBL","address":"0x02ec0c9e6d3c08b8fb12fec51ccba048afbc36a6","decimals":18,"name":"Stable Set"},
   {"symbol":"STU","address":"0x0371a82e4a9d0a4312f3ee2ac9c6958512891372","decimals":18,"name":"BitJob"},
@@ -3282,7 +3285,6 @@ let radarOfflineTokens = [
   {"symbol":"MAN","address":"0xe25bcec5d3801ce3a794079bf94adf1b8ccd802d","decimals":18,"name":"Matrix AI"},
   {"symbol":"ZRX","address":"0xe41d2489571d322189246dafa5ebde1f4699f498","decimals":18,"name":"0x Protocol Token"},
   {"symbol":"CL","address":"0xe81d72d14b1516e68ac3190a46c93302cc8ed60f","decimals":18,"name":"Coinlancer"},
-  {"symbol":"REP","address":"0xe94327d07fc17907b4db788e5adf2ed424addff6","decimals":18,"name":"Augur Reputation Token"},
   {"symbol":"UFR","address":"0xea097a2b1db00627b2fa17460ad260c016016977","decimals":18,"name":"Upfiring"},
   {"symbol":"CTXC","address":"0xea11755ae41d889ceec39a63e6ff75a02bc1c00d","decimals":18,"name":"Cortex Coin"},
   {"symbol":"TIX","address":"0xea1f346faf023f974eb5adaf088bbcdf02d761f4","decimals":18,"name":"Blocktix Token"},

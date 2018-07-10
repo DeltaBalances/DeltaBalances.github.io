@@ -56,8 +56,15 @@
                     
                     if(customToken.locked) {
                         token.locked = true;
-                    } else {
-                        delete token.locked;
+                    } 
+                    if (customToken.blocked) {
+                        token.blocked = Number(customToken.blocked);
+                    }
+                    if (customToken.killed) {
+                        token.killed = true;
+                    }
+                    if (customToken.spam) {
+                        token.spam = true;
                     }
 					
 					if (!customTokens[token.address]) {
@@ -202,17 +209,21 @@
 		//	let mewTokens = undefined;
 		//	let mcTokens = undefined;
 			let ethplorerED = undefined;
-			let ethploredIdex = undefined;
+			let ethplorerIdex = undefined;
+            let ethplorerStore = undefined;
+            let ethplorerDdex = undefined;
 			let loaded = 0;
 
 			function done() {
 
-				if (loaded >= 2) {
-					if (/*mewTokens && mcTokens &&*/ ethplorerED && ethploredIdex) {
+				if (loaded >= 4) {
+					if (/*mewTokens && mcTokens &&*/ ethplorerED && ethplorerIdex && ethplorerStore && ethplorerDdex) {
 						//parseMewTokens(mewTokens);
 						//parseMewTokens(mcTokens);
 						parseEthplorer(ethplorerED);
-						parseEthplorer(ethploredIdex);
+						parseEthplorer(ethplorerIdex);
+                        parseEthplorer(ethplorerStore);
+						parseEthplorer(ethplorerDdex);
 
 						let customTokensList = Object.values(customTokens);
 
@@ -231,6 +242,9 @@
 						outputString = outputString.replace(/"decimal"/g, 'decimal');
                         outputString = outputString.replace(/"name"/g, 'name');
                         outputString = outputString.replace(/"locked"/g, 'locked');
+                        outputString = outputString.replace(/"blocked"/g, 'blocked');
+                        outputString = outputString.replace(/"killed"/g, 'killed');
+                        outputString = outputString.replace(/"spam"/g, 'spam');
 						outputString = outputString.replace(/"Binance"/g, 'Binance');
                         outputString = outputString.replace(/"EtherDelta"/g, 'EtherDelta');
                         outputString = outputString.replace(/"ForkDelta"/g, 'ForkDelta');
@@ -248,7 +262,7 @@
 						$('#output').html('something went wrong');
 					}
 				} else {
-					$('#output').html('loading... , loaded ' + loaded + '/2');
+					$('#output').html('loading... , loaded ' + loaded + '/4');
 				}
 			}
 
@@ -272,7 +286,9 @@
 			});
             */
 
-			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey=freekey').done(function (data) {
+            let key = 'enrrf9840PPmQ31';
+            //etherdelta contract
+			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey='+key).done(function (data) {
 				loaded++;
 				if (data && data.tokens)
 					ethplorerED = data;
@@ -282,10 +298,33 @@
 				done();
 			});
             
-			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208?apiKey=freekey').done(function (data) {
+            //idex contract
+			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208?apiKey='+key).done(function (data) {
 				loaded++;
 				if (data && data.tokens)
-					ethploredIdex = data;
+					ethplorerIdex = data;
+				done();
+			}).fail(function () {
+				loaded++;
+				done();
+			});
+            
+            //token store contract
+            $.getJSON('https://api.ethplorer.io/getAddressInfo/0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208?apiKey='+key).done(function (data) {
+				loaded++;
+				if (data && data.tokens)
+					ethplorerStore = data;
+				done();
+			}).fail(function () {
+				loaded++;
+				done();
+			});
+            
+            //ddex admin address (fee receiver)
+            $.getJSON('https://api.ethplorer.io/getAddressInfo/0xe269e891a2ec8585a378882ffa531141205e92e9?apiKey='+key).done(function (data) {
+				loaded++;
+				if (data && data.tokens)
+					ethplorerDdex = data;
 				done();
 			}).fail(function () {
 				loaded++;

@@ -1,5 +1,3 @@
-//https://datatables.net/examples/api/show_hide.html
-
 {
 	// shorthands
 	var _delta = bundle.DeltaBalances;
@@ -18,58 +16,59 @@
 	var progressTableLoaded = false;
 	var balanceTable = undefined;
 	var progressTable = undefined;
+	var tableHeaders = [];
 
 	var exchanges =
-		{
-			'Wallet': {
-				enabled: true,
-				loaded: 0, //async loading progress, number of tokens
-				displayed: 0, //async loading progress, number of tokens
-				contract: undefined
-			},
-			'EtherDelta': {
-				enabled: true,
-				loaded: 0,
-				displayed: 0,
-				contract: _delta.config.exchangeContracts.EtherDelta.addr
-			},
-			'IDEX': {
-				enabled: false,
-				loaded: 0,
-				displayed: 0,
-				contract: _delta.config.exchangeContracts.Idex.addr
-			},
-			'Token store': {
-				enabled: false,
-				loaded: 0,
-				displayed: 0,
-				contract: _delta.config.exchangeContracts.TokenStore.addr
-			},
-			'Enclaves': {
-				enabled: false,
-				loaded: 0,
-				displayed: 0,
-				contract: _delta.config.exchangeContracts.Enclaves.addr
-			},
-			'Decentrex': {
-				enabled: false,
-				loaded: 0,
-				displayed: 0,
-				contract: _delta.config.exchangeContracts.Decentrex.addr
-			},
-			'Ethen': {
-				enabled: false,
-				loaded: 0,
-				displayed: 0,
-				contract: _delta.config.exchangeContracts.Ethen.addr
-			},
-			'DEXY': {
-				enabled: false,
-				loaded: 0,
-				displayed: 0,
-				contract: _delta.config.exchangeContracts.Dexy.addr
-			},
-		};
+	{
+		'Wallet': {
+			enabled: true,
+			loaded: 0, //async loading progress, number of tokens
+			displayed: 0, //async loading progress, number of tokens
+			contract: undefined
+		},
+		'EtherDelta': {
+			enabled: true,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.EtherDelta.addr
+		},
+		'IDEX': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.Idex.addr
+		},
+		'Token store': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.TokenStore.addr
+		},
+		'Enclaves': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.Enclaves.addr
+		},
+		'Decentrex': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.Decentrex.addr
+		},
+		'Ethen': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.Ethen.addr
+		},
+		'DEXY': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.Dexy.addr
+		},
+	};
 
 	var loadedBid = 0;
 	var failedBid = 0;
@@ -113,25 +112,25 @@
 	// placeholder
 	var balancesPlaceholder = {
 		"0x0000000000000000000000000000000000000000":
-			{
-				Name: 'ETH',
-				Wallet: 0,
-				EtherDelta: 0,
-				IDEX: 0,
-				'Token store': 0,
-				Enclaves: 0,
-				Decentrex: 0,
-				Ethen: 0,
-				DEXY: 0,
-				Total: 0,
-				Unlisted: false,
-				Address: '0x0000000000000000000000000000000000000000',
-				Bid: '',
-				Ask: '',
-				'Est. ETH': '',
-				'USD': '',
-				'EUR': '',
-			},
+		{
+			Name: 'ETH',
+			Wallet: 0,
+			EtherDelta: 0,
+			IDEX: 0,
+			'Token store': 0,
+			Enclaves: 0,
+			Decentrex: 0,
+			Ethen: 0,
+			DEXY: 0,
+			Total: 0,
+			Unlisted: false,
+			Address: '0x0000000000000000000000000000000000000000',
+			Bid: '',
+			Ask: '',
+			'Est. ETH': '',
+			'USD': '',
+			'EUR': '',
+		},
 	};
 
 	init();
@@ -334,6 +333,8 @@
 
 		if (exchanges[name].enabled != enabled) {
 			exchanges[name].enabled = enabled;
+			setBalanceProgress(true);
+
 			if (lastResult) {
 				if (!enabled) {
 					//hide loaded exchange, don't reload
@@ -373,7 +374,7 @@
 		changeZero = true;
 		hideZero = $('#zero').prop('checked');
 		if (lastResult) {
-			makeTable(lastResult, hideZero);
+			finishedBalanceRequest();
 		}
 		changeZero = false;
 		setStorage();
@@ -429,7 +430,7 @@
 			showSpam = newSpam;
 			if (showCustomTokens) {
 				if (lastResult) {
-					makeTable(lastResult, hideZero);
+					finishedBalanceRequest();
 				} else if (!running) {
 					placeholderTable();
 				}
@@ -520,6 +521,8 @@
 			$('#loadingBalances').show();
 			$('#refreshButtonLoading').show();
 			$('#refreshButtonSearch').hide();
+			$('#overviewOverlay').removeClass('hidden-xs');
+			$('#overviewOverlay').removeClass('hidden-sm');
 		}
 		$("#tablesearcher").prop("disabled", balance);
 
@@ -562,7 +565,8 @@
 		if (balance) {
 			$('#refreshButtonLoading').hide();
 			$('#refreshButtonSearch').show();
-
+			$('#overviewOverlay').addClass('hidden-xs');
+			$('#overviewOverlay').addClass('hidden-sm');
 		}
 	}
 
@@ -732,11 +736,9 @@
 
 		setBalanceProgress();
 		if (table1Loaded) {
-			let headers = getColumnHeaders(Object.values(balancesPlaceholder), balanceHeaders);
-
 			balanceTable.clear();
-			for (let i = 0; i < headers.length; i++) {
-				let enabled = balanceHeaders[headers[i].title];
+			for (let i = 0; i < tableHeaders.length; i++) {
+				let enabled = balanceHeaders[tableHeaders[i].title];
 				let column = balanceTable.column(i).visible(enabled);
 			}
 			balanceTable.columns.adjust().fixedColumns().relayout().draw();
@@ -1166,7 +1168,7 @@
 		$('#error').hide();
 	}
 
-	function setBalanceProgress() {
+	function setBalanceProgress(changeHeaders) {
 
 		let loadingState = {
 		}
@@ -1235,37 +1237,30 @@
 				"searching": false,
 				"scrollX": true,
 				"info": false,
-				"language": {
-					"zeroRecords": "0 Balances loaded",
-				},
+				"orderClasses": false,
 			});
 			progressTableLoaded = true;
+			changeHeaders = true;
 		}
 
-		let row2$ = $('<tr/>');
-		let values = Object.values(loadingState);
-		for (let i = 0; i < values.length; i++) {
-			row2$.append($('<td/>').html(values[i]));
-		}
 
-		progressTable.clear();
-		progressTable.rows.add(row2$);
-
-		let keys2 = Object.keys(loadingState);
-		for (let i = 0; i < keys2.length; i++) { //enable, disable exchanges (prices always enabled)
-			if (keys2[i] !== 'Prices') {
-				progressTable.column(i).visible(exchanges[keys2[i]].enabled);
-			} else {
-				progressTable.column(i).visible(true);
+		if (changeHeaders) {
+			let keys2 = Object.keys(loadingState);
+			for (let i = 0; i < keys2.length; i++) { //enable, disable exchanges (prices always enabled)
+				if (keys2[i] !== 'Prices') {
+					progressTable.column(i).visible(exchanges[keys2[i]].enabled);
+				}
 			}
 		}
 
-		progressTable.columns.adjust().draw();
+		let row2 = Object.values(loadingState);
+		progressTable.row(0).data(row2).invalidate();
 	}
 
 
 	// callback when balance request completes
 	function finishedBalanceRequest() {
+
 		let keys = Object.keys(exchanges);
 
 		//check if all requests are complete
@@ -1283,8 +1278,9 @@
 		clearOverviewHtml(false);
 		setBalanceProgress();
 
-		if (noneDone)
+		if (noneDone) {
 			return;
+		}
 
 		let sumETH = _delta.web3.toBigNumber(0);
 		let sumWETH = _delta.web3.toBigNumber(0);
@@ -1409,11 +1405,6 @@
 			let totalSumETH = sumETH.plus(sumToken).plus(sumWETH);
 			$('#totalbalance').html('<span data-toggle="tooltip" title="' + totalSumETH.toString() + '">' + totalSumETH.toFixed(fixedDecimals) + ' ETH</span>');
 
-			$('[data-toggle=tooltip]').tooltip({
-				'placement': 'top',
-				'container': 'body'
-			});
-
 			if (showFiat == 1) {
 				$('#ethbalancePrice').html(" $" + _util.commaNotation((sumETH.times(etherPriceUSD)).toFixed(2)));
 				$('#wethbalancePrice').html(" $" + _util.commaNotation((sumWETH.times(etherPriceUSD)).toFixed(2)));
@@ -1432,7 +1423,6 @@
 			clearOverviewHtml(false);
 			$('#downloadBalances').html('');
 		}
-
 		makeTable(result, hideZero); //calls trigger
 	}
 
@@ -1440,7 +1430,6 @@
 
 	//balances table
 	function makeTable(result, hideZeros) {
-
 		hidePopovers();
 
 		var loaded = table1Loaded;
@@ -1448,21 +1437,12 @@
 
 		if (hideZeros) {
 			filtered = filtered.filter(x => {
-				return (Number(x.Total) > 0 || x.Address === _delta.config.ethAddr);
+				return (
+					(!hideZeros || (Number(x.Total) > 0 || x.Address === _delta.config.ethAddr))
+					&& (showSpam || !_delta.uniqueTokens[x.Address].spam)
+				);
 			});
 		}
-		if (!showSpam && showCustomTokens) {
-			filtered = filtered.filter(x => {
-				return !_delta.uniqueTokens[x.Address].spam;
-			});
-		}
-		/*
-		if(!showCustomTokens)
-		{
-			filtered = result.filter(x => {
-				return !(x.Unlisted);
-			});
-		} */
 
 		balanceHeaders['Ask'] = useAsk;
 		balanceHeaders['Bid'] = !useAsk;
@@ -1474,12 +1454,12 @@
 		let numColumns = Object.values(exchanges).reduce((sum, ex) => { if (ex.enabled) return sum + 1; else return sum; }, 0);
 		balanceHeaders['Total'] = numColumns > 1;
 
-		let headers = getColumnHeaders(filtered, balanceHeaders);
 		if (!table1Loaded) {
-			makeInitTable('#resultTable', headers, balancesPlaceholder);
+			tableHeaders = getColumnHeaders(filtered, balanceHeaders);
+			makeInitTable('#resultTable', tableHeaders, balancesPlaceholder);
 		}
-		let tableData = buildTableRows(filtered, headers);
-		trigger(tableData, headers);
+		let tableData = buildTableRows(filtered, tableHeaders);
+		trigger(tableData, tableHeaders);
 	}
 
 
@@ -1611,7 +1591,6 @@
 		}
 
 		if (!table1Loaded) {
-
 			balanceTable = $('#resultTable').DataTable({
 				"paging": false,
 				"ordering": true,
@@ -1619,6 +1598,8 @@
 				"scrollY": "60vh",
 				"scrollX": true,
 				"scrollCollapse": true,
+				"orderClasses": false,
+				"deferRender": true,
 				fixedColumns: {
 					leftColumns: 1
 				},
@@ -1639,7 +1620,6 @@
 			updateToggleToolbar();
 			table1Loaded = true;
 		}
-
 		balanceTable.clear();
 		if (dataSet.length > 0) {
 			for (let i = 0; i < dataSet.length; i++) {
@@ -1652,7 +1632,8 @@
 			let column = balanceTable.column(i).visible(enabled);
 		}
 
-		balanceTable.columns.adjust().fixedColumns().relayout().draw();
+		/*balanceTable.columns.adjust().fixedColumns().relayout().draw();*/
+		balanceTable.draw();
 
 		$("[data-toggle=popover]").popover();
 		$('[data-toggle=tooltip]').tooltip({

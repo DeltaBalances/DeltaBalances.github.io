@@ -243,6 +243,12 @@
 			$('#userToggle').addClass('hidden');
 			$('#address').focus();
 		}
+		if (autoStart && !initiated) {
+			showLoading(true);
+			if (table1Loaded && balanceTable) {
+				balanceTable.clear().draw();
+			}
+		}
 	}
 
 	function hidePopovers() {
@@ -513,7 +519,7 @@
 			$('#loadingBalances').removeClass('dim');
 	}
 
-	function showLoading(balance, trans) {
+	function showLoading(balance) {
 		if (balance) {
 			$('#loadingBalances').addClass('fa-spin');
 			$('#loadingBalances').addClass('dim');
@@ -532,9 +538,9 @@
 		} */
 	}
 
-	function buttonLoading(balance, trans) {
+	function buttonLoading(balance) {
 		if (!publicAddr) {
-			hideLoading(balance, trans);
+			hideLoading(balance);
 			return;
 		}
 		if (balance) {
@@ -547,22 +553,13 @@
 		}
 	}
 
-	function hideLoading(balance, trans) {
+	function hideLoading(balance) {
 		if (!publicAddr) {
 			balance = true;
-			trans = true;
-			$('#refreshButtonLoading').hide();
-			$('#refreshButtonSearch').show();
 		}
-		if (balance) {
-			if (!trans)
-				$('#loadingBalances').removeClass('fa-spin');
-			else
-				$('#loadingBalances').hide();
-		}
-
 		$("#tablesearcher").prop("disabled", !balance);
 		if (balance) {
+			$('#loadingBalances').removeClass('fa-spin');
 			$('#refreshButtonLoading').hide();
 			$('#refreshButtonSearch').show();
 			$('#overviewOverlay').addClass('hidden-xs');
@@ -597,7 +594,7 @@
 			//placeholder();
 			console.log('invalid input');
 			disableInput(false);
-			hideLoading(true, true);
+			hideLoading(true);
 		}
 	}
 
@@ -718,7 +715,7 @@
 		loadedBid = 0;
 		failedBid = 0;
 
-		showLoading(true, false);
+		showLoading(true);
 
 		if (!appendExchange && !appendCustom)
 			resetExLoadingState();
@@ -1605,7 +1602,7 @@
 				},
 				aoColumnDefs: [
 					{ bSearchable: true, aTargets: [0] },
-					{ bSearchable: false, aTargets: ['_all'] }
+					{ bSearchable: false, aTargets: ['_all'] },
 				],
 				"dom": '<"toolbar">frtip',
 				"language": {
@@ -1652,10 +1649,10 @@
 
 		if (trigger_1) {
 			disableInput(false);
-			hideLoading(true, true);
+			hideLoading(true);
 			running = false;
 			requestID++;
-			buttonLoading(true, true);
+			buttonLoading(true);
 		}
 	}
 

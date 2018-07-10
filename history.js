@@ -1120,6 +1120,7 @@
 				"scrollX": true,
 				"scrollCollapse": true,
 				"order": [[defaultSort, "desc"]],
+				"orderClasses": false,
 				fixedColumns: {
 					leftColumns: 1
 				},

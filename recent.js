@@ -188,6 +188,12 @@
 			$('#userToggle').addClass('hidden');
 			$('#address').focus();
 		}
+		if (autoStart && !initiated) {
+			showLoading(true);
+			if (table2Loaded && recentTable) {
+				recentTable.clear().draw();
+			}
+		}
 	}
 
 	// more decimals checbox
@@ -254,7 +260,7 @@
 
 	}
 
-	function showLoading(balance, trans) {
+	function showLoading(trans) {
 		if (trans) {
 			$('#loadingTransactions2').addClass('fa-spin');
 			$('#loadingTransactions2').addClass('dim');
@@ -269,9 +275,9 @@
 		}
 	}
 
-	function buttonLoading(balance, trans) {
+	function buttonLoading(trans) {
 		if (!publicAddr) {
-			hideLoading(balance, trans);
+			hideLoading(trans);
 			return;
 		}
 		if (trans) {
@@ -279,20 +285,16 @@
 			$('#loadingTransactions2').removeClass('dim');
 			$('#loadingTransactions2').prop('disabled', false);
 			$('#loadingTransactions2').show();
-			$('#refreshButtonLoading').show();
-			$('#refreshButtonSearch').hide();
-		}
-		if (trans) {
+		//	$('#refreshButtonLoading').show();
+		//	$('#refreshButtonSearch').hide();
 			$('#refreshButtonLoading').hide();
 			$('#refreshButtonSearch').show();
 		}
 	}
 
-	function hideLoading(balance, trans) {
+	function hideLoading(trans) {
 		if (!publicAddr) {
 			trans = true;
-			$('#refreshButtonLoading').hide();
-			$('#refreshButtonSearch').show();
 		}
 
 		if (trans) {
@@ -329,7 +331,7 @@
 			//placeholder();
 			console.log('invalid input');
 			disableInput(false);
-			hideLoading(true, true);
+			hideLoading(true);
 		}
 	}
 
@@ -346,7 +348,7 @@
 		if (publicAddr) {
 			setStorage();
 			window.location.hash = publicAddr;
-			if(table2Loaded) {
+			if (table2Loaded) {
 				recentTable.clear().draw();
 			}
 			getTrans(rqid);
@@ -366,7 +368,7 @@
 			trigger_2 = false;
 			//disableInput(true);
 
-			showLoading(false, true);
+			showLoading(true);
 
 			if (blocknum > 0) // blocknum also retrieved on page load, reuse it
 			{
@@ -1263,6 +1265,7 @@
 				"scrollCollapse": true,
 				"order": [[9, "desc"]],
 				"dom": '<"toolbar">frtip',
+				"orderClasses": false,
 				fixedColumns: {
 					leftColumns: 2
 				},
@@ -1304,13 +1307,13 @@
 
 		if (trigger_2) {
 			disableInput(false);
-			hideLoading(true, true);
+			hideLoading(true);
 			running = false;
 			requestID++;
-			buttonLoading(true, true);
+			buttonLoading(true);
 		}
 		else {
-			hideLoading(trigger_2, trigger_2);
+			hideLoading(trigger_2);
 		}
 	}
 

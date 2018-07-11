@@ -285,8 +285,8 @@
 			$('#loadingTransactions2').removeClass('dim');
 			$('#loadingTransactions2').prop('disabled', false);
 			$('#loadingTransactions2').show();
-		//	$('#refreshButtonLoading').show();
-		//	$('#refreshButtonSearch').hide();
+			//	$('#refreshButtonLoading').show();
+			//	$('#refreshButtonSearch').hide();
 			$('#refreshButtonLoading').hide();
 			$('#refreshButtonSearch').show();
 		}
@@ -1276,6 +1276,10 @@
 					{ bSearchable: true, aTargets: [6] },
 					{ bSearchable: true, aTargets: [8] },
 					{ bSearchable: false, aTargets: ['_all'] },
+					{ bSortable: false, aTargets: [0, 10] },
+					{ asSorting: ["desc", "asc"], aTargets: [4, 5, 7, 9] },
+					{ sClass: "dt-body-right", aTargets: [4, 5, 7] },
+					{ sClass: "dt-body-center", aTargets: [0,10] },
 				],
 				"language": {
 					"search": '<i class="dim fa fa-search"></i>',

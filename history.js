@@ -14,6 +14,7 @@
 	// loading states
 	var tableLoaded = false;
 	var historyTable = undefined;
+	var tableHeaders = [];
 	var loadedLogs = 0;
 	var displayedLogs = false;
 
@@ -1015,11 +1016,11 @@
 			tradeHeaders['Exchange'] = 1;
 		}
 
-		let headers = getColumnHeaders(filtered, tradeHeaders);
 		if (!tableLoaded) {
-			makeInitTable('#transactionsTable', headers, transactionsPlaceholder);
+			tableHeaders = getColumnHeaders(filtered, tradeHeaders);
+			makeInitTable('#transactionsTable', tableHeaders, transactionsPlaceholder);
 		}
-		let tableData = buildTableRows(filtered, headers);
+		let tableData = buildTableRows(filtered, tableHeaders);
 		trigger(tableData);
 	}
 
@@ -1106,11 +1107,6 @@
 	// final callback to sort table
 	function trigger(dataSet) {
 
-		let defaultSort = 9;
-		if (!tradeHeaders['Exchange']) {
-			defaultSort = 8;
-		}
-
 		if (!tableLoaded) {
 			historyTable = $('#transactionsTable').DataTable({
 				"paging": false,
@@ -1119,7 +1115,7 @@
 				"scrollY": "75vh",
 				"scrollX": true,
 				"scrollCollapse": true,
-				"order": [[defaultSort, "desc"]],
+				"order": [[9, "desc"]],
 				"orderClasses": false,
 				fixedColumns: {
 					leftColumns: 1
@@ -1131,6 +1127,10 @@
 					{ bSearchable: true, aTargets: [6] },
 					{ bSearchable: true, aTargets: [8] },
 					{ bSearchable: false, aTargets: ['_all'] },
+					{ bSortable: false, aTargets: [13] },
+					{ asSorting: ["desc", "asc"], aTargets: [3, 4, 6, 8, 9, 11] },
+					{ sClass: "dt-body-right", aTargets: [3, 4, 6, 11] },
+					{ sClass: "dt-body-center", aTargets: [13]},
 				],
 				"language": {
 					"search": '<i class="dim fa fa-search"></i>',
@@ -1142,6 +1142,10 @@
 				},
 			});
 			tableLoaded = true;
+			for (let i = 0; i < tableHeaders.length; i++) {
+				let enabled = tradeHeaders[tableHeaders[i].title];
+				let column = historyTable.column(i).visible(enabled);
+			}
 		}
 
 		historyTable.clear();
@@ -1181,7 +1185,7 @@
 		let resultTable = [];
 
 		for (var i = 0; i < myList.length; i++) {
-			
+
 			/*if (!showCustomTokens && myList[i].Unlisted)
 				continue;*/
 			var row$ = $('<tr/>');
@@ -1305,7 +1309,7 @@
 		for (var i = 0; i < myList.length; i++) {
 			var rowHash = myList[i];
 			for (var key in rowHash) {
-				if (!columnSet[key] && headers[key]) {
+				if (!columnSet[key] && headers[key] >= 0) {
 					columnSet[key] = 1;
 					columns.push({ title: key });
 				}

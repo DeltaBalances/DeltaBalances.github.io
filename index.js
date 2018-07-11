@@ -748,7 +748,8 @@
 				let enabled = balanceHeaders[tableHeaders[i].title];
 				let column = balanceTable.column(i).visible(enabled);
 			}
-			balanceTable.columns.adjust().fixedColumns().relayout().draw();
+			//balanceTable.columns.adjust().fixedColumns().relayout().draw();
+			balanceTable.draw();
 		}
 
 
@@ -1250,7 +1251,6 @@
 			changeHeaders = true;
 		}
 
-
 		if (changeHeaders) {
 			let keys2 = Object.keys(loadingState);
 			for (let i = 0; i < keys2.length; i++) { //enable, disable exchanges (prices always enabled)
@@ -1612,7 +1612,11 @@
 				},
 				aoColumnDefs: [
 					{ bSearchable: true, aTargets: [0] },
-					{ bSearchable: false, aTargets: ['_all'] }
+					{ asSorting: ["asc", "desc"], aTargets: [0] },
+					{ bSearchable: false, aTargets: ['_all'] },
+					{ asSorting: ["desc", "asc"], aTargets: ['_all'] },
+				//	{ sClass: "dt-body-left", aTargets: [0]},
+				//	{ sClass: "dt-body-right", aTargets: ['_all'] },
 				],
 				"dom": '<"toolbar">frtip',
 				"language": {
@@ -1640,7 +1644,7 @@
 			let column = balanceTable.column(i).visible(enabled);
 		}
 
-		/*balanceTable.columns.adjust().fixedColumns().relayout().draw();*/
+	//	balanceTable.columns.adjust().fixedColumns().relayout().draw();
 		balanceTable.draw();
 
 		$("[data-toggle=popover]").popover();

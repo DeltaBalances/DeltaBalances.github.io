@@ -3120,7 +3120,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
 
                     // less than full base amount
                     if (unpacked.name == 'TakeSellOrder' && unpacked.events[3].value !== unpacked.events[4].value) {
-                        baseAmount = utility.weiweiToTokenToEth(unpacked.events[4].value, base);
+                        baseAmount = utility.weiToToken(unpacked.events[4].value, base);
                         tokenAmount = baseAmount.div(price);
                     }
                     //less than full token amount

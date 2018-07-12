@@ -16,27 +16,60 @@ module.exports = {
     '0x': { addr: '0x12459c951127e0c374ff9105dda097662a027093', name: '0x Exchange ', supportedDex: true },
     '0xProxy': { addr: '0x8da0d80f5007ef1e431dd2127178d224e32c2ef4', name: '0x Proxy ', supportedDex: true },
     OasisDex: { addr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425', name: 'OasisDex ', supportedDex: true },
+    //Oasisdirect, no input/event parsing yet
     OasisDirect: { addr: '0x793ebbe21607e4f04788f89c7a9b97320773ec59', name: 'OasisDirect ', supportedDex: false },
     AirSwap: { addr: '0x8fd3121013a07c57f0d69646e86e7a4880b467b7', name: 'AirSwap ', supportedDex: true },
-    Kyber: { addr: '0x964f35fae36d75b1e72770e244f6595b68508cf5', name: 'Kyber Network ', supportedDex: true },
-    KyberReserve: { addr: '0x63825c174ab367968ec60f061753d3bbd36a0d8f', name: 'Kyber Reserve ', supportedDex: false },
+    Kyber: { addr: '0x964f35fae36d75b1e72770e244f6595b68508cf5', name: 'Kyber Network ', supportedDex: true }, // contract disabled?
+    KyberTest: { addr: '0xd2d21fdef0d054d2864ce328cc56d1238d6b239e', name: 'Kyber Test ', supportedDex: true },
+
+    Kyber2: { addr: '0x91a502c678605fbce581eae053319747482276b9', name: 'Kyber Network ', supportedDex: true }, // Kyber v2?
+    Kyber2Proxy: { addr: '0x818e6fecd516ecc3849daf6845e3ec868087b755', name: 'Kyber Network ', supportedDex: true }, // kyber2 moved events to proxy?
+    Kyber2_2: { addr: '0x706abce058db29eb36578c463cf295f180a1fe9c', name: 'Kyber Network ', supportedDex: true },
+    Kyber2_2Proxy: { addr: '0xc14f34233071543e979f6a79aa272b0ab1b4947d', name: 'Kyber Network ', supportedDex: true },
+    Kyber2_3: { addr: '0x44f854ea73eec7a10c9ff0e003d1ec076ac18197', name: 'Kyber Network ', supportedDex: true },
+    Kyber2_3Proxy: { addr: '0x3257073d3b80bae378db8dea32519938910d05cc', name: 'Kyber Network ', supportedDex: true },
+    Kyber2_4: { addr: '0xaa9fb0f5b12752af97afa9ffdad9a15902645dbf', name: 'Kyber Network ', supportedDex: true },
+    Kyber2_4Proxy: { addr: '0xd76d2888828aea74247c41157020dad54865e730', name: 'Kyber Network ', supportedDex: true },
+
     BancorQuick: { addr: '0xcf1cc6ed5b653def7417e3fa93992c3ffe49139b', name: 'Bancor ', supportedDex: true },
     BancorQuick2: { addr: '0xf87a7ec94884f44d9de33d36b73f42c7c0dd38b1', name: 'Bancor ', supportedDex: true },
     // bancor quick3? 0x111913ca1c1a8d4e3283213ba115bf6dcde07d6f
     Enclaves: { addr: '0xbf45f4280cfbe7c2d2515a7d984b8c71c15e82b7', name: 'EnclavesDex ', supportedDex: true },
     Enclaves2: { addr: '0xed06d46ffb309128c4458a270c99c824dc127f5d', name: 'EnclavesDex ', supportedDex: false },
     Ethen: { addr: '0xf4c27b8b002389864ac214cb13bfeef4cc5c4e8d', name: 'ETHEN ', supportedDex: true },
+    Ethex: { addr: '0xb746aed479f18287dc8fc202fe06f25f1a0a60ae', name: 'ETHEX ', supportedDex: true },
+    /* small exchanges, no input/event parsing yet */
     Dexy: { addr: '0x54b0de285c15d27b0daa687bcbf40cea68b2807f', name: 'Dexy ', supportedDex: false },
     Dexy2: { addr: '0x9d160e257f1dff52ec81d5a4e7326dd82e144177', name: 'Dexy ', supportedDex: false },
-    Ethex: { addr: '0xb746aed479f18287dc8fc202fe06f25f1a0a60ae', name: 'ETHEX ', supportedDex: true },
+    Dubiex: { addr: '0x7c21d723af0f4594d4f8821aa16bc27c8ea6cec7', name: 'DUBIex ', supportedDex: false },
+    Radex: { addr: '0x9462eeb9124c99731cc7617348b3937a8f00b11f', name: 'Radex ', supportedDex: false },
+    Joyso: { addr: '0x04f062809b244e37e7fdc21d9409469c989c2342', name: 'Joyso ', supportedDex: false },
+    /* exchange aggregators (no input parsing yet) */
     Totle: { addr: '0xd94c60e2793ad587400d86e4d6fd9c874f0f79ef', name: 'Totle ', supportedDex: true },
     Totle2: { addr: '0x98db9047e80260b407ffbc67543f9a010ef0fc6a', name: 'Totle-OLD ', supportedDex: true },
     EasyTrade: { addr: '0x9ae4ed3bf7a3a529afbc126b4541c0d636d455f6', name: 'EasyTrade ', supportedDex: true },
-    Singularx: { addr: '0x9a2d163ab40f88c625fd475e807bbc3556566f80', name: 'SingularX ', supportedDex: true },
     DexDex: { addr: '0x0c577fbf29f8797d9d29a33de59001b872a1d4dc', name: 'DexDex (EasyTrade) ', supportedDex: true },
+    /* small ED/FD clones, not in history pages yet, input/events should parse */
+    Singularx: { addr: '0x9a2d163ab40f88c625fd475e807bbc3556566f80', name: 'SingularX ', supportedDex: true },
     EtherC: { addr: '0xd8d48e52f39ab2d169c8b562c53589e6c71ac4d3', name: 'EtherC ', supportedDex: true },
-    Dubiex: { addr: '0x7c21d723af0f4594d4f8821aa16bc27c8ea6cec7', name: 'DUBIex ', supportedDex: false },
-    // ?? (ED clone) 0xd307c5686441fe6677e9251d1c1c469e0785e331
+    Bitox: { addr: '0xb5adb233f28c86cef693451b67e1f2d41da97d21', name: 'BITOX ', supportedDex: true },
+    Coinchange: { addr: '0x2f23228b905ceb4734eb42d9b42805296667c93b', name: 'Coinchangex ', supportedDex: true },
+    EtherNext: { addr: '0x499197314f9903a1ba9bed7ee54cd9eee5900e49', name: 'Ethernext ', supportedDex: true },
+    Swisscrypto: { addr: '0xbeeb655808e3bdb83b6998f09dfe1e0f2c66a9be', name: 'SwissCrypto ', supportedDex: true },
+    Ethmall: { addr: '0x2b44d68555899dbc1ab0892e7330476183dbc932', name: 'Ethmall ', supportedDex: true },
+    Ethernity: { addr: '0x18f0cd26c06449d967ca6aef8b5f9d8ee9fd7992', name: 'Ethernity ', supportedDex: true },
+
+    /* unknown ED clones */
+    // fake ED? 0x60394f71266901a5930bb4e90db5dd26b77f8dad
+    // MarketPLace (ED clone) 0x2f13fa06c0efd2a5c4cf2175a0467084672e648b 
+    // bloxxor (ED clone) 0xb92c5f4f3a13bb14467fe0c25a4c569aa20e1df8
+    // 0xd307c5686441fe6677e9251d1c1c469e0785e331
+    // 0xd307c5686441fe6677e9251d1c1c469e0785e331
+    // 0xa0e8bf2b304a9761cbbf82369182f748cbeae6b5
+    // 0x4d55f76ce2dbbae7b48661bef9bd144ce0c9091b
+    // 0xc86366cb075426223bca74059ae9dd3d68b5210a
+
+    // fake 0x? 0x5fb2f392772a6cb5ac423ceb587b62898c06c8cf
   },
   //token attributes for exchanges that makes tokens show up as listed
   listedExchanges: ['EtherDelta', 'ForkDelta', 'IDEX', 'DDEX', 'Binance', 'Radar'],
@@ -109,6 +142,8 @@ module.exports = {
     '0xf5bec430576ff1b82e44ddb5a1c93f6f9d0884f3': 'Yobit',
     '0x2b5634c42055806a59e9107ed44d43c426e58258': 'KuCoin',
     //'0x0286f920f893513c7ec9fe35ba0a4760229a243e': 'SingularFund',
+    '0x09678741bd50c3e74301f38fbd0136307099ae5d': 'Local Ethereum',
+    '0x867ffb5a3871b500f65bdfafe0136f9667deae06': 'Local Ethereum',
   },
 
 
@@ -324,7 +359,6 @@ module.exports = {
   baseToken: {
     "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359": 1, // DAI stablecoin
   },
-
   apiServer: 'https://api.etherdelta.com', /*'https://api.forkdelta.com', 'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/
   etherscanAPIKey: 'YHBUWV6P5B5ITKMI91JIRZZYBP1CG1V65R',
   infuraURL: 'https://mainnet.infura.io/DeltaBalances',

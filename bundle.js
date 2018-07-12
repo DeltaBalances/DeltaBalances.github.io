@@ -4158,8 +4158,9 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
         name = this.config.admins[lcAddr] + ' ';
     } else if (this.config.exchangeWallets[lcAddr]) {
         name = this.config.exchangeWallets[lcAddr] + ' ';
-    }
-    else {
+    } else if (this.config.bancorConverters.indexOf(lcAddr) !== -1) {
+        name = "Bancor ";
+    } else {
         let exchanges = Object.values(this.config.exchangeContracts);
         for (let i = 0; i < exchanges.length; i++) {
             let ex = exchanges[i];
@@ -4187,15 +4188,19 @@ DeltaBalances.prototype.isTokenAddress = function (addr) {
 };
 
 DeltaBalances.prototype.isExchangeAddress = function (addr) {
-    var lcAddr = addr.toLowerCase();
+    let lcAddr = addr.toLowerCase();
 
     let exchanges = Object.values(this.config.exchangeContracts);
     for (let i = 0; i < exchanges.length; i++) {
-        let ex = exchanges[i];
-        if (ex.addr === lcAddr && ex.supportedDex) {
+        if (exchanges[i].addr === lcAddr && exchanges[i].supportedDex) {
             return true;
         }
     }
+    for (let j = 0; j < this.config.bancorConverters.length; j++) {
+        if (lcAddr === this.config.bancorConverters[j])
+            return true;
+    }
+
     return false;
 };
 

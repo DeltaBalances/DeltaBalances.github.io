@@ -730,6 +730,7 @@
 					if (_util.isWrappedETH(from)) {
 						var val = _util.weiToEth(tx.value);
 						trans = createOutputTransaction('Unwrap ETH', _delta.setToken(tx.from), val, _delta.config.tokens[0], val, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+						trans.Incomplete = true;
 					}
 					else if (_delta.isExchangeAddress(from)) {
 						// IDEX withdraw, only found in internal tx
@@ -869,9 +870,18 @@
 								}
 								else if (unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized') {
 									if (obj.type == 'Buy up to') {
+										// did send ETH along with tx and base is wrapped ether
+										if (obj.base && _util.isWrappedETH(obj.base.addr) && val.greaterThan(0)) {
+											let ethval = _util.weiToEth(val);
+											if (String(ethval) == String(obj.baseAmount)) {
+												obj.base = _delta.setToken(_delta.config.ethAddr);
+											}
+										}
 										trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
 									} else {
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
+										//internal tx to unwrap eth token
+										trans.Incomplete = true;
 									}
 								}
 								else if (unpacked.name === 'approve') {
@@ -1056,6 +1066,17 @@
 							outputHashes[transs.Hash].Status = false;
 						} else if (transs.Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'Taker Buy' && outputHashes[transs.Hash].Type == 'In' && String(transs.Total) == String(outputHashes[transs.Hash].Amount)) {
 							transs.Status = false;
+							outputHashes[transs.Hash] = transs;
+						}
+						// bancor sell for ETH token & unwrap ETH token, make sell for ETH
+						else if (outputHashes[transs.Hash].Type == 'Unwrap ETH' && transs.Type === 'Sell up to' && transs.Exchange.indexOf('Bancor') !== -1) {
+							transs.Base = outputHashes[transs.Hash].Base;
+							outputHashes[transs.Hash] = transs;
+						} else if (outputHashes[transs.Hash].Type == 'Sell up to' && transs.Type === 'Unwrap ETH' && outputHashes[transs.Hash].indexOf('Bancor') !== -1) {
+							outputHashes[transs.Hash].Base = transs.Base;
+						}
+						// (trade?) returning ETH, seen as unwrap ETH by internal transaction result (generiv version of bancor above)
+						else if (outputHashes[transs.Hash].Type == 'Unwrap ETH' && transs.Type !== 'Unwrap ETH' && transs.Exchange) {
 							outputHashes[transs.Hash] = transs;
 						}
 						else { // more than 1 in, 1 out, just display tx multiple times
@@ -1279,7 +1300,7 @@
 					{ bSortable: false, aTargets: [0, 10] },
 					{ asSorting: ["desc", "asc"], aTargets: [4, 5, 7, 9] },
 					{ sClass: "dt-body-right", aTargets: [4, 5, 7] },
-					{ sClass: "dt-body-center", aTargets: [0,10] },
+					{ sClass: "dt-body-center", aTargets: [0, 10] },
 				],
 				"language": {
 					"search": '<i class="dim fa fa-search"></i>',

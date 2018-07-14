@@ -507,7 +507,7 @@
 
 			if (!pending) {
 				transaction.gasUsed = Number(txLog.gasUsed);
-				transaction.gasEth = Number(txLog.gasUsed) * _util.weiToEth(Number(tx.gasPrice));
+				transaction.gasEth = _util.weiToEth(tx.gasPrice).times(txLog.gasUsed);
 				if (Number(txLog.status) === 1) {
 					transaction.status = 'Completed';
 					transaction.blockNumber = tx.blockNumber;
@@ -801,16 +801,16 @@
 		$('#from').html(_util.addressLink(transaction.from, true, false));
 		$('#to').html(_util.addressLink(transaction.to, true, false));
 		$('#cost').html('??');
-		$('#gasgwei').html(transaction.gasGwei + ' Gwei (' + transaction.gasPrice.toFixed(10) + ' ETH)');
+		$('#gasgwei').html(transaction.gasGwei + ' Gwei (' + '<span data-toggle="tooltip" title="' + _util.exportNotation(transaction.gasPrice) + '">' + transaction.gasPrice.toFixed(10) + ' ETH)</span>');
 		if (!transaction.gasUsed)
 			transaction.gasUsed = '???';
 		$('#gasusedlimit').html(transaction.gasUsed + " / " + transaction.gasLimit);
 		if (transaction.status === 'Completed') {
-			$('#gascost').html(Number(transaction.gasEth).toFixed(5) + ' ETH');
+			$('#gascost').html('<span data-toggle="tooltip" title="' + _util.exportNotation(transaction.gasEth) + '">' + Number(transaction.gasEth).toFixed(5) + ' ETH</span>');
 		} else if (transaction.status === 'Pending') {
 			$('#gascost').html('Pending');
 		} else {
-			$('#gascost').html(Number(transaction.gasEth).toFixed(5) + ' ETH');
+			$('#gascost').html('<span data-toggle="tooltip" title="' + _util.exportNotation(transaction.gasEth) + '">' + transaction.gasEth.toFixed(5) + ' ETH</span>');
 		}
 		$('#nonce').html(transaction.nonce);
 		if (transaction.status === 'Completed') {
@@ -825,7 +825,8 @@
 			$('#status').html('<i style="color:red;" class="fa fa-exclamation-circle"></i>' + ' ' + transaction.status);
 			$('#time').html(txDate !== "??" ? _util.formatDate(txDate) : txDate);
 		}
-		$('#ethval').html(transaction.value.toString());
+
+		$('#ethval').html('<span data-toggle="tooltip" title="' + _util.exportNotation(transaction.value) + '">' + transaction.value.toString() + '</span>');
 		$('#inputdata').html('');
 		if (transaction.input && transaction.input[0].type) {
 			$('#inputtype').html(transaction.input[0].type);
@@ -1010,10 +1011,10 @@
 					}
 					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice' || keys[i] == 'fee' || keys[i] == 'takerFee' || keys[i] == 'makerFee') {
 						if (cellValue !== "")
-							cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(5) + '</span>';
+							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(5) + '</span>';
 					}
 					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'balance') {
-						cellValue = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(3) + '</span>';
+						cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(3) + '</span>';
 					}
 					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'maker' || keys[i] == 'taker' || keys[i] == 'wallet') {
 						if (cellValue)
@@ -1034,9 +1035,29 @@
 
 		table$.append(tbody$);
 		$(selector).append(table$);
+		$('[data-toggle=tooltip]').unbind();
 		$('[data-toggle=tooltip]').tooltip({
 			'placement': 'top',
-			'container': 'body'
+			'container': 'body',
+			'trigger': 'manual'
+		}).on("mouseenter", function () {
+			let _this = this;
+			$('[data-toggle=tooltip]').each(function () {
+				if (this !== _this) {
+					$(this).tooltip('hide');
+				}
+			});
+			$(_this).tooltip("show");
+			$(".tooltip").on("mouseleave", function () {
+				$(_this).tooltip('hide');
+			});
+		}).on("mouseleave", function () {
+			let _this = this;
+			setTimeout(function () {
+				if (!$(".tooltip:hover").length) {
+					$(_this).tooltip("hide");
+				}
+			}, 300);
 		});
 		$("[data-toggle=popover]").popover();
 	}

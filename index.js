@@ -1406,11 +1406,11 @@
 			}
 			lastResult = result;
 
-			$('#ethbalance').html('<span data-toggle="tooltip" title="' + sumETH.toString() + '">' + sumETH.toFixed(fixedDecimals) + ' ETH</span>');
-			$('#wethbalance').html('<span data-toggle="tooltip" title="' + sumWETH.toString() + '">' + sumWETH.toFixed(fixedDecimals) + ' ETH</span>');
-			$('#tokenbalance').html('<span data-toggle="tooltip" title="' + sumToken.toString() + '">' + sumToken.toFixed(fixedDecimals) + ' ETH</span>');
+			$('#ethbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(sumETH) + '">' + sumETH.toFixed(fixedDecimals) + ' ETH</span>');
+			$('#wethbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(sumWETH) + '">' + sumWETH.toFixed(fixedDecimals) + ' ETH</span>');
+			$('#tokenbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(sumToken) + '">' + sumToken.toFixed(fixedDecimals) + ' ETH</span>');
 			let totalSumETH = sumETH.plus(sumToken).plus(sumWETH);
-			$('#totalbalance').html('<span data-toggle="tooltip" title="' + totalSumETH.toString() + '">' + totalSumETH.toFixed(fixedDecimals) + ' ETH</span>');
+			$('#totalbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(totalSumETH) + '">' + totalSumETH.toFixed(fixedDecimals) + ' ETH</span>');
 
 			if (showFiat == 1) {
 				$('#ethbalancePrice').html(" $" + _util.commaNotation((sumETH.times(etherPriceUSD)).toFixed(2)));
@@ -1615,8 +1615,8 @@
 					{ asSorting: ["asc", "desc"], aTargets: [0] },
 					{ bSearchable: false, aTargets: ['_all'] },
 					{ asSorting: ["desc", "asc"], aTargets: ['_all'] },
-				//	{ sClass: "dt-body-left", aTargets: [0]},
-				//	{ sClass: "dt-body-right", aTargets: ['_all'] },
+					//	{ sClass: "dt-body-left", aTargets: [0]},
+					//	{ sClass: "dt-body-right", aTargets: ['_all'] },
 				],
 				"dom": '<"toolbar">frtip',
 				"language": {
@@ -1644,13 +1644,34 @@
 			let column = balanceTable.column(i).visible(enabled);
 		}
 
-	//	balanceTable.columns.adjust().fixedColumns().relayout().draw();
+		//	balanceTable.columns.adjust().fixedColumns().relayout().draw();
 		balanceTable.draw();
 
 		$("[data-toggle=popover]").popover();
+
+		$('[data-toggle=tooltip]').unbind();
 		$('[data-toggle=tooltip]').tooltip({
 			'placement': 'top',
-			'container': 'body'
+			'container': 'body',
+			'trigger': 'manual'
+		}).on("mouseenter", function () {
+			let _this = this;
+			$('[data-toggle=tooltip]').each(function () {
+				if (this !== _this) {
+					$(this).tooltip('hide');
+				}
+			});
+			$(_this).tooltip("show");
+			$(".tooltip").on("mouseleave", function () {
+				$(_this).tooltip('hide');
+			});
+		}).on("mouseleave", function () {
+			let _this = this;
+			setTimeout(function () {
+				if (!$(".tooltip:hover").length) {
+					$(_this).tooltip("hide");
+				}
+			}, 300);
 		});
 
 		var allDisplayed = true;
@@ -1720,7 +1741,7 @@
 						if (head == 'Bid' || head == 'Ask') {
 							dec += 2;
 						}
-						var num = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(dec) + '</span>';
+						var num = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(dec) + '</span>';
 						num = _util.commaNotation(num);
 						row$.append($('<td/>').html(num));
 					} else {

@@ -1322,9 +1322,29 @@
 			}
 			recentTable.columns.adjust().fixedColumns().relayout().draw();;
 			$("[data-toggle=popover]").popover();
+			$('[data-toggle=tooltip]').unbind();
 			$('[data-toggle=tooltip]').tooltip({
 				'placement': 'top',
-				'container': 'body'
+				'container': 'body',
+				'trigger': 'manual'
+			}).on("mouseenter", function () {
+				let _this = this;
+				$('[data-toggle=tooltip]').each(function () {
+					if (this !== _this) {
+						$(this).tooltip('hide');
+					}
+				});
+				$(_this).tooltip("show");
+				$(".tooltip").on("mouseleave", function () {
+					$(_this).tooltip('hide');
+				});
+			}).on("mouseleave", function () {
+				let _this = this;
+				setTimeout(function () {
+					if (!$(".tooltip:hover").length) {
+						$(_this).tooltip("hide");
+					}
+				}, 300);
 			});
 		}
 
@@ -1404,7 +1424,7 @@
 						var dec = fixedDecimals;
 						if (head == 'Price')
 							dec += 2;
-						var num = '<span data-toggle="tooltip" title="' + cellValue.toString() + '">' + cellValue.toFixed(dec) + '</span>';
+						var num = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(dec) + '</span>';
 						row$.append($('<td/>').html(num));
 					}
 					else {

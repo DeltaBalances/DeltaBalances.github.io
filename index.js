@@ -960,22 +960,22 @@
 			}, rqid);
 		}
 
-		//prices from etherdelta https endpoint (includes more unlisted tokens)
+		//prices from IDEX https endpoint
 		function retryURL1() {
 
 			$.ajax({
 				dataType: "json",
-				url: _delta.config.apiServer + '/returnTicker',
+				url: 'https://api.idex.market/returnTicker',
 				data: "",
 				success: (result) => {
 					if (requestID <= rqid) {
 						if (result) {
-							parsePrices(result, 'ED');
+							parsePrices(result, 'ID');
 						} else if (loadedBid < 2 && url1Retries < numRetries) {
 							url1Retries++;
 							retryURL1();
 						} else if (url1Retries >= numRetries) {
-							showError("Failed to retrieve EtherDelta Prices after 3 tries. Prices may be less accurate.");
+							showError("Failed to retrieve IDEX Prices after 3 tries. Prices may be less accurate.");
 							loadedBid++;
 							finishedBalanceRequest();
 						}
@@ -989,7 +989,6 @@
 						retryURL1();
 					}
 					else if (url1Retries >= numRetries) {
-						//	showError("Failed to retrieve EtherDelta Prices after 3 tries. Try again (later)");
 						loadedBid++;
 						failedBid++;
 						finishedBalanceRequest();
@@ -999,16 +998,39 @@
 		}
 
 		function parsePrices(result, source) {
-			var results = Object.values(result);
-			for (var i = 0; i < results.length; i++) {
+			let results = Object.values(result);
+			let keys = Object.keys(result);
+			if (source == 'ID') {
+				//map idex token names to addresses
+				keys = keys.map((key) => {
+					let name = key.replace('_ETH', '');
+					const matchingTokens = results.filter(
+						x => x.IDEX && x.IDEX === name);
+
+					if (matchingTokens.length > 0) {
+						return matchingTokens[0];
+					} else {
+						return name;
+					}
+				})
+			}
+
+			for (let i = 0; i < results.length; i++) {
 
 				if (source == 'ED' || source == 'FD') {
-					var token = _delta.uniqueTokens[results[i].tokenAddr];
+					let token = _delta.uniqueTokens[results[i].tokenAddr];
 					if (token && balances[token.addr]) {
 						balances[token.addr][source + 'Bid'] = Number(results[i].bid);
 						balances[token.addr][source + 'Ask'] = Number(results[i].ask);
 					}
-				} else if (source == 'BIN') {
+				} else if (source == 'ID') {
+					let token = _delta.uniqueTokens[keys[i]];
+					if (token && balances[token.addr]) {
+						balances[token.addr][source + 'Bid'] = Number(results[i].highestBid);
+						balances[token.addr][source + 'Ask'] = Number(results[i].lowestAsk);
+					}
+				}
+				else if (source == 'BIN') {
 
 					let priceAddr = _delta.binanceMap[results[i].symbol];
 					if (priceAddr) {
@@ -1338,13 +1360,15 @@
 						sumToken = sumToken.plus(bal.Total);
 					}
 				}
-				else if ((bal.EDBid || bal.EDAsk || bal.FDBid || bal.FDAsk) && bal.Total) {
+				else if ((bal.EDBid || bal.EDAsk || bal.FDBid || bal.FDAsk || bal.IDBid || bal.IDAsk) && bal.Total) {
 
-					//case cade price sources in volume, Binance most accurate price
+					//cascade price sources in volume, Binance most accurate price
 					if (bal.EDBid)
 						bal.Bid = bal.EDBid;
 					if (bal.FDBid && (!bal.EDBid || bal.FDBid > bal.EDBid))
 						bal.Bid = bal.FDBid;
+					if (bal.IDBid)
+						bal.Bid = IDBid;
 					if (bal.BINBid)
 						bal.Bid = bal.BINBid;
 
@@ -1352,6 +1376,8 @@
 						bal.Ask = bal.EDAsk;
 					if (bal.FDAsk && (!bal.EDAsk || bal.FDAsk < bal.EDAsk))
 						bal.Ask = bal.FDAsk;
+					if (bal.IDAsk)
+						bal.Ask = bal.IDAsk;
 					if (bal.BINAsk)
 						bal.Ask = bal.BINAsk;
 

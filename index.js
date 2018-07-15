@@ -1003,14 +1003,14 @@
 			if (source == 'ID') {
 				//map idex token names to addresses
 				keys = keys.map((key) => {
-					let name = key.replace('_ETH', '');
-					const matchingTokens = results.filter(
+					let name = key.replace('ETH_', '');
+					const matchingTokens = _delta.config.customTokens.filter(
 						x => x.IDEX && x.IDEX === name);
 
 					if (matchingTokens.length > 0) {
-						return matchingTokens[0];
+						return matchingTokens[0].addr;
 					} else {
-						return name;
+						return key;
 					}
 				})
 			}
@@ -1368,7 +1368,7 @@
 					if (bal.FDBid && (!bal.EDBid || bal.FDBid > bal.EDBid))
 						bal.Bid = bal.FDBid;
 					if (bal.IDBid)
-						bal.Bid = IDBid;
+						bal.Bid = bal.IDBid;
 					if (bal.BINBid)
 						bal.Bid = bal.BINBid;
 

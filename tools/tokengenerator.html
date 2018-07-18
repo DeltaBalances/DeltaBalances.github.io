@@ -34,6 +34,7 @@
 
 	<script>
 		var customTokens = {};
+        var idexBlock = {};
 
 		function parseMewTokens(array) {
 			for (var i = 0; i < array.length; i++) {
@@ -93,15 +94,20 @@
                         token.name = escapeHtml(EDtoken.name2);
                     }
                     
-                    
-                    token[exchange] = token.symbol;
-                    
+                    if(exchange == 'IDEX' && idexBlock[token.address]) {
+                        token['blockIDEX'] = true;
+                    } else {
+                        token[exchange] = token.symbol;
+                    }
                     
 					if (!customTokens[token.address]) {
 						customTokens[token.address] = token;
 					} else {
-                        if(!customTokens[token.address][exchange]) {
-                            customTokens[token.address][exchange] = token.symbol;
+                        if(exchange == 'IDEX' && idexBlock[token.address]) {
+                            customTokens[token.address]['blockIDEX'] = true;
+                        }
+                        else if(!customTokens[token.address][exchange]) {
+                            customTokens[token.address][exchange] = token.symbol;   
                         }
                         if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
                             customTokens[token.address].name = token.name;
@@ -192,6 +198,13 @@
 			}
 		}
 
+        
+         for(let i = 0; i < idexDelisted.length; i++) {
+            if(idexDelisted[i] && idexDelisted[i].addr) {
+                idexBlock[idexDelisted[i].addr] = true;
+            }
+        }
+        
 		//parse existing custom tokens from offlineCustomTokens (backupTokens.js)
 		parseMewTokens(offlineCustomTokens);
         
@@ -245,6 +258,7 @@
                         outputString = outputString.replace(/"blocked"/g, 'blocked');
                         outputString = outputString.replace(/"killed"/g, 'killed');
                         outputString = outputString.replace(/"spam"/g, 'spam');
+                        outputString = outputString.replace(/"blockIDEX"/g, 'blockIDEX');
 						outputString = outputString.replace(/"Binance"/g, 'Binance');
                         outputString = outputString.replace(/"EtherDelta"/g, 'EtherDelta');
                         outputString = outputString.replace(/"ForkDelta"/g, 'ForkDelta');

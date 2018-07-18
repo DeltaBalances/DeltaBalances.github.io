@@ -2557,10 +2557,15 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             if (x.spam) {
                 token.spam = true;
             }
+            if (x.blockIDEX) {
+                token.blockIDEX = true;
+            }
 
             for (let i = 0; i < _delta.config.listedExchanges.length; i++) {
                 let exchange = _delta.config.listedExchanges[i];
-                if (x[exchange]) {
+                if (x.blockIDEX && exchange == 'IDEX') {
+                    continue;
+                } else if (x[exchange]) {
                     token[exchange] = x[exchange];
                     token.unlisted = false;
                 }
@@ -2661,17 +2666,26 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         for (var i = 0; i < idexConfig.length; i++) {
             var token = idexConfig[i];
             token.addr = token.addr.toLowerCase();
-            token.IDEX = token.name;
-            token.unlisted = false;
-            if (this.uniqueTokens[token.addr]) {
-                this.uniqueTokens[token.addr].IDEX = token.name;
-                this.uniqueTokens[token.addr].unlisted = false;
-                if (token.name2 && !this.uniqueTokens[token.addr].name2) {
-                    this.uniqueTokens[token.addr].name2 = token.name2;
+
+            if (this.uniqueTokens[token.addr] && this.uniqueTokens[token.addr].blockIDEX) {
+                continue;
+            } else {
+                if (!token.blockIDEX) {
+                    token.IDEX = token.name;
+                    token.unlisted = false;
                 }
-            }
-            else {
-                this.uniqueTokens[token.addr] = token;
+                if (this.uniqueTokens[token.addr]) {
+                    if (!token.blockIDEX) {
+                        this.uniqueTokens[token.addr].IDEX = token.name;
+                        this.uniqueTokens[token.addr].unlisted = false;
+                    }
+                    if (token.name2 && !this.uniqueTokens[token.addr].name2) {
+                        this.uniqueTokens[token.addr].name2 = token.name2;
+                    }
+                }
+                else {
+                    this.uniqueTokens[token.addr] = token;
+                }
             }
         }
     } catch (e) {
@@ -4593,7 +4607,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     }
                 }
             }
-            //kyber trade
+            //kyber v1 trade
             else if (unpacked.name === 'ExecuteTrade') {
 
                 //  event ExecuteTrade(address indexed sender, ERC20 src, ERC20 dest, uint actualSrcAmount, uint actualDestAmount);

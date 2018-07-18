@@ -353,10 +353,12 @@
 		var transResult = undefined;
 		var logResult = undefined;
 		var statusResult = undefined;
+		var internalResult = undefined;
 
 		var gotBlockNum = false;
 
 		var transLoaded = 0;
+		const transNumber = 5;
 
 		getTransactionData();
 
@@ -368,18 +370,19 @@
 				if (finished)
 					return;
 				if (result && result.result) {
+					finished = true;
 					handleTransData(result.result);
 				} else {
 					//etherscan failed, try web3
 					_delta.web3s[0].eth.getTransaction(transactionHash, (err, result) => {
 						if (!err && result) {
+							finished = true;
 							handleTransData(result);
 						} else {
 							handleTransData(undefined);
 						}
 					});
 				}
-				finished = true;
 			});
 
 			// if etherscan takes >3 sec, try web3
@@ -402,14 +405,15 @@
 					if (res.blockNumber) {
 						getBlockTime(Number(res.blockNumber));
 						getTransactionReceipt();
+						getInternal();
 					} else {
 						// tx is pending, no need to wait for tx status or logs
-						transLoaded = 4;
-						processTransactions(transResult, undefined, undefined);
+						transLoaded = transNumber;
+						processTransactions(transResult, undefined, undefined, undefined);
 						return;
 					}
 				} else {
-					processTransactions(undefined, undefined, undefined);
+					processTransactions(undefined, undefined, undefined, undefined);
 					return;
 				}
 			}
@@ -430,8 +434,8 @@
 					}
 				}
 				transLoaded++;
-				if (transLoaded >= 4)
-					processTransactions(transResult, statusResult, logResult);
+				if (transLoaded >= transNumber)
+					processTransactions(transResult, statusResult, logResult, internalResult);
 			});
 		}
 
@@ -454,14 +458,14 @@
 						}
 					}
 					transLoaded++;
-					if (transLoaded >= 4)
-						processTransactions(transResult, statusResult, logResult);
+					if (transLoaded >= transNumber)
+						processTransactions(transResult, statusResult, logResult, internalResult);
 				});
 			} else {
 				txDate = blockDates[num];
 				transLoaded++;
-				if (transLoaded >= 4)
-					processTransactions(transResult, statusResult, logResult);
+				if (transLoaded >= transNumber)
+					processTransactions(transResult, statusResult, logResult, internalResult);
 			}
 		}
 
@@ -470,12 +474,22 @@
 				if (result && result.status === '1')
 					statusResult = result.result;
 				transLoaded++;
-				if (transLoaded >= 4)
-					processTransactions(transResult, statusResult, logResult);
+				if (transLoaded >= transNumber)
+					processTransactions(transResult, statusResult, logResult, internalResult);
 			});
 		}
 
-		function processTransactions(tx, txStatus, txLog) {
+		function getInternal() {
+			$.getJSON('https://api.etherscan.io/api?module=account&action=txlistinternal&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
+				if (result && result.status === '1')
+					internalResult = result.result;
+				transLoaded++;
+				if (transLoaded >= transNumber)
+					processTransactions(transResult, statusResult, logResult, internalResult);
+			});
+		}
+
+		function processTransactions(tx, txStatus, txLog, txInternal) {
 			if (!tx) {
 				console.log('error');
 				showError('failed to load transaction from <a href="https://etherscan.io/tx/' + transactionHash + '" + target="_blank"> Etherscan </a>');
@@ -505,9 +519,48 @@
 				rawInput: tx.input,
 			}
 
-			if (!pending) {
+			transaction.internal = [];
+
+			function addTransfer(from, to, val, isInput) {
+				let eth = _delta.setToken(_delta.config.ethAddr);
+				let obj = {
+					'type': 'Transfer',
+					'note': 'Transferred ETH',
+					'token': eth,
+					'amount': val,
+					'from': from.toLowerCase(),
+					'to': to.toLowerCase(),
+					'unlisted': false,
+				};
+				if (isInput) {
+					transaction.input.push(obj);
+				} else {
+					transaction.internal.push(obj);
+				}
+			}
+
+			if (pending) {
+				if (transaction.value.greaterThan(0)) {
+					addTransfer(transaction.from, transaction.to, transaction.value, true);
+				}
+			}
+			else if (!pending) {
 				transaction.gasUsed = Number(txLog.gasUsed);
 				transaction.gasEth = _util.weiToEth(tx.gasPrice).times(txLog.gasUsed);
+
+
+				if (transaction.value.greaterThan(0)) {
+					addTransfer(transaction.from, transaction.to, transaction.value, false);
+				}
+
+				if (txInternal && txInternal.length > 0) {
+					for (let i = 0; i < txInternal.length; i++) {
+						let itx = txInternal[i];
+						let val = _util.weiToEth(itx.value);
+						addTransfer(itx.from, itx.to, val, false);
+					}
+				}
+
 				if (Number(txLog.status) === 1) {
 					transaction.status = 'Completed';
 					transaction.blockNumber = tx.blockNumber;
@@ -649,6 +702,14 @@
 			output: '',
 		}
 		*/
+
+		if (transaction.internal) {
+			if (transaction.output) {
+				transaction.output = transaction.output.concat(transaction.internal);
+			} else {
+				transaction.output = transaction.internal;
+			}
+		}
 
 		//generate messages based on tx 
 		var sum = '';
@@ -851,6 +912,7 @@
 			$('#outputdata').html('Transaction is pending, no output available yet.');
 		else
 			$('#outputdata').html('');
+
 
 
 

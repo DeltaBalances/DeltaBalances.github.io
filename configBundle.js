@@ -439,6 +439,7 @@ module.exports = {
       'OasisDex',
       'AirSwap',
       'Kyber',
+      'Kyber2Proxy',
       'Enclaves',
       'Ethen',
       'Ethex',
@@ -547,7 +548,7 @@ module.exports = {
     hideOpponent: false,
   },
   historyKyber: {
-    exchange: 'Kyber',
+    exchange: ['Kyber', 'Kyber2Proxy'],
     minBlock: 5049196,
     maxBlock: undefined,
     tradeTopic: '0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39', // ExecuteTrade

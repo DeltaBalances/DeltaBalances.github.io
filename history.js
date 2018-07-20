@@ -111,7 +111,7 @@
 	function init() {
 
 		getBlockStorage(); // get cached block dates
-
+        
 		// borrow some ED code for compatibility
 		_delta.startDeltaBalances(false, () => {
 			//if(!autoStart)
@@ -1012,11 +1012,18 @@
 		var filtered = result;
 		var loaded = tableLoaded;
 
-		if (historyConfig.showRelayers || Array.isArray(historyConfig.exchange)) {
+		if (historyConfig.showExchange) {
 			tradeHeaders['Exchange'] = 1;
 		}
 
 		if (!tableLoaded) {
+            if(historyConfig.hideFees) {
+                tradeHeaders['Fee'] = 0;
+                tradeHeaders['Fee in'] = 0;
+            }
+            if(historyConfig.hideOpponent) {
+                tradeHeaders['Opponent'] = 0;
+            }
 			tableHeaders = getColumnHeaders(filtered, tradeHeaders);
 			makeInitTable('#transactionsTable', tableHeaders, transactionsPlaceholder);
 		}

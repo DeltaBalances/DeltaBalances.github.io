@@ -172,17 +172,35 @@
 
 		function parseEthplorer(response) {
 			for (let i = 0; i < response.tokens.length; i++) {
+                let tokenResponse = response.tokens[i];
 				let tok = response.tokens[i].tokenInfo;
 				let addr = tok.address.toLowerCase();
-                if (!customTokens[addr] && tok.symbol && response.tokens[i].balance > 10 && tok.holdersCount > 10 && response.tokens[i].balance < Number(tok.totalSupply)) {
-
-					if (tok.symbol !== tok.name && tok.name !== "") {
-						customTokens[addr] = { symbol: escapeHtml(tok.symbol), address: addr,  decimal: Number(tok.decimals), name: escapeHtml(tok.name) };
-					} else {
-						customTokens[addr] = { symbol: escapeHtml(tok.symbol), address: addr, decimal: Number(tok.decimals) };
-					}
-				} 
-
+                if (!customTokens[addr]){ 
+                
+                    if(tok.symbol && tokenResponse.balance > 10 && tokenResponse.balance < (Number(tok.totalSupply) / 2)) {
+                        
+                        if(tok.price) {
+                            addToken(tok);
+                        }
+                        else if (tokenResponse.totalIn > 0 && tokenResponse.totalOut > 0 && tokenResponse.totalIn !== tokenResponse.totalOut ) {
+                            addToken(tok);
+                        } 
+                        // outdated api?
+                        else if(tok.holdersCount && tok.holdersCount > 10) {
+                            addToken(tok);
+                        } 
+                    }
+                
+                    function addToken(token) {
+                        if (token.symbol !== token.name && token.name !== "") {
+                            customTokens[addr] = { symbol: escapeHtml(token.symbol), address: addr,  decimal: Number(token.decimals), name: escapeHtml(token.name) };
+                        } else {
+                            customTokens[addr] = { symbol: escapeHtml(token.symbol), address: addr, decimal: Number(token.decimals) };
+                        }
+                    }
+                    
+                    
+				}
 				if (customTokens[addr] && !customTokens[addr].name && tok.symbol !== tok.name && tok.name !== "") {
 					customTokens[addr].name = escapeHtml(tok.name);
 				}
@@ -195,7 +213,7 @@
 					  customTokens[addr].fixSymbol = tok.symbol;
 				  }
 				  */
-			}
+			} 
 		}
 
         
@@ -324,7 +342,7 @@
 			});
             
             //token store contract
-            $.getJSON('https://api.ethplorer.io/getAddressInfo/0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208?apiKey='+key).done(function (data) {
+            $.getJSON('https://api.ethplorer.io/getAddressInfo/0x1ce7ae555139c5ef5a57cc8d814a867ee6ee33d8?apiKey='+key).done(function (data) {
 				loaded++;
 				if (data && data.tokens)
 					ethplorerStore = data;

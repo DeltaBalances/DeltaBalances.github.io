@@ -27,7 +27,7 @@
 			contract: undefined
 		},
 		'EtherDelta': {
-			enabled: true,
+			enabled: false,
 			loaded: 0,
 			displayed: 0,
 			contract: _delta.config.exchangeContracts.EtherDelta.addr
@@ -49,6 +49,18 @@
 			loaded: 0,
 			displayed: 0,
 			contract: _delta.config.exchangeContracts.Enclaves.addr
+		},
+		'SingularX': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.Singularx.addr
+		},
+		'EtherC': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.EtherC.addr
 		},
 		'Decentrex': {
 			enabled: false,
@@ -119,6 +131,8 @@
 			IDEX: 0,
 			'Token store': 0,
 			Enclaves: 0,
+			SingularX: 0,
+			EtherC: 0,
 			Decentrex: 0,
 			Ethen: 0,
 			DEXY: 0,
@@ -201,6 +215,26 @@
 				hideError();
 			}
 		});
+
+		$('#exchangeDropdown').on('hidden.bs.select', function (e) {
+			var selected = []
+			selected = $('#exchangeDropdown').val()
+
+			// array of exchange names
+			setTimeout(function () {
+				checkExchange(selected);
+			}, 150);
+
+		});
+
+		//set exchange dropdown
+		let dropdownVal = [];
+		Object.keys(exchanges).forEach(function (key) {
+			if (exchanges[key].enabled) {
+				dropdownVal.push(key);
+			}
+		});
+		$('#exchangeDropdown').selectpicker('val', dropdownVal);
 
 
 		resetExLoadingState();
@@ -320,51 +354,50 @@
 
 	}
 
-	function checkExchange(name) {
-		let id = '#' + name;
-		let boxId = id + 'Box';
+	function checkExchange(selected) {
+		let changed = false;
+		let requiresLoading = false;
 
-		if (name == 'store')
-			name = 'Token store';
-		let enabled = $(id).prop('checked');
+		let keys = Object.keys(exchanges);
+		for (let i = 0; i < keys.length; i++) {
+			let name = keys[i];
+			if (name == 'Wallet')
+				continue;
 
+			let enabled = false;
+			if (selected.length > 0 && selected.indexOf(name) !== -1) {
+				enabled = true;
+			}
 
-		$(boxId).removeClass('box-success');
-		$(boxId).removeClass('box-warning');
-		if (enabled) {
-			$(boxId).addClass('box-success');
-		} else {
-			$(boxId).addClass('box-warning');
-		}
+			if (exchanges[name].enabled !== enabled) {
+				changed = true;
 
-		if (exchanges[name].enabled != enabled) {
-			exchanges[name].enabled = enabled;
-			setBalanceProgress(true);
+				if (lastResult) {
 
-			if (lastResult) {
-				if (!enabled) {
-					//hide loaded exchange, don't reload
-					balanceHeaders[name] = exchanges[name].enabled;
-					finishedBalanceRequest();
-				} else {
-					if (exchanges[name].loaded >= tokenCount) {
-						//show hidden exchange result
-						balanceHeaders[name] = exchanges[name].enabled;
-						finishedBalanceRequest();
-					} else {
-						// load new exchange only, keep old
-						getBalances(true, false);
+					if (enabled && exchanges[name].loaded < tokenCount) {
+						requiresLoading = true;
 					}
 				}
-			} else {
-				remakeEmpty();
 			}
-		} else {
 			exchanges[name].enabled = enabled;
-			remakeEmpty();
+			balanceHeaders[name] = exchanges[name].enabled;
 		}
 
-		setStorage();
+		if (changed) {
+			setBalanceProgress(true);
+			setStorage();
+		}
+
+		if (!changed && !lastResult) {
+			remakeEmpty();
+		}
+		else if (lastResult && changed) {
+			if (!requiresLoading) {
+				finishedBalanceRequest();
+			} else {
+				getBalances(true, false);
+			}
+		}
 
 		function remakeEmpty() {
 
@@ -781,6 +814,8 @@
 				IDEX: 0,
 				'Token store': 0,
 				Enclaves: 0,
+				SingularX: 0,
+				EtherC: 0,
 				Decentrex: 0,
 				Ethen: 0,
 				DEXY: 0,
@@ -1655,10 +1690,10 @@
 					"infoEmpty": "No balances found",
 					"infoFiltered": "(filtered from _MAX_ )"
 				},
-				"drawCallback": function( settings ) {
-					setTimeout(function(){ 
+				"drawCallback": function (settings) {
+					setTimeout(function () {
 						$("[data-toggle=popover]").popover();
-					}, 150);
+					}, 300);
 				}
 			});
 			updateToggleToolbar();
@@ -1768,7 +1803,7 @@
 				var head = headers[colIndex].title;
 
 
-				if (head == 'Total' || head == 'EtherDelta' || head == 'Decentrex' || head == 'Token store' || head == 'IDEX' || head == 'Enclaves' || head == 'DEXY' || head == 'Ethen' || head == 'Wallet' || head == 'Bid' || head == 'Ask' || head == 'Est. ETH') {
+				if (head == 'Total' || head == 'EtherDelta' || head == 'Decentrex' || head == 'Token store' || head == 'IDEX' || head == 'Enclaves' || head == 'DEXY' || head == 'SingularX' || head == 'EtherC' || head == 'Ethen' || head == 'Wallet' || head == 'Bid' || head == 'Ask' || head == 'Est. ETH') {
 					if (cellValue !== "" && cellValue !== undefined) {
 						var dec = fixedDecimals;
 						if (head == 'Bid' || head == 'Ask') {
@@ -1807,7 +1842,7 @@
 		return resultTable;
 	}
 
-	var balanceHeaders = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'IDEX': 1, 'Token store': 1, 'Enclaves': 1, 'Decentrex': 1, 'DEXY': 1, 'Ethen': 1, 'Total': 1, 'Value': 1, 'Bid': 1, 'Ask': 0, 'Est. ETH': 1, 'USD': 0, 'EUR': 0 };
+	var balanceHeaders = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'IDEX': 1, 'Token store': 1, 'Enclaves': 1, 'Decentrex': 1, 'SingularX': 1, 'EtherC': 1, 'DEXY': 0, 'Ethen': 0, 'Total': 1, 'Value': 1, 'Bid': 1, 'Ask': 0, 'Est. ETH': 1, 'USD': 0, 'EUR': 0 };
 
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain

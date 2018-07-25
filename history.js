@@ -350,6 +350,8 @@
 			return;
 		}
 
+		hidePopovers();
+		
 		trigger1 = false;
 		loadedLogs = 0;
 		displayedLogs = false;

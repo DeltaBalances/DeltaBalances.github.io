@@ -690,6 +690,8 @@
 		if (!publicAddr)
 			return;
 
+		hidePopovers();
+
 		requestID++;
 		running = true;
 		runningListed = showListed;
@@ -1653,6 +1655,11 @@
 					"infoEmpty": "No balances found",
 					"infoFiltered": "(filtered from _MAX_ )"
 				},
+				"drawCallback": function( settings ) {
+					setTimeout(function(){ 
+						$("[data-toggle=popover]").popover();
+					}, 150);
+				}
 			});
 			updateToggleToolbar();
 			table1Loaded = true;

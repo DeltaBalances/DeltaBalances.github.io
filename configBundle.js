@@ -45,6 +45,7 @@ module.exports = {
     Dubiex: { addr: '0x7c21d723af0f4594d4f8821aa16bc27c8ea6cec7', name: 'DUBIex ', supportedDex: false },
     Radex: { addr: '0x9462eeb9124c99731cc7617348b3937a8f00b11f', name: 'Radex ', supportedDex: false },
     Joyso: { addr: '0x04f062809b244e37e7fdc21d9409469c989c2342', name: 'Joyso ', supportedDex: false },
+    DexTop: { addr: '0x7600977eb9effa627d6bd0da2e5be35e11566341', name: 'DEx.top', supportedDex: false },
     /* exchange aggregators (no input parsing yet) */
     Totle: { addr: '0xd94c60e2793ad587400d86e4d6fd9c874f0f79ef', name: 'Totle ', supportedDex: true },
     Totle2: { addr: '0x98db9047e80260b407ffbc67543f9a010ef0fc6a', name: 'Totle-OLD ', supportedDex: true },

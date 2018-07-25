@@ -2106,7 +2106,7 @@ let offlineCustomTokens = [
   {symbol:"KOL",address:"0xb9feb59b7eb4df1d7ec129a03a15dcf271f0d795",decimal:18,name:"HRToken"},
   {symbol:"KPCC",address:"0xd5cab6a6060c67642cf2a434050ed48ba83ebb67",decimal:8,name:"King Playerkill China Chain"},
   {symbol:"KPR",address:"0xb5c33f965c8899d255c34cdd2a3efa8abcbb3dea",decimal:18,name:"KPR Coin"},
-  {symbol:"KPT",address:"0x3bb72e05402c45198c0ceb76354205deaa65542c",decimal:18,name:Kyber},
+  {symbol:"KPT",address:"0x3bb72e05402c45198c0ceb76354205deaa65542c",decimal:18,name:"Kyber "},
   {symbol:"KRE",address:"0x896cdbbc5a4bb96c4735b08e7eda0518cffb0b15",decimal:2,name:"kreon"},
   {symbol:"KRI",address:"0xeef8102a0d46d508f171d7323bceffc592835f13",decimal:18,name:"KriosCoin",IDEX:"KRI"},
   {symbol:"KRL",address:"0x464ebe77c293e473b48cfe96ddcf88fcf7bfdac0",decimal:18,name:"Kryll Token",IDEX:"KRL",DDEX:"KRL"},

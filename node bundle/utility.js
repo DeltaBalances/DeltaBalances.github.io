@@ -355,6 +355,27 @@ module.exports = (config) => {
     return url;
   }
 
+  utility.kyberURL = function (tokenObj, html) {
+    var url = "https://kyber.network/swap/eth_";
+    var labelClass = "label-primary";
+
+    if (tokenObj && tokenObj.Kyber) {
+      url += tokenObj.Kyber.toLowerCase();
+    } else {
+      labelClass = 'label-default';
+      url = '';
+    }
+
+    if (html) {
+      if (url == '') {
+        url = '<span class="label ' + labelClass + '">Kyber</span>';
+      } else {
+        url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Kyber <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+      }
+    }
+    return url;
+  }
+
   utility.hashLink = function (hash, html, short) {
     var url = 'https://etherscan.io/tx/' + hash;
     if (!html)

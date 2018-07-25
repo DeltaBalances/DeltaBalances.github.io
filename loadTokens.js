@@ -158,6 +158,44 @@ try {
     console.log('radar relay live tokens loading error ' + err);
 }
 
+
+var kyberConfig = [];
+try {
+
+    let kyberData = sessionStorage.getItem('kyberTokens1');
+    // only get live tokens if we haven't saved them this session already
+    if (kyberData !== undefined && kyberData) {
+        let parsed = JSON.parse(kyberData);
+        if (parsed && parsed.length > 0) {
+            kyberConfig = parsed;
+        }
+    } else {
+
+        // if we have saved data from a previous session, pre-load it
+        let kyberData2 = localStorage.getItem('kyberTokens2');
+        if (kyberData2 !== undefined && kyberData2) {
+            let parsed = JSON.parse(kyberData2);
+            if (parsed && parsed.length > kyberConfig.length) {
+                kyberData2 = parsed;
+            }
+        }
+
+        $.getJSON('https://tracker.kyber.network/api/tokens/supported', function (jsonData) {
+            if (jsonData && jsonData.length > 0) {
+                jsonData = jsonData.filter((x) => { return x.contractAddress !== '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'});
+                kyberConfig = jsonData.map((x) => { return { symbol: x.symbol, address: x.contractAddress, decimals: x.decimals, name: x.name } });
+                let string = JSON.stringify(kyberConfig);
+                sessionStorage.setItem('kyberTokens1', string);
+                localStorage.setItem('kyberTokens2', string);
+            }
+        });
+    }
+} catch (err) {
+    console.log('kyber tokens loading error ' + err);
+}
+
+
+
 var unknownTokenCache = [];
 try {
     let tokenData = localStorage.getItem('unknownTokens1');

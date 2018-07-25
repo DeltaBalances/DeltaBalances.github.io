@@ -169,6 +169,34 @@
 				}
 			}
 		}
+        
+           function parseKyberTokens(array) {
+			for (var i = 0; i < array.length; i++) {
+				let kyberToken = array[i];
+                if (kyberToken) {
+                
+                    if(!kyberToken.decimals)
+                        kyberToken.decimals = 0;
+                        
+                    let token = {
+                        symbol : escapeHtml(kyberToken.symbol),
+                        address : kyberToken.address.toLowerCase(),
+                        decimal : Number(kyberToken.decimals),
+                        name: escapeHtml(kyberToken.name)
+                    };
+                    token.Kyber = token.symbol;
+                    
+					if (!customTokens[token.address]) {
+						customTokens[token.address] = token;
+					} else {
+                        if(!customTokens[token.address].Kyber) {
+                            customTokens[token.address].Kyber = token.symbol;
+                        }
+                    }
+				}
+			}
+		}
+
 
 		function parseEthplorer(response) {
 			for (let i = 0; i < response.tokens.length; i++) {
@@ -232,6 +260,7 @@
         parseEDTokens(idexOfflineTokens, 'IDEX');
         parseDDEXTokens(ddexOfflineTokens);
         parseRadarTokens(radarOfflineTokens);
+        parseKyberTokens(kyberOfflineTokens);
         
 		//get list of tokens from myetherwallet & mycrypto
 		function getCustomTokens() {
@@ -283,6 +312,7 @@
                         outputString = outputString.replace(/"IDEX"/g, 'IDEX');
                         outputString = outputString.replace(/"DDEX"/g, 'DDEX');
                         outputString = outputString.replace(/"Radar"/g, 'Radar');
+                        outputString = outputString.replace(/"Kyber"/g, 'Kyber');
 						outputString = outputString.replace(/{ /g, '{');
 						outputString = outputString.replace(/ }/g, '}');
 						outputString = outputString.replace(/, /g, ',');

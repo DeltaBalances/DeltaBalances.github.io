@@ -2721,6 +2721,34 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     }
 
     try {
+        //kyber listed tokens
+        let kyberTokens = [];
+        if (kyberConfig && kyberConfig.length > 0) {
+            kyberTokens = kyberConfig;
+        }
+        for (var i = 0; i < kyberTokens.length; i++) {
+            var tok = kyberTokens[i];
+            if (tok) {
+                let token = {};
+                token.addr = tok.address.toLowerCase();
+                token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
+                token.decimals = Number(tok.decimals);
+                token.unlisted = false;
+                token.Kyber = token.name.toUpperCase();
+                if (this.uniqueTokens[token.addr]) {
+                    this.uniqueTokens[token.addr].Kyber = token.Kyber;
+                    this.uniqueTokens[token.addr].unlisted = false;
+                }
+                else {
+                    this.uniqueTokens[token.addr] = token;
+                }
+            }
+        }
+    } catch (e) {
+        console.log('failed to parse Kyber token list');
+    }
+
+    try {
         //unknown tokens saved from etherscan responses
         for (var i = 0; i < unknownTokenCache.length; i++) {
             var token = unknownTokenCache[i];
@@ -5620,6 +5648,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                         + '</td><td>' + utility.ddexURL(token, true)
                         + '</td></tr><tr><td>' + utility.tokenStoreURL(token, true)
                         + '</td><td>' + utility.radarURL(token, true)
+                        + '</td></tr><tr><td>' + utility.kyberURL(token, true)
                         + '</td><td></td></tr></table>';
 
 
@@ -27731,6 +27760,27 @@ module.exports = (config) => {
         url = '<span class="label ' + labelClass + '">RadarRelay</span>';
       } else {
         url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">RadarRelay <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+      }
+    }
+    return url;
+  }
+
+  utility.kyberURL = function (tokenObj, html) {
+    var url = "https://kyber.network/swap/eth_";
+    var labelClass = "label-primary";
+
+    if (tokenObj && tokenObj.Kyber) {
+      url += tokenObj.Kyber.toLowerCase();
+    } else {
+      labelClass = 'label-default';
+      url = '';
+    }
+
+    if (html) {
+      if (url == '') {
+        url = '<span class="label ' + labelClass + '">Kyber</span>';
+      } else {
+        url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Kyber <i class="fa fa-external-link" aria-hidden="true"></i></a>';
       }
     }
     return url;

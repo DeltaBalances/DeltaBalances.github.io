@@ -857,7 +857,7 @@
 										// other trade
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 									}
-								} else if (unpacked.name == 'takeSellOrder' || unpacked.name == 'takeBuyOrder' || unpacked.name == 'makeSellorder' || unpacked.name == 'makeBuyOrder') {
+								} else if (unpacked.name == 'takeSellOrder' || unpacked.name == 'takeBuyOrder' || unpacked.name == 'makeSellOrder' || unpacked.name == 'makeBuyOrder') {
 
 									if (obj.maker == myAddr) {// maker trade from etherscan token event
 										if (obj.type == 'Taker Buy') {

@@ -48,10 +48,13 @@
 
 
 	var displayFilter = {
-		Trades: 1,
-		DepWith: 1,
+		'Maker trade': 1,
+		'Taker trade': 1,
+		Deposit: 1,
+		Withdraw: 1,
 		Cancel: 0,
-		Wrap: 1,
+		'Wrap ETH': 1,
+		'Unwrap ETH': 1,
 		Approve: 0,
 		Transfer: 1
 	}
@@ -152,6 +155,29 @@
 			}
 		});
 
+		$('#typesDropdown').on('changed.bs.select', function (e) {
+			//  $('#typesDropdown').on('hidden.bs.select', function (e) {
+			var selected = []
+			selected = $('#typesDropdown').val()
+
+			// array of exchange names
+			setTimeout(function () {
+				toggleFilter(selected);
+			}, 100);
+
+		});
+
+		//set types dropdown
+		let dropdownVal = [];
+		let displFilt = Object.keys(displayFilter);
+		for (let i = 0; i < displFilt.length; i++) {
+			let displ = displayFilter[displFilt[i]];
+			if (displ) {
+				dropdownVal.push(displFilt[i]);
+			}
+		}
+		$('#typesDropdown').selectpicker('val', dropdownVal);
+
 		placeholderTable();
 
 		// url hash #0x..
@@ -214,29 +240,52 @@
 
 
 
-	function toggleFilter(str) {
-		displayFilter[str] = !displayFilter[str];
+	function toggleFilter(selected) {
 
-		if (lastResult2) {
-			makeTable2(lastResult2);
-		} else {
-			placeholderTable();
+		let changed = false;
+		let displFilt = Object.keys(displayFilter);
+		for (let i = 0; i < displFilt.length; i++) {
+
+			let enabled = 0;
+			if (selected.length > 0 && selected.indexOf(displFilt[i]) !== -1) {
+				enabled = 1;
+			}
+			if (displayFilter[displFilt[i]] !== enabled) {
+				displayFilter[displFilt[i]] = enabled;
+				changed = true;
+			}
+		}
+
+		if (changed) {
+			if (lastResult2) {
+				makeTable2(lastResult2);
+			} else {
+				placeholderTable();
+			}
 		}
 	}
 
 	function checkFilter(transType) {
 		if (transType) {
-			if (transType.indexOf('aker') !== -1 || transType.indexOf('up to') !== -1 || transType == 'Buy offer' || transType == 'Sell offer' || transType == 'Trade') {
-				return displayFilter.Trades;
+			if (transType.indexOf('Maker') !== -1 || transType == 'Buy offer' || transType == 'Sell offer') {
+				return displayFilter['Maker trade'];
+			} else if (transType.indexOf('Taker') !== -1 || transType.indexOf('up to') !== -1 || transType == 'Trade') {
+				return displayFilter['Taker trade'];
 			}
-			else if (transType === 'Deposit' || transType === 'Withdraw') {
-				return displayFilter.DepWith;
+			else if (transType === 'Deposit') {
+				return displayFilter.Deposit;
+			}
+			else if (transType === 'Withdraw') {
+				return displayFilter.Withdraw;
 			}
 			else if (transType.indexOf('Cancel') !== -1) {
 				return displayFilter.Cancel;
 			}
-			else if (transType.indexOf('rap') !== -1) {
-				return displayFilter.Wrap;
+			else if (transType.indexOf('Wrap ') !== -1) {
+				return displayFilter['Wrap ETH'];
+			}
+			else if (transType.indexOf('Unwrap ') !== -1) {
+				return displayFilter['Unwrap ETH'];
 			}
 			else if (transType === 'Approve') {
 				return displayFilter.Approve;
@@ -1305,14 +1354,13 @@
 				"language": {
 					"search": '<i class="dim fa fa-search"></i>',
 					"searchPlaceholder": "Type, Exchange, Token, Hash",
-					"zeroRecords": "No transactions loaded",
+					"zeroRecords": "No transactions found",
 					"info": "Showing _TOTAL_ transactions",
 					"infoEmpty": "No transactions found",
 					"infoFiltered": "(filtered from _MAX_ )"
 				},
 			});
 			table2Loaded = true;
-			activateFilters();
 		}
 
 		recentTable.clear();
@@ -1320,7 +1368,7 @@
 			for (let i = 0; i < dataSet.length; i++) {
 				recentTable.rows.add(dataSet[i]);
 			}
-			recentTable.columns.adjust().fixedColumns().relayout().draw();;
+			recentTable.columns.adjust().fixedColumns().relayout().draw();
 			$("[data-toggle=popover]").popover();
 			$('[data-toggle=tooltip]').unbind();
 			$('[data-toggle=tooltip]').tooltip({
@@ -1346,6 +1394,8 @@
 					}
 				}, 300);
 			});
+		} else {
+			recentTable.columns.adjust().fixedColumns().relayout().draw();
 		}
 
 		trigger_2 = transLoaded >= 3;
@@ -1360,49 +1410,6 @@
 		else {
 			hideLoading(trigger_2);
 		}
-	}
-
-	function activateFilters() {
-		$("div.toolbar").html(`
-			<div class="btn-group" data-toggle="buttons">
-				<label id="Trades" class="btn btn-xs btn-flat btn-multi">
-				<input type="checkbox" value=""> Trades
-				</label>
-				<label id="DepWith" class="btn btn-xs btn-flat btn-multi">
-				<input type="checkbox"> Deposit-Withdraw
-				</label>
-				<label id="Cancel" class="btn btn-xs btn-flat btn-multi">
-				<input type="checkbox"> Cancel
-				</label>
-				<label id="Wrap" class="btn btn-xs btn-flat btn-multi">
-				<input type="checkbox"> Wrap ETH
-				</label>
-				<label id="Approve" class="btn btn-xs btn-flat btn-multi">
-				<input type="checkbox"> Approve
-				</label>
-				<label id="Transfer" class="btn btn-xs btn-flat btn-multi">
-				<input type="checkbox"> Transfer
-				</label>
-			</div>`
-		);
-
-		let displFilt = Object.keys(displayFilter);
-		for (let i = 0; i < displFilt.length; i++) {
-			let displ = displayFilter[displFilt[i]];
-			let id = '#' + displFilt[i];
-			if (displ) {
-				$(id).addClass('active');
-			} else {
-				$(id).removeClass('active');
-			}
-		}
-
-		$('#Trades').on("click", () => { toggleFilter('Trades'); });
-		$('#DepWith').on("click", () => { toggleFilter('DepWith'); });
-		$('#Cancel').on("click", () => { toggleFilter('Cancel'); });
-		$('#Wrap').on("click", () => { toggleFilter('Wrap'); });
-		$('#Approve').on("click", () => { toggleFilter('Approve'); });
-		$('#Transfer').on("click", () => { toggleFilter('Transfer'); });
 	}
 
 	// Builds the HTML Table out of myList.

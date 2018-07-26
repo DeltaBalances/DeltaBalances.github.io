@@ -366,14 +366,25 @@
 			var finished = false;
 
 			// get tx data & input from etherscan
-			$.getJSON('https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
-				if (finished)
-					return;
-				if (result && result.result) {
-					finished = true;
-					handleTransData(result.result);
+			_util.getURL('https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (err, result) => {
+
+				if (!err && result) {
+					if (finished)
+						return;
+					if (result && result.result) {
+						finished = true;
+						handleTransData(result.result);
+					} else {
+						web3GetTransaction();
+					}
 				} else {
-					//etherscan failed, try web3
+					web3GetTransaction();
+				}
+			});
+
+			function web3GetTransaction() {
+				//etherscan failed, try web3
+				if (!finished) {
 					_delta.web3s[0].eth.getTransaction(transactionHash, (err, result) => {
 						if (!err && result) {
 							finished = true;
@@ -383,18 +394,11 @@
 						}
 					});
 				}
-			});
+			}
 
 			// if etherscan takes >3 sec, try web3
 			setTimeout(function () {
-				if (!finished) {
-					_delta.web3s[0].eth.getTransaction(transactionHash, (err, result) => {
-						if (!err && result) {
-							finished = true;
-							handleTransData(result);
-						}
-					});
-				}
+				web3GetTransaction();
 			}, 3000);
 
 			function handleTransData(res) {
@@ -470,23 +474,31 @@
 		}
 
 		function getTxStatus() {
-			$.getJSON('https://api.etherscan.io/api?module=transaction&action=getstatus&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
-				if (result && result.status === '1')
-					statusResult = result.result;
+			_util.getURL('https://api.etherscan.io/api?module=transaction&action=getstatus&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (err, result) => {
+
+				if (!err && result) {
+					if (result && result.status === '1')
+						statusResult = result.result;
+				}
 				transLoaded++;
 				if (transLoaded >= transNumber)
 					processTransactions(transResult, statusResult, logResult, internalResult);
 			});
+
 		}
 
 		function getInternal() {
-			$.getJSON('https://api.etherscan.io/api?module=account&action=txlistinternal&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (result) => {
-				if (result && result.status === '1')
-					internalResult = result.result;
+			_util.getURL('https://api.etherscan.io/api?module=account&action=txlistinternal&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (err, result) => {
+
+				if (!err && result) {
+					if (result && result.status === '1')
+						internalResult = result.result;
+				}
 				transLoaded++;
 				if (transLoaded >= transNumber)
 					processTransactions(transResult, statusResult, logResult, internalResult);
 			});
+
 		}
 
 		function processTransactions(tx, txStatus, txLog, txInternal) {
@@ -549,19 +561,21 @@
 				transaction.gasEth = _util.weiToEth(tx.gasPrice).times(txLog.gasUsed);
 
 
-				if (transaction.value.greaterThan(0)) {
-					addTransfer(transaction.from, transaction.to, transaction.value, false);
-				}
-
-				if (txInternal && txInternal.length > 0) {
-					for (let i = 0; i < txInternal.length; i++) {
-						let itx = txInternal[i];
-						let val = _util.weiToEth(itx.value);
-						addTransfer(itx.from, itx.to, val, false);
-					}
-				}
-
 				if (Number(txLog.status) === 1) {
+
+					if (transaction.value.greaterThan(0)) {
+						addTransfer(transaction.from, transaction.to, transaction.value, false);
+					}
+
+					if (txInternal && txInternal.length > 0) {
+						for (let i = 0; i < txInternal.length; i++) {
+							let itx = txInternal[i];
+							let val = _util.weiToEth(itx.value);
+							addTransfer(itx.from, itx.to, val, false);
+						}
+					}
+
+
 					transaction.status = 'Completed';
 					transaction.blockNumber = tx.blockNumber;
 					transaction.blockHash = tx.blockHash;

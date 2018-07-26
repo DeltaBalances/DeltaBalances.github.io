@@ -1,0 +1,4 @@
+This is a Brave Payments publisher verification file.
+
+Domain: deltabalances.github.io
+Token: 6cedfeb1f4b8565ced64663a9d677c824f41cd7df170eb3b35d242f06c264292

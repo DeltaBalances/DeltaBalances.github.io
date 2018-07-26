@@ -1588,12 +1588,45 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 };
             }
             //Bancor token conversions 
-            else if (unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized' || (unpacked.name === 'convert' && unpacked.params.length == 4)) {
-                //  function quickConvert(IERC20Token[] _path, uint256 _amount, uint256 _minReturn)
-                // function quickConvertPrioritized(IERC20Token[] _path, uint256 _amount, uint256 _minReturn, uint256 _block, uint256 _nonce, uint8 _v, bytes32 _r, bytes32 _s)
-                //convert(IERC20Token _fromToken, IERC20Token _toToken, uint256 _amount, uint256 _minReturn)
+            else if (unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized' || (unpacked.name === 'convert' && unpacked.params.length == 4)
+                || unpacked.name == 'convertFor' || unpacked.name == 'convertForPrioritized2' || unpacked.name == 'convertForPrioritized2'
+                || unpacked.name == 'claimAndConvert' || unpacked.name == 'claimAndConvertFor'
+            ) {
+                /* basic bancor converter
+                    function quickConvert(IERC20Token[] _path, uint256 _amount, uint256 _minReturn)
+                    function quickConvertPrioritized(IERC20Token[] _path, uint256 _amount, uint256 _minReturn, uint256 _block, uint256 _nonce, uint8 _v, bytes32 _r, bytes32 _s)
+                    function convert(IERC20Token _fromToken, IERC20Token _toToken, uint256 _amount, uint256 _minReturn)
+                */
 
-                if (unpacked.name === 'convert') {
+                /* bancor quick convertor/ bancor network
+                    function convert(IERC20Token[] _path, uint256 _amount, uint256 _minReturn) public payable returns (uint256);
+                    function convertFor(IERC20Token[] _path, uint256 _amount, uint256 _minReturn, address _for) public payable returns (uint256);
+                    function convertForPrioritized2(
+                        IERC20Token[] _path,
+                        uint256 _amount,
+                        uint256 _minReturn,
+                        address _for,
+                        uint256 _block,
+                        uint8 _v,
+                        bytes32 _r,
+                        bytes32 _s)
+                        public payable returns (uint256);
+
+                    function convertForPrioritized(
+                        IERC20Token[] _path,
+                        uint256 _amount,
+                        uint256 _minReturn,
+                        address _for,
+                        uint256 _block,
+                        uint256 _nonce,
+                        uint8 _v,
+                        bytes32 _r,
+                        bytes32 _s)
+                        public payable returns (uint256);
+                */
+
+                // everything else has (path[], amount, minRate), so convert this one to that format
+                if (unpacked.name === 'convert' && unpacked.params[0].name == '_fromToken') {
                     let params2 = [];
                     params2[0] = { value: [unpacked.params[0].value, unpacked.params[1].value] };
                     params2[1] = { value: unpacked.params[2].value };
@@ -1610,13 +1643,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                 var exchange = 'Bancor';
 
-                if (utility.isWrappedETH(tokenGet.addr) || (!utility.isWrappedETH(tokenGive.addr) && utility.isNonEthBase(tokenGive.addr))) // get eth  -> sell
+                if (utility.isWrappedETH(tokenGet.addr) || (!utility.isWrappedETH(tokenGive.addr) && utility.isNonEthBase(tokenGive.addr)) || (!utility.isWrappedETH(tokenGive.addr) && tokenGet.name == "BNT")) // get eth  -> sell
                 {
                     tradeType = 'Buy';
                     token = tokenGive;
                     base = tokenGet;
                 }
-                else if (utility.isWrappedETH(tokenGive.addr) || (!utility.isWrappedETH(tokenGet.addr) && utility.isNonEthBase(tokenGet.addr))) // buy
+                else if (utility.isWrappedETH(tokenGive.addr) || (!utility.isWrappedETH(tokenGet.addr) && utility.isNonEthBase(tokenGet.addr)) || (!utility.isWrappedETH(tokenGet.addr) && tokenGive.name == "BNT")) // buy
                 {
                     tradeType = 'Sell';
                     token = tokenGet;
@@ -2539,11 +2572,11 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     takerToken.name = "??? RelayBNT";
                 }
 
-                if (utility.isWrappedETH(takerToken.addr) || (!utility.isWrappedETH(makerToken.addr) && makerToken.name === "BNT") || (smartRelays[takerToken.addr] || takerToken.name === "??? RelayBNT")) { // get eth  -> sell
+                if (utility.isWrappedETH(takerToken.addr) || (!utility.isWrappedETH(makerToken.addr) && takerToken.name === "BNT") || (smartRelays[takerToken.addr] || takerToken.name === "??? RelayBNT")) { // get eth  -> sell
                     tradeType = 'Buy';
                     token = makerToken;
                     base = takerToken;
-                } else if (utility.isWrappedETH(makerToken.addr) || (!utility.isWrappedETH(takerToken.addr) && takerToken.name === "BNT") || (smartRelays[makerToken.addr] || makerToken.name === "??? RelayBNT")) { // buy
+                } else if (utility.isWrappedETH(makerToken.addr) || (!utility.isWrappedETH(takerToken.addr) && makerToken.name === "BNT") || (smartRelays[makerToken.addr] || makerToken.name === "??? RelayBNT")) { // buy
                     tradeType = 'Sell';
                     token = takerToken;
                     base = makerToken;

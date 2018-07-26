@@ -917,7 +917,9 @@
 									}
 									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 								}
-								else if (unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized') {
+								else if (unpacked.name === 'convert' || unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized'
+									|| unpacked.name === 'convertFor' || unpacked.name == 'convertForPrioritized' || unpacked.name === 'convertForPrioritized2') {
+
 									if (obj.type == 'Buy up to') {
 										// did send ETH along with tx and base is wrapped ether
 										if (obj.base && _util.isWrappedETH(obj.base.addr) && val.greaterThan(0)) {
@@ -1121,7 +1123,7 @@
 						else if (outputHashes[transs.Hash].Type == 'Unwrap ETH' && transs.Type === 'Sell up to' && transs.Exchange.indexOf('Bancor') !== -1) {
 							transs.Base = outputHashes[transs.Hash].Base;
 							outputHashes[transs.Hash] = transs;
-						} else if (outputHashes[transs.Hash].Type == 'Sell up to' && transs.Type === 'Unwrap ETH' && outputHashes[transs.Hash].indexOf('Bancor') !== -1) {
+						} else if (outputHashes[transs.Hash].Type == 'Sell up to' && transs.Type === 'Unwrap ETH' && outputHashes[transs.Hash].Exchange.indexOf('Bancor') !== -1) {
 							outputHashes[transs.Hash].Base = transs.Base;
 						}
 						// (trade?) returning ETH, seen as unwrap ETH by internal transaction result (generiv version of bancor above)

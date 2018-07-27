@@ -881,7 +881,7 @@
 								} else if (unpacked.name == 'buy' && unpacked.params.length == 2) {
 									trans = createOutputTransaction(obj.type, undefined, undefined, undefined, undefined, tx.hash, tx.timeStamp, undefined, undefined, tx.isError === '0', exchange);
 								}
-								else if (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders' || unpacked.name === 'cancel' || unpacked.name == 'cancelAllSellorders' || unpacked.name == 'cancelAllBuyOrders') {
+								else if (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders' || unpacked.name === 'cancel' || unpacked.name == 'cancelAllSellOrders' || unpacked.name == 'cancelAllBuyOrders') {
 									let cancelAmount = '';
 									if (obj.baseAmount)
 										cancelAmount = obj.baseAmount;

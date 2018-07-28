@@ -1,5 +1,5 @@
 {
-	//set var historyConfig in html
+	//set var exchanges in html
 
 	// shorthands
 	var _delta = bundle.DeltaBalances;
@@ -48,14 +48,14 @@
 	var endblock = 0;
 	var transactionDays = 1;
 	var useDaySelector = true;
-	var minBlock = historyConfig.minBlock;
-
-	//3154197; //https://etherscan.io/block/3154196  etherdelta_2 creation
-	//const minBlock tokenstore 4097028
-	//minblock decentrex 3767901 
+	var minBlock = _delta.config.history.EtherDelta.minBlock; // init to oldes known exchange contract, change later
 
 	var uniqueBlocks = {}; //date for each block
 	var blockDates = {};
+
+	//var exchanges = ['EtherDelta'];  defined in html file
+	var historyConfig = undefined;
+	var newConfig = undefined;
 
 	// placeholder
 	var transactionsPlaceholder = [
@@ -110,8 +110,10 @@
 
 	function init() {
 
+
+
 		getBlockStorage(); // get cached block dates
-        
+
 		// borrow some ED code for compatibility
 		_delta.startDeltaBalances(false, () => {
 			//if(!autoStart)
@@ -147,14 +149,18 @@
 			$('#metamaskAddress').html(metamaskAddr.slice(0, 16));
 		}
 
-		$('#minBlockLink').html('<a href="https://etherscan.io/tx/' + historyConfig.createTx + '" target="_blank">' + minBlock + '</a>');
 
-		fillMonthSelect();
-		let daysDisabled = $('#days').prop('disabled');
-		if (!daysDisabled)
-			setDaySelector();
-		else
-			setMonthSelector();
+
+		$('#exchangeDropdown').on('changed.bs.select', function (e) {
+			var selected = []
+			selected = $('#exchangeDropdown').val();
+
+			setExchanges(selected);
+		});
+
+		setExchanges();
+
+
 
 		setBlockProgress(0, 0, 0, 0, 0);
 		changeTypes();
@@ -169,6 +175,8 @@
 				return true;
 			}
 		});
+
+
 
 		$(window).resize(function () {
 			hidePopovers();
@@ -230,8 +238,10 @@
 		}
 	}
 
-	function disableInput(disable) {
-		$('#refreshButton').prop('disabled', disable);
+	function disableInput(disable, exceptSearch) {
+		if (!exceptSearch) {
+			$('#refreshButton').prop('disabled', disable);
+		}
 		// $("#address").prop("disabled", disable);
 		$('#loadingTransactions').addClass('dim');
 		$("#loadingTransactions").prop("disabled", disable);
@@ -296,6 +306,116 @@
 		}
 	}
 
+
+	function setExchanges(newExchanges) {
+
+		if (newExchanges && newExchanges !== exchanges) {
+			if (exchanges.length == 0) {
+				disableInput(false);
+			}
+			if (newExchanges && newExchanges.length == 0) {
+				disableInput(true, true);
+			}
+			exchanges = newExchanges;
+		}
+
+		if (exchanges.length == 0) {
+		}
+		else if (exchanges.length == 1) {
+			historyConfig = _delta.config.history[exchanges[0]];
+		} else {
+
+			let currentConfig = {
+				contract: [], //contract variable in exchangeContracts
+				minBlock: 99999999999999999999999999,
+				tradeTopic: [],
+				withdrawTopic: [],
+				depositTopic: [],
+				createTx: '',
+				userIndexed: true,
+				showExchange: false,
+				hideFees: true,
+				hideOpponent: true,
+			};
+
+			if (exchanges.length > 1) {
+				currentConfig.showExchange = true;
+			}
+
+			// make a combined historyConfig of the selected exchanges
+			exchanges.forEach(function (name) {
+				let exchangeConfig = _delta.config.history[name];
+				if (exchangeConfig) {
+					if (exchangeConfig.minBlock < currentConfig.minBlock) {
+						currentConfig.minBlock = exchangeConfig.minBlock;
+						currentConfig.createTx = exchangeConfig.createTx;
+					}
+
+					let topics = ['contract', 'tradeTopic', 'withdrawTopic', 'depositTopic'];
+					topics.forEach(function (topic) {
+						if (exchangeConfig[topic]) {
+							if (Array.isArray(exchangeConfig[topic])) {
+								currentConfig[topic] = currentConfig[topic].concat(exchangeConfig[topic]);
+							} else {
+								currentConfig[topic].push(exchangeConfig[topic]);
+							}
+						}
+
+
+					});
+
+					if (!exchangeConfig.hideFees) {
+						currentConfig.hideFees = false;
+					}
+					if (!exchangeConfig.hideOpponent) {
+						currentConfig.hideOpponent = false;
+					}
+					if (!exchangeConfig.userIndexed) {
+						currentConfig.userIndexed = false;
+					}
+				}
+			});
+
+			let topics = ['contract', 'tradeTopic', 'withdrawTopic', 'depositTopic'];
+
+			if (currentConfig.tradeTopic.length > 1)
+				currentConfig.tradeTopic = removeDuplicates(currentConfig.tradeTopic);
+			if (currentConfig.depositTopic.length > 1)
+				currentConfig.depositTopic = removeDuplicates(currentConfig.depositTopic);
+			if (currentConfig.withdrawTopic.length > 1)
+				currentConfig.withdrawTopic = removeDuplicates(currentConfig.withdrawTopic);
+
+			function removeDuplicates(a) {
+				var seen = {};
+				return a.filter(function (item) {
+					return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+				});
+			}
+
+			historyConfig = currentConfig;
+			minBlock = historyConfig.minBlock;
+		}
+
+		try {
+			let dropdownVal = [];
+			exchanges.forEach(function (name) {
+				dropdownVal.push(name);
+			});
+			$('#exchangeDropdown').selectpicker('val', dropdownVal);
+		} catch (e) {
+
+		}
+
+		$('#minBlockLink').html('<a href="https://etherscan.io/tx/' + historyConfig.createTx + '" target="_blank">' + minBlock + '</a>');
+
+		fillMonthSelect();
+		let daysDisabled = $('#days').prop('disabled');
+		if (!daysDisabled)
+			setDaySelector();
+		else
+			setMonthSelector();
+	}
+
 	function myClick() {
 		if (running)
 			requestID++;
@@ -308,10 +428,12 @@
 		hideHint();
 		//disableInput(true);
 		clearDownloads();
+		setExchanges();
 
 		// validate address
-		if (!autoStart)
+		if (!autoStart) {
 			publicAddr = getAddress();
+		}
 
 		autoStart = false;
 		if (publicAddr) {
@@ -351,13 +473,19 @@
 		}
 
 		hidePopovers();
-		
+
 		trigger1 = false;
 		loadedLogs = 0;
 		displayedLogs = false;
 		disableInput(true);
 		blockReqs = 0;
 		blockLoaded = 0;
+
+		if (exchanges.length == 0) {
+			disableInput(false);
+			running = false;
+			return;
+		}
 
 		showLoading(true);
 
@@ -649,11 +777,11 @@
 				topics = [historyConfig.tradeTopic];
 		}
 		else if (typeMode == 1) { // Funds
-			if (historyConfig == _delta.config.historyEthen) { //ethen.market only
+			if (historyConfig == _delta.config.history.ETHEN) { //ethen.market only
 				let innerTopics = historyConfig.withdrawTopic.concat(historyConfig.depositTopic);
 				topics = [innerTopics];
 			}
-			else if (historyConfig !== _delta.config.historyEnclaves) { // all other withdraw/deposit exchanges
+			else if (historyConfig !== _delta.config.history.Enclaves) { // all other withdraw/deposit exchanges
 				topics = [[historyConfig.depositTopic, historyConfig.withdrawTopic]];
 			} else { // enclavesdex only
 				let myTopicAddr = "0x000000000000000000000000" + publicAddr.slice(2).toLowerCase();
@@ -661,7 +789,7 @@
 			}
 		}
 		else { // trades & funds
-			if (historyConfig == _delta.config.historyEthen) { //ethen.market only
+			if (historyConfig == _delta.config.history.ETHEN) { //ethen.market only
 				let innerTopics = historyConfig.tradeTopic.concat(historyConfig.withdrawTopic.concat(historyConfig.depositTopic));
 				topics = [innerTopics];
 			} else { // all other deposit/withdraw exchanges
@@ -681,13 +809,13 @@
 
 		var tradeLogResult = [];
 		var contractAddr = '';
-		if (Array.isArray(historyConfig.exchange)) {
+		if (Array.isArray(historyConfig.contract)) {
 			contractAddr = [];
-			for (let i = 0; i < historyConfig.exchange.length; i++) {
-				contractAddr.push(_delta.config.exchangeContracts[historyConfig.exchange[i]].addr);
+			for (let i = 0; i < historyConfig.contract.length; i++) {
+				contractAddr.push(_delta.config.exchangeContracts[historyConfig.contract[i]].addr);
 			}
 		} else {
-			contractAddr = _delta.config.exchangeContracts[historyConfig.exchange].addr;
+			contractAddr = _delta.config.exchangeContracts[historyConfig.contract].addr;
 		}
 
 		var reqAmount = 0;
@@ -820,11 +948,11 @@
 			{
 				// Ethen.market only, deal with 2 events that need to be combined
 				// mark the hash if one of 2 events contains your address
-				if (historyConfig.exchange === 'Ethen' ||
-					(Array.isArray(historyConfig.exchange) && historyConfig.exchange !== 'Ethen')
+				if (historyConfig == _delta.config.history.ETHEN ||
+					(Array.isArray(historyConfig.contract) && historyConfig.contract.indexOf('Ethen') !== -1)
 				)
 					outputLogs.map((log) => {
-						if (log.address === _delta.config.exchangeContracts.Ethen.Addr) {
+						if (log.address === _delta.config.exchangeContracts.Ethen.addr) {
 							if (log.data.indexOf(addrrr) !== -1) {
 								ethenOrders[log.transactionHash] = true;
 							}
@@ -833,13 +961,13 @@
 			}
 
 			//kyber check only topic1
-			if (historyConfig == _delta.config.historyKyber) {
+			if (historyConfig == _delta.config.history.Kyber) {
 				filteredLogs = outputLogs.filter((log) => {
 					return log.topics[historyConfig.userTopic].indexOf(addrrr) !== -1;
 				});
 			}
 			// oasis, check only topic 2 && 3
-			else if (historyConfig == _delta.config.historyOasisDex) {
+			else if (historyConfig == _delta.config.history.OasisDex) {
 				filteredLogs = outputLogs.filter((log) => {
 					return log.topics[2].indexOf(addrrr) !== -1 || log.topics[3].indexOf(addrrr) !== -1;
 				});
@@ -897,7 +1025,11 @@
 						unpacked.name != 'WithdrawToken' &&
 						unpacked.name != 'WithdrawEther' &&
 						unpacked.name != 'TakeSellOrder' &&
-						unpacked.name != 'TakeBuyOrder'
+						unpacked.name != 'TakeBuyOrder' &&
+						unpacked.name != 'Buy' &&
+						unpacked.name != 'Sell' &&
+						unpacked.name != 'FillBuyOrder' &&
+						unpacked.name != 'FillSellOrder'
 					)
 				) {
 					continue;
@@ -1018,14 +1150,16 @@
 			tradeHeaders['Exchange'] = 1;
 		}
 
+		if (historyConfig.hideFees) {
+			tradeHeaders['Fee'] = 0;
+			tradeHeaders['Fee in'] = 0;
+		}
+		if (historyConfig.hideOpponent) {
+			tradeHeaders['Opponent'] = 0;
+		}
+
 		if (!tableLoaded) {
-            if(historyConfig.hideFees) {
-                tradeHeaders['Fee'] = 0;
-                tradeHeaders['Fee in'] = 0;
-            }
-            if(historyConfig.hideOpponent) {
-                tradeHeaders['Opponent'] = 0;
-            }
+
 			tableHeaders = getColumnHeaders(filtered, tradeHeaders);
 			makeInitTable('#transactionsTable', tableHeaders, transactionsPlaceholder);
 		}
@@ -1046,7 +1180,6 @@
 			} else {
 				localStorage.removeItem('address');
 			}
-
 		}
 	}
 
@@ -1151,10 +1284,6 @@
 				},
 			});
 			tableLoaded = true;
-			for (let i = 0; i < tableHeaders.length; i++) {
-				let enabled = tradeHeaders[tableHeaders[i].title];
-				let column = historyTable.column(i).visible(enabled);
-			}
 		}
 
 		historyTable.clear();
@@ -1162,7 +1291,13 @@
 			for (let i = 0; i < dataSet.length; i++) {
 				historyTable.rows.add(dataSet[i]);
 			}
-			historyTable.columns.adjust().fixedColumns().relayout().draw();;
+
+			for (let i = 0; i < Object.keys(tradeHeaders).length; i++) {
+				let enabled = tradeHeaders[tableHeaders[i].title];
+				let column = historyTable.column(i).visible(enabled);
+			}
+
+			historyTable.columns.adjust().fixedColumns().relayout().draw();
 			$("[data-toggle=popover]").popover();
 			$('[data-toggle=tooltip]').unbind();
 			$('[data-toggle=tooltip]').tooltip({
@@ -1188,6 +1323,12 @@
 					}
 				}, 300);
 			});
+		} else {
+			for (let i = 0; i < Object.keys(tradeHeaders); i++) {
+				let enabled = tradeHeaders[tableHeaders[i].title];
+				let column = historyTable.column(i).visible(enabled);
+			}
+			historyTable.columns.adjust().fixedColumns().relayout().draw();
 		}
 
 		if (displayedLogs)
@@ -1324,7 +1465,7 @@
 		return resultTable;
 	}
 
-	var tradeHeaders = { 'Exchange': 0, 'Type': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'Base': 1, 'Total': 1, 'Hash': 1, 'Date': 1, 'Opponent': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Info': 1 };
+	var tradeHeaders = { 'Exchange': 1, 'Type': 1, 'Token': 1, 'Amount': 1, 'Price': 1, 'Base': 1, 'Total': 1, 'Hash': 1, 'Date': 1, 'Opponent': 1, 'Fee': 1, 'Fee in': 1, 'Block': 1, 'Info': 1 };
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
 	// all records.
@@ -1389,7 +1530,7 @@
 		var count = 0;
 		//Create and append the options
 		for (var i = 0; i < array.length; i++) {
-			if (array[i].blockTo >= minBlock && (!historyConfig.maxBlock || array[i].blockFrom <= historyConfig.maxBlock)) {
+			if (array[i].blockTo >= minBlock /*&& (!historyConfig.maxBlock || array[i].blockFrom <= historyConfig.maxBlock)*/) {
 				count++;
 				var option = document.createElement("option");
 				option.value = i;
@@ -1475,7 +1616,14 @@
 		a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 		a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvstring);
 		a.target = '_blank';
-		a.download = name + historyConfig.exchange + "_Trades_" + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+
+		let filename = name;
+		if (exchanges.length == 1)
+			filename += exchanges[0];
+		else
+			filename += 'DEX';
+		filename += "_Trades_" + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+		a.download = filename;
 		dl.appendChild(a);
 	}
 
@@ -1485,7 +1633,12 @@
 		a.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i>';
 		a.href = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvstring);
 		a.target = '_blank';
-		a.download = name + historyConfig.exchange + "_Funds_" + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+		let filename = name;
+		if (exchanges.length == 1)
+			filename += exchanges[0];
+		else
+			filename += 'DEX';
+		a.download = filename + "_Funds_" + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
 		dl.appendChild(a);
 	}
 

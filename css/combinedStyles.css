@@ -968,3 +968,10 @@ th, td {
   display:none;
 }
 
+.DTFC_LeftBodyLiner {
+  overflow-x: hidden;
+}
+
+.DTFC_RightBodyLiner {
+  overflow-x: hidden;
+}

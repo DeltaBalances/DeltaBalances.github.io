@@ -441,198 +441,174 @@ module.exports = {
     { m: "Jun 2018", blockFrom: 5710964, blockTo: 5883490 },
   ],
 
-  historyAll: {
-    exchange: [
-      'EtherDelta',
-      'Decentrex',
-      'TokenStore',
-      '0x',
-      'OasisDex',
-      'AirSwap',
-      'Kyber',
-      'Kyber2Proxy',
-      'Enclaves',
-      'Ethen',
-      'Ethex',
-      // 'Singularx',
-      // 'EtherC',
-    ],
-    minBlock: 3154197,
-    maxBlock: undefined,
-    tradeTopic: [
-      '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d', //EtherDelta, Decentrex
-      '0x3314c351c2a2a45771640a1442b843167a4da29bd543612311c031bbfb4ffa98', //TokenStore
-      '0x0d0b9391970d9a25552f37d436d2aae2925e2bfe1b2a923754bada030c498cb3', //0x
-      '0x3383e3357c77fd2e3a4b30deea81179bc70a795d053d14d5b7f2f01d0fd4596f', //oasis
-      '0xe59c5e56d85b2124f5e7f82cb5fcc6d28a4a241a9bdd732704ac9d3b6bfc98ab', //airswap
-      '0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39', //kyber
-      '0x7b6c917cd708d6f749ab415a0f1aa5ced6110d03141d28e5b75e216ecb4e79f7', //enclaves
-      '0x165223f17116d321e4ef371cbdb122aa350ce59db46ff8f575874758c14a3ef0', // Ethen 1/2 'Order'
-      '0xee7e85974085b8a74acdea8330a9e8c09680dccea6f6df360491edf22a27cc3b', // Ethen 2/2 'Trade'
-      '0x4a42a397fcad5d4d60ebf2e7cf663489e687e9c6d2d2cf518488fc78044815ba', // Ethex take sell
-      '0x8de9ee05a363c847bda3ed15fc9011be60b55c7cf2e7c024c173859ed2d3760c', // Ethex take buy
-    ],
-    withdrawTopic: undefined,
-    depositTopic: undefined,
-    createTx: '0xc10fc67499a037b6c2f14ae0c63b659b05bd7b553378202f96e777dd4843130f',
-    userIndexed: false,
-    showExchange: true,
-    hideFees: false,
-    hideOpponent: false,
-  },
-  historyEtherDelta: {
-    exchange: 'EtherDelta',
-    minBlock: 3154197,
-    maxBlock: undefined,
-    tradeTopic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
-    withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
-    depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
-    createTx: '0xc10fc67499a037b6c2f14ae0c63b659b05bd7b553378202f96e777dd4843130f',
-    userIndexed: false,
-    showExchange: false,
-    hideFees: false,
-    hideOpponent: false,
-  },
-  historyDecentrex: {
-    exchange: 'Decentrex',
-    minBlock: 3767902,
-    maxBlock: 4832686,
-    tradeTopic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
-    withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
-    depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
-    createTx: '0x1b2ff86bbf91feb9ef7f5310dd258137e034d65f6e99ea432fa98a933a2ffecd',
-    userIndexed: false,
-    showExchange: false,
-    hideFees: false,
-    hideOpponent: false,
-  },
-  historyTokenStore: {
-    exchange: 'TokenStore',
-    minBlock: 4097029,
-    maxBlock: undefined,
-    tradeTopic: '0x3314c351c2a2a45771640a1442b843167a4da29bd543612311c031bbfb4ffa98',
-    withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
-    depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
-    createTx: '0x386439acefbf00018b318f283a9ebc6185c483ff6738117243dba40fc1b42bb6',
-    userIndexed: false,
-    showExchange: false,
-    hideFees: false,
-    hideOpponent: false,
-  },
-  history0x: {
-    exchange: '0x',
-    minBlock: 4145578,
-    maxBlock: undefined,
-    tradeTopic: '0x0d0b9391970d9a25552f37d436d2aae2925e2bfe1b2a923754bada030c498cb3',
-    withdrawTopic: undefined,
-    depositTopic: undefined,
-    createTx: '0x4ba480054e660dd81dea5d9ffcdc12a355650762d6997f181c9fe2ec6fa96f6e',
-    userIndexed: false, // only if maker
-    showExchange: true,
-    hideFees: false,
-    hideOpponent: false,
-  },
-  historyOasisDex: {
-    exchange: 'OasisDex',
-    minBlock: 4751582,
-    maxBlock: undefined,
-    tradeTopic: '0x3383e3357c77fd2e3a4b30deea81179bc70a795d053d14d5b7f2f01d0fd4596f', // LogTake
-    withdrawTopic: undefined,
-    depositTopic: undefined,
-    createTx: '0xdfe4f91325cd74cce7d3f2d53cc0592af09ee74a58935523b404a02c1db9165f',
-    userIndexed: false,
-    showExchange: false,
-    hideFees: false,
-    hideOpponent: false,
-  },
-  historyAirSwap: {
-    exchange: 'AirSwap',
-    minBlock: 4349701,
-    maxBlock: undefined,
-    tradeTopic: '0xe59c5e56d85b2124f5e7f82cb5fcc6d28a4a241a9bdd732704ac9d3b6bfc98ab', //Fill
-    withdrawTopic: undefined,
-    depositTopic: undefined,
-    createTx: '0xb5ddd56f449b623f1073535154356849deb8d37cf89140c9d6c07f14a04bc1a2',
-    userIndexed: false,
-    showExchange: false,
-    hideFees: true,
-    hideOpponent: false,
-  },
-  historyKyber: {
-    exchange: ['Kyber', 'Kyber2Proxy'],
-    minBlock: 5049196,
-    maxBlock: undefined,
-    tradeTopic: '0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39', // ExecuteTrade
-    withdrawTopic: undefined,
-    depositTopic: undefined,
-    createTx: '0x4f76c7f8627440a0fdedd50866f17e1b6a99255479dc8dce6be800c86e8f6e54',
-    userIndexed: true,
-    userTopic: 1,
-    showExchange: false,
-    hideFees: true,
-    hideOpponent: true,
-  },
-  historyEnclaves: {
-    exchange: 'Enclaves',
-    minBlock: 5446248,
-    maxBlock: undefined,
-    tradeTopic: '0x7b6c917cd708d6f749ab415a0f1aa5ced6110d03141d28e5b75e216ecb4e79f7',
-    withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
-    depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
-    createTx: '0x9f314254a972db7d6967d929c3e576240b2bbfb7b24ff5b38ca73f83cb49c072',
-    userIndexed: false,
-    showExchange: false,
-    hideFees: false,
-    hideOpponent: false,
-  },
-  historyEthen: {
-    exchange: 'Ethen',
-    minBlock: 5354266,
-    maxBlock: undefined,
-    tradeTopic: [
-      '0x165223f17116d321e4ef371cbdb122aa350ce59db46ff8f575874758c14a3ef0', // Ethen 1/2 'Order'
-      '0xee7e85974085b8a74acdea8330a9e8c09680dccea6f6df360491edf22a27cc3b', // Ethen 2/2 'Trade'
-    ],
-    withdrawTopic: ['0xfd68f27313402be52d2f46b6d391b7b8657000a3062853a4be930f1281072a01', '0xa69fc39b702a6e8195370ae2252cc11b4445837cc4abe15ac39123f2f2d8770d'],
-    depositTopic: ['0xbb01c612a93e37305a5f1f7b8ed63ea61211be444f722915b9dc827c0bdbffcc', '0x20d6bac8359f33d79581bfd2b0457cb189fda6d90fed287ddc9f2ba3eb124b67'],
-    createTx: '0x9fc7d3e77c02fb00c537640114369ec5f1fbf748ac69a819c2d6dddbf08279b1',
-    userIndexed: false,
-    showExchange: false,
-    hideFees: false,
-    hideOpponent: false,
-  },
-  historyEthex: {
-    exchange: 'Ethex',
-    minBlock: 5026534,
-    maxBlock: undefined,
-    tradeTopic: [
-      '0x4a42a397fcad5d4d60ebf2e7cf663489e687e9c6d2d2cf518488fc78044815ba', // take sell
-      '0x8de9ee05a363c847bda3ed15fc9011be60b55c7cf2e7c024c173859ed2d3760c', // take buy
-    ],
-    withdrawTopic: undefined,
-    depositTopic: undefined,
-    createTx: '0x7c50c240caa6aceb49d5d315bf959387f0d092b972185b000f1e4e77d4789d77',
-    userIndexed: false,
-    showExchange: false,
-    hideFees: false,
-    hideOpponent: false,
-  },
-  historyEasyTrade: {
-    exchange: ['EasyTrade', 'EasyTrade2'],
-    minBlock: 5045834,
-    maxBlock: undefined,
-    tradeTopic: [
-      '0x4c5de51a00fa52b3d883d5627b5d614583a2f5eec10c63c6efe8a6f1f68b11e3', // Buy (v2)
-      '0x2182e4add8250752f872eda9b48eab6b84aa81f99ee69c557acfbf103828083c', // Sell (v2)
-      '0xe26e8d84f7ed98fa72d63fa1c1214ede1ac33f01853fc7ecba14153893fc75f5', // FillSellOrder
-      '0xa6ddcc9603775cbdbc6af5fc55608e5b392f9c04a446106e0fe78e12813640bd', // FillBuyOrder
-    ],
-    withdrawTopic: undefined,
-    depositTopic: undefined,
-    createTx: '0x88c95f4369aba78edda75389faaa1d80c93e3a20f9b23da385ad221598151c5a',
-    userIndexed: false,
-    showExchange: false,
-    hideFees: true,
-    hideOpponent: true,
-  },
+  history: {
+    EtherDelta: {
+      contract: 'EtherDelta', //contract variable in exchangeContracts
+      minBlock: 3154197,
+      tradeTopic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
+      withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
+      depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
+      createTx: '0xc10fc67499a037b6c2f14ae0c63b659b05bd7b553378202f96e777dd4843130f',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: false,
+      hideOpponent: false,
+    },
+    Decentrex: {
+      contract: 'Decentrex',
+      minBlock: 3767902,
+      tradeTopic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
+      withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
+      depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
+      createTx: '0x1b2ff86bbf91feb9ef7f5310dd258137e034d65f6e99ea432fa98a933a2ffecd',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: false,
+      hideOpponent: false,
+    },
+    'Token store': {
+      contract: 'TokenStore',
+      minBlock: 4097029,
+      tradeTopic: '0x3314c351c2a2a45771640a1442b843167a4da29bd543612311c031bbfb4ffa98',
+      withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
+      depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
+      createTx: '0x386439acefbf00018b318f283a9ebc6185c483ff6738117243dba40fc1b42bb6',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: false,
+      hideOpponent: false,
+    },
+    '0x Protocol': {
+      contract: '0x',
+      minBlock: 4145578,
+      tradeTopic: '0x0d0b9391970d9a25552f37d436d2aae2925e2bfe1b2a923754bada030c498cb3',
+      withdrawTopic: undefined,
+      depositTopic: undefined,
+      createTx: '0x4ba480054e660dd81dea5d9ffcdc12a355650762d6997f181c9fe2ec6fa96f6e',
+      userIndexed: false, // only if maker
+      showExchange: true,
+      hideFees: false,
+      hideOpponent: false,
+    },
+    OasisDex: {
+      contract: 'OasisDex',
+      minBlock: 4751582,
+      tradeTopic: '0x3383e3357c77fd2e3a4b30deea81179bc70a795d053d14d5b7f2f01d0fd4596f', // LogTake
+      withdrawTopic: undefined,
+      depositTopic: undefined,
+      createTx: '0xdfe4f91325cd74cce7d3f2d53cc0592af09ee74a58935523b404a02c1db9165f',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: true,
+      hideOpponent: false,
+    },
+    AirSwap: {
+      contract: 'AirSwap',
+      minBlock: 4349701,
+      tradeTopic: '0xe59c5e56d85b2124f5e7f82cb5fcc6d28a4a241a9bdd732704ac9d3b6bfc98ab', //Fill
+      withdrawTopic: undefined,
+      depositTopic: undefined,
+      createTx: '0xb5ddd56f449b623f1073535154356849deb8d37cf89140c9d6c07f14a04bc1a2',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: true,
+      hideOpponent: false,
+    },
+    Kyber: {
+      contract: ['Kyber', 'Kyber2Proxy'],
+      minBlock: 5049196,
+      tradeTopic: '0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39', // ExecuteTrade
+      withdrawTopic: undefined,
+      depositTopic: undefined,
+      createTx: '0x4f76c7f8627440a0fdedd50866f17e1b6a99255479dc8dce6be800c86e8f6e54',
+      userIndexed: true,
+      userTopic: 1,
+      showExchange: false,
+      hideFees: true,
+      hideOpponent: true,
+    },
+    Enclaves: {
+      contract: 'Enclaves',
+      minBlock: 5446248,
+      tradeTopic: '0x7b6c917cd708d6f749ab415a0f1aa5ced6110d03141d28e5b75e216ecb4e79f7',
+      withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
+      depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
+      createTx: '0x9f314254a972db7d6967d929c3e576240b2bbfb7b24ff5b38ca73f83cb49c072',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: false,
+      hideOpponent: false,
+    },
+    ETHEN: {
+      contract: 'Ethen',
+      minBlock: 5354266,
+      tradeTopic: [
+        '0x165223f17116d321e4ef371cbdb122aa350ce59db46ff8f575874758c14a3ef0', // Ethen 1/2 'Order'
+        '0xee7e85974085b8a74acdea8330a9e8c09680dccea6f6df360491edf22a27cc3b', // Ethen 2/2 'Trade'
+      ],
+      withdrawTopic: ['0xfd68f27313402be52d2f46b6d391b7b8657000a3062853a4be930f1281072a01', '0xa69fc39b702a6e8195370ae2252cc11b4445837cc4abe15ac39123f2f2d8770d'],
+      depositTopic: ['0xbb01c612a93e37305a5f1f7b8ed63ea61211be444f722915b9dc827c0bdbffcc', '0x20d6bac8359f33d79581bfd2b0457cb189fda6d90fed287ddc9f2ba3eb124b67'],
+      createTx: '0x9fc7d3e77c02fb00c537640114369ec5f1fbf748ac69a819c2d6dddbf08279b1',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: false,
+      hideOpponent: false,
+    },
+    ETHEX: {
+      contract: 'Ethex',
+      minBlock: 5026534,
+      tradeTopic: [
+        '0x4a42a397fcad5d4d60ebf2e7cf663489e687e9c6d2d2cf518488fc78044815ba', // take sell
+        '0x8de9ee05a363c847bda3ed15fc9011be60b55c7cf2e7c024c173859ed2d3760c', // take buy
+      ],
+      withdrawTopic: undefined,
+      depositTopic: undefined,
+      createTx: '0x7c50c240caa6aceb49d5d315bf959387f0d092b972185b000f1e4e77d4789d77',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: false,
+      hideOpponent: false,
+    },
+    EasyTrade: {
+      contract: ['EasyTrade', 'EasyTrade2'],
+      minBlock: 5045834,
+      tradeTopic: [
+        '0x4c5de51a00fa52b3d883d5627b5d614583a2f5eec10c63c6efe8a6f1f68b11e3', // Buy (v2)
+        '0x2182e4add8250752f872eda9b48eab6b84aa81f99ee69c557acfbf103828083c', // Sell (v2)
+        '0xe26e8d84f7ed98fa72d63fa1c1214ede1ac33f01853fc7ecba14153893fc75f5', // FillSellOrder
+        '0xa6ddcc9603775cbdbc6af5fc55608e5b392f9c04a446106e0fe78e12813640bd', // FillBuyOrder
+      ],
+      withdrawTopic: undefined,
+      depositTopic: undefined,
+      createTx: '0x88c95f4369aba78edda75389faaa1d80c93e3a20f9b23da385ad221598151c5a',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: true,
+      hideOpponent: true,
+    },
+    SingularX: {
+      contract: 'Singularx', 
+      minBlock: 4504709,
+      tradeTopic: '0x6effdda786735d5033bfad5f53e5131abcced9e52be6c507b62d639685fbed6d',
+      withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
+      depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
+      createTx: '0x3693cdf7af88c0ccc01f32dddde09e2012afb598a0c6913cb7d730e0a04cfb3f',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: false,
+      hideOpponent: false,
+    },
+    EtherC: {
+      contract: 'EtherC', 
+      minBlock: 5474977,
+      tradeTopic: '0x68381874bf7a1a19bfeecb18abbaa22f0fc7892cfec46e7dd4ea9b3688419d18',
+      withdrawTopic: '0xf341246adaac6f497bc2a656f546ab9e182111d630394f0c57c710a59a2cb567',
+      depositTopic: '0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7',
+      createTx: '0x1d1e714a8ec7c0657e70822b8f83778779e3073c010324c9ff2271fb7e859d5c',
+      userIndexed: false,
+      showExchange: false,
+      hideFees: false,
+      hideOpponent: false,
+    }
+  }
 };

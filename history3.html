@@ -36,7 +36,7 @@
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
   <script> 
-    var historyConfig = bundle.DeltaBalances.config.historyDecentrex;
+    var exchanges = ['Decentrex'];
   </script>
   <script src="history.js"></script>
 
@@ -307,8 +307,8 @@
                       <li class="list-group-item" style="background-color:inherit; border:none;">
                         <form id="blockSelector">
                           <ul class="list-unstyled">
-                            <li style="display:none;">
-                              <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" disabled>
+                            <li>
+                              <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()">
                               <label for="r0"> The last
                                 <input disabled class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;"
                                   onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (14s per block)</label>

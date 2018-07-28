@@ -23,6 +23,7 @@
 
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
   <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
+  <script src="js/bootstrap-select.min.js"></script>
 
   <!-- JS socketIO  for exchange prices -->
   <!--<script src="js/socket.io.js" defer></script>-->
@@ -35,9 +36,9 @@
   <!--  config excluded from bundle -->
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
-  <script> 
-    var historyConfig = bundle.DeltaBalances.config.historyAll;
-  </script>
+  <script>
+    var exchanges = ['EtherDelta', '0x Protocol'];
+   </script>
   <script src="history.js"></script>
 
 </head>
@@ -297,6 +298,28 @@
                   </div>
                   <br>
                 </div>
+                 <div class="col-md-12 col-lg-8 noPadM">
+                    <h4>Select exchanges</h4>
+                    <div class="form-group">
+                      <select id="exchangeDropdown" data-actions-box="true" data-width="100%" data-none-selected-text="Click to select one or more exchange(s)" class="selectpicker"
+                        multiple>
+                        <option data-icon="icon-etherdelta" data-subtext="ForkDelta">EtherDelta</option>
+                         <option data-icon="icon-zrx" data-subtext="(RadarRelay, DDEX, Paradex, etc.)">0x Protocol</option>
+                         <option data-icon="icon-airswap" >AirSwap</option>
+                         <option data-icon="icon-kyber">Kyber</option>
+                        <option data-icon="icon-tokenstore">Token store</option>
+                        <option data-icon="icon-enclaves">Enclaves</option>
+                        <option data-icon="icon-oasis" data-subtext="(not OasisDirect)">OasisDex</option>
+                        <option data-icon="icon-link">ETHEX</option>
+                        <option data-icon="icon-link">EasyTrade</option>
+                        <option data-icon="icon-enclaves">ETHEN</option>
+                        <option data-icon="icon-enclaves">SingularX</option>
+                        <option data-icon="icon-enclaves">EtherC</option>
+                        <option data-icon="icon-decentrex" data-subtext="(Discontinued)">Decentrex</option>
+                      </select>
+                    </div>
+
+                </div>
                 <div class="col-md-12 noPadM">
                   <div class="col-md-5 noPad" style="overflow:hidden;">
                     <h4 class="hidden">Operation types</h4>
@@ -352,8 +375,7 @@
                   </div>
                   <div class="col-md-7 noPad" style="overflow:hidden;">
                     <h4>Info</h4>
-                    This is the combined trade history for all supported Ethereum exchanges.
-                    <br> For a faster experience, use the history for a specific exchange.
+                        For a faster experience, select as few exchanges as possible.
                     <span class="visible-xs">
                       <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
                       <br>
@@ -363,8 +385,8 @@
                     <br> Trades are retrieved from the blockchain using Infura.
                     <br>Large block ranges will take a long time to load.
                     <br>
-                    <br> History is limited to trades with base (W)ETH or DAI, starting at block
-                    <span id="minBlockLink"></span>
+                    <br> History is limited to trades with base (W)ETH or DAI. <br>
+                    Minimum block for current selection: <span id="minBlockLink"></span>
                     <br>
 
                   </div>

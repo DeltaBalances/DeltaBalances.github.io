@@ -4405,9 +4405,12 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     let makerFee = new BigNumber(0);
                     const ether1 = new BigNumber(1000000000000000000); // 1 ether in wei
 
-                    if (exchange == 'EtherDelta ' || exchange == 'Decentrex ' || exchange == 'Token store ') {
+                    let contractList = this.config.exchangeContracts;
+                    if (exchange == contractList.EtherDelta.name || exchange == contractList.Decentrex.name || exchange == contractList.TokenStore.name
+                        || exchange == contractList.Singularx.name || exchange == contractList.EtherC.name
+                    ) {
                         takerFee = new BigNumber(3000000000000000); //0.3% fee in wei
-                    } else if (exchange == 'Enclaves ') {
+                    } else if (exchange == contractList.Enclaves.name) {
                         let exchangeNum = Number(unpacked.events[6].value);
 
                         //etherdelta proxy

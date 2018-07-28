@@ -1884,6 +1884,53 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                 }
             }
+            // EasyTrade v1 & v2
+            else if (unpacked.name == 'createBuyOrder' || unpacked.name == 'createSellOrder' || unpacked.name == 'sell' || unpacked.name == 'buy') {
+                //createBuyOrder(address token, uint256 tokensTotal, uint8[] exchanges, address[5][] orderAddresses, uint256[6][] orderValues, uint256[] exchangeFees, uint8[] v, bytes32[] r, bytes32[] s)
+                //createSellOrder(address token, uint256 tokensTotal, uint256 ethersTotal, uint8[] exchanges, address[5][] orderAddresses, uint256[6][] orderValues, uint256[] exchangeFees, uint8[] v, bytes32[] r, bytes32[] s)
+
+                //sell(address tradeable, uint256 volume, uint256 volumeEth, bytes ordersData, address destinationAddr, address affiliate)
+                //buy(address tradeable, uint256 volume, bytes ordersData, address destinationAddr, address affiliate)
+
+                let base = this.setToken(this.config.ethAddr);
+                let token = this.setToken(unpacked.params[0].value);
+                let tradeType = '';
+
+                let rawETH = undefined;
+                if (unpacked.name == 'sell' || unpacked.name == 'createSellOrder') {
+                    rawETH = new BigNumber(unpacked.params[2].value);
+                    tradeType = 'Sell';
+                } else {
+                    rawETH = new BigNumber(tx.value);
+                    tradeType = 'Buy';
+                }
+
+                let exchange = '';
+                let addrName = this.addressName(txTo);
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                }
+
+                if (base && token) {
+
+                    let tokenAmount = utility.weiToToken(unpacked.params[1].value, token);
+                    let baseAmount = utility.weiToEth(rawETH);
+
+                    return {
+                        'type': tradeType + ' up to',
+                        'exchange': exchange,
+                        'note': utility.addressLink(txFrom, true, true) + ' iniated a trade thorugh an exchange aggregator.',
+                        'token': token,
+                        'amount': tokenAmount,
+                        'price': '',
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        'taker': txFrom,
+                    };
+                }
+            }
+
         } else {
             return undefined;
         }
@@ -3308,7 +3355,81 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     }
                 }
             }
-            // Order ?
+            // EasyTrade v1 & v2
+            else if ((unpacked.name == 'Buy' || unpacked.name == 'Sell' || unpacked.name == 'FillBuyOrder' || unpacked.name == 'FillSellOrder') && unpacked.events.length == 7) {
+                // 	FillBuyOrder FillSellOrder (address account, address token, uint256 tokens, uint256 ethers, uint256 tokensObtained, uint256 ethersSpent, uint256 ethersRefunded)       
+                //	Buy Sell (address account, address destinationAddr, address traedeable, uint256 volume, uint256 volumeEth, uint256 volumeEffective, uint256 volumeEthEffective)
+
+                let offset = 0;
+                if (unpacked.name.indexOf('Fill') == -1) {
+                    offset = 1;
+                }
+
+                let taker = unpacked.events[0].value.toLowerCase();
+                let maker = unpacked.address.toLowerCase();
+                let buyer = '';
+                let seller = '';
+                let tradeType = '';
+                let transType = 'Taker'
+
+                if (unpacked.name == 'Buy' || unpacked.name == 'FillBuyOrder') {
+                    tradeType = 'Buy';
+                    buyer = taker;
+                    seller = maker;
+                } else {
+                    tradeType = 'Sell';
+                    seller = taker;
+                    buyer = maker;
+                }
+
+
+
+                let base = this.setToken(this.config.ethAddr);
+                let token = this.setToken(unpacked.events[1 + offset].value);
+
+                let exchange = '';
+                let addrName = this.addressName(unpacked.address);
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                }
+
+
+                if (token && base) {
+                    let tokenAmount = utility.weiToToken(unpacked.events[4 + offset].value, token);
+                    let rawBaseAmount = new BigNumber(unpacked.events[5 + offset].value);
+                    let baseAmount = utility.weiToToken(rawBaseAmount, base);
+
+                    var price = new BigNumber(0);
+                    if (tokenAmount.greaterThan(0)) {
+                        price = baseAmount.div(tokenAmount);
+                    }
+
+                    let fee = new BigNumber(0);
+
+                    return {
+                        'type': transType + ' ' + tradeType,
+                        'exchange': exchange,
+                        'note': utility.addressLink(taker, true, true) + 'traded through an exchange aggregator',
+                        'token': token,
+                        'amount': tokenAmount,
+                        'price': price,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        //  'maker': maker,
+                        //  'taker': taker,
+                        'buyer': buyer,
+                        'seller': seller,
+                        'feeCurrency': '',
+                        'fee': '',
+                        'transType': transType,
+                        'tradeType': tradeType,
+                    };
+                }
+
+            }
+
+            // ED onchain-Order ?
         } else {
             return { 'error': 'unknown event output' };
         }

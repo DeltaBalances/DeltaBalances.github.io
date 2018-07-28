@@ -273,6 +273,17 @@ sell
 ###### cancel sell order
 ?
 
+## EasyTrade
+###### sell v1
+`https://etherscan.io/tx/0x867473bed096e09953b1405026857feac1474124b1f9713c311c98a1ef321151`
+###### buy v1
+`https://etherscan.io/tx/0xd7603ab401bfba6c642e6a62012fdae3afb4f530a97fe60fcc842d55e82a9390`
+ 
+###### buy v2
+`https://etherscan.io/tx/0xaa03715ff5da837364f1b2e4d4b4914b64fadb2b41a666afaa36b1d735794ba5`
+###### sell 2
+`https://etherscan.io/tx/0x666662cf93f8deb6543fe03818c115467ad1edc193cd81c56c2dd5847cf2dc8f`
+
 ## Totle
 ###### buy on both Radar and EtherDelta
 `https://etherscan.io/tx/0xdf1f3bf6085cad619e5e9645d9bfa8c4eb1036b0211c0da9fdb5d82317a64ab4`
@@ -280,7 +291,7 @@ sell
 
 ## ETHERC
 ###### cancelOrder  
-
+`https://etherscan.io/tx/0x84a2ac132c86299f831c121e2998da2135794624ca584813518e9126e5aa9ce2`
 
 ###### depositToken  
 `https://etherscan.io/tx/0x6f3d21227d4bfa2f9152fc767fea33b069f8c70f724818301827b84f1725c304`

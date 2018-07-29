@@ -353,39 +353,47 @@
                 <div class="col-md-12 noPadM">
                   <ul class="list-unstyled">
                     <li>
-                      Total Value:
+
                       <li>
-                        <select id="fiatSelect" onchange="selectFiat()" style="display:inline; width:125px;" class="form-control">
-                          <option value="0">ETH</option>
-                          <option value="1" selected>ETH & USD</option>
-                          <option value="2">ETH & EUR</option>
-                        </select>
-                      </li>
-                      Price estimate:
-                      <li>
-                        <select id="priceSelect" onchange="selectPrice()" style="display:inline; width:125px;" class="form-control">
-                          <option value="0" selected>Highest Bid</option>
-                          <option value="1">Lowest Ask</option>
-                        </select>
+                        <div class="form-group" style="float:left;Padding-right: 45px;">
+                          Total Value:
+                          <br>
+                          <select id="fiatSelect" onchange="selectFiat()" data-width="125px" class="selectpicker">
+                            <option value="0">ETH</option>
+                            <option value="1" selected>ETH & USD</option>
+                            <option value="2">ETH & EUR</option>
+                          </select>
+                        </div>
+                        <div class="form-group" style="float:left;">
+                          Price estimate:
+                          <br>
+                          <select id="priceSelect" onchange="selectPrice()" data-width="125px" class="selectpicker">
+                            <option value="0" selected>Highest Bid</option>
+                            <option value="1">Lowest Ask</option>
+                          </select>
+                        </div>
                       </li>
                       <li class="hidden">
                         <input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero">
                         <label for="zero">Hide zero balances</label>
                       </li>
                       <li>
+                        <div style="clear:both;"></div>
                         <br>
                         <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
                         <label for="decimals">Show more decimals</label>
                       </li>
 
                   </ul>
+
                 </div>
               </div>
               <!-- /.box-body -->
             </div>
             <!-- /.box -->
           </div>
-
+        </div>
+        <div class="row">
           <div class="col-md-12 col-lg-10">
             <h4> Load deposited DEX balances: </h4>
           </div>

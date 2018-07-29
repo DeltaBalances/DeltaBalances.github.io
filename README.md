@@ -1,8 +1,9 @@
 # [DeltaBalances.github.io](https://deltabalances.github.io)
 A community tool to make decentralized exchanges a little easier.
 + View all your token balances in one place (including deposited balances)
++ Retrieve and export a history of all your DEX trades.
 + Look at the details of your transactions with decentralized exchanges.
-+ Retrieve and export a history of all your trades.
+
 
 DeltaBalances runs fully client side, powered by [Etherscan](https://etherscan.io) and [Infura](https://infura.io).
 
@@ -19,6 +20,9 @@ DeltaBalances is not affiliated with any of the exchanges mentioned below.
 + [Enclaves Dex](https://enclaves.io)
 + [ETHEN](https://ethen.market) (No balances yet)
 + [ETHEX](https://ethex.market)
++ [SingularX](https://singularx.com)
++ [EtherC](https://etherc.io)
++ [EasyTrade](https://easytrade.io)
 
 0x Project Relayers, including:
 + [DDEX](https://ddex.io/)

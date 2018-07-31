@@ -155,10 +155,10 @@
 			var selected = []
 			selected = $('#exchangeDropdown').val();
 
-			setExchanges(selected);
+			setExchanges(selected, true);
 		});
 
-		setExchanges();
+		setExchanges(exchanges, true);
 
 
 
@@ -307,7 +307,7 @@
 	}
 
 
-	function setExchanges(newExchanges) {
+	function setExchanges(newExchanges, setDates) {
 
 		if (newExchanges && newExchanges !== exchanges) {
 			if (exchanges.length == 0) {
@@ -406,14 +406,16 @@
 
 		}
 
-		$('#minBlockLink').html('<a href="https://etherscan.io/tx/' + historyConfig.createTx + '" target="_blank">' + minBlock + '</a>');
+		if (setDates) {
+			$('#minBlockLink').html('<a href="https://etherscan.io/tx/' + historyConfig.createTx + '" target="_blank">' + minBlock + '</a>');
 
-		fillMonthSelect();
-		let daysDisabled = $('#days').prop('disabled');
-		if (!daysDisabled)
-			setDaySelector();
-		else
-			setMonthSelector();
+			fillMonthSelect();
+			let daysDisabled = $('#days').prop('disabled');
+			if (!daysDisabled)
+				setDaySelector();
+			else
+				setMonthSelector();
+		}
 	}
 
 	function myClick() {
@@ -428,7 +430,7 @@
 		hideHint();
 		//disableInput(true);
 		clearDownloads();
-		setExchanges();
+		setExchanges(exchanges, false);
 
 		// validate address
 		if (!autoStart) {
@@ -1522,6 +1524,7 @@
 
 
 	function fillMonthSelect() {
+		$('#monthSelect').empty();
 		var select = document.getElementById("monthSelect");
 
 		//Create array of options to be added

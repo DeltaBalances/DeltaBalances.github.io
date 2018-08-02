@@ -41,6 +41,8 @@ module.exports = {
     Enclaves2: { addr: '0xed06d46ffb309128c4458a270c99c824dc127f5d', name: 'EnclavesDex ', supportedDex: false },
     Ethen: { addr: '0xf4c27b8b002389864ac214cb13bfeef4cc5c4e8d', name: 'ETHEN ', supportedDex: true },
     Ethex: { addr: '0xb746aed479f18287dc8fc202fe06f25f1a0a60ae', name: 'ETHEX ', supportedDex: true },
+    Singularx: { addr: '0x9a2d163ab40f88c625fd475e807bbc3556566f80', name: 'SingularX ', supportedDex: true },
+    EtherC: { addr: '0xd8d48e52f39ab2d169c8b562c53589e6c71ac4d3', name: 'EtherC ', supportedDex: true },
     /* exchange aggregators */
     EasyTrade: { addr: '0x9ae4ed3bf7a3a529afbc126b4541c0d636d455f6', name: 'EasyTrade ', supportedDex: true },
     EasyTrade2: { addr: '0x0c577fbf29f8797d9d29a33de59001b872a1d4dc', name: 'EasyTrade ', supportedDex: true },
@@ -56,8 +58,6 @@ module.exports = {
     Totle: { addr: '0xd94c60e2793ad587400d86e4d6fd9c874f0f79ef', name: 'Totle ', supportedDex: true },
     Totle2: { addr: '0x98db9047e80260b407ffbc67543f9a010ef0fc6a', name: 'Totle-OLD ', supportedDex: true },
     /* small ED/FD clones, not in history pages yet, input/events should parse */
-    Singularx: { addr: '0x9a2d163ab40f88c625fd475e807bbc3556566f80', name: 'SingularX ', supportedDex: true },
-    EtherC: { addr: '0xd8d48e52f39ab2d169c8b562c53589e6c71ac4d3', name: 'EtherC ', supportedDex: true },
     Bitox: { addr: '0xb5adb233f28c86cef693451b67e1f2d41da97d21', name: 'BITOX ', supportedDex: true },
     Coinchange: { addr: '0x2f23228b905ceb4734eb42d9b42805296667c93b', name: 'Coinchangex ', supportedDex: true },
     EtherNext: { addr: '0x499197314f9903a1ba9bed7ee54cd9eee5900e49', name: 'Ethernext ', supportedDex: true },
@@ -440,6 +440,7 @@ module.exports = {
     { m: "Apr 2018", blockFrom: 5357795, blockTo: 5534863 },
     { m: "May 2018", blockFrom: 5534863, blockTo: 5710964 },
     { m: "Jun 2018", blockFrom: 5710964, blockTo: 5883490 },
+    { m: "Jul 2018", blockFrom: 5883490, blockTo: 6065980 },
   ],
 
   history: {

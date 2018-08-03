@@ -2776,8 +2776,8 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     }
 
     let ethAddr = this.config.ethAddr;
-    this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr] && !x.blocked && !x.killed; });
-    let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !x.killed && !x.blocked && !tokenBlacklist[x.addr] && x.addr !== ethAddr); });
+    this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr] && (!x.unlisted || !x.blocked) && !x.killed; });
+    let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !x.killed && !tokenBlacklist[x.addr] && x.addr !== ethAddr); });
     this.config.tokens = [this.uniqueTokens[ethAddr]].concat(listedTokens);
 }
 

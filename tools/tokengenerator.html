@@ -27,7 +27,7 @@
 	<ul>
 		<li> myetherwallet's ethTokens</li>
 		<li> myCrypto's ethTokens</li>
-		<li> Tokens deposited in exchange contracts accoring to ethplorer.io (Filter tokens on >=10 deposited and >=10 token holders.)</li>
+		<li> Tokens deposited in exchange contracts accoring to ethplorer.io (Filter tokens on >=10 deposited and >=100 token holders.)</li>
 
 	</ul>
 
@@ -210,11 +210,7 @@
                         if(tok.price) {
                             addToken(tok);
                         }
-                        else if (tokenResponse.totalIn > 0 && tokenResponse.totalOut > 0 && tokenResponse.totalIn !== tokenResponse.totalOut ) {
-                            addToken(tok);
-                        } 
-                        // outdated api?
-                        else if(tok.holdersCount && tok.holdersCount > 10) {
+                        else if(tok.holdersCount && tok.holdersCount > 100) {
                             addToken(tok);
                         } 
                     }
@@ -226,9 +222,17 @@
                             customTokens[addr] = { symbol: escapeHtml(token.symbol), address: addr, decimal: Number(token.decimals) };
                         }
                     }
-                    
-                    
-				}
+      
+				} else if(tok && tok.holdersCount) {
+                    if(Number(tok.holdersCount) < 100) {
+                        if(!customTokens[addr].blocked)
+                            customTokens[addr].blocked = 1;
+                    } else if(tok.holdersCount && Number(tok.holdersCount) >= 100 && customTokens[addr].blocked && customTokens[addr].blocked == 1 ) {
+                        delete customTokens[addr].blocked;
+                    }
+                }
+                
+                
 				if (customTokens[addr] && !customTokens[addr].name && tok.symbol !== tok.name && tok.name !== "") {
 					customTokens[addr].name = escapeHtml(tok.name);
 				}
@@ -297,22 +301,23 @@
 							outputString += str + ",<br>";
 						}
 						outputString += "]";
-						outputString = outputString.replace(/"address":/g, "address:");
-						outputString = outputString.replace(/"symbol":/g, 'symbol:');
-						outputString = outputString.replace(/"decimal":/g, 'decimal:');
-                        outputString = outputString.replace(/"name":/g, 'name:');
-                        outputString = outputString.replace(/"locked":/g, 'locked:');
-                        outputString = outputString.replace(/"blocked":/g, 'blocked:');
-                        outputString = outputString.replace(/"killed":/g, 'killed:');
-                        outputString = outputString.replace(/"spam":/g, 'spam:');
-                        outputString = outputString.replace(/"blockIDEX":/g, 'blockIDEX:');
-						outputString = outputString.replace(/"Binance":/g, 'Binance:');
-                        outputString = outputString.replace(/"EtherDelta":/g, 'EtherDelta:');
-                        outputString = outputString.replace(/"ForkDelta":/g, 'ForkDelta:');
-                        outputString = outputString.replace(/"IDEX":/g, 'IDEX:');
-                        outputString = outputString.replace(/"DDEX":/g, 'DDEX:');
-                        outputString = outputString.replace(/"Radar":/g, 'Radar:');
-                        outputString = outputString.replace(/"Kyber":/g, 'Kyber:');
+						outputString = outputString.replace(/"address"/g, "address");
+						outputString = outputString.replace(/"symbol"/g, 'symbol');
+						outputString = outputString.replace(/"decimal"/g, 'decimal');
+                        outputString = outputString.replace(/"name"/g, 'name');
+                        outputString = outputString.replace(/"locked"/g, 'locked');
+                        outputString = outputString.replace(/"blocked"/g, 'blocked');
+                        outputString = outputString.replace(/"killed"/g, 'killed');
+                        outputString = outputString.replace(/"spam"/g, 'spam');
+                        outputString = outputString.replace(/"blockIDEX"/g, 'blockIDEX');
+						outputString = outputString.replace(/"Binance"/g, 'Binance');
+                        outputString = outputString.replace(/"EtherDelta"/g, 'EtherDelta');
+                        outputString = outputString.replace(/"ForkDelta"/g, 'ForkDelta');
+                        outputString = outputString.replace(/"IDEX"/g, 'IDEX');
+                        outputString = outputString.replace(/"DDEX"/g, 'DDEX');
+                        outputString = outputString.replace(/"Radar"/g, 'Radar');
+                        outputString = outputString.replace(/"Kyber"/g, 'Kyber');
+                        outputString = outputString.replace(/name:Kyber/g, 'name:"Kyber"');
 						outputString = outputString.replace(/{ /g, '{');
 						outputString = outputString.replace(/ }/g, '}');
 						outputString = outputString.replace(/, /g, ',');

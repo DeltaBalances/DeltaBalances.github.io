@@ -917,6 +917,9 @@
 									}
 									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 								}
+								else if( unpacked.name === 'buy' || unpacked.name == 'sell' || unpacked.name == 'createSellOrder' || unpacked.name == 'createBuyOrder') {
+									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+								}
 								else if (unpacked.name === 'convert' || unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized'
 									|| unpacked.name === 'convertFor' || unpacked.name == 'convertForPrioritized' || unpacked.name === 'convertForPrioritized2') {
 
@@ -956,7 +959,7 @@
 									if ((!contract && (obj.maker == myAddr || obj.taker == myAddr))
 										|| (contract && (to == myAddr || from == myAddr))) {
 
-										if (obj.taker == '') {//from etherscan token event , admin took maker trade
+										if (obj.maker === myAddr) {
 											if (obj.type == 'Taker Buy') {
 												obj.type = 'Maker Sell';
 											} else if (obj.type == 'Taker Sell') {

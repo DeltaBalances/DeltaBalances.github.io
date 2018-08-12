@@ -3,6 +3,9 @@
 
 var etherDeltaConfig = { tokens: [] };
 
+//output retrieved tokens in the console
+var logTokens = false;
+
 // dont get live etherdelta tokens, as they haven't been changed in >3 months
 /*
 try {
@@ -41,6 +44,10 @@ try {
                 let string = JSON.stringify(forkDeltaConfig.tokens);
                 sessionStorage.setItem('forkTokens1', string);
                 localStorage.setItem('forkTokens2', string);
+                if(logTokens) {
+                    console.log('fork');
+                    console.log(string);
+                }
             }
         });
     }
@@ -80,6 +87,10 @@ try {
                     let string = JSON.stringify(idexConfig)
                     sessionStorage.setItem('idexTokens1', string);
                     localStorage.setItem('idexTokens2', string);
+                    if(logTokens) {
+                        console.log('idex');
+                        console.log(string);
+                    }
                 }
             }
         });
@@ -116,6 +127,10 @@ try {
                 let string = JSON.stringify(ddexConfig.tokens);
                 sessionStorage.setItem('ddexTokens1', string);
                 localStorage.setItem('ddexTokens2', string);
+                if(logTokens) {
+                    console.log('ddex');
+                    console.log(string);
+                }
             }
         });
     }
@@ -151,6 +166,10 @@ try {
                 let string = JSON.stringify(radarConfig);
                 sessionStorage.setItem('radarTokens1', string);
                 localStorage.setItem('radarTokens2', string);
+                if(logTokens) {
+                    console.log('radar');
+                    console.log(string);
+                }
             }
         });
     }
@@ -187,6 +206,10 @@ try {
                 let string = JSON.stringify(kyberConfig);
                 sessionStorage.setItem('kyberTokens1', string);
                 localStorage.setItem('kyberTokens2', string);
+                if(logTokens) {
+                    console.log('kyber');
+                    console.log(string);
+                }
             }
         });
     }
@@ -203,6 +226,11 @@ try {
         let parsed = JSON.parse(tokenData);
         if (parsed && parsed.length > 0) {
             unknownTokenCache = parsed;
+            if(logTokens) {
+                let string = JSON.stringify(unknownTokenCache);
+                console.log('unknown cache');
+                console.log(string);
+            }
         }
     }
 } catch (err) {

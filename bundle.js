@@ -27806,7 +27806,7 @@ module.exports = (config) => {
   }
 
   utility.forkDeltaURL = function (tokenObj, html) {
-    var url = "https://forkdelta.github.io/#!/trade/";
+    var url = "https://forkdelta.app/#!/trade/";
     var labelClass = "label-warning";
     if (tokenObj) {
       if (!tokenObj.ForkDelta) {

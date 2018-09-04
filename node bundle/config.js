@@ -54,6 +54,7 @@ module.exports = {
     Joyso: { addr: '0x04f062809b244e37e7fdc21d9409469c989c2342', name: 'Joyso ', supportedDex: false },
     DexTop: { addr: '0x7600977eb9effa627d6bd0da2e5be35e11566341', name: 'DEx.top ', supportedDex: false },
     BitEye: { addr: '0x39fbd1140cd1fc298f00c3ea64b3591de94c67e7', name: 'BitEye ', supportedDex: false },
+    AXNET: { addr: '0xacf999bfa9347e8ebe6816ed30bf44b127233177', name: 'AXNET ', supportedDex: false },
     /* exchange aggregators (no input parsing yet) */
     Totle: { addr: '0xd94c60e2793ad587400d86e4d6fd9c874f0f79ef', name: 'Totle ', supportedDex: true },
     Totle2: { addr: '0x98db9047e80260b407ffbc67543f9a010ef0fc6a', name: 'Totle-OLD ', supportedDex: true },
@@ -64,12 +65,15 @@ module.exports = {
     Swisscrypto: { addr: '0xbeeb655808e3bdb83b6998f09dfe1e0f2c66a9be', name: 'SwissCrypto ', supportedDex: true },
     Ethmall: { addr: '0x2b44d68555899dbc1ab0892e7330476183dbc932', name: 'Ethmall ', supportedDex: true },
     Ethernity: { addr: '0x18f0cd26c06449d967ca6aef8b5f9d8ee9fd7992', name: 'Ethernity ', supportedDex: true },
+    ExToke: { addr: '0x97c9e0eccc27efef7330e89a8c9414623ba2ee0f', name: 'ExToke ', supportedDex: true },
+    AZExchange: { addr: '0xba74368aa52ad58d08309f1f549aa63bab0c7e2a', name: 'AZExchange ', supportedDex: true },
+    EtherERC: { addr: '0x20ac542ea6b358066f2308c9805531be62747e90', name: 'EtherERC ', supportedDex: true},
+    Polaris: { addr: '0x25066b77ae6174d372a9fe2b1d7886a2be150e9b', name: 'PolarisDEX ', supportedDex : true},
 
     /* unknown ED clones */
     // fake ED? 0x60394f71266901a5930bb4e90db5dd26b77f8dad
     // MarketPLace (ED clone) 0x2f13fa06c0efd2a5c4cf2175a0467084672e648b 
     // bloxxor (ED clone) 0xb92c5f4f3a13bb14467fe0c25a4c569aa20e1df8
-    // 0xd307c5686441fe6677e9251d1c1c469e0785e331
     // 0xd307c5686441fe6677e9251d1c1c469e0785e331
     // 0xa0e8bf2b304a9761cbbf82369182f748cbeae6b5
     // 0x4d55f76ce2dbbae7b48661bef9bd144ce0c9091b
@@ -93,6 +97,7 @@ module.exports = {
     '0xc22d5b2951db72b44cfb8089bb8cd374a3c354ea': 'OpenRelay',
     '0x8124071f810d533ff63de61d0c98db99eeb99d64': 'STAR BIT',
     '0x4524baa98f9a3b9dec57caae7633936ef96bd708': 'LedgerDex',
+    '0x7219612be7036d1bfa933e16ca1246008f38c5fe': 'The Ocean',
   },
   admins: {
     '0xceceaa8edc0830c7cec497e33bb3a3c28dd55a32': 'IDEX Admin',

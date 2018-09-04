@@ -441,6 +441,7 @@ module.exports = {
     { m: "May 2018", blockFrom: 5534863, blockTo: 5710964 },
     { m: "Jun 2018", blockFrom: 5710964, blockTo: 5883490 },
     { m: "Jul 2018", blockFrom: 5883490, blockTo: 6065980 },
+    { m: "Aug 2018", blockFrom: 6065980, blockTo: 6249399 },
   ],
 
   history: {

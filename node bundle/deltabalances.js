@@ -2570,6 +2570,11 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                         fee = takerFee;
                     }
 
+                    if (buyUser === myAddr)
+                        tradeType = "Buy";
+                    else if (sellUser === myAddr)
+                        tradeType = "Sell";
+
                     return {
                         'type': transType + ' ' + tradeType,
                         'exchange': exchange,

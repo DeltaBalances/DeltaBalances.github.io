@@ -932,6 +932,7 @@
 			let activeDateRequests = 0;
 			let loadedDates = 0;
 			let lastLoadUsed = 0;
+			let pendingBlockDates = {};
 
 			let blocksToLoad = Object.keys(needBlockDates).filter((b) => { return !blockDates[b] });
 
@@ -946,7 +947,7 @@
 			}
 
 			function startNewRequest() {
-				blocksToLoad = Object.keys(needBlockDates).filter((b) => { return !blockDates[b] });
+				blocksToLoad = Object.keys(needBlockDates).filter((b) => { return !blockDates[b] && !pendingBlockDates[b]});
 
 				if (loadedDates - lastLoadUsed > 5) {
 					lastLoadUsed = loadedDates;
@@ -971,6 +972,7 @@
 				if (activeDateRequests < maxDateRequests) {
 					activeDateRequests++;
 
+					pendingBlockDates[block] = true;
 					// try getting block date from etherscan
 					_util.getBlockDate(_delta.web3, block, (err, unixtimestamp, nr) => {
 						if (err) {
@@ -998,6 +1000,8 @@
 			}
 
 			function receiveDates(err, unixtimestamp, nr) {
+				pendingBlockDates[nr] = false;
+
 				if (!err && unixtimestamp) {
 					loadedDates++;
 					blockDates[nr] = _util.toDateTime(unixtimestamp);

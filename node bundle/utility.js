@@ -488,10 +488,16 @@ module.exports = (config) => {
       topics: topics,
     }]);
 
-    let retries = 0;
-    retry();
 
-    function retry() {
+    let range = {
+      start: startblock,
+      end: endblock,
+      count: (endblock - startblock) + 1
+    };
+
+    makeRequest();
+
+    function makeRequest() {
       jQuery.ajax({
         headers: {
           'Accept': '*/*',
@@ -499,25 +505,32 @@ module.exports = (config) => {
         },
         type: "POST",
         async: true,
-        'url': bundle.DeltaBalances.config.infuraURL,
-        'data': '{"jsonrpc":"2.0","method":"eth_getLogs","params":' + filterObj + ' ,"id":' + rpcID + '}',
-        'dataType': 'json',
+        url: bundle.DeltaBalances.config.infuraURL,
+        data: '{"jsonrpc":"2.0","method":"eth_getLogs","params":' + filterObj + ' ,"id":' + rpcID + '}',
+        dataType: 'json',
+        timeout: 55000, // 55 sec timeout (these requests can be slooooow)
       }).done((result) => {
-        if (result.result && result.result.length > 0) {
-          callback(result.result, (endblock - startblock) + 1);
+        if (result) {
+
+          if (result.result && Array.isArray(result.result)) {
+            callback(result.result, range);
+          } else {
+            //response but not an array as expected?
+            returnError();
+          }
         } else {
-          callback([], (endblock - startblock) + 1);
+          //empty positive response?
+          returnError();
         }
       }).fail((result) => {
-        if (retries < 1) {
-          retries++;
-          retry();
-          return;
-        }
-        else {
-          callback(undefined, 0);
-        }
+        returnError();
       });
+    }
+
+    function returnError() {
+      range.count = 0;
+      range.error = true;
+      callback(undefined, range);
     }
   };
 

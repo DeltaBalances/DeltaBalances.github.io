@@ -38,9 +38,6 @@
 	var metamaskAddr = '';
 	var lastResult = undefined;
 
-	var blockReqs = 0;
-	var blockLoaded = 0;
-
 	// config
 	var blocktime = 14;
 	var blocknum = -1;
@@ -50,8 +47,9 @@
 	var useDaySelector = true;
 	var minBlock = _delta.config.history.EtherDelta.minBlock; // init to oldes known exchange contract, change later
 
-	var uniqueBlocks = {}; //date for each block
+	//date for each block
 	var blockDates = {};
+	var needBlockDates = {}; //currently loaded blocks that (might) need a date
 
 	//var exchanges = ['EtherDelta'];  defined in html file
 	var historyConfig = undefined;
@@ -455,6 +453,7 @@
 		trigger1 = true;
 
 		lastResult = undefined;
+		needBlockDates = {};
 
 		if (publicAddr) {
 			setStorage();
@@ -480,8 +479,6 @@
 		loadedLogs = 0;
 		displayedLogs = false;
 		disableInput(true);
-		blockReqs = 0;
-		blockLoaded = 0;
 
 		if (exchanges.length == 0) {
 			disableInput(false);
@@ -765,6 +762,9 @@
 	}
 
 
+
+
+
 	function getTransactions(rqid) {
 
 		var topics = [];
@@ -801,7 +801,7 @@
 
 		var start = startblock;
 		var end = endblock;
-		const max = 5000;
+		const max = 5000; // max number of blocks in the range of 1 request
 
 		let totalBlocks = end - start + 1; //block 5-10 (inclusive) gives you 6 blocks
 
@@ -827,8 +827,9 @@
 		var rpcId = 6;
 
 		var activeRequests = 0;
-		const maxRequests = 12;
+		const maxRequests = 10; //max number of concurrent get_logs request
 		var activeStart = start;
+		var failedRanges = [];
 
 		// repeat func until it returns false
 		for (var i = 0; i < maxRequests; i++) {
@@ -836,13 +837,28 @@
 		}
 
 		function getBatchedLogs() {
-			if (activeRequests < maxRequests && activeStart <= end) {
-				activeRequests++;
-				let tempStart = activeStart;
-				activeStart = tempStart + max + 1;
-				getLogsInRange(tempStart, Math.min(tempStart + max, end), rpcId);
-				rpcId++;
-				return true;
+			if (activeRequests < maxRequests) {
+				// first loop through the entire block range
+
+				if (activeStart <= end) {
+					activeRequests++;
+					let tempStart = activeStart;
+					activeStart = tempStart + max + 1;
+					getLogsInRange(tempStart, Math.min(tempStart + max, end), rpcId);
+					rpcId++;
+					return true;
+				}
+				else if (failedRanges.length > 0) {
+					let rangeObj = failedRanges[0];
+					failedRanges.splice(0, 1);
+
+					activeRequests++;
+					console.log('retrying failed range ' + rangeObj.start + ' ' + rangeObj.end);
+					getLogsInRange(rangeObj.start, rangeObj.end, rpcId);
+					rpcId++;
+					return true;
+				}
+
 			} else {
 				return false;
 			}
@@ -852,24 +868,21 @@
 			}
 		}
 
-		/*	for (var i = start; i <= end; i += (max + 1)) {
-				getLogsInRange(i, Math.min(i + max, end), rpcId);
-				rpcId++;
-			}
-	
-			function getLogsInRange(startNum, endNum, rpcID) {
-				_util.getTradeLogs(_delta.web3, contractAddr, startNum, endNum, rpcID, receiveLogs);
-			}
-			*/
-
-		function receiveLogs(logs, blockCount) {
+		function receiveLogs(logs, rangeObj) {
 
 			activeRequests--;
+
+			if (rangeObj && (!logs || rangeObj.error)) {
+				console.log('range ' + rangeObj.start + ' ' + rangeObj.end + ' failed');
+				failedRanges.push(rangeObj);
+			}
+
+			// start the next request now that one has returned
 			getBatchedLogs();
 
 
-			if (rqid <= requestID) {
-				downloadedBlocks += blockCount;
+			if (rqid <= requestID && rangeObj && !rangeObj.error) {
+				downloadedBlocks += rangeObj.count;
 				if (logs) {
 
 					loadedLogs++;
@@ -877,51 +890,19 @@
 						var tradesInResult = parseOutput(logs);
 
 						//get tx times
-
-						var doneBlocks = {};
+						let unknownCount = 0;
 						for (var i = 0; i < tradesInResult.length; i++) {
-							if (!blockDates[tradesInResult[i].Block] && !doneBlocks[tradesInResult[i].Block]) {
-								uniqueBlocks[tradesInResult[i].Block] = 1;
-								doneBlocks[tradesInResult[i].Block] = true;
-								blockReqs++;
-
-								// try getting block date from etherscan
-								_util.getBlockDate(_delta.web3, tradesInResult[i].Block, (err, unixtimestamp, nr) => {
-
-									if (err) {
-										console.log(err);
-										// etherscan fails, try web3 provider
-										if (_delta.web3s.length > 1 && nr) {
-											_util.getBlockDate(_delta.web3s[1], nr, (err2, unixtimestamp2, nr2) => {
-												receiveDates(err2, unixtimestamp2, nr2);
-											});
-										}
-									} else {
-										receiveDates(err, unixtimestamp, nr);
-									}
-
-								});
-
-								function receiveDates(err, unixtimestamp, nr) {
-									if (!err && unixtimestamp) {
-										blockDates[nr] = _util.toDateTime(unixtimestamp);
-									}
-
-									blockLoaded++;
-									if (blockLoaded >= blockReqs) {
-										setBlockStorage(); // update cached block dates
-										if (!running)
-											done();
-									}
-								}
-
+							if (!blockDates[tradesInResult[i].Block] && !needBlockDates[tradesInResult[i].Block]) {
+								needBlockDates[tradesInResult[i].Block] = true;
+								unknownCount++;
 							}
+						}
+						if (unknownCount > 0) {
+							loadBlockDates();
 						}
 						tradeLogResult = tradeLogResult.concat(tradesInResult);
 					}
 					done();
-				} else {
-					console.log('failed');
 				}
 			}
 		}
@@ -936,6 +917,96 @@
 			lastResult = tradeLogResult;
 			displayedLogs = true;
 			makeTable(lastResult);
+		}
+
+		var runningDates = false;
+
+		function loadBlockDates() {
+
+			if (runningDates) //if already another inctance loading in batches, return
+				return;
+
+			runningDates = true;
+
+			const maxDateRequests = 10;
+			let activeDateRequests = 0;
+			let loadedDates = 0;
+			let lastLoadUsed = 0;
+
+			let blocksToLoad = Object.keys(needBlockDates).filter((b) => { return !blockDates[b] });
+
+			let tempCount = Math.min(maxDateRequests, blocksToLoad.length);
+			if (tempCount > 0) {
+				for (let i = 0; i < tempCount; i++) {
+					startNewRequest();
+				}
+			} else {
+				runningDates = false;
+				return;
+			}
+
+			function startNewRequest() {
+				blocksToLoad = Object.keys(needBlockDates).filter((b) => { return !blockDates[b] });
+
+				if (loadedDates - lastLoadUsed > 5) {
+					lastLoadUsed = loadedDates;
+					done(); //update dates from ?? in table
+				}
+
+				if (blocksToLoad.length > 0) {
+					getBlockDate(blocksToLoad[0]);
+				} else {
+					if (activeDateRequests <= 0) {
+						runningDates = false;
+						if (loadedDates > 0) {
+							setBlockStorage();
+							done();
+						}
+					}
+				}
+			}
+
+
+			function getBlockDate(block) {
+				if (activeDateRequests < maxDateRequests) {
+					activeDateRequests++;
+
+					// try getting block date from etherscan
+					_util.getBlockDate(_delta.web3, block, (err, unixtimestamp, nr) => {
+						if (err) {
+							console.log(err);
+							// etherscan fails, try web3 provider
+							if (_delta.web3s.length > 1 && nr) {
+								_util.getBlockDate(_delta.web3s[1], nr, (err2, unixtimestamp2, nr2) => {
+									activeDateRequests--;
+									receiveDates(err2, unixtimestamp2, nr2);
+								});
+							} else {
+								//return with a slight timeout, to give etherscan a break
+								setTimeout(function () {
+									activeDateRequests--;
+									receiveDates("unknown error", undefined, nr);
+								}, 50);
+
+							}
+						} else {
+							activeDateRequests--;
+							receiveDates(err, unixtimestamp, nr);
+						}
+					});
+				}
+			}
+
+			function receiveDates(err, unixtimestamp, nr) {
+				if (!err && unixtimestamp) {
+					loadedDates++;
+					blockDates[nr] = _util.toDateTime(unixtimestamp);
+				}
+
+				if (activeDateRequests < maxDateRequests) {
+					startNewRequest();
+				}
+			}
 		}
 
 		function parseOutput(outputLogs) {
@@ -1530,18 +1601,16 @@
 		//Create array of options to be added
 		var array = _delta.config.blockMonths;
 
-		var count = 0;
 		//Create and append the options
-		for (var i = 0; i < array.length; i++) {
+		for (var i = array.length -1; i > 0; i--) {
 			if (array[i].blockTo >= minBlock /*&& (!historyConfig.maxBlock || array[i].blockFrom <= historyConfig.maxBlock)*/) {
-				count++;
 				var option = document.createElement("option");
 				option.value = i;
 				option.text = array[i].m;
 				select.appendChild(option);
 			}
 		}
-		select.selectedIndex = count - 1;
+		select.selectedIndex = 0;
 	}
 
 

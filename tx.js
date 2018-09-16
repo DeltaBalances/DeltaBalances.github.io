@@ -631,7 +631,7 @@
 									delete obj.feeCurrency;
 									delete obj.transType;
 									delete obj.tradeType;
-								} else if (unpacked.name === 'LogFill') {
+								} else if (unpacked.name === 'LogFill' || unpacked.name === 'Fill') {
 									delete obj.transType;
 									delete obj.tradeType;
 									delete obj.relayer;

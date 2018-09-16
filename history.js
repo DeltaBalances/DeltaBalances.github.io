@@ -1091,6 +1091,7 @@
 					(
 						unpacked.name != 'Trade' &&
 						unpacked.name != 'LogFill' &&
+						unpacked.name != 'Fill' &&
 						unpacked.name !== 'ExecuteTrade' &&
 						unpacked.name !== 'LogTake' &&
 						unpacked.name != 'Filled' &&

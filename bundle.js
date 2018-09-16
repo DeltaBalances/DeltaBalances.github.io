@@ -4810,23 +4810,68 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 }
             }
             // 0x trade output event
-            else if (unpacked.name == "LogFill") {
-                // LogFill (index_topic_1 address maker, address taker, index_topic_2 address feeRecipient, address makerToken, address takerToken, uint256 filledMakerTokenAmount, uint256 filledTakerTokenAmount, uint256 paidMakerFee, uint256 paidTakerFee, index_topic_3 bytes32 tokens, bytes32 orderHash)
+            else if (unpacked.name == "LogFill" || unpacked.name == "Fill") {
+                //0x v1: LogFill (index_topic_1 address maker, address taker, index_topic_2 address feeRecipient, address makerToken, address takerToken, uint256 filledMakerTokenAmount, uint256 filledTakerTokenAmount, uint256 paidMakerFee, uint256 paidTakerFee, index_topic_3 bytes32 tokens, bytes32 orderHash)
+                /* v2:  event Fill(
+                            address indexed makerAddress,         // Address that created the order.      
+                            address indexed feeRecipientAddress,  // Address that received fees.
+                            address takerAddress,                 // Address that filled the order.
+                            address senderAddress,                // Address that called the Exchange contract (msg.sender).
+                            uint256 makerAssetFilledAmount,       // Amount of makerAsset sold by maker and bought by taker. 
+                            uint256 takerAssetFilledAmount,       // Amount of takerAsset sold by taker and bought by maker.
+                            uint256 makerFeePaid,                 // Amount of ZRX paid to feeRecipient by maker.
+                            uint256 takerFeePaid,                 // Amount of ZRX paid to feeRecipient by taker.
+                            bytes32 indexed orderHash,            // EIP712 hash of order (see LibOrder.getOrderHash).
+                            bytes makerAssetData,                 // Encoded data specific to makerAsset. 
+                            bytes takerAssetData                  // Encoded data specific to takerAsset.
+                        ); */
 
-                let maker = unpacked.events[0].value.toLowerCase();
-                let taker = unpacked.events[1].value.toLowerCase();
-                let makerToken = this.setToken(unpacked.events[3].value);
-                let takerToken = this.setToken(unpacked.events[4].value);
-
-                let makerAmount = new BigNumber(unpacked.events[5].value);
-                let takerAmount = new BigNumber(unpacked.events[6].value);
-
-                // fee is ZRX
+                let maker, taker, makerToken, takerToken, makerAmount, takerAmount, makerFee, takerFee, relayer;
+                //zrx fee
                 let feeCurrency = this.setToken('0xe41d2489571d322189246dafa5ebde1f4699f498');
-                let makerFee = utility.weiToToken(unpacked.events[7].value, feeCurrency);
-                let takerFee = utility.weiToToken(unpacked.events[8].value, feeCurrency);
 
-                let relayer = unpacked.events[2].value.toLowerCase();
+                //0x v1
+                if (unpacked.name == 'LogFill') {
+                    maker = unpacked.events[0].value.toLowerCase();
+                    taker = unpacked.events[1].value.toLowerCase();
+                    makerToken = this.setToken(unpacked.events[3].value);
+                    takerToken = this.setToken(unpacked.events[4].value);
+
+                    makerAmount = new BigNumber(unpacked.events[5].value);
+                    takerAmount = new BigNumber(unpacked.events[6].value);
+
+                    makerFee = utility.weiToToken(unpacked.events[7].value, feeCurrency);
+                    takerFee = utility.weiToToken(unpacked.events[8].value, feeCurrency);
+
+                    relayer = unpacked.events[2].value.toLowerCase();
+                }
+                //0x v2
+                else {
+                    // 'bytes' of erc20proxy identifier + token address
+                    let makerTokenData = unpacked.events[9].value;
+                    let takerTokenData = unpacked.events[10].value;
+
+                    const erc20ID = '0xf47261b'; //erc20 proxy tag
+                    // are both assets ERC20 tokens and not erc721?
+                    if (makerTokenData.indexOf(erc20ID) != -1 && takerTokenData.indexOf(erc20ID) != -1) {
+
+                        maker = unpacked.events[0].value.toLowerCase();
+                        taker = unpacked.events[2].value.toLowerCase();
+
+                        makerToken = this.setToken('0x' + makerTokenData.slice(-40));
+                        takerToken = this.setToken('0x' + takerTokenData.slice(-40));
+
+                        makerAmount = new BigNumber(unpacked.events[4].value);
+                        takerAmount = new BigNumber(unpacked.events[5].value);
+
+                        makerFee = utility.weiToToken(unpacked.events[6].value, feeCurrency);
+                        takerFee = utility.weiToToken(unpacked.events[7].value, feeCurrency);
+
+                        relayer = unpacked.events[1].value.toLowerCase();
+                    } else {
+                        return { 'error': 'unsupported ERC721 trade' };
+                    }
+                }
 
                 var exchange = utility.relayName(relayer);
 

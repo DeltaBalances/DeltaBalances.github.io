@@ -85,10 +85,10 @@ module.exports = {
   //token attributes for exchanges that makes tokens show up as listed
   listedExchanges: ['EtherDelta', 'ForkDelta', 'IDEX', 'DDEX', 'Binance', 'Radar', 'Kyber'],
 
+  //https://github.com/0xProject/0x-relayer-registry/blob/master/relayers.json
   zrxRelayers: {
     '0xa258b39954cef5cb142fd567a46cddb31a670124': "RadarRelay",
     '0xeb71bad396acaa128aeadbc7dbd59ca32263de01': "IDT",
-    '0x173a2467cece1f752eb8416e337d0f0b58cad795': 'Erc Dex',
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX',
     '0x0000000000000000000000000000000000000000': 'Paradex',
     '0x6f7ae872e995f98fcd2a7d3ba17b7ddfb884305f': 'Tokenlon',
@@ -96,9 +96,21 @@ module.exports = {
     '0x5e150a33ffa97a8d22f59c77ae5487b089ef62e9': 'TokenJar',
     '0x5dd835a893734b8d556eccf87800b76dda5aedc5': 'BambooRelay',
     '0xc22d5b2951db72b44cfb8089bb8cd374a3c354ea': 'OpenRelay',
-    '0x8124071f810d533ff63de61d0c98db99eeb99d64': 'STAR BIT',
     '0x4524baa98f9a3b9dec57caae7633936ef96bd708': 'LedgerDex',
     '0x7219612be7036d1bfa933e16ca1246008f38c5fe': 'The Ocean',
+    '0x0e8ba001a821f3ce0734763d008c9d7c957f5852': 'Amadeus',
+
+    '0x8124071f810d533ff63de61d0c98db99eeb99d64': 'STAR BIT',
+    '0x0681e844593a051e2882ec897ecd5444efe19ff2': 'STAR BIT',
+
+    "0x58a5959a6c528c5d5e03f7b9e5102350e24005f1": 'Erc Dex',
+    "0xa71deef328b2c40d0e6525cd248ae749e9208dbb": 'Erc Dex',
+    "0x5bf2c11b0aa0c752c6de6fed48dd56fed2a4286d": 'Erc Dex',
+    "0x1dd43bbe2264234bccfbb88aadbde331d87719ee": 'Erc Dex',
+    "0x3b4ce2ea700ff327c3b4fe624f328c4106fd2885": 'Erc Dex',
+    "0x3fa5f23d42847e49d242496ffe2a3c8fda66706c": 'Erc Dex',
+    "0x173a2467cece1f752eb8416e337d0f0b58cad795": 'Erc Dex',
+    '0x173a2467cece1f752eb8416e337d0f0b58cad795': 'Erc Dex', 
   },
   admins: {
     '0xceceaa8edc0830c7cec497e33bb3a3c28dd55a32': 'IDEX Admin',

@@ -38,7 +38,7 @@ try {
             }
         }
 
-        $.getJSON('https://forkdelta.github.io/config/main.json', function (jsonData) {
+        $.getJSON('https://forkdelta.app/config/main.json', function (jsonData) {
             if (jsonData && jsonData.tokens && jsonData.tokens.length > 0) {
                 forkDeltaConfig = jsonData;
                 let string = JSON.stringify(forkDeltaConfig.tokens);

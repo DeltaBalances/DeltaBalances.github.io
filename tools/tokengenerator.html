@@ -95,6 +95,7 @@
                     }
                     
                     if(exchange == 'IDEX' && idexBlock[token.address]) {
+                        token[exchange] = token.symbol;
                         token['blockIDEX'] = true;
                     } else {
                         token[exchange] = token.symbol;
@@ -106,7 +107,8 @@
                         if(exchange == 'IDEX' && idexBlock[token.address]) {
                             customTokens[token.address]['blockIDEX'] = true;
                         }
-                        else if(!customTokens[token.address][exchange]) {
+                        
+                        if(!customTokens[token.address][exchange]) {
                             customTokens[token.address][exchange] = token.symbol;   
                         }
                         if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {

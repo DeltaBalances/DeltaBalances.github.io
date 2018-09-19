@@ -17,7 +17,9 @@ try {
 	} catch (err){} 
 */
 
+//temporarily disable forkdelta update, new domain forkdelta.app has cross domain issues
 var forkDeltaConfig = { tokens: [] };
+/*
 try {
 
     let forkData = sessionStorage.getItem('forkTokens1');
@@ -54,6 +56,7 @@ try {
 } catch (err) {
     console.log('forkdelta live tokens loading error ' + err);
 }
+*/
 
 var idexConfig = [];
 try {

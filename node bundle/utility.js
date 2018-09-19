@@ -276,7 +276,7 @@ module.exports = (config) => {
   utility.idexURL = function (tokenObj, html) {
     var url = "https://idex.market/eth/"
     var labelClass = "label-primary";
-    if (tokenObj && tokenObj.IDEX) {
+    if (tokenObj && tokenObj.IDEX && !tokenObj.blockIDEX) {
       url += tokenObj.IDEX;
     } else {
       url = '';

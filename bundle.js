@@ -2563,11 +2563,11 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
 
             for (let i = 0; i < _delta.config.listedExchanges.length; i++) {
                 let exchange = _delta.config.listedExchanges[i];
-                if (x.blockIDEX && exchange == 'IDEX') {
-                    continue;
-                } else if (x[exchange]) {
+                if (x[exchange]) {
                     token[exchange] = x[exchange];
-                    token.unlisted = false;
+                    if (!(x.blockIDEX && exchange == 'IDEX')) {
+                        token.unlisted = false;
+                    }
                 }
             }
             return token;
@@ -2667,26 +2667,24 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             var token = idexConfig[i];
             token.addr = token.addr.toLowerCase();
 
-            if (this.uniqueTokens[token.addr] && this.uniqueTokens[token.addr].blockIDEX) {
-                continue;
-            } else {
+
+            token.IDEX = token.name;
+            if (!token.blockIDEX) {
+                token.unlisted = false;
+            }
+            if (this.uniqueTokens[token.addr]) {
+                this.uniqueTokens[token.addr].IDEX = token.name;
                 if (!token.blockIDEX) {
-                    token.IDEX = token.name;
-                    token.unlisted = false;
+                    this.uniqueTokens[token.addr].unlisted = false;
                 }
-                if (this.uniqueTokens[token.addr]) {
-                    if (!token.blockIDEX) {
-                        this.uniqueTokens[token.addr].IDEX = token.name;
-                        this.uniqueTokens[token.addr].unlisted = false;
-                    }
-                    if (token.name2 && !this.uniqueTokens[token.addr].name2) {
-                        this.uniqueTokens[token.addr].name2 = token.name2;
-                    }
-                }
-                else {
-                    this.uniqueTokens[token.addr] = token;
+                if (token.name2 && !this.uniqueTokens[token.addr].name2) {
+                    this.uniqueTokens[token.addr].name2 = token.name2;
                 }
             }
+            else {
+                this.uniqueTokens[token.addr] = token;
+            }
+
         }
     } catch (e) {
         console.log('failed to parse IDEX token list');
@@ -4259,6 +4257,71 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
         return undefined;
     } catch (error) {
         console.log('unpacked input parsing exception ' + error);
+        return undefined;
+    }
+};
+
+//trade from IDEX api for in recent trades page
+DeltaBalances.prototype.parseRecentIdexTrade = function (key, obj, userAddress) {
+
+    let delta = this;
+
+    function matchToken(symbol) {
+        if (symbol === 'ETH')
+            return delta.uniqueTokens[delta.config.ethAddr];
+
+        let tokens = Object.values(delta.uniqueTokens);
+        for (let i = 0; i < tokens.length; i++) {
+            let token = tokens[i];
+            if (token.IDEX && token.IDEX == symbol)
+                return token;
+        }
+        return undefined;
+    }
+
+    // match idex token
+
+    let baseAmount = new BigNumber(obj.total);
+    let amount = new BigNumber(obj.amount);
+    let price = new BigNumber(obj.price);
+
+    let keys = key.split('_');
+    let baseToken = matchToken(keys[0]);
+    let token = matchToken(keys[1]);
+    let hash = obj.transactionHash;
+    let tradeType = obj.type;
+    // capitalize first letter
+    tradeType = tradeType.charAt(0).toUpperCase() + tradeType.slice(1);
+
+    if (userAddress)
+        userAddress = userAddress.toLowerCase();
+
+    // continue if known tokens and address matches trade
+    if (token && baseToken && (userAddress == obj.maker || userAddress == obj.taker)) {
+        let type = 'Taker ';
+        if (userAddress == obj.maker)
+            type = 'Maker ';
+
+        let dateString = obj.date;
+        dateString = dateString.replace(' ', 'T');
+        dateString += 'Z';
+        let date = new Date(dateString);
+
+        var returnObj = {
+            Status: true,
+            Type: type + tradeType,
+            Exchange: 'IDEX ',
+            Token: token,
+            Amount: amount,
+            Price: price,
+            Base: baseToken,
+            Total: baseAmount,
+            Hash: hash,
+            Date: date,
+            Info: window.location.origin + window.location.pathname + '/../tx.html#' + hash,
+        };
+        return returnObj;
+    } else {
         return undefined;
     }
 };
@@ -27893,7 +27956,7 @@ module.exports = (config) => {
   utility.idexURL = function (tokenObj, html) {
     var url = "https://idex.market/eth/"
     var labelClass = "label-primary";
-    if (tokenObj && tokenObj.IDEX) {
+    if (tokenObj && tokenObj.IDEX && !tokenObj.blockIDEX) {
       url += tokenObj.IDEX;
     } else {
       url = '';

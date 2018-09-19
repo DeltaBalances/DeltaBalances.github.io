@@ -596,14 +596,18 @@
 		var inTransResult = [];
 		var tokenTxResult = [];
 
-
 		let normalRetries = 0;
 		let internalRetries = 0;
 		let tokenRetries = 0;
+		let idexRetries = 0;
 
 		normalTransactions();
 		internalTransactions();
 		tokenTransactions();
+		idexTrades();
+
+
+
 
 		function normalTransactions() {
 			$.getJSON('https://api.etherscan.io/api?module=account&action=txlist&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey).done((result) => {
@@ -677,7 +681,41 @@
 			});
 		}
 
+		function idexTrades() {
+			let end = Math.round(new Date().getTime() / 1000);
+			let start = end - (transactionDays * (24 * 60 * 60));
 
+			$.getJSON('https://api.idex.market/returnTradeHistory?address=' + publicAddr + '&start=' + start + '&end=' + end).done((result) => {
+				if (requestID > rqid)
+					return;
+				if (result) {
+					let keys = Object.keys(result);
+					for (let k = 0; k < keys.length; k++) {
+						let trades = result[keys[k]];
+						for (let t = 0; t < trades.length; t++) {
+							let trade = _delta.parseRecentIdexTrade(keys[k], trades[t], publicAddr);
+							if (trade) {
+								outputHashes[trade.Hash] = trade;
+							}
+						}
+					}
+				}
+				transLoaded++;
+				processTransactions([]);
+			}).fail((result) => {
+				if (requestID > rqid)
+					return;
+				if (idexRetries < 2) {
+					idexRetries++;
+					idexTrades();
+					return;
+				} else {
+					showError('Failed to load IDEX trades from the IDEX API');
+					transLoaded++;
+					processTransactions([]);
+				}
+			});
+		}
 
 
 		var outputHashes = {};
@@ -917,7 +955,7 @@
 									}
 									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 								}
-								else if( unpacked.name === 'buy' || unpacked.name == 'sell' || unpacked.name == 'createSellOrder' || unpacked.name == 'createBuyOrder') {
+								else if (unpacked.name === 'buy' || unpacked.name == 'sell' || unpacked.name == 'createSellOrder' || unpacked.name == 'createBuyOrder') {
 									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
 								}
 								else if (unpacked.name === 'convert' || unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized'
@@ -1403,7 +1441,7 @@
 			recentTable.columns.adjust().fixedColumns().relayout().draw();
 		}
 
-		trigger_2 = transLoaded >= 3;
+		trigger_2 = transLoaded >= 4;
 
 		if (trigger_2) {
 			disableInput(false);

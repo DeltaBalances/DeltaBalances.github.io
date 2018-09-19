@@ -326,8 +326,8 @@
                   <div class="form-group">
                     <select id="typesDropdown" data-width="100%" data-none-selected-text="Select transaction types" class="selectpicker" multiple>
                       <optgroup>
-                        <option data-subtext=" (no IDEX)">Taker trade</option>
-                        <option data-subtext="(no deposit DEX like EtherDelta, IDEX)">Maker trade</option>
+                        <option data-subtext=" ">Taker trade</option>
+                        <option data-subtext="(no deposit DEX like EtherDelta, Token Store)">Maker trade</option>
                         <option data-subtext=" (no IDEX, DDEX)">Cancel</option>
                       </optgroup>
                       <optgroup>
@@ -381,6 +381,7 @@
                     <li>Deposit style exchanges:
                       <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
                       <a href="https://forkdelta.github.io" target="_blank">ForkDelta</a>),
+                      <a href="https://idex.market" target="_blank">IDEX</a>,
                       <a href="https://token.store" target="_blank">Token Store</a>,
                       <a href="https://www.enclaves.io" target="_blank">EnclavesDex</a>,
                       <a href="https://www.ethen.market" target="_blank">ETHEN</a>,
@@ -409,8 +410,8 @@
                     </li>
                   </ul>
                   Maker trades
-                  <strong>do not</strong> show for deposit style exchanges, see the trade history instead.
-                  <br> For IDEX only deposits and withdraws are shown.
+                  <strong>do not</strong> show for most deposit style exchanges, see the trade history instead.
+                  <br> IDEX trades are retrieved from the IDEX API instead of etherscan.
                 </div>
               </div>
               <!-- /.box-body -->

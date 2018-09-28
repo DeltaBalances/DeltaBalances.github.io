@@ -396,7 +396,7 @@ module.exports = {
   infuraURL: 'https://mainnet.infura.io/DeltaBalances',
   web3URLs: {
     Infura: 'https://mainnet.infura.io/DeltaBalances',
-    myEtherApi: 'https://api.myetherapi.com/eth',
+    myEtherApi: 'https://api.myetherwallet.com/eth',//'https://api.myetherapi.com/eth',
     //myCryptoApi: 'https://api.mycryptoapi.com/eth',
   },
   localNode: 'http://localhost:8545',

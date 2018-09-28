@@ -162,7 +162,7 @@ try {
             }
         }
 
-        $.getJSON('https://api.radarrelay.com/v0/tokens', function (jsonData) {
+        $.getJSON('https://api.radarrelay.com/v2/tokens', function (jsonData) {
             if (jsonData && jsonData.length > 0) {
                 jsonData = jsonData.filter((x) => { return x.active; });
                 radarConfig = jsonData.map((x) => { return { symbol: x.symbol, address: x.address, decimals: x.decimals, name: x.name } });

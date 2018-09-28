@@ -1,6 +1,6 @@
 
 // token exchange lists, taken from console output on loadTokens.js 
-// used to generate list in backuptokens.js
+// used to generate list in backuptokens.js, not used on the actual deltabalances website
 
 
 
@@ -2017,6 +2017,7 @@ let idexDelisted = [
   {"name":"ULT","decimals":18,"addr":"0x4632091b0dd0e0902d1fe0534e16eb7b20328d70","name2":"Ultimat"},
   {"name":"YC","decimals":0,"addr":"0x4e260e3ca268e40133c84b142de73108a7c1ec99","name2":"YoshiCoin"},
   {"name":"CARDOLD","decimals":18,"addr":"0xb07ec2c28834b889b1ce527ca0f19364cd38935c","name2":"Cardstak Old"},
+  {"name":"TBE_OLD","decimals":18,"addr":"0xf18b97b312ef48c5d2b5c21c739d499b7c65cf96","name2":"TowerBee"},
 ];
 
 //no decimals var, decimals :0 
@@ -2363,7 +2364,6 @@ let idexOfflineTokens = [
   {"name":"STAKE","decimals":8,"addr":"0xbec8f6d667594fb181c9d68e5c80c910888be93d","name2":"StakeIt"},
   {"name":"WIND","decimals":18,"addr":"0x2fc4f87665d68ce3c6eee906c10086ee61fbfb17","name2":"WindCoin"},
   {"name":"COV","decimals":18,"addr":"0xe2fb6529ef566a080e6d23de0bd351311087d567","name2":"Covesting"},
-  {"name":"PYN","decimals":18,"addr":"0x0142c3b2fc51819b5af5dfc4aa52df9722790851","name2":"Paycentos"},
   {"name":"BFI","decimals":18,"addr":"0xd83c82d9ead90cdd59be89b9a893bfce3826e2fd","name2":"BitFinTech"},
   {"name":"EGAS","decimals":8,"addr":"0xb53a96bcbdd9cf78dff20bab6c2be7baec8f00f8","name2":"ETHGAS"},
   {"name":"BALI","decimals":18,"addr":"0x013a06558f07d9e6f9a00c95a33f3a0e0255176b","name2":"Bali Coin"},
@@ -2416,7 +2416,7 @@ let idexOfflineTokens = [
   {"name":"BNTY","decimals":18,"addr":"0xd2d6158683aee4cc838067727209a0aaf4359de3","name2":"Bounty0x"},
   {"name":"CAJ","decimals":18,"addr":"0x3c6a7ab47b5f058be0e7c7fe1a4b7925b8aca40e","name2":"Cajutel"},
   {"name":"SPANK","decimals":18,"addr":"0x42d6622dece394b54999fbd73d108123806f6a18","name2":"SpankChain"},
-  {"name":"UCN","decimals":8,"addr":"0xb236e2477b8ed34b203b60e2b88884ee5b31a3c3","name2":"UC Coin"},
+  {"name":"UCN2","decimals":8,"addr":"0xb236e2477b8ed34b203b60e2b88884ee5b31a3c3","name2":"UC Coin"},
   {"name":"INDI","decimals":18,"addr":"0xe8c09672cfb9cfce6e2edbb01057d9fa569f97c1","name2":"Indicoin"},
   {"name":"GZE","decimals":18,"addr":"0x8c65e992297d5f092a756def24f4781a280198ff","name2":"GazeCoin"},
   {"name":"QVT","decimals":18,"addr":"0x1183f92a5624d68e85ffb9170f16bf0443b4c242","name2":"Qvolta"},
@@ -2977,7 +2977,6 @@ let idexOfflineTokens = [
   {"name":"VAI","decimals":18,"addr":"0xd4078bdb652610ad5383a747d130cbe905911102","name2":"VIOLET"},
   {"name":"MFT","decimals":18,"addr":"0xdf2c7238198ad8b389666574f2d8bc411a4b7428","name2":"Mainframe"},
   {"name":"ZXC","decimals":18,"addr":"0x83e2be8d114f9661221384b3a50d24b96a5653f5","name2":"0xcert Protocol"},
-  {"name":"MAS","decimals":18,"addr":"0x23ccc43365d9dd3882eab88f43d515208f832430","name2":"Midas Protocol"},
   {"name":"ESS","decimals":18,"addr":"0xfc05987bd2be489accf0f509e44b0145d68240f7","name2":"ESSENTIA"},
   {"name":"IONC","decimals":6,"addr":"0xbddc4fe9b07ad7243abffaec9ef35daac4a3f95c","name2":"IonChain"},
   {"name":"FXY","decimals":18,"addr":"0xa024e8057eec474a9b2356833707dd0579e26ef3","name2":"Fixy Network"},
@@ -3066,7 +3065,6 @@ let idexOfflineTokens = [
   {"name":"CST","decimals":18,"addr":"0xbb49a51ee5a66ca3a8cbe529379ba44ba67e6771","name2":"CryptosolarTech"},
   {"name":"HAND","decimals":0,"addr":"0x48c1b2f3efa85fbafb2ab951bf4ba860a08cdbb7","name2":"SHOWHAND"},
   {"name":"KWATT","decimals":18,"addr":"0x241ba672574a78a3a604cdd0a94429a73a84a324","name2":"KWATT"},
-  {"name":"UBBEY","decimals":18,"addr":"0x6cb1c2b61e24ad08bf5fff4d2b13ea987d211a88","name2":"UBBEY"},
   {"name":"AMO","decimals":18,"addr":"0x38c87aa89b2b8cd9b95b736e1fa7b612ea972169","name2":"AMO Coin"},
   {"name":"GENE","decimals":18,"addr":"0x884181554dfa9e578d36379919c05c25dc4a15bb","name2":"GeneSourceCodeChain"},
   {"name":"POD","decimals":18,"addr":"0x14ee347f1c49181f36d0784077faca539872e370","name2":"Proof of Dilligence"},
@@ -3074,7 +3072,7 @@ let idexOfflineTokens = [
   {"name":"FTXT","decimals":8,"addr":"0x41875c2332b0877cdfaa699b641402b7d4642c32","name2":"FUTURAX"},
   {"name":"ETKN","decimals":4,"addr":"0x31523372962309845680b5e76da13d1208352a41","name2":"Easy Token"},
   {"name":"SPU+","decimals":18,"addr":"0xef7bce1be2ba032131326910a6c11e716daedbff","name2":"Spurt Plus"},
-  {"name":"TBE","decimals":18,"addr":"0xf18b97b312ef48c5d2b5c21c739d499b7c65cf96","name2":"TowerBee"},
+  {"name":"TBE_OLD","decimals":18,"addr":"0xf18b97b312ef48c5d2b5c21c739d499b7c65cf96","name2":"TowerBee"},
   {"name":"UUU","decimals":18,"addr":"0x3543638ed4a9006e4840b105944271bcea15605d","name2":"UNetworkToken"},
   {"name":"DIT","decimals":8,"addr":"0xf14922001a2fb8541a433905437ae954419c2439","name2":"Inmediate"},
   {"name":"KWH","decimals":18,"addr":"0xebc7cd2684dd96619841c7994343c5a8bda94b10","name2":"KWHCoin"},
@@ -3110,7 +3108,18 @@ let idexOfflineTokens = [
   {"name":"NPXS","decimals":18,"addr":"0xa15c7ebe1f07caf6bff097d8a589fb8ac49ae5b3","name2":"Pundi X"},
   {"name":"ABC","decimals":8,"addr":"0xafd75caff5c1d402cbf3692e289775438df6a9f0","name2":"Anti Bureaucracy Coin"},
   {"name":"EDN","decimals":18,"addr":"0x05860d453c7974cbf46508c06cba14e211c629ce","name2":"EdenCoin"},
-  {"name":"IHF","decimals":18,"addr":"0xaf1250fa68d7decd34fd75de8742bc03b29bd58e","name2":"Invictus Hyperion"}
+  {"name":"IHF","decimals":18,"addr":"0xaf1250fa68d7decd34fd75de8742bc03b29bd58e","name2":"Invictus Hyperion"},
+  {"name":"3DES","decimals":18,"addr":"0x115e7b7ecdd9792d6995cb426b2ef4d6119682a7","name2":"3DES Token"},
+  {"name":"BRN","decimals":18,"addr":"0x4083c75ab1f20ac0a1787a591c98bacd43ae777a","name2":"Brainmab"},
+  {"name":"UBBEY","decimals":18,"addr":"0x6cb1c2b61e24ad08bf5fff4d2b13ea987d211a88","name2":"UBBEY"},
+  {"name":"SPND","decimals":18,"addr":"0xddd460bbd9f79847ea08681563e8a9696867210c","name2":"Spendcoin"},
+  {"name":"TBE","decimals":18,"addr":"0xb3c61539af156438951ea6cd48756d22a48fce62","name2":"TowerBee"},
+  {"name":"UCN","decimals":18,"addr":"0xaaf37055188feee4869de63464937e683d61b2a1","name2":"UChain Token"},
+  {"name":"PYN","decimals":18,"addr":"0x0142c3b2fc51819b5af5dfc4aa52df9722790851","name2":"Paycent"},
+  {"name":"MAS","decimals":18,"addr":"0x23ccc43365d9dd3882eab88f43d515208f832430","name2":"Midas Protocol"},
+  {"name":"DEC","decimals":18,"addr":"0x89c6c856a6db3e46107163d0cda7a7ff211bd655","name2":"Darico Ecosystem Coin"},
+  {"name":"PERA","decimals":8,"addr":"0xbfd78aebccf26cb964a7836263143b5ee8072d84","name2":"PERA"},
+  {"name":"TXN","decimals":18,"addr":"0xaaf099a16cb37dfdaffc1a169f6e99f41aaaf75c","name2":"Traxion"}
 ]; // end idexOfflineTokens
 
 
@@ -3194,8 +3203,8 @@ let ddexOfflineTokens = [
   {"symbol":"ONEP","address":"0xeccdf45eacfafc3ca888cbdc101225c8b1d38fe4","decimals":2},
   {"symbol":"ELEM","address":"0xada00d9468c54a17564e33058bdd9451f75462ad","decimals":10},
   {"symbol":"BTR","address":"0x499a6b77bc25c26bcf8265e2102b1b3dd1617024","decimals":18},
-  {"symbol":"TUSD","address":"0x8dd5fbce2f6a956c3022ba3663759011dd51e73e","decimals":18},
   {"symbol":"ECOREAL","address":"0xb052f8a33d8bb068414eade06af6955199f9f010","decimals":18},
+  {"symbol":"TUSD","address":"0x8dd5fbce2f6a956c3022ba3663759011dd51e73e","decimals":18},
   {"symbol":"EON","address":"0x3032b9e916a575db2d5a0c865f413a82891bd260","decimals":18},
   {"symbol":"DAN","address":"0x9b70740e708a083c6ff38df52297020f5dfaa5ee","decimals":10},
   {"symbol":"OMG","address":"0xd26114cd6ee289accf82350c8d8487fedb8a0c07","decimals":18},
@@ -3223,13 +3232,13 @@ let ddexOfflineTokens = [
   {"symbol":"ABX","address":"0x9a794dc1939f1d78fa48613b89b8f9d0a20da00e","decimals":18},
   {"symbol":"EDR","address":"0xc528c28fec0a90c083328bc45f587ee215760a0f","decimals":18},
   {"symbol":"TOTO","address":"0xe3278df3eb2085ba9b6899812a99a10f9ca5e0df","decimals":8},
-  {"symbol":"PAL","address":"0xfedae5642668f8636a11987ff386bfd215f942ee","decimals":18},
   {"symbol":"NTK","address":"0x5d4d57cd06fa7fe99e26fdc481b468f77f05073c","decimals":18},
   {"symbol":"SEELE","address":"0xb1eef147028e9f480dbc5ccaa3277d417d1b85f0","decimals":18},
   {"symbol":"DCC","address":"0xffa93aacf49297d51e211817452839052fdfb961","decimals":18},
   {"symbol":"ADI","address":"0x8810c63470d38639954c6b41aac545848c46484a","decimals":18},
   {"symbol":"DAG","address":"0xa8258abc8f2811dd48eccd209db68f25e3e34667","decimals":8},
   {"symbol":"PTT","address":"0x4689a4e169eb39cc9078c0940e21ff1aa8a39b9c","decimals":18},
+  {"symbol":"PAL","address":"0xfedae5642668f8636a11987ff386bfd215f942ee","decimals":18},
   {"symbol":"PARETO","address":"0xea5f88e54d982cbb0c441cde4e79bc305e5b43bc","decimals":18},
   {"symbol":"CTXC","address":"0xea11755ae41d889ceec39a63e6ff75a02bc1c00d","decimals":18},
   {"symbol":"PPI","address":"0x5a3c9a1725aa82690ee0959c89abe96fd1b527ee","decimals":18},
@@ -3257,7 +3266,11 @@ let ddexOfflineTokens = [
   {"symbol":"CAF","address":"0x254f91949d4f57b22392ba0278069cf5a9105f05","decimals":6},
   {"symbol":"OMX","address":"0xb5dbc6d3cf380079df3b27135664b6bcf45d1869","decimals":8},
   {"symbol":"DST","address":"0xc5807256e2e2fe85ca94c3617c4bc5ff2bd9cfb6","decimals":18},
-  {"symbol":"TRIO","address":"0x8b40761142b9aa6dc8964e61d0585995425c3d94","decimals":18}
+  {"symbol":"TRIO","address":"0x8b40761142b9aa6dc8964e61d0585995425c3d94","decimals":18},
+  {"symbol":"KTC","address":"0x1f224c07a3d6cafa422072ee17f764c6aacf2d56","decimals":8},
+  {"symbol":"BCZERO","address":"0xd45247c07379d94904e0a87b4481f0a1ddfa0c64","decimals":18},
+  {"symbol":"IMVR","address":"0x7878424e994d8a2b8e329d31096922b7ceabe660","decimals":18},
+  {"symbol":"NOKU","address":"0x1fc52f1abade452dd4674477d4711951700b3d27","decimals":18}
 ]; // end ddexOfflineTokens
 
 let radarOfflineTokens = [
@@ -3323,7 +3336,6 @@ let radarOfflineTokens = [
   {"symbol":"XAUR","address":"0x4df812f6064def1e5e029f1ca858777cc98d2d81","decimals":8,"name":"Xaurum"},
   {"symbol":"DGX","address":"0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf","decimals":9,"name":"Digix Gold Token"},
   {"symbol":"LINK","address":"0x514910771af9ca656af840dff83e8264ecf986ca","decimals":18,"name":"ChainLink"},
-  {"symbol":"EUSD","address":"0x523630976eb6147621b5c31c781ebe2ec2a806e0","decimals":18,"name":"Ether-backed USD Nomins"},
   {"symbol":"FDX","address":"0x52a7cb918c11a16958be40cba7e31e32a499a465","decimals":18,"name":"fidentiaX"},
   {"symbol":"HST","address":"0x554c20b7c486beee439277b4540a434566dc4c02","decimals":18,"name":"Decision Token"},
   {"symbol":"CAT","address":"0x56ba2ee7890461f463f7be02aac3099f6d5811a8","decimals":18,"name":"BlockCAT"},
@@ -3473,6 +3485,7 @@ let kyberOfflineTokens = [
   {"symbol":"AE","address":"0x5ca9a71b1d01849c0a95490cc00559717fcf0d1d","decimals":18,"name":"Aeternity"},
   {"symbol":"CVC","address":"0x41e5560054824ea6b0732e656e3ad64e20e94e45","decimals":8,"name":"Civic"},
   {"symbol":"BLZ","address":"0x5732046a883704404f284ce41ffadd5b007fd668","decimals":18,"name":"Bluzelle"},
+  {"symbol":"REP","address":"0x1985365e9f78359a9b6ad760e32412f4a445e862","decimals":18,"name":"Augur"},
   {"symbol":"PAL","address":"0xfedae5642668f8636a11987ff386bfd215f942ee","decimals":18,"name":"PolicyPal Network"},
   {"symbol":"COFI","address":"0x3136ef851592acf49ca4c825131e364170fa32b3","decimals":18,"name":"CoinFi"},
   {"symbol":"BBO","address":"0x84f7c44b6fed1080f647e354d552595be2cc602f","decimals":18,"name":"Bigbom"},
@@ -3492,5 +3505,8 @@ let kyberOfflineTokens = [
   {"symbol":"MTL","address":"0xF433089366899D83a9f26A773D59ec7eCF30355e","decimals":8,"name":"Metal"},
   {"symbol":"WABI","address":"0x286BDA1413a2Df81731D4930ce2F862a35A609fE","decimals":18,"name":"WaBi"},
   {"symbol":"MOC","address":"0x865ec58b06bf6305b886793aa20a2da31d034e68","decimals":18,"name":"Moss Land"},
-  {"symbol":"WETH","address":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","decimals":18,"name":"Wrapped Ether"}
+  {"symbol":"BNB","address":"0xB8c77482e45F1F44dE1745F52C74426C631bDD52","decimals":18,"name":"Binance"},
+  {"symbol":"ZRX","address":"0xe41d2489571d322189246dafa5ebde1f4699f498","decimals":18,"name":"0x"},
+  {"symbol":"WETH","address":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","decimals":18,"name":"Wrapped Ether"},
+  {"symbol":"MAS","address":"0x23ccc43365d9dd3882eab88f43d515208f832430","decimals":18,"name":"MidasProtocol"}
 ]; // end kyber offline

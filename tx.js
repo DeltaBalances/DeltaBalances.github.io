@@ -853,12 +853,12 @@
 				}
 			}
 
-			if (tradeCount > 1 && !_delta.isExchangeAddress(transaction.to)) {
+			if (tradeCount > 1 && !_delta.isExchangeAddress(transaction.to, true)) {
 				sum += '<br>This transaction was made by a contract that has made multiple trades in a single transaction. <br>';
 				// sum up what a custom cotract did in multiple trades
 				//	sum += "ETH gain over these trades: " + (received.minus(spent).minus(transaction.gasEth)) + " (incl. gas cost). <br>";
 			}
-			else if (tradeCount > 0 && !_delta.isExchangeAddress(transaction.to)) {
+			else if (tradeCount > 0 && !_delta.isExchangeAddress(transaction.to, true)) {
 				sum += '<br>This transaction was made by a contract instead of a user. <br>';
 			}
 
@@ -906,10 +906,16 @@
 		if (transaction.input && transaction.input[0].type) {
 			$('#inputtype').html(transaction.input[0].type);
 		} else {
-			if (tradeCount == 0)
-				$('#inputtype').html('');
-			else
+			if (tradeCount == 0) {
+
+				if (transaction.output && transaction.output[0].type) {
+					$('#inputtype').html(transaction.output[0].type);
+				} else {
+					$('#inputtype').html('');
+				}
+			} else {
 				$('#inputtype').html('Trade');
+			}
 		}
 		if (transaction.input) {
 			displayParse(transaction.input, "#inputdata");
@@ -973,7 +979,8 @@
 				uniqueType = 'trade';
 				wideOutput = true;
 			}
-			else if (uniqueType.indexOf('cancel') !== -1) {
+			// all cancels except 'cancel up to'  (0x v2)
+			else if (uniqueType.indexOf('cancel') !== -1 && uniqueType.indexOf('up to') == -1) {
 				uniqueType = 'cancel';
 				wideOutput = true;
 			} else if (uniqueType === 'deposit' || uniqueType === 'token deposit' || uniqueType === 'withdraw' || uniqueType === 'token withdraw') {
@@ -1090,11 +1097,16 @@
 							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(5) + '</span>';
 					}
 					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'balance') {
-						cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(3) + '</span>';
+						if (cellValue !== "")
+							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(3) + '</span>';
 					}
-					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'maker' || keys[i] == 'taker' || keys[i] == 'wallet') {
+					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'maker' || keys[i] == 'taker' || keys[i] == 'wallet' || keys[i] == 'signer') {
 						if (cellValue)
 							cellValue = _util.addressLink(cellValue, true, true);
+					} else if (keys[i] == 'orderEpoch') {
+						if (cellValue) {
+							cellValue = checkOrderEpoch(cellValue);
+						}
 					}
 
 					if (cellValue == null) cellValue = "";
@@ -1352,6 +1364,32 @@
 				}
 			}
 		}
+	}
+
+	// check if we can find a reasonable date in the OrderEpoch salt string  (0x v2 cancel up to)
+	function checkOrderEpoch(epoch) {
+		let returnVal = epoch;
+
+		if (epoch) {
+			let epochString = String(epoch);
+			let offset = 1;
+			while (offset * 10 <= epochString.length) {
+				const minDate = 1535767048; // 1 september 2018, launch week 0xv2
+				const now = Math.round(new Date().getTime() / 1000);
+				const endDate = now + (7 * 24 * 60 * 60); //  7 days in the future
+
+				let stringOffset = (offset - 1) * 10;
+				let possibleEpoch = epochString.slice(stringOffset, stringOffset + 10);
+				try {
+					possibleEpoch = Number(possibleEpoch);
+					if (possibleEpoch > minDate && possibleEpoch < endDate) {
+						returnVal = _util.formatDate(_util.toDateTime(possibleEpoch));
+						break;
+					}
+				} catch (e) { }
+			}
+		}
+		return returnVal;
 	}
 
 }

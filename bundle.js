@@ -3047,7 +3047,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     };
                 }
             }
-            // 0x cancel input
+            // 0x v1 cancel input
             else if (!badFromTo && (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders')) {
 
                 var _delta = this;
@@ -3168,6 +3168,37 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     }
                 }
+            }
+            //0x v2, function called with signed data, from sender != signer
+            else if (unpacked.name == 'executeTransaction') {
+                let exchange = '0x Exchange V2';
+                if (this.config.admins[txFrom]) {
+                    name = this.config.admins[txFrom];
+                    name = name.replace(' Admin', '');
+                } else {
+                    name = utility.relayName(txFrom);
+                }
+                if (name !== txFrom) {
+                    exchange = name;
+                }
+                return {
+                    'type': 'Signed execution',
+                    'Exchange': exchange,
+                    'note': 'a 0x trade/cancel executed through a third party for a signer address',
+                    'sender': tx.from,
+                    'signer': unpacked.params[1].value.toLowerCase()
+                }
+            }
+            //0x v2 cancel up to
+            else if (unpacked.name === 'cancelOrdersUpTo') {
+                return {
+                    'type': 'Cancel up to',
+                    'exchange': '0x Exchange V2',
+                    'note': 'Cancels all open 0x(V2) orders up to a certain date',
+                    'tokens': 'All',
+                    'maker': tx.from,
+                    'orderEpoch': unpacked.params[0].value,
+                };
             }
             // airswap cancel && fill
             else if ((unpacked.name === 'cancel' || unpacked.name === 'fill') && unpacked.params.length > 10) {
@@ -4372,12 +4403,12 @@ DeltaBalances.prototype.isTokenAddress = function (addr) {
     return false;
 };
 
-DeltaBalances.prototype.isExchangeAddress = function (addr) {
+DeltaBalances.prototype.isExchangeAddress = function (addr, allowNonSupported) {
     let lcAddr = addr.toLowerCase();
 
     let exchanges = Object.values(this.config.exchangeContracts);
     for (let i = 0; i < exchanges.length; i++) {
-        if (exchanges[i].addr === lcAddr && exchanges[i].supportedDex) {
+        if (exchanges[i].addr === lcAddr && (exchanges[i].supportedDex || allowNonSupported)) {
             return true;
         }
     }
@@ -4630,7 +4661,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     'tradeType': tradeType,
                 };
             }
-            //0x error
+            //0x v1 error
             else if (unpacked.name == 'LogError' && unpacked.events && unpacked.events.length == 2) {
 
                 const errortext = [
@@ -4872,7 +4903,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     };
                 }
             }
-            // 0x trade output event
+            // 0x v1 & v2 trade output event
             else if (unpacked.name == "LogFill" || unpacked.name == "Fill") {
                 //0x v1: LogFill (index_topic_1 address maker, address taker, index_topic_2 address feeRecipient, address makerToken, address takerToken, uint256 filledMakerTokenAmount, uint256 filledTakerTokenAmount, uint256 paidMakerFee, uint256 paidTakerFee, index_topic_3 bytes32 tokens, bytes32 orderHash)
                 /* v2:  event Fill(
@@ -5276,68 +5307,130 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     };
                 }
             }
-            // Order cancel etherdelta, decentrex, kyber, enclaves
+            // Order cancel etherdelta, decentrex, token store, enclaves 
+            //  0x v2 
             else if (unpacked.name == 'Cancel') {
-                var cancelType = 'sell';
-                var token = undefined;
-                var base = undefined;
+                //everything besides 0x v2 cancel
+                if (unpacked.events[0].name !== 'makerAddress') {
+                    var cancelType = 'sell';
+                    var token = undefined;
+                    var base = undefined;
 
 
-                let tokenGet = this.setToken(unpacked.events[0].value);
-                let tokenGive = this.setToken(unpacked.events[2].value);
+                    let tokenGet = this.setToken(unpacked.events[0].value);
+                    let tokenGive = this.setToken(unpacked.events[2].value);
 
-                if (utility.isWrappedETH(tokenGet.addr) || (!utility.isWrappedETH(tokenGive.addr) && utility.isNonEthBase(tokenGive.addr))) // get eth  -> sell
-                {
-                    cancelType = 'buy';
-                    token = tokenGive;
-                    base = tokenGet;
-                }
-                else if (utility.isWrappedETH(tokenGive.addr) || (!utility.isWrappedETH(tokenGet.addr) && utility.isNonEthBase(tokenGet.addr))) // buy
-                {
-                    token = tokenGet;
-                    base = tokenGive;
-                }
-                else {
-                    return { error: 'unknown base token' };
-                }
+                    if (utility.isWrappedETH(tokenGet.addr) || (!utility.isWrappedETH(tokenGive.addr) && utility.isNonEthBase(tokenGive.addr))) // get eth  -> sell
+                    {
+                        cancelType = 'buy';
+                        token = tokenGive;
+                        base = tokenGet;
+                    }
+                    else if (utility.isWrappedETH(tokenGive.addr) || (!utility.isWrappedETH(tokenGet.addr) && utility.isNonEthBase(tokenGet.addr))) // buy
+                    {
+                        token = tokenGet;
+                        base = tokenGive;
+                    }
+                    else {
+                        return { error: 'unknown base token' };
+                    }
 
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                    var exchange = '';
+                    let addrName = this.addressName(unpacked.address);
+                    if (addrName.indexOf('0x') === -1) {
+                        exchange = addrName;
+                    }
 
-                if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
-                    if (cancelType === 'sell') {
-                        rawAmount = new BigNumber(unpacked.events[1].value);
-                        rawBaseAmount = new BigNumber(unpacked.events[3].value);
+                    /*   let maker = '';
+                       if (unpacked.events.length >= 7 && unpacked.events[6].name == 'user') {
+                           maker = unpacked.events[6].value.toLowerCase();
+                       } */
+
+                    if (token && base && token.addr && base.addr) {
+                        var rawAmount = new BigNumber(0);
+                        var rawBaseAmount = new BigNumber(0);
+                        if (cancelType === 'sell') {
+                            rawAmount = new BigNumber(unpacked.events[1].value);
+                            rawBaseAmount = new BigNumber(unpacked.events[3].value);
+                        } else {
+                            rawBaseAmount = new BigNumber(unpacked.events[1].value);
+                            rawAmount = new BigNumber(unpacked.events[3].value);
+                        }
+
+                        var amount = utility.weiToToken(rawAmount, token);
+                        var baseAmount = utility.weiToToken(rawBaseAmount, base);
+                        var price = new BigNumber(0);
+                        if (amount.greaterThan(0)) {
+                            price = baseAmount.div(amount);
+                        }
+                        return {
+                            'type': 'Cancel ' + cancelType,
+                            'exchange': exchange,
+                            'note': 'Cancelled an open order',
+                            'token': token,
+                            'amount': amount,
+                            'price': price,
+                            'base': base,
+                            'baseAmount': baseAmount,
+                            //   'maker': maker,
+                            'unlisted': token.unlisted,
+                        };
+                    }
+                } else {
+
+                    let makerTokenData = unpacked.events[4].value;
+                    let takerTokenData = unpacked.events[5].value;
+
+                    const erc20ID = '0xf47261b'; //erc20 proxy tag
+                    // are both assets ERC20 tokens and not erc721?
+                    if (makerTokenData.indexOf(erc20ID) != -1 && takerTokenData.indexOf(erc20ID) != -1) {
+
+                        let maker = unpacked.events[0].value.toLowerCase();
+
+                        let makerToken = this.setToken('0x' + makerTokenData.slice(-40));
+                        let takerToken = this.setToken('0x' + takerTokenData.slice(-40));
+
+                        let base = makerToken;
+                        let token = takerToken;
+                        if (utility.isWrappedETH(takerToken.addr) || (!utility.isWrappedETH(base.addr) && utility.isNonEthBase(token.addr))) {
+                            base = takerToken;
+                            token = makerToken;
+                        }
+
+                        let relayer = unpacked.events[1].value.toLowerCase();
+                        let exchange = utility.relayName(relayer);
+
+                        //TODO retrieve order by orderHash and get price & amount?
+
+                        return {
+                            'type': 'Cancel',
+                            'exchange': exchange,
+                            'note': 'Cancelled an open order (0x V2)',
+                            'token': token,
+                            //   'amount': "",
+                            //    'price': "",
+                            'base': base,
+                            //   'baseAmount': "",
+                            'maker': maker,
+                            'unlisted': token.unlisted,
+                        };
                     } else {
-                        rawBaseAmount = new BigNumber(unpacked.events[1].value);
-                        rawAmount = new BigNumber(unpacked.events[3].value);
+                        return { 'error': 'unsupported ERC721 trade' };
                     }
-
-                    var amount = utility.weiToToken(rawAmount, token);
-                    var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
-                    if (amount.greaterThan(0)) {
-                        price = baseAmount.div(amount);
-                    }
-                    return {
-                        'type': 'Cancel ' + cancelType,
-                        'exchange': exchange,
-                        'note': 'Cancelled an open order',
-                        'token': token,
-                        'amount': amount,
-                        'price': price,
-                        'base': base,
-                        'baseAmount': baseAmount,
-                        'unlisted': token.unlisted,
-                    };
                 }
             }
-            //0x cancel
+            else if (unpacked.name == "CancelUpTo") {
+                let maker = unpacked.events[0].value.toLowerCase();
+                let upTo = Number(unpacked.events[2].value);
+                return {
+                    'type': 'Cancel up to',
+                    'exchange': '0x Exchange V2',
+                    'tokens': 'All',
+                    'note': 'Cancelled all 0x(v2) orders placed up to a certain moment',
+                    'orderEpoch': upTo
+                };
+            }
+            //0x 1 cancel
             else if (unpacked.name == 'LogCancel') {
                 let maker = unpacked.events[0].value.toLowerCase();
                 let relayer = unpacked.events[1].value.toLowerCase();

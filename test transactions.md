@@ -76,8 +76,25 @@ sell up to
 `https://etherscan.io/tx/0xbc7a009bd1f70791629072670217b8b97f583fe42c473a7cd947bec281cc3bd8`
 
 
+## 0x v2 (incomplete)
 
+###### cancelOrdersUpTo
+`https://etherscan.io/tx/0xff0020e61dbde767d905e96007e6a8f43e7ed14f57b0559d080407ebd7a300b2`
 
+###### executeTransaction -> fill
+`https://etherscan.io/tx/0xb1499652fd788d1bbfcff55a94e4becbb2ddbe460723130017271b11e253018e`
+`https://etherscan.io/tx/0x0e3c4f8eb7d3ee423e46e3d6f58d0755bb319af279e7e63e85058daf232605f4`
+
+###### ??? -> fill
+`https://etherscan.io/tx/0x53766f247ea96d5cd9da6cb13ced6111f25fdd7aca7c3612b744a3fb05c66709`
+`https://etherscan.io/tx/0xf3ee2f58a07a1a715128960671f4dc96c353d5ff1f3460d0c5393706b27d45d4`
+
+###### ??? -> cancel
+`https://etherscan.io/tx/0x3e46b0f65fa89d8cf76587ff110a3c82e80264dbfeadc9bed926182ba75ece90`
+`https://etherscan.io/tx/0x16dc52dd1cbc073c553ab15e857923de1228caaaab9b551f6e329b12853baa00`
+
+###### ??? -> fill (no transfers)
+`https://etherscan.io/tx/0xc978d07db14072a56ed215de84a0fe257ae60dbad5534981ab4007d650e1a8c5`
 
 ## Kyber
 ###### Trade buy  

@@ -4487,6 +4487,20 @@ let offlineCustomTokens = [
   {symbol:"电报etuiofficial送ETH",address:"0x75f2ff3f2d5a789762622d7c039373ca6b8ad74a",decimal:18,spam:true},
   {symbol:"福慧币",address:"0xe743c9f1eb264bfe8784ee090fbe25a3c0ff5078",decimal:18,blocked:1},
   {symbol:"草泥马币",address:"0x81d26c79c2acca248ef240ac28e763f9a3e06a4f",decimal:2,spam:true},
+
+  {symbol:"ETH-W",address:"0xaa7427d8f17d87a28f5e1ba3adbb270badbe1011",name:"ETH wrapper (ethfinex)",decimal:18},
+  {symbol:"USDT-W",address:"0x1a9b2d827f26b7d7c18fec4c1b27c1e8deeba26e",name:"USDT wrapper (ethfinex)",decimal:6,blocked:1},
+  {symbol:"ZRX-W",address:"0xcf67d7a481ceeca0a77f658991a00366fed558f7",name:"ZRX wrapper (ethfinex)",decimal:18,blocked:1},
+  {symbol:"OMG-W",address:"0x60f8526f09caaf0008187945ccd88bc43790042c",name:"OMG wrapper (ethfinex)",decimal:18,blocked:1},
+  {symbol:"REP-W",address:"0x058e2bec45b24cf4a5d9d8c780731ea4f5f09ed7",name:"REP wrapper (ethfinex)",decimal:18,blocked:1},
+  {symbol:"NEC-W",address:"0xc94ec1f80c4423ae0cecb4296b5de530219f0f9d",name:"NEC wrapper (ethfinex)",decimal:18,blocked:1},
+  {symbol:"SAN-W",address:"0xb0abd4cc5195560209492b6854c666d7cff8c03c",name:"SAN wrapper (ethfinex)",decimal:18,blocked:1},
+  {symbol:"SNT-W",address:"0x8aa72dd6045505836f643b39b82e70fd705f9686",name:"SNT wrapper (ethfinex)",decimal:18,blocked:1},
+  {symbol:"GNT-W",address:"0x5d173723236e6f844eed04f4fba72db5e32adb7c",name:"GNT wrapper (ethfinex)",decimal:18,blocked:1},
+  {symbol:"EDO-W",address:"0xab056a8119bb91ca50631bd319ee3df654bebfa2",name:"EDO wrapper (ethfinex)",decimal:18,blocked:1},
+  {symbol:"FUN-W",address:"0xb33ce6b1e48f450b4c6d4c0a3f281237eeea2dec",name:"FUN wrapper (ethfinex)",decimal:8,blocked:1},
+  {symbol:"DAI-W",address:"0xd9ebebfdab08c643c5f2837632de920c70a56247",name:"DAI wrapper (ethfinex)",decimal:18,blocked:1},
+  {symbol:"SPANK-W",address:"0x70b04d0684ea9dc0c8e244e0a1453744350f3864",name:"SPANK wrapper (ethfinex)",decimal:18,blocked:1},
 ]; // end OfflineCustomTokens
 
 let smartRelays = {

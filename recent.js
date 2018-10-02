@@ -731,6 +731,7 @@
 				setBlockStorage();
 
 			function addTransactions(array) {
+		
 				for (let i = 0; i < array.length; i++) {
 					let tx = array[i];
 					// only parse tx if..
@@ -856,7 +857,7 @@
 						}
 					}
 					if (trans) {
-						addTransaction(trans);
+						addTransaction(trans, 0);
 					}
 				}
 				// token deposit/withdraw, trades, cancels
@@ -1051,7 +1052,9 @@
 									trans = createOutputTransaction(newType, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exch);
 								}
 
-								addTransaction(trans);
+								if (trans) {
+									addTransaction(trans, i);
+								}
 							}
 						}
 					}
@@ -1118,7 +1121,7 @@
 							}
 						}
 
-						addTransaction(trans2);
+						addTransaction(trans2, 0);
 					}
 				}
 			}
@@ -1130,14 +1133,19 @@
 			} catch (e) { console.log('failed to set token cache'); }
 			done();
 
-			function addTransaction(transs) {
+			function addTransaction(transs, index) {
 				if (transs && transs.Hash) {
+
+					let mainHash = transs.Hash + "(" + index + ")";
+
+					let oldTrans = outputHashes[mainHash];
+
 					// don't know it, or know it without knowing the token
-					if (!outputHashes[transs.Hash] || (transs.Type === outputHashes[transs.Hash].Type && outputHashes[transs.Hash].Token.unknown)) {
-						outputHashes[transs.Hash] = transs;
+					if (!oldTrans || (transs.Type === oldTrans.Type && oldTrans.Token.unknown)) {
+						outputHashes[mainHash] = transs;
 					}
 					// we parsed a different token the second time   (etherscan regular tx input vs erc20 event )
-					else if (outputHashes[transs.Hash].Token.addr !== transs.Token.addr || transs.Type !== outputHashes[transs.Hash].Type) {
+					else if (oldTrans.Token.addr !== transs.Token.addr || transs.Type !== oldTrans.Type) {
 
 						let exchange = 'unknown ';
 						if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
@@ -1146,33 +1154,33 @@
 							exchange = _delta.addressName(from);
 						}
 						// detect where one token goes in and another goes out in same tx
-						if (transs.Type == 'In' && outputHashes[transs.Hash].Type == 'Out') {
-							let newTrans = createOutputTransaction('Trade', transs.Token, transs.Amount, outputHashes[transs.Hash].Token, outputHashes[transs.Hash].Amount, tx.hash, tx.timeStamp, transs.Token.unlisted, '', tx.isError === '0', exchange);
-							outputHashes[transs.Hash] = newTrans;
-						} else if (transs.Type == 'Out' && outputHashes[transs.Hash].Type == 'In') {
-							let newTrans = createOutputTransaction('Trade', outputHashes[transs.Hash].Token, outputHashes[transs.Hash].Amount, transs.Token, transs.Amount, tx.hash, tx.timeStamp, outputHashes[transs.Hash].Token.unlisted, '', tx.isError === '0', exchange);
-							outputHashes[transs.Hash] = newTrans;
+						if (transs.Type == 'In' && oldTrans.Type == 'Out') {
+							let newTrans = createOutputTransaction('Trade', transs.Token, transs.Amount, oldTrans.Token, oldTrans.Amount, tx.hash, tx.timeStamp, transs.Token.unlisted, '', tx.isError === '0', exchange);
+							outputHashes[mainHash] = newTrans;
+						} else if (transs.Type == 'Out' && oldTrans.Type == 'In') {
+							let newTrans = createOutputTransaction('Trade', oldTrans.Token, oldTrans.Amount, transs.Token, transs.Amount, tx.hash, tx.timeStamp, oldTrans.Token.unlisted, '', tx.isError === '0', exchange);
+							outputHashes[mainHash] = newTrans;
 						}
 						// detect AirSwap sending back the same amount
-						else if (outputHashes[transs.Hash].Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'In' && outputHashes[transs.Hash].Type == 'Taker Buy' && String(transs.Amount) == String(outputHashes[transs.Hash].Total)) {
-							outputHashes[transs.Hash].Status = false;
-						} else if (transs.Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'Taker Buy' && outputHashes[transs.Hash].Type == 'In' && String(transs.Total) == String(outputHashes[transs.Hash].Amount)) {
+						else if (oldTrans.Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'In' && oldTrans.Type == 'Taker Buy' && String(transs.Amount) == String(oldTrans.Total)) {
+							outputHashes[mainHash].Status = false;
+						} else if (transs.Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'Taker Buy' && oldTrans.Type == 'In' && String(transs.Total) == String(oldTrans.Amount)) {
 							transs.Status = false;
-							outputHashes[transs.Hash] = transs;
+							outputHashes[mainHash] = transs;
 						}
 						// bancor sell for ETH token & unwrap ETH token, make sell for ETH
-						else if (outputHashes[transs.Hash].Type == 'Unwrap ETH' && transs.Type === 'Sell up to' && transs.Exchange.indexOf('Bancor') !== -1) {
-							transs.Base = outputHashes[transs.Hash].Base;
-							outputHashes[transs.Hash] = transs;
-						} else if (outputHashes[transs.Hash].Type == 'Sell up to' && transs.Type === 'Unwrap ETH' && outputHashes[transs.Hash].Exchange.indexOf('Bancor') !== -1) {
-							outputHashes[transs.Hash].Base = transs.Base;
+						else if (oldTrans.Type == 'Unwrap ETH' && transs.Type === 'Sell up to' && transs.Exchange.indexOf('Bancor') !== -1) {
+							transs.Base = oldTrans.Base;
+							outputHashes[mainHash] = transs;
+						} else if (oldTrans.Type == 'Sell up to' && transs.Type === 'Unwrap ETH' && oldTrans.Exchange.indexOf('Bancor') !== -1) {
+							outputHashes[mainHash].Base = transs.Base;
 						}
 						// (trade?) returning ETH, seen as unwrap ETH by internal transaction result (generiv version of bancor above)
-						else if (outputHashes[transs.Hash].Type == 'Unwrap ETH' && transs.Type !== 'Unwrap ETH' && transs.Exchange) {
-							outputHashes[transs.Hash] = transs;
+						else if (oldTrans.Type == 'Unwrap ETH' && transs.Type !== 'Unwrap ETH' && transs.Exchange) {
+							outputHashes[mainHash] = transs;
 						}
 						else { // more than 1 in, 1 out, just display tx multiple times
-							let newHash = transs.Hash;
+							let newHash = mainHash;
 							while (outputHashes[newHash]) {
 								newHash += ' ';
 							}

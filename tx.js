@@ -908,7 +908,7 @@
 		} else {
 			if (tradeCount == 0) {
 
-				if (transaction.output && transaction.output[0].type) {
+				if (transaction.output && transaction.output.length > 0 && transaction.output[0].type) {
 					$('#inputtype').html(transaction.output[0].type);
 				} else {
 					$('#inputtype').html('');

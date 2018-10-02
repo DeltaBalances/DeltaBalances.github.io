@@ -35,7 +35,9 @@ module.exports = (config) => {
   utility.isNonEthBase = function (address) {
     if (address) {
       address = address.toLowerCase();
-      return bundle.DeltaBalances.config.baseToken[address] === 1;
+      if (bundle.DeltaBalances.config.baseToken[address]) {
+        return bundle.DeltaBalances.config.baseToken[address];
+      }
     }
     return false;
   };

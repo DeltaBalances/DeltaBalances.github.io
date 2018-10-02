@@ -24,7 +24,7 @@ DeltaBalances is not affiliated with any of the exchanges mentioned below.
 + [EtherC](https://etherc.io)
 + [EasyTrade](https://easytrade.io)
 
-0x Project Relayers, including:
+0x Project (V1 & V2) Relayers , including:
 + [DDEX](https://ddex.io/)
 + [Radar Relay](https://radarrelay.com/)
 + [Paradex](https://paradex.io/)
@@ -34,6 +34,8 @@ DeltaBalances is not affiliated with any of the exchanges mentioned below.
 + [IDT](https://idtexchange.com)
 + [Bamboo Relay](https://bamboorelay.com)
 + [Tokenlon](https://tokenlon.token.im/tokenlon)
++ [The Ocean](https://theocean.trade)
++ [Ethfinex trustless](https://trustless.ethfinex.com/)
 
 
 # Smart contract

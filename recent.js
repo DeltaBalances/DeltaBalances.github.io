@@ -731,7 +731,7 @@
 				setBlockStorage();
 
 			function addTransactions(array) {
-		
+
 				for (let i = 0; i < array.length; i++) {
 					let tx = array[i];
 					// only parse tx if..
@@ -931,6 +931,8 @@
 										}
 									}
 									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, cancelAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
+								} else if (unpacked.name === 'cancelOrdersUpTo') {
+									trans = createOutputTransaction('Cancel All', '', '', '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', obj.exchange);
 								}
 								else if (unpacked.name === 'trade' || unpacked.name === 'fill' || unpacked.name === 'tradeEtherDelta') {
 
@@ -989,11 +991,19 @@
 										obj.amount = '';
 									trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
 								}
-								else if (unpacked.name === 'fillOrder'
-									|| unpacked.name === 'fillOrKillOrder'
-									|| unpacked.name === 'batchFillOrders'
-									|| unpacked.name === 'batchFillOrKillOrders'
-									|| unpacked.name === 'fillOrdersUpTo'
+								else if (unpacked.name === 'fillOrder' // 0xv1 0xv2
+									|| unpacked.name === 'fillOrKillOrder' //0xv1 0xv2
+									|| unpacked.name === 'batchFillOrders' //0xv1 0xv2
+									|| unpacked.name === 'batchFillOrKillOrders' //0xv1 0xv2
+									|| unpacked.name === 'fillOrdersUpTo' //0xv1
+									|| unpacked.name === 'fillOrderNoThrow' //0xv2
+									|| unpacked.name === 'batchFillOrdersNoThrow' //0xv2
+									|| unpacked.name === 'marketSellOrders' //0xv2
+									|| unpacked.name === 'marketSellOrdersNoThrow' //0xv2
+									|| unpacked.name === 'marketBuyOrders' //0xv2
+									|| unpacked.name === 'marketBuyOrdersNoThrow' //0xv2
+									|| unpacked.name === 'matchOrders' //0xv2
+									|| (unpacked.name == 'executeTransaction' && obj.type !== "Signed execution") //0xv2
 								) {
 									if ((!contract && (obj.maker == myAddr || obj.taker == myAddr))
 										|| (contract && (to == myAddr || from == myAddr))) {
@@ -1194,7 +1204,7 @@
 
 				if (status === undefined)
 					status = true;
-				if (token) {
+				if (token || type == 'Cancel All') {
 
 					return {
 						Status: status,
@@ -1511,7 +1521,7 @@
 					else if (cellValue == 'Withdraw' || cellValue == 'Unwrap ETH' || cellValue == 'Out') {
 						row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
 					}
-					else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy' || cellValue == 'Cancel offer' || cellValue == 'Sell offer' || cellValue == 'Buy offer' || cellValue == 'Cancel Sell' || cellValue == 'Cancel Buy') {
+					else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy' || cellValue == 'Cancel offer' || cellValue == 'Sell offer' || cellValue == 'Buy offer' || cellValue == 'Cancel Sell' || cellValue == 'Cancel Buy' || cellValue == 'Cancel All') {
 						row$.append($('<td/>').html('<span class="label label-default" >' + cellValue + '</span>'));
 					}
 					else if (cellValue == 'Taker Buy' || cellValue == 'Buy up to' || cellValue == 'Maker Buy' || cellValue == 'Fill offer' || cellValue == 'Trade') {

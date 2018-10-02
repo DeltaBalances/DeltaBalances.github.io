@@ -15,7 +15,7 @@ module.exports = {
     Decentrex: { addr: '0xbf29685856fae1e228878dfb35b280c0adcc3b05', name: 'Decentrex ', supportedDex: true },
     '0x': { addr: '0x12459c951127e0c374ff9105dda097662a027093', name: '0x Exchange ', supportedDex: true },
     '0xProxy': { addr: '0x8da0d80f5007ef1e431dd2127178d224e32c2ef4', name: '0x Proxy ', supportedDex: true },
-    '0x2': { addr: '0x4f833a24e1f95d70f028921e27040ca56e09ab0b', name: '0x Exchange2 ', supportedDex: false },
+    '0x2': { addr: '0x4f833a24e1f95d70f028921e27040ca56e09ab0b', name: '0x Exchange2 ', supportedDex: true },
     '0xProxy2': { addr: '0x2240dab907db71e64d3e0dba4800c83b5c502d4e', name: '0x ERC20 Proxy ', supportedDex: true },
     // ethfinex uses 0x clone?
     'Ethfinex': { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex ', supportedDex:true },
@@ -398,6 +398,11 @@ module.exports = {
   // non ETH/WETH  base currency (like DAI)
   baseToken: {
     "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359": 1, // DAI stablecoin
+    "0xdac17f958d2ee523a2206206994597c13d831ec7": 2, // USDT 
+    "0xe41d2489571d322189246dafa5ebde1f4699f498": 3, // fee in 0x sometimes a zrx trade
+    "0x1a9b2d827f26b7d7c18fec4c1b27c1e8deeba26e": 4,// USDT-W ethfinex
+    "0xd9ebebfdab08c643c5f2837632de920c70a56247": 5, // DAI-W
+    "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c": 6, //BNT
   },
   apiServer: 'https://api.etherdelta.com', /*'https://api.forkdelta.com', 'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/
   etherscanAPIKey: 'YHBUWV6P5B5ITKMI91JIRZZYBP1CG1V65R',

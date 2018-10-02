@@ -17,11 +17,10 @@ function _addABI(abiArray) {
     // Iterate new abi to generate method id's
     abiArray.map(function (abi) {
       if (abi.name) {
-        const signature = new Web3().sha3(abi.name + "(" + abi.inputs.map(function (input) { return input.type; }).join(",") + ")");
+        const signature = new Web3().sha3(_getSignature(abi));
         if (abi.type == "event") {
           state.methodIDs[signature.slice(2)] = abi;
-        }
-        else {
+        } else {
           state.methodIDs[signature.slice(2, 10)] = abi;
         }
       }
@@ -34,19 +33,66 @@ function _addABI(abiArray) {
   }
 }
 
+// get an unhashed function signature 'function(address,uin256)'
+function _getSignature(abiItem) {
+  if (abiItem.name) {
+    return abiItem.name + _concatInput(abiItem.inputs);
+  } else {
+    throw new Error("Expected a function or event name");
+  }
+}
+
+function _concatInput(inputArray) {
+  inputArray = inputArray.map(function (input) {
+    //check for structs (tuple in abi)
+    if (input.type.indexOf('tuple') === -1) {
+      return input.type;
+    } else {
+      let type = _concatInput(input.components);
+      //adjust for tuple arrays  "tuple[]", "tuple[][]"
+      let length = input.type.length - 5;
+      while (length >= 2) {
+        type += "[]";
+        length -= 2;
+      }
+      return type;
+    }
+  });
+  return "(" + inputArray.join(',') + ")";
+}
+
+
+// get array of abi input types, with tuples as string 'tuple(uint256,address)'
+function _getInputTypes(inputArray) {
+
+  return inputArray.map(function (input) {
+    if (input.type.indexOf('tuple') === -1) {
+      return input.type;
+    } else {
+      let type = 'tuple' + _concatInput(input.components);
+      //add (multi) arrays  "tuple[]", "tuple[][]"
+      let length = input.type.length - 5;
+      while (length >= 2) {
+        type += "[]";
+        length -= 2;
+      }
+      return type;
+    }
+  });
+}
+
 function _removeABI(abiArray) {
   if (Array.isArray(abiArray)) {
 
     // Iterate new abi to generate method id's
     abiArray.map(function (abi) {
       if (abi.name) {
-        const signature = new Web3().sha3(abi.name + "(" + abi.inputs.map(function (input) { return input.type; }).join(",") + ")");
+        const signature = new Web3().sha3(_getSignature(abi));
         if (abi.type == "event") {
           if (state.methodIDs[signature.slice(2)]) {
             delete state.methodIDs[signature.slice(2)];
           }
-        }
-        else {
+        } else {
           if (state.methodIDs[signature.slice(2, 10)]) {
             delete state.methodIDs[signature.slice(2, 10)];
           }
@@ -67,32 +113,54 @@ function _decodeMethod(data) {
   const methodID = data.slice(2, 10);
   const abiItem = state.methodIDs[methodID];
   if (abiItem) {
-    const params = abiItem.inputs.map(function (item) { return item.type; });
-    // let decoded = SolidityCoder.decodeParams(params, data.slice(10));
+    const params = _getInputTypes(abiItem.inputs);
     let decoded = Interface.decodeParams(params, '0x' + data.slice(10));
+
     return {
       name: abiItem.name,
       params: decoded.map(function (param, index) {
         let parsedParam = param;
-        const isUint = abiItem.inputs[index].type.indexOf("uint") == 0;
-        const isInt = abiItem.inputs[index].type.indexOf("int") == 0;
+        let paramType = abiItem.inputs[index].type;
+        const isUint = paramType.indexOf("uint") == 0;
+        const isInt = paramType.indexOf("int") == 0;
+        const isTuple = paramType.indexOf("tuple") == 0;
 
         if (isUint || isInt) {
           parsedParam = parseArrayNumber(param);
-
-          function parseArrayNumber(param2) {
-            let parsedParam2 = param2;
-            const isArray = Array.isArray(param2);
-
-            if (isArray) {
-              parsedParam2 = param2.map(val => parseArrayNumber(val));
-            } else {
-              parsedParam2 = new Web3().toBigNumber(param2).toString();
-            }
-            return parsedParam2;
-          }
-
+        } else if (isTuple) {
+          let depth = (paramType.match(/]/g) || []).length;
+          parsedParam = parseTuple(parsedParam, depth);
         }
+
+        function parseTuple(param2, arrayDepth) {
+          if (arrayDepth > 0) {
+            return param2.map((x) => {
+              return parseTuple(x, arrayDepth - 1);
+            });
+          } else {
+            return param2.map((val, index2) => {
+              let type = abiItem.inputs[index].components[index2].type;
+              if (type.indexOf("uint") == 0 || type.indexOf("int") == 0) {
+                return parseArrayNumber(val);
+              } else {
+                return val;
+              }
+            });
+          }
+        }
+
+        function parseArrayNumber(param2) {
+          let parsedParam2 = param2;
+          const isArray = Array.isArray(param2);
+
+          if (isArray) {
+            parsedParam2 = param2.map(val => parseArrayNumber(val));
+          } else {
+            parsedParam2 = new Web3().toBigNumber(param2).toString();
+          }
+          return parsedParam2;
+        }
+
         return {
           name: abiItem.inputs[index].name,
           value: parsedParam,
@@ -149,7 +217,8 @@ function _decodeLogs(logs) {
       method.inputs.map(
         function (input) {
           if (!input.indexed) {
-            dataTypes.push(input.type);
+            let type = _getInputTypes([input])[0];
+            dataTypes.push(type);
           }
         }
       );

@@ -931,6 +931,7 @@ let forkOfflineTokens = [
   { "addr": "0x006bea43baa3f7a6f765f14f10a1a1b08334ef45", "name": "STX", "fullName": "Stox", "decimals": 18 },
   { "addr": "0x009e864923b49263c7f10d19b7f8ab7a9a5aad33", "name": "FKX", "fullName": "Knoxstertoken", "decimals": 18 },
   { "addr": "0x00a0cbe98e4d110b0fa82646152d77babf2951d0", "name": "EETHER", "fullName": "EETHER", "decimals": 18 },
+  { "addr": "0x00c4b398500645eb5da00a1a379a88b11683ba01", "name": "EXC", "fullName": "Eximchain Token", "decimals": 18 },
   { "addr": "0x013a06558f07d9e6f9a00c95a33f3a0e0255176b", "name": "BALI", "fullName": "BALI COIN", "decimals": 18 },
   { "addr": "0x014b50466590340d41307cc54dcee990c8d58aa8", "name": "ICOS", "fullName": "ICOS", "decimals": 6 },
   { "addr": "0x01a28adc0edd796b570ec4da734e1aa809f6f1fc", "name": "EDASH", "fullName": "eDash", "decimals": 18 },
@@ -1039,6 +1040,7 @@ let forkOfflineTokens = [
   { "addr": "0x17fd666fa0784885fa1afec8ac624d9b7e72b752", "name": "FLIK", "fullName": "FLiK", "decimals": 14 },
   { "addr": "0x180e5087935a94fd5bbab00fd2249c5be0473381", "name": "ZCG", "fullName": "ZCashGOLD", "decimals": 8 },
   { "addr": "0x181a63746d3adcf356cbc73ace22832ffbb1ee5a", "name": "ALCO", "fullName": "Alaricoin", "decimals": 8 },
+  { "addr": "0x1829aa045e21e0d59580024a951db48096e01782", "name": "FXT", "fullName": "FuzeX Token", "decimals": 18 },
   { "addr": "0x1831887fbabf783910db128e60c41bfa016059d8", "name": "EUR_S", "fullName": "EUR Static", "decimals": 18 },
   { "addr": "0x1844b21593262668b7248d0f57a220caaba46ab9", "name": "PRL", "fullName": "Oyster Pearl", "decimals": 18 },
   { "addr": "0x189c05c3c191015c694032e1b09c190d5db3fb50", "name": "READ", "fullName": "Readcoin", "decimals": 8 },
@@ -1083,6 +1085,7 @@ let forkOfflineTokens = [
   { "addr": "0x22a3d74c363379189b6cc059d8fbd888e98df5ec", "name": "JPY_R", "fullName": "JPY Risk", "decimals": 18 },
   { "addr": "0x22c10728343e9d49ef25080f74a223878a3d4052", "name": "DRP2", "fullName": "Digital Rupiah", "decimals": 8 },
   { "addr": "0x22f0af8d78851b72ee799e05f54a77001586b18a", "name": "GXVC", "fullName": "Genevieve VC", "decimals": 10 },
+  { "addr": "0x23352036e911a22cfc692b5e2e196692658aded9", "name": "FDZ", "fullName": "Friendz Coin", "decimals": 18 },
   { "addr": "0x23cb17d7d079518dbff4febb6efcc0de58d8c984", "name": "TRV", "fullName": "TravelCoin", "decimals": 16 },
   { "addr": "0x24021d38db53a938446ecb0a31b1267764d9d63d", "name": "HIT", "fullName": "HODL INCENTIVE TOKEN", "decimals": 18 },
   { "addr": "0x2405cc17ba128bfa7117815e04a4da228013f5bc", "name": "BNN", "fullName": "Bananas", "decimals": 8 },
@@ -1301,6 +1304,7 @@ let forkOfflineTokens = [
   { "addr": "0x5afda18caba69fe3af5e6d56e42e1c9f92c40d77", "name": "MCD", "fullName": "MealCoinDinnerful", "decimals": 18 },
   { "addr": "0x5b0751713b2527d7f002c0c4e2a37e1219610a6b", "name": "HORSE", "fullName": "Horse", "decimals": 18 },
   { "addr": "0x5b26c5d0772e5bbac8b3182ae9a13f9bb2d03765", "name": "EDU", "fullName": "Education", "decimals": 8 },
+  { "addr": "0x5b7093fe2491dfb058c94bcd62a1cd4d822f884c", "name": "AUN", "fullName": "Authoreon", "decimals": 18 },
   { "addr": "0x5bc7e5f0ab8b2e10d2d0a3f21739fce62459aef3", "name": "ENTRP", "fullName": "Hut34 Entropy Token", "decimals": 18 },
   { "addr": "0x5c3a228510d246b78a3765c20221cbf3082b44a4", "name": "STQ", "fullName": "Storiqa Token", "decimals": 18 },
   { "addr": "0x5c5413bad5f6fdb0f4fcd1457e46ead8e01d73d3", "name": "UAHOLD", "fullName": "UAHPAY", "decimals": 18 },
@@ -1572,6 +1576,7 @@ let forkOfflineTokens = [
   { "addr": "0xa15c7ebe1f07caf6bff097d8a589fb8ac49ae5b3", "name": "NPXS", "fullName": "Pundi X Token", "decimals": 18 },
   { "addr": "0xa25d01d15fc0e3cdede1bebee4124394aae0db33", "name": "FLLWOLD", "fullName": "Follow Coin", "decimals": 18 },
   { "addr": "0xa2f4fcb0fde2dd59f7a1873e121bc5623e3164eb", "name": "AIRA", "fullName": "Air phase 1", "decimals": 0 },
+  { "addr": "0xa4ea687a2a7f29cf2dc66b39c68e4411c0d00c49", "name": "IVY", "fullName": "IvyKoin Public Network Tokens", "decimals": 18 },
   { "addr": "0xa4ef5964f146d2526c51fc40caa244e45edce136", "name": "EPL", "fullName": "ELECTRONIC PLATINUM", "decimals": 8 },
   { "addr": "0xa4ff5ce0556f9ff0797ae525ec5ba9b723878a3e", "name": "CIPHS", "fullName": "Ciphs", "decimals": 18 },
   { "addr": "0xa51153d9cf9d3cf6d58697b68eccc158d1e40388", "name": "PME", "fullName": "Peermine", "decimals": 18 },
@@ -1618,6 +1623,7 @@ let forkOfflineTokens = [
   { "addr": "0xae616e72d3d89e847f74e8ace41ca68bbf56af79", "name": "GOOD", "fullName": "Good Karma", "decimals": 6 },
   { "addr": "0xae73b38d1c9a8b274127ec30160a4927c4d71824", "name": "STK", "fullName": "STK Token", "decimals": 18 },
   { "addr": "0xaec2e87e0a235266d9c5adc9deb4b2e29b54d009", "name": "SNGLS", "fullName": "SingularDTV", "decimals": 0 },
+  { "addr": "0xaf1250fa68d7decd34fd75de8742bc03b29bd58e", "name": "IHF", "fullName": "Invictus Hyperion", "decimals": 18 },
   { "addr": "0xaf146fbd319ca7ae178caa2c9d80a2db6b944350", "name": "PXT", "fullName": "PXToken", "decimals": 18 },
   { "addr": "0xaf30d2a7e90d7dc361c8c4585e9bb7d2f6f15bc7", "name": "1ST", "fullName": "Firstblood", "decimals": 18 },
   { "addr": "0xaf4dce16da2877f8c9e00544c93b62ac40631f16", "name": "MTH", "fullName": "Monetha", "decimals": 5 },
@@ -1716,6 +1722,7 @@ let forkOfflineTokens = [
   { "addr": "0xc79d440551a03f84f863b1f259f135794c8a7190", "name": "MGX", "fullName": "MEGA X", "decimals": 18 },
   { "addr": "0xc7a4eb66f982cde71d872398e4d1fc5fc586cb9e", "name": "REZ", "fullName": "Rezox", "decimals": 8 },
   { "addr": "0xc7bba5b765581efb2cdd2679db5bea9ee79b201f", "name": "GEM", "fullName": "Gems Token", "decimals": 18 },
+  { "addr": "0xc80c5e40220172b36adee2c951f26f2a577810c5", "name": "BNK", "fullName": "Banker Token", "decimals": 8 },
   { "addr": "0xc87c5dd86a3d567ff28701886fb0745aaa898da4", "name": "CTG", "fullName": "CT Global", "decimals": 18 },
   { "addr": "0xc8c6a31a4a806d3710a7b38b7b296d2fabccdba8", "name": "ELIX", "fullName": "elixir", "decimals": 18 },
   { "addr": "0xc9859fccc876e6b4b3c749c5d29ea04f48acb74f", "name": "INO", "fullName": "Ino Coin", "decimals": 0 },
@@ -1808,6 +1815,7 @@ let forkOfflineTokens = [
   { "addr": "0xdfe7351c291bc0e49079c62212587244e1c666ba", "name": "SME", "fullName": "SME Banking Platform", "decimals": 18 },
   { "addr": "0xe0b7927c4af23765cb51314a0e0521a9645f0e2a", "name": "DGD", "fullName": "Digix DAO", "decimals": 9 },
   { "addr": "0xe0c21b3f45fea3e5fdc811021fb1f8842caccad2", "name": "BITC", "fullName": "Bitsync", "decimals": 0 },
+  { "addr": "0xe0e73e8fc3a0fa161695be1d75e1bc3e558957c4", "name": "ANN", "fullName": "Agent Not Needed", "decimals": 18 },
   { "addr": "0xe13ef257cf4d5df928ca11d230427c037666d466", "name": "WIT", "fullName": "WIT", "decimals": 6 },
   { "addr": "0xe1479d294807379320dca9a9e9002ac644539099", "name": "KING", "fullName": "King93", "decimals": 18 },
   { "addr": "0xe256bb0b2a3457e54db3a41cf5a8b826aca222a8", "name": "ARX", "fullName": "Arexium", "decimals": 18 },
@@ -1882,6 +1890,7 @@ let forkOfflineTokens = [
   { "addr": "0xf0ee6b27b759c9893ce4f094b49ad28fd15a23e4", "name": "ENG", "fullName": "Enigma", "decimals": 8 },
   { "addr": "0xf0f8b0b8dbb1124261fc8d778e2287e3fd2cf4f5", "name": "BQ", "fullName": "bitqy", "decimals": 3 },
   { "addr": "0xf152fca41bd23ff250292af391236db35e0e99c3", "name": "EETH", "fullName": "eEthereum", "decimals": 8 },
+  { "addr": "0xf19eac69f9566f0b40660bd0cc16234330f38456", "name": "CRAFTR", "fullName": "CraftR", "decimals": 18 },
   { "addr": "0xf1d9139c6512452db91f25635457b844d7e22b8b", "name": "CTC", "fullName": "CARBON TOKEN CLASSIC", "decimals": 4 },
   { "addr": "0xf230b790e05390fc8295f4d3f60332c93bed42e2", "name": "TRX", "fullName": "Tronix", "decimals": 6 },
   { "addr": "0xf244176246168f24e3187f7288edbca29267739b", "name": "HAV", "fullName": "Havven", "decimals": 18 },
@@ -1895,6 +1904,7 @@ let forkOfflineTokens = [
   { "addr": "0xf444cd92e09cc8b2a23cd2eecb3c1e4cc8da6958", "name": "CBC", "fullName": "CashBagCoin", "decimals": 9 },
   { "addr": "0xf4467cae19c5a53b9fdcd4ded678826805aa1927", "name": "XBV", "fullName": "BlockVentureCoin", "decimals": 8 },
   { "addr": "0xf4522eda455814d43b003bc1c38501b04d65cc4a", "name": "CAD_R", "fullName": "CAD Risk", "decimals": 18 },
+  { "addr": "0xf4faea455575354d2699bc209b0a65ca99f69982", "name": "NOBS", "fullName": "No BS Crypto", "decimals": 18 },
   { "addr": "0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c", "name": "ENJ", "fullName": "Enjin Coin", "decimals": 18 },
   { "addr": "0xf62baa1997f04f165edd100d78241e07617f6ce6", "name": "UST", "fullName": "Uservice Token", "decimals": 18 },
   { "addr": "0xf6b55acbbc49f4524aa48d19281a9a77c54de10f", "name": "WLK", "fullName": "WOLK TOKEN", "decimals": 18 },
@@ -2838,7 +2848,6 @@ let idexOfflineTokens = [
   {"name":"HER","decimals":18,"addr":"0x491c9a23db85623eed455a8efdd6aba9b911c5df","name2":"HeroNode Token"},
   {"name":"ELI","decimals":18,"addr":"0xc7c03b8a3fc5719066e185ea616e87b88eba44a3","name2":"EligmaToken"},
   {"name":"SNOV","decimals":18,"addr":"0xbdc5bac39dbe132b1e030e898ae3830017d7d969","name2":"Snovio"},
-  {"name":"ODEM","decimals":18,"addr":"0xbf52f2ab39e26e0951d2a02b49b7702abe30406a","name2":"ODEM"},
   {"name":"HYDRO","decimals":18,"addr":"0xebbdf302c940c6bfd49c6b165f457fdb324649bc","name2":"HYDRO"},
   {"name":"IPL","decimals":18,"addr":"0x64cdf819d3e75ac8ec217b3496d7ce167be42e80","name2":"InsurePal"},
   {"name":"SRG","decimals":6,"addr":"0x607cbd284681db257a360d384a937ce149363760","name2":"SRG"},
@@ -2924,7 +2933,6 @@ let idexOfflineTokens = [
   {"name":"CFTY","decimals":8,"addr":"0x6956983f8b3ce173b4ab84361aa0ad52f38d936f","name2":"Crafty"},
   {"name":"SPN","decimals":6,"addr":"0x20f7a3ddf244dc9299975b4da1c39f8d5d75f05a","name2":"Sapien Network"},
   {"name":"HOLD","decimals":18,"addr":"0xd6e1401a079922469e9b965cb090ea6ff64c6839","name2":"HOLD"},
-  {"name":"ODE","decimals":18,"addr":"0xbf52f2ab39e26e0951d2a02b49b7702abe30406a","name2":"ODEM Token"},
   {"name":"WBT","decimals":18,"addr":"0xe2ee1ac57b2e5564522b2de064a47b3f98b0e9c9","name2":"Whalesburg Token"},
   {"name":"MOT","decimals":18,"addr":"0x263c618480dbe35c300d8d5ecda19bbb986acaed","name2":"Mount Olympus Token"},
   {"name":"CIC","decimals":18,"addr":"0xad640689e6950b7453729a4686edb3fdfd754616","name2":"CIChain"},
@@ -3129,7 +3137,13 @@ let idexOfflineTokens = [
   {"name":"MAS","decimals":18,"addr":"0x23ccc43365d9dd3882eab88f43d515208f832430","name2":"Midas Protocol"},
   {"name":"DEC","decimals":18,"addr":"0x89c6c856a6db3e46107163d0cda7a7ff211bd655","name2":"Darico Ecosystem Coin"},
   {"name":"PERA","decimals":8,"addr":"0xbfd78aebccf26cb964a7836263143b5ee8072d84","name2":"PERA"},
-  {"name":"TXN","decimals":18,"addr":"0xaaf099a16cb37dfdaffc1a169f6e99f41aaaf75c","name2":"Traxion"}
+  {"name":"TXN","decimals":18,"addr":"0xaaf099a16cb37dfdaffc1a169f6e99f41aaaf75c","name2":"Traxion"},
+  {"name":"USDC","decimals":6,"addr":"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48","name2":"USD//Coin"},
+  {"name":"BIO","decimals":8,"addr":"0xf18432ef894ef4b2a5726f933718f5a8cf9ff831","name2":"BioCrypt"},
+  {"name":"S","decimals":18,"addr":"0x96b0bf939d9460095c15251f71fda11e41dcbddb","name2":"Sharpay"},
+  {"name":"TOL","decimals":18,"addr":"0xd07d9fe2d2cc067015e2b4917d24933804f42cfa","name2":"Tolar "},
+  {"name":"ZNT","decimals":18,"addr":"0xe95990825aab1a7f0af4cc648f76a3bcc99f25b2","name2":"Zenswap Network "},
+  {"name":"ODEM","decimals":18,"addr":"0xbf52f2ab39e26e0951d2a02b49b7702abe30406a","name2":"ODEM"}
 ]; // end idexOfflineTokens
 
 
@@ -3176,7 +3190,6 @@ let ddexOfflineTokens = [
   {"symbol":"SNTR","address":"0x2859021ee7f2cb10162e67f33af2d22764b31aff","decimals":4},
   {"symbol":"E10","address":"0xf1e48f13768bd8114a530070b43257a63f24bb12","decimals":18},
   {"symbol":"FRAS","address":"0xc60000ba92b436bc165fd48d803bce95a099ab67","decimals":8},
-  {"symbol":"DAI","address":"0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359","decimals":18},
   {"symbol":"BNB","address":"0xb8c77482e45f1f44de1745f52c74426c631bdd52","decimals":18},
   {"symbol":"PPN","address":"0xab15d36c3f60bd9ba66f962a79fc8a790e40d7a7","decimals":18},
   {"symbol":"WTC","address":"0xb7cb1c96db6b22b0d3d9536e0108d062bd488f74","decimals":18},
@@ -3458,7 +3471,8 @@ let radarOfflineTokens = [
   {"symbol":"ETHX_5_18","address":"0xfa10e13fe555760a5297dc14eb6562a1a53e4e37","decimals":18,"name":"EthereumX May 2018 Set"},
   {"symbol":"IOST","address":"0xfa1a856cfa3409cfa145fa4e20eb270df3eb21ab","decimals":18,"name":"IOSToken"},
   {"symbol":"BTT","address":"0xfa456cf55250a839088b27ee32a424d7dacb54ff","decimals":18,"name":"Blocktrade"},
-  {"symbol":"ART","address":"0xfec0cf7fe078a500abf15f1284958f22049c2c7e","decimals":18,"name":"Maecenas"}
+  {"symbol":"ART","address":"0xfec0cf7fe078a500abf15f1284958f22049c2c7e","decimals":18,"name":"Maecenas"},
+  {"symbol":"PASS","address":"0x22365168c8705e95b2d08876c23a8c13e3ad72e2","decimals":0,"name":"Gods Unchained Tournament Pass"}
 ]; //end radar offline
 
 let kyberOfflineTokens = [
@@ -3518,5 +3532,9 @@ let kyberOfflineTokens = [
   {"symbol":"BNB","address":"0xB8c77482e45F1F44dE1745F52C74426C631bDD52","decimals":18,"name":"Binance"},
   {"symbol":"ZRX","address":"0xe41d2489571d322189246dafa5ebde1f4699f498","decimals":18,"name":"0x"},
   {"symbol":"WETH","address":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","decimals":18,"name":"Wrapped Ether"},
-  {"symbol":"MAS","address":"0x23ccc43365d9dd3882eab88f43d515208f832430","decimals":18,"name":"MidasProtocol"}
+  {"symbol":"MAS","address":"0x23ccc43365d9dd3882eab88f43d515208f832430","decimals":18,"name":"MidasProtocol"},
+  {"symbol":"KCC","address":"0x09677d0175dec51e2215426cddd055a71bf4228d","decimals":18,"name":"Kyber Community Coupon"},
+  {"symbol":"DAT","address":"0x81c9151de0c8bafcd325a57e3db5a5df1cebf79c","decimals":18,"name":"Datum"},
+  {"symbol":"REN","address":"0x408e41876cccdc0f92210600ef50372656052a38","decimals":18,"name":"Republic"},
+  {"symbol":"QKC","address":"0xea26c4ac16d4a5a106820bc8aee85fd0b7b2b664","decimals":18,"name":"QuarkChain"}
 ]; // end kyber offline

@@ -226,10 +226,10 @@
                     }
       
 				} else if(tok && tok.holdersCount) {
-                    if(Number(tok.holdersCount) < 100) {
+                    if(Number(tok.holdersCount) < 150) {
                         if(!customTokens[addr].blocked)
                             customTokens[addr].blocked = 1;
-                    } else if(tok.holdersCount && Number(tok.holdersCount) >= 100 && customTokens[addr].blocked && customTokens[addr].blocked == 1 ) {
+                    } else if(tok.holdersCount && Number(tok.holdersCount) >= 150 && customTokens[addr].blocked && customTokens[addr].blocked == 1 ) {
                         delete customTokens[addr].blocked;
                     }
                 }

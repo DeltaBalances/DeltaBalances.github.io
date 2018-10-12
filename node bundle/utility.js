@@ -22,6 +22,105 @@ module.exports = (config) => {
     return new BigNumber(wei).div(divisor);
   }
 
+  // check if an input address or url (including address) is a valid address
+  // return empty string if invalid
+  utility.addressFromString = function (inputString) {
+
+    if (!inputString) {
+      return '';
+    }
+
+    //trim whitespace, make lowercase, remove dots
+    inputString = inputString.toLowerCase().trim();
+    inputString = inputString.replace(/\./g, ' ');
+
+    // check if we already have an address
+    if (_delta.web3.isAddress(inputString)) {
+      return inputString;
+    }
+    // maybe address without 0x
+    else if (inputString.length == 40 && inputString.slice(0, 2) !== '0x') {
+      let possibleAddress = '0x' + inputString;
+      if (_delta.web3.isAddress(possibleAddress)) {
+        return possibleAddress;
+      }
+    }
+
+    //check if url with address
+    if (inputString.indexOf('0x') !== -1) {
+
+      let urlPrefixes = ['/0x', '=0x', '#0x'];
+      let index = -1;
+      let prefix = '';
+
+      for (let i = 0; i < urlPrefixes.length; i++) {
+        index = inputString.indexOf(urlPrefixes[i]);
+        if (index != -1) {
+          prefix = urlPrefixes[i];
+          break;
+        }
+      }
+
+      if (prefix) {
+        let endSlice = Math.min(42, inputString.length - index);
+        let possibleAddress = inputString.slice(index + 1, index + 1 + endSlice);
+        if (_delta.web3.isAddress(possibleAddress)) {
+          return possibleAddress;
+        }
+      }
+    }
+
+    return '';
+  }
+
+  // check if an input hash or url (including hash) is valid
+  // return empty string if invalid
+  utility.hashFromString = function (inputString) {
+
+    if (!inputString) {
+      return '';
+    }
+
+    //trim whitespace, make lowercase, remove dots
+    inputString = inputString.toLowerCase().trim();
+    inputString = inputString.replace(/\./g, ' ');
+
+    // check if we already have a hash
+    if (inputString.length == 66 && inputString.slice(0, 2) === '0x') {
+      return inputString;
+    }
+    // maybe hash without 0x
+    else if (inputString.length == 64 && inputString.slice(0, 2) !== '0x') {
+      return '0x' + inputString;
+    }
+
+    //check if url with hash
+    if (inputString.indexOf('0x') !== -1) {
+
+      let urlPrefixes = ['/0x', '=0x', '#0x'];
+      let index = -1;
+      let prefix = '';
+
+      for (let i = 0; i < urlPrefixes.length; i++) {
+        index = inputString.indexOf(urlPrefixes[i]);
+        if (index != -1) {
+          prefix = urlPrefixes[i];
+          break;
+        }
+      }
+
+      if (prefix) {
+        let endSlice = Math.min(66, inputString.length - index);
+        let possibleHash = inputString.slice(index + 1, index + 1 + endSlice);
+        if (possibleHash.length == 66 && possibleHash.slice(0, 2) === '0x') {
+          return possibleHash;
+        }
+      }
+    }
+
+    return '';
+  }
+
   // token is ether or wrapped ether
   utility.isWrappedETH = function (address) {
     if (address) {

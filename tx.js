@@ -1,3 +1,5 @@
+
+var isAddressPage = false;
 {
 	// shorthands
 	var _delta = bundle.DeltaBalances;
@@ -30,8 +32,6 @@
 	var blocknum = -1;
 
 	var publicAddr = '';
-	var savedAddr = '';
-	var metamaskAddr = '';
 
 	var unknownToken = false;
 
@@ -196,7 +196,7 @@
 				trans = hash.slice(1);
 		}
 		if (trans) {
-			trans = getAddress(trans);
+			trans = getTxHash(trans);
 			if (trans) {
 				transactionHash = trans;
 				window.location.hash = transactionHash;
@@ -272,7 +272,7 @@
 
 		// validate address
 		if (!autoStart)
-			transactionHash = getAddress();
+			transactionHash = getTxHash();
 
 		autoStart = false;
 		if (transactionHash) {
@@ -309,43 +309,27 @@
 		}
 	}
 
-	// check if input address is valid
-	function getAddress(addr) {
-		var address = '';
-		address = addr ? addr : document.getElementById('address').value;
-		address = address.trim();
+	// check if input hash is valid
+	function getTxHash(hash) {
 
-		{
-			//check if url ending in address
-			if (address.indexOf('/0x') !== -1) {
-				var parts = address.split('/');
-				var lastSegment = parts.pop() || parts.pop();  // handle potential trailing slash
-				if (lastSegment)
-					address = lastSegment;
-			}
-
-			if (address.length == 66 && address.slice(0, 2) === '0x') {
-				// address is ok
-			}
-			else if (address.length == 64 && address.slice(0, 2) !== '0x') {
-				address = '0x' + address;
-			}
-			else if (address.length == 42 && address.slice(0, 2) === '0x')  //wallet addr, not transaction hash
-			{
-				window.location = window.location.origin + window.location.pathname + '/../index.html#' + address;
-				return;
-			}
-			else {
-				if (!addr) // ignore if in url arguments
-				{
-					showError("Invalid transaction hash, try again");
+		//get address from input or else from html input
+		var inputHash = hash ? hash : document.getElementById('address').value;
+		if (inputHash) {
+			let checkedHash = _util.hashFromString(inputHash);
+			if (checkedHash) {
+				document.getElementById('address').value = checkedHash;
+				return checkedHash;
+			} else {
+				let address = _util.addressFromString(inputHash);
+				if (address) {
+					window.location = window.location.origin + window.location.pathname + '/../index.html#' + address;
+					return;
 				}
-				return undefined;
 			}
 		}
 
-		document.getElementById('address').value = address;
-		return address;
+		showError("Invalid transaction hash, try again");
+		return undefined;
 	}
 
 	function getTransactions() {
@@ -1226,37 +1210,9 @@
 	}
 
 
-	function setAddrImage(addr) {
 
-		var icon2 = document.getElementById('currentAddrImg');
-		var icon3 = document.getElementById('userImage');
 
-		if (addr) {
-			var smallImg = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-			icon2.style.backgroundImage = smallImg;
-			icon3.style.backgroundImage = smallImg;
-		} else {
-			icon2.style.backgroundImage = '';
-			icon3.style.backgroundImage = '';
-		}
-	}
-
-	function setSavedImage(addr) {
-		var icon = document.getElementById('savedImage');
-		if (addr)
-			icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-		else
-			icon.style.backgroundImage = '';
-	}
-
-	function setMetamaskImage(addr) {
-		var icon = document.getElementById('metamaskImage');
-		if (addr)
-			icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-		else
-			icon.style.backgroundImage = '';
-	}
-
+	/*
 	function forget() {
 		if (publicAddr) {
 			if (publicAddr.toLowerCase() === savedAddr.toLowerCase()) {
@@ -1279,7 +1235,9 @@
 
 		return false;
 	}
+	*/
 
+	/*
 	function save() {
 		savedAddr = publicAddr;
 
@@ -1291,9 +1249,10 @@
 
 		return false;
 	}
+	*/
 
 	//called from html onclick
-	function loadSaved() {
+	/*function loadSaved() {
 		if (savedAddr) {
 
 			publicAddr = savedAddr;
@@ -1314,29 +1273,31 @@
 			setStorage();
 		}
 		return false;
-	}
+	} */
 
-	//called from html onclick
-	function loadMetamask() {
-		if (metamaskAddr) {
-
-			publicAddr = metamaskAddr;
-			document.getElementById('currentAddr').innerHTML = metamaskAddr.slice(0, 16); // side menu
-			document.getElementById('currentAddr2').innerHTML = metamaskAddr.slice(0, 8); //top bar
-
-			$('#walletInfo').removeClass('hidden');
-			$('#metamaskSection').addClass('hidden');
-			document.getElementById('currentAddrDescr').innerHTML = 'Metamask address';
-
-			$('#etherscan').attr("href", _util.addressLink(metamaskAddr, false, false));
-			setAddrImage(metamaskAddr);
-			if (savedAddr && savedAddr !== metamaskAddr) {
-				$('#savedsection').removeClass('hidden');
+	/*
+		//called from html onclick
+		function loadMetamask() {
+			if (metamaskAddr) {
+	
+				publicAddr = metamaskAddr;
+				document.getElementById('currentAddr').innerHTML = metamaskAddr.slice(0, 16); // side menu
+				document.getElementById('currentAddr2').innerHTML = metamaskAddr.slice(0, 8); //top bar
+	
+				$('#walletInfo').removeClass('hidden');
+				$('#metamaskSection').addClass('hidden');
+				document.getElementById('currentAddrDescr').innerHTML = 'Metamask address';
+	
+				$('#etherscan').attr("href", _util.addressLink(metamaskAddr, false, false));
+				setAddrImage(metamaskAddr);
+				if (savedAddr && savedAddr !== metamaskAddr) {
+					$('#savedsection').removeClass('hidden');
+				}
+				setStorage();
 			}
-			setStorage();
+			return false;
 		}
-		return false;
-	}
+		*/
 
 
 	function getBlockStorage() {

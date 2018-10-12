@@ -1,3 +1,5 @@
+
+var isAddressPage = true;
 {
 	// shorthands
 	var _delta = bundle.DeltaBalances;
@@ -33,9 +35,7 @@
 	var transLoaded = 0;
 
 	// user input & data
-	var publicAddr = '';
-	var savedAddr = '';
-	var metamaskAddr = '';
+	/* publicAddr, savedAddr, metamaskAddr  moved to user.js */
 	var lastResult2 = undefined;
 
 	// config
@@ -197,9 +197,6 @@
 			}
 		}
 		else if (publicAddr) {
-			if (publicAddr !== savedAddr) {
-				$('#forget').addClass('hidden');
-			}
 			autoStart = true;
 			myClick();
 		} else if (savedAddr) {//autoload when remember is active
@@ -437,135 +434,6 @@
 			}
 		}
 	}
-
-
-	// check if input address is valid
-	function getAddress(addr) {
-
-		setAddrImage('');
-		document.getElementById('currentAddr').innerHTML = '0x......'; // side menu
-		document.getElementById('currentAddr2').innerHTML = '0x......'; //top bar
-		document.getElementById('currentAddrDescr').innerHTML = 'Input address';
-
-		var address = '';
-		address = addr ? addr : document.getElementById('address').value;
-		address = address.trim();
-
-		if (!_delta.web3.isAddress(address)) {
-			//check if url ending in address
-			if (address.indexOf('/0x') !== -1) {
-				var parts = address.split('/');
-				var lastSegment = parts.pop() || parts.pop();  // handle potential trailing slash
-				if (lastSegment)
-					address = lastSegment;
-			}
-
-			if (!_delta.web3.isAddress(address)) {
-				if (address.length == 66 && address.slice(0, 2) === '0x') {
-					// transaction hash, go to transaction details
-					window.location = window.location.origin + window.location.pathname + '/../tx.html#' + address;
-					return;
-				}
-
-				// possible private key, show warning   (private key, or tx without 0x)
-				if (address.length == 64 && address.slice(0, 2) !== '0x') {
-					if (!addr) // ignore if in url arguments
-					{
-						showError("You likely entered your private key, NEVER do that again");
-					}
-				}
-				else if (address.length == 40 && address.slice(0, 2) !== '0x') {
-					address = `0x${addr}`;
-
-				}
-				else {
-					if (!addr) // ignore if in url arguments
-					{
-						showError("Invalid address, try again");
-					}
-					return undefined;
-				}
-				if (!_delta.web3.isAddress(address)) {
-					if (!addr) // ignore if in url arguments
-					{
-						showError("Invalid address, try again");
-					}
-					return undefined;
-				}
-			}
-		}
-
-		$('#userToggle').removeClass('hidden');
-		document.getElementById('address').value = address;
-		document.getElementById('currentAddr').innerHTML = address.slice(0, 16); // side menu
-		document.getElementById('currentAddr2').innerHTML = address.slice(0, 8); //top bar
-		$('#walletInfo').removeClass('hidden');
-		if (!savedAddr || address.toLowerCase() !== savedAddr.toLowerCase()) {
-			$('#save').removeClass('hidden');
-			$('#forget').addClass('hidden');
-			if (savedAddr) {
-				$('#savedSection').removeClass('hidden');
-			}
-		} else if (savedAddr && address.toLowerCase() === savedAddr.toLowerCase()) {
-			$('#save').addClass('hidden');
-			$('#forget').removeClass('hidden');
-			$('#savedSection').addClass('hidden');
-			if (savedAddr === metamaskAddr) {
-				document.getElementById('currentAddrDescr').innerHTML = 'Metamask address (Saved)';
-			} else {
-				document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
-			}
-		}
-		if (metamaskAddr) {
-			if (address.toLowerCase() === metamaskAddr.toLowerCase()) {
-				if (metamaskAddr !== savedAddr)
-					document.getElementById('currentAddrDescr').innerHTML = 'Metamask address';
-				$('#metamaskSection').addClass('hidden');
-			} else {
-				$('#metamaskSection').removeClass('hidden');
-			}
-		}
-		$('#etherscan').attr("href", _util.addressLink(address, false, false))
-		document.getElementById('addr').innerHTML = _util.addressLink(address, true, false);
-		setAddrImage(address);
-
-		return address;
-	}
-
-	function setAddrImage(addr) {
-
-		var icon = document.getElementById('addrIcon');
-		var icon2 = document.getElementById('currentAddrImg');
-		var icon3 = document.getElementById('userImage');
-
-		if (addr) {
-			icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 16 }).toDataURL() + ')';
-			var smallImg = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-			icon2.style.backgroundImage = smallImg;
-			icon3.style.backgroundImage = smallImg;
-		} else {
-			icon.style.backgroundImage = '';
-			icon2.style.backgroundImage = '';
-			icon3.style.backgroundImage = '';
-		}
-	}
-
-	function setSavedImage(addr) {
-		var icon = document.getElementById('savedImage');
-		if (addr)
-			icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-		else
-			icon.style.backgroundImage = '';
-	}
-
-	function setMetamaskImage(addr) {
-		var icon = document.getElementById('metamaskImage');
-		if (addr)
-			icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-		else
-			icon.style.backgroundImage = '';
-	}
-
 
 	function getStartBlock(blcknm, days) {
 		startblock = Math.floor(blcknm - ((days * 24 * 60 * 60) / blocktime));
@@ -1619,63 +1487,6 @@
 		}
 	}
 
-	function forget() {
-		if (publicAddr) {
-			if (publicAddr.toLowerCase() === savedAddr.toLowerCase()) {
-				savedAddr = '';
-				$('#savedSection').addClass('hidden');
-			}
-		}
-		$('#address').val('');
-		publicAddr = getAddress('');
-		setStorage();
-		window.location.hash = "";
-		$('#walletInfo').addClass('hidden');
-		if (!publicAddr && !savedAddr && !metamaskAddr) {
-			$('#userToggle').click();
-			$('#userToggle').addClass('hidden');
-		}
-
-		myClick();
-
-		return false;
-	}
-
-	function save() {
-		savedAddr = publicAddr;
-		publicAddr = getAddress(savedAddr);
-
-		$('#savedAddress').html(savedAddr.slice(0, 16));
-		$('#savedSection').addClass('hidden');
-		$('#save').addClass('hidden');
-		setSavedImage(savedAddr);
-		setStorage();
-
-		return false;
-	}
-
-	function loadSaved() {
-		if (savedAddr) {
-
-			publicAddr = savedAddr;
-			publicAddr = getAddress(savedAddr);
-			$('#forget').removeClass('hidden');
-			setStorage();
-			myClick();
-		}
-		return false;
-	}
-
-	function loadMetamask() {
-		if (metamaskAddr) {
-			publicAddr = metamaskAddr;
-			publicAddr = getAddress(metamaskAddr);
-			$('#metamaskSection').addClass('hidden');
-			setStorage();
-			myClick();
-		}
-		return false;
-	}
 
 	function getBlockStorage() {
 		if (typeof (Storage) !== "undefined") {

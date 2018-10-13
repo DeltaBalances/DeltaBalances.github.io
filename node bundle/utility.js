@@ -22,6 +22,10 @@ module.exports = (config) => {
     return new BigNumber(wei).div(divisor);
   }
 
+  utility.isAddress = function(addr) {
+    return (addr && addr.length == 42 && _delta.web3.isAddress(addr));
+  }
+
   // check if an input address or url (including address) is a valid address
   // return empty string if invalid
   utility.addressFromString = function (inputString) {
@@ -35,19 +39,19 @@ module.exports = (config) => {
     inputString = inputString.replace(/\./g, ' ');
 
     // check if we already have an address
-    if (_delta.web3.isAddress(inputString)) {
+    if (this.isAddress(inputString)) {
       return inputString;
     }
     // maybe address without 0x
     else if (inputString.length == 40 && inputString.slice(0, 2) !== '0x') {
       let possibleAddress = '0x' + inputString;
-      if (_delta.web3.isAddress(possibleAddress)) {
+      if (this.isAddress(possibleAddress)) {
         return possibleAddress;
       }
     }
 
     //check if url with address
-    if (inputString.indexOf('0x') !== -1) {
+    if (inputString.indexOf('0x') !== -1 && inputString.indexOf('/tx') === -1) {
 
       let urlPrefixes = ['/0x', '=0x', '#0x'];
       let index = -1;
@@ -64,7 +68,7 @@ module.exports = (config) => {
       if (prefix) {
         let endSlice = Math.min(42, inputString.length - index);
         let possibleAddress = inputString.slice(index + 1, index + 1 + endSlice);
-        if (_delta.web3.isAddress(possibleAddress)) {
+        if (this.isAddress(possibleAddress)) {
           return possibleAddress;
         }
       }

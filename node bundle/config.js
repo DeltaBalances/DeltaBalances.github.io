@@ -399,10 +399,11 @@ module.exports = {
   baseToken: {
     "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359": 1, // DAI stablecoin
     "0xdac17f958d2ee523a2206206994597c13d831ec7": 2, // USDT 
-    "0xe41d2489571d322189246dafa5ebde1f4699f498": 3, // fee in 0x sometimes a zrx trade
-    "0x1a9b2d827f26b7d7c18fec4c1b27c1e8deeba26e": 4,// USDT-W ethfinex
-    "0xd9ebebfdab08c643c5f2837632de920c70a56247": 5, // DAI-W
-    "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c": 6, //BNT
+    "0xe41d2489571d322189246dafa5ebde1f4699f498": 3, // ZRX, fee in 0x sometimes as a zrx trade
+    "0x0027449bf0887ca3e431d263ffdefb244d95b555": 4, // NOT coin openrelay
+    "0x1a9b2d827f26b7d7c18fec4c1b27c1e8deeba26e": 5,// USDT-W ethfinex
+    "0xd9ebebfdab08c643c5f2837632de920c70a56247": 6, // DAI-W
+    "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c": 7, //BNT
   },
   apiServer: 'https://api.etherdelta.com', /*'https://api.forkdelta.com', 'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/
   etherscanAPIKey: 'YHBUWV6P5B5ITKMI91JIRZZYBP1CG1V65R',

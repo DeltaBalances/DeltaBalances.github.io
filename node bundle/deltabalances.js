@@ -211,7 +211,7 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         if (x.address && x.symbol) {
             let addr = x.address.toLowerCase();
             //make sure WETH appears listed 
-            if (utility.isWrappedETH(addr) || utility.isNonEthBase(addr)) {
+            if (utility.isWrappedETH(addr) /*|| utility.isNonEthBase(addr)*/) {
                 unlisted = false;
             }
             var token = {

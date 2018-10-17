@@ -1,120 +1,65 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
 
 /* 
-    Contract for DeltaBalances.github.io V3
-    Check balances for multiple ERC20 tokens in 1 batched request.
-    For the previous versions, see 0x3150954EAE1a8a5e5EE1F1B8E8444Fe16EA9F94C, 0xf5f563D3A99152c18cE8b133232Fe34317F60FEF
+    Contract for DeltaBalances.github.io V4.
+    Check ERC20 token balances & allowances for multiple tokens in 1 batched request.
     
-    // address 0x0 is used to indicate ETH
+    V4 changes:
+    - Small optimizations.
+    - Add token allowances.
+    - Removed unused functions.
+    
+    For the previous versions, see 0x3E25F0BA291F202188Ae9Bda3004A7B3a803599a for code and comments.
+    
+    Address 0x0 is used to indicate ETH (as used in EtherDelta, IDEX and more).
 */
 
-// Exchange contract Interface for EtherDelta and forks
+// Exchange contract Interface for EtherDelta and forks.
 contract Exchange {
-  function balanceOf(address /*token*/, address /*user*/) public view returns (uint);
+  function balanceOf(address token, address user) public view returns (uint);
 }
 
-// ERC20 contract interface
+// ERC20 contract interface.
 contract Token {
-  function balanceOf(address /*tokenOwner*/) public view returns (uint /*balance*/);
-  function transfer(address /*to*/, uint /*tokens*/) public returns (bool /*success*/);
+  function balanceOf(address tokenOwner) public view returns (uint balance);
+  function transfer(address to, uint tokens) public returns (bool success);
+  function allowance(address tokenOwner, address spenderContract) public view returns (uint remaining);
 }
 
 contract DeltaBalances {
     
   address public admin; 
 
-  function DeltaBalances() public {
+  constructor() public {
     admin = msg.sender;
   }
 
-  // Fallback function, don't accept any ETH
-  function() public payable {
-    revert();
-  }
-
-  // Limit withdrawals to the contract creator
+  // Limit withdrawals to the contract creator.
   modifier isAdmin() {
     require(msg.sender == admin);
     _;
   }
 
-  // Backup withdraw, in case ETH gets in here
+
+  // Backup withdraw, in case ETH gets in here.
   function withdraw() external isAdmin {
     admin.transfer(address(this).balance);
   }
 
-  // Backup withdraw, in case ERC20 tokens get in here
+  // Backup withdraw, in case ERC20 tokens get in here.
   function withdrawToken(address token, uint amount) external isAdmin {
     require(token != address(0x0) && Token(token).transfer(msg.sender, amount));
   }
 
-  /* Get multiple token balances on EtherDelta (or similar exchange)
-    Possible error throws:
-        - invalid exchange contract 
-        - using an extremely large array (gas cost too high?)
-        
-    Returns array of token balances in wei units. */
-  function deltaBalances(address exchange, address user,  address[] tokens) external view returns (uint[]) {
-    Exchange ex = Exchange(exchange);
-    uint[] memory balances = new uint[](tokens.length);
-    
-    for(uint i = 0; i < tokens.length; i++) {
-      balances[i] = ex.balanceOf(tokens[i], user);
-    }    
-    return balances;
-  }
 
-  /* Get multiple token balances on EtherDelta (or similar exchange)
-    Possible error throws:
-        - invalid exchange contract 
-        - using extremely large arrays (gas cost too high?)
-        
-    Returns array of token balances in wei units.
-    Balances in token-first order [token0ex0, token0ex1, token0ex2, token1ex0, token1ex1 ...] */
-  function multiDeltaBalances(address[] exchanges, address user,  address[] tokens) external view returns (uint[]) {
-    uint[] memory balances = new uint[](tokens.length * exchanges.length);
-    
-    for(uint i = 0; i < exchanges.length; i++) {
-      Exchange ex = Exchange(exchanges[i]);
-        
-      for(uint j = 0; j < tokens.length; j++) {
-        balances[(j * exchanges.length) + i] = ex.balanceOf(tokens[j], user);
-      }
-    }
-    return balances;
-  }
-
- /* Check the token balance of a wallet in a token contract
-    Avoids possible errors:
-    - returns 0 on invalid exchange contract 
-    - return 0 on non-contract address 
-    
-    Mainly for internal use, but public for anyone who thinks it is useful    */
-  function tokenBalance(address user, address token) public view returns (uint) {
-    // check if token is actually a contract
-    uint256 tokenCode;
-    assembly { tokenCode := extcodesize(token) } // contract code size
-   
-   // is it a contract and does it implement balanceOf 
-    if(tokenCode > 0 && token.call(bytes4(0x70a08231), user)) {    // bytes4(keccak256("balanceOf(address)")) == bytes4(0x70a08231)  
-      return Token(token).balanceOf(user);
-    } else {
-      return 0; // not a valid token, return 0 instead of error
-    }
-  }
-
- /* Check the token balances of a wallet for multiple tokens
-    Uses tokenBalance() to be able to return, even if a token isn't valid 
-    Possible error throws:
-        - extremely large arrays (gas cost too high) 
-        
-    Returns array of token balances in wei units. */
-  function walletBalances(address user,  address[] tokens) external view returns (uint[]) {
+  /* Check the token balances of a wallet for multiple tokens.
+     Returns array of token balances in wei units. */
+  function tokenBalances(address user,  address[] tokens) external view returns (uint[]) {
     uint[] memory balances = new uint[](tokens.length);
     
     for(uint i = 0; i < tokens.length; i++) {
       if(tokens[i] != address(0x0)) { 
-        balances[i] = tokenBalance(user, tokens[i]);
+        balances[i] = tokenBalance(user, tokens[i]); // check token balance and catch errors
       } else {
         balances[i] = user.balance; // ETH balance    
       }
@@ -122,27 +67,59 @@ contract DeltaBalances {
     return balances;
   }
 
- /* Combine walletBalances() and deltaBalances() to get both exchange and wallet balances for multiple tokens.
-    Possible error throws:
-        - extremely large arrays (gas cost too high) 
-        
-    Returns array of token balances in wei units, 2* input length.
-    even index [0] is exchange balance, odd [1] is wallet balance
-    [tok0ex, tok0, tok1ex, tok1, .. ] */
-  function allBalances(address exchange, address user,  address[] tokens) external view returns (uint[]) {
+
+  /* Get multiple token balances deposited on a DEX (EtherDelta, IDEX, or similar exchange).
+     Returns array of deposited token balances in wei units. */
+  function depositedBalances(address exchange, address user, address[] tokens) external view returns (uint[]) {
     Exchange ex = Exchange(exchange);
-    uint[] memory balances = new uint[](tokens.length * 2);
+    uint[] memory balances = new uint[](tokens.length);
     
     for(uint i = 0; i < tokens.length; i++) {
-      uint j = i * 2;
-      balances[j] = ex.balanceOf(tokens[i], user);
-      if(tokens[i] != address(0x0)) {
-        balances[j + 1] = tokenBalance(user, tokens[i]);
-      } else {
-        balances[j + 1] = user.balance; // ETH balance    
-      }
+      balances[i] = ex.balanceOf(tokens[i], user); //might error if exchange does not implement balanceOf correctly
+    }    
+    return balances;
+  }
+
+  /* Get multiple token allowances for a contract.
+     Returns array of deposited token balances in wei units. */
+  function tokenAllowances(address spenderContract, address user, address[] tokens) external view returns (uint[]) {
+    uint[] memory allowances = new uint[](tokens.length);
+    
+    for(uint i = 0; i < tokens.length; i++) {
+      allowances[i] = tokenAllowance(spenderContract, user, tokens[i]); // check token allowance and catch errors
+    }    
+    return allowances;
+  }
+
+
+ /* Check the token balance of a wallet in a token contract.
+    Returns 0 on a bad token contract   */
+  function tokenBalance(address user, address token) internal view returns (uint) {
+    // check if token is actually a contract
+    uint256 tokenCode;
+    assembly { tokenCode := extcodesize(token) } // contract code size
+   
+   // is it a contract and does it implement balanceOf() 
+    if(tokenCode > 0 && token.call(0x70a08231, user)) {    // bytes4(keccak256("balanceOf(address)")) == 0x70a08231  
+      return Token(token).balanceOf(user);
+    } else {
+      return 0; // not a valid token, return 0 instead of error
     }
-    return balances; 
   }
   
+  
+  /* Check the token allowance of a wallet for a specific contract.
+     Returns 0 on a bad token contract.   */
+  function tokenAllowance(address spenderContract, address user, address token) internal view returns (uint) {
+    // check if token is actually a contract
+    uint256 tokenCode;
+    assembly { tokenCode := extcodesize(token) } // contract code size
+   
+   // is it a contract and does it implement allowance() 
+    if(tokenCode > 0 && token.call(0xdd62ed3e, user, spenderContract)) {    // bytes4(keccak256("allowance(address,address)")) == 0xdd62ed3e
+      return Token(token).allowance(user, spenderContract);
+    } else {
+      return 0; // not a valid token, return 0 instead of error
+    }
+  }
 }

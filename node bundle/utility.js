@@ -22,7 +22,7 @@ module.exports = (config) => {
     return new BigNumber(wei).div(divisor);
   }
 
-  utility.isAddress = function(addr) {
+  utility.isAddress = function (addr) {
     return (addr && addr.length == 42 && _delta.web3.isAddress(addr));
   }
 

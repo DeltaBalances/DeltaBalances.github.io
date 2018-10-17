@@ -802,7 +802,7 @@ var isAddressPage = true;
 								} else if (unpacked.name === 'cancelOrdersUpTo') {
 									trans = createOutputTransaction('Cancel All', '', '', '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', obj.exchange);
 								}
-								else if (unpacked.name === 'trade' || unpacked.name === 'fill' || unpacked.name === 'tradeEtherDelta') {
+								else if (unpacked.name === 'trade' || unpacked.name === 'fill' || unpacked.name === 'tradeEtherDelta' || unpacked.name === 'instantTrade') {
 
 									if (unpacked.name === 'trade' && unpacked.params.length === 7) {
 										//kyber only

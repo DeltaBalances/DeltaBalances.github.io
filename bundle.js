@@ -3617,7 +3617,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 };
             }
             // etherdelta/decentrex/tokenstore use 11, idex has 4, enclaves has 12
-            else if (!badFromTo && (unpacked.name === 'trade' && (unpacked.params.length == 11 || unpacked.params.length == 12 || unpacked.params.length == 4) || unpacked.name === 'tradeEtherDelta')) {
+            else if (!badFromTo && (unpacked.name === 'trade' && (unpacked.params.length == 11 || unpacked.params.length == 12 || unpacked.params.length == 4) || unpacked.name === 'tradeEtherDelta' || unpacked.name === 'instantTrade')) {
 
                 let idex = false;
                 //make idex trades fit the old etherdelta format
@@ -28334,7 +28334,7 @@ module.exports = (config) => {
     return new BigNumber(wei).div(divisor);
   }
 
-  utility.isAddress = function(addr) {
+  utility.isAddress = function (addr) {
     return (addr && addr.length == 42 && _delta.web3.isAddress(addr));
   }
 

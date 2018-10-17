@@ -982,10 +982,10 @@ var isAddressPage = true;
 
 			var tokens = tokens3.slice(startIndex, endIndex);
 
-			var functionName = 'deltaBalances';
+			var functionName = 'depositedBalances';
 			var arguments = [exchanges[mode].contract, publicAddr, tokens];
 			if (mode == 'Wallet') {
-				functionName = 'walletBalances';
+				functionName = 'tokenBalances';
 				arguments = [publicAddr, tokens];
 			}
 
@@ -1029,7 +1029,7 @@ var isAddressPage = true;
 							if (!success) {
 								success = true;
 							}
-							if (funcName == 'walletBalances' || funcName == 'deltaBalances') {
+							if (funcName == 'tokenBalances' || funcName == 'depositedBalances') {
 								if (exchanges[exName].enabled) {
 
 									for (let i = 0; i < tokens.length; i++) {
@@ -1059,12 +1059,12 @@ var isAddressPage = true;
 						{
 							const retryAmount = 2;
 							if (totalTries >= retryAmount * 2) { //if we retried too much, show an error
-								if (funcName == 'walletBalances') {
+								if (funcName == 'tokenBalances') {
 									showError('Failed to load all Wallet balances after 3 tries, try again later');
 									exchanges[exName].loaded = -1;
 									finishedBalanceRequest();
 								}
-								else if (funcName == 'deltaBalances') {
+								else if (funcName == 'depositedBalances') {
 									showError('Failed to load all ' + exName + ' balances after 3 tries, try again later');
 									exchanges[exName].loaded = -1;
 									finishedBalanceRequest();

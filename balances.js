@@ -111,41 +111,17 @@ var isAddressPage = true;
 
 	// config
 	var tokenCount = 0; //auto loaded
-	var blocktime = 14;
 	var blocknum = -1;
-	var startblock = 0;
-	var endblock = 'latest';
 	var walletWarningBalance = 0.003;
 
 	var balances = {};
 	var etherPriceUSD = 0;
 	var etherPriceEUR = 0;
 
+
+	initBalance({ "name": 'ETH', "addr": "0x0000000000000000000000000000000000000000", "unlisted": false });
 	// placeholder
-	var balancesPlaceholder = {
-		"0x0000000000000000000000000000000000000000":
-		{
-			Name: 'ETH',
-			Wallet: 0,
-			EtherDelta: 0,
-			IDEX: 0,
-			'Token store': 0,
-			Enclaves: 0,
-			SingularX: 0,
-			EtherC: 0,
-			Decentrex: 0,
-			Ethen: 0,
-			DEXY: 0,
-			Total: 0,
-			Unlisted: false,
-			Address: '0x0000000000000000000000000000000000000000',
-			Bid: '',
-			Ask: '',
-			'Est. ETH': '',
-			'USD': '',
-			'EUR': '',
-		},
-	};
+	var balancesPlaceholder = balances;
 
 	init();
 
@@ -236,11 +212,7 @@ var isAddressPage = true;
 		});
 		$('#exchangeDropdown').selectpicker('val', dropdownVal);
 
-
 		resetExLoadingState();
-		Object.keys(exchanges).forEach(function (key) {
-			initExchangeBox(key);
-		});
 
 		placeholderTable();
 		setBalanceProgress();
@@ -326,29 +298,6 @@ var isAddressPage = true;
 				$('#collapseSettings').click();
 			}
 		}
-	}
-
-	function initExchangeBox(name) {
-
-		let name2 = name;
-		if (name2 == 'Token store')
-			name2 = 'store';
-		let id = '#' + name2;
-		let boxId = id + 'Box';
-
-		let enabled = $(id).prop('checked');
-		if (enabled != exchanges[name].enabled) {
-			$(id).prop("checked", exchanges[name].enabled);
-			$(boxId).removeClass('box-success');
-			$(boxId).removeClass('box-warning');
-
-			if (exchanges[name].enabled) {
-				$(boxId).addClass('box-success');
-			} else {
-				$(boxId).addClass('box-warning');
-			}
-		}
-
 	}
 
 	function checkExchange(selected) {
@@ -802,30 +751,31 @@ var isAddressPage = true;
 
 		getPrices(rqid);
 		getEtherPrice();
+	}
 
-		function initBalance(tokenObj, customToken) {
-			balances[tokenObj.addr] = {
-				Name: tokenObj.name,
-				Wallet: '',
-				EtherDelta: '',
-				IDEX: 0,
-				'Token store': 0,
-				Enclaves: 0,
-				SingularX: 0,
-				EtherC: 0,
-				Decentrex: 0,
-				Ethen: 0,
-				DEXY: 0,
-				Total: 0,
-				Bid: '',
-				Ask: '',
-				'Est. ETH': '',
-				Unlisted: tokenObj.unlisted,
-				Address: tokenObj.addr,
-			};
+
+	function initBalance(tokenObj) {
+		let obj = {
+			Name: tokenObj.name,
+		};
+
+		let exs = Object.keys(exchanges);
+		for (let i = 0; i < exs.length; i++) {
+			obj[exs[i]] = 0;
 		}
 
+		let obj1 = {
+			Total: 0,
+			Bid: '',
+			Ask: '',
+			'Est. ETH': '',
+			Unlisted: tokenObj.unlisted,
+			Address: tokenObj.addr,
+		};
+
+		balances[tokenObj.addr] = Object.assign({}, obj, obj1);
 	}
+
 
 	function getEtherPrice() {
 		$.getJSON('https://api.coinmarketcap.com/v2/ticker/1027/?convert=EUR', result => {
@@ -1671,7 +1621,7 @@ var isAddressPage = true;
 				var head = headers[colIndex].title;
 
 
-				if (head == 'Total' || head == 'EtherDelta' || head == 'Decentrex' || head == 'Token store' || head == 'IDEX' || head == 'Enclaves' || head == 'DEXY' || head == 'SingularX' || head == 'EtherC' || head == 'Ethen' || head == 'Wallet' || head == 'Bid' || head == 'Ask' || head == 'Est. ETH') {
+				if (head == 'Total' || exchanges[head] || head == 'Bid' || head == 'Ask' || head == 'Est. ETH') {
 					if (cellValue !== "" && cellValue !== undefined) {
 						var dec = fixedDecimals;
 						if (head == 'Bid' || head == 'Ask') {
@@ -1710,7 +1660,7 @@ var isAddressPage = true;
 		return resultTable;
 	}
 
-	var balanceHeaders = { 'Name': 1, 'Wallet': 1, 'EtherDelta': 1, 'IDEX': 1, 'Token store': 1, 'Enclaves': 1, 'Decentrex': 1, 'SingularX': 1, 'EtherC': 1, 'DEXY': 0, 'Ethen': 0, 'Total': 1, 'Value': 1, 'Bid': 1, 'Ask': 0, 'Est. ETH': 1, 'USD': 0, 'EUR': 0 };
+	var balanceHeaders = { 'Name': 1, 'Wallet': 1, 'Total': 1, 'Value': 1, 'Bid': 1, 'Ask': 0, 'Est. ETH': 1, 'USD': 0, 'EUR': 0 };
 
 	// Adds a header row to the table and returns the set of columns.
 	// Need to do union of keys from all records as some records may not contain
@@ -1812,7 +1762,7 @@ var isAddressPage = true;
 
 				for (let j = 0; j < arr.length; j++) {
 					//remove exponential notation
-					if (A[0][j] == 'Wallet' || A[0][j] == 'EtherDelta' || A[0][j] == 'IDEX' || A[0][j] == 'Token store' || A[0][j] == 'Enclaves' || A[0][j] == 'Decentrex' || A[0][j] == 'DEXY' || A[0][j] == 'Ethen' || A[0][j] == 'Total' || A[0][j] == 'Estimated value (ETH)' || A[0][j] == 'Bid (ETH)' || A[0][j] == 'Ask (ETH)') {
+					if (A[0][j] == 'Wallet' || exchanges[A[0][j]] || A[0][j] == 'Total' || A[0][j] == 'Estimated value (ETH)' || A[0][j] == 'Bid (ETH)' || A[0][j] == 'Ask (ETH)') {
 						if (arr[j] != '' && arr[j] != ' ')
 							arr[j] = _util.exportNotation(arr[j]);
 					}

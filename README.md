@@ -40,7 +40,7 @@ DeltaBalances is not affiliated with any of the exchanges mentioned below.
 
 # Smart contract
 Want to check token balances in your Dapp?  
-Try the DeltaBalances [smart contract](https://etherscan.io/address/0x3e25f0ba291f202188ae9bda3004a7b3a803599a#code) 
+Try the DeltaBalances [smart contract](https://etherscan.io/address/0x40a38911e470fc088beeb1a9480c2d69c847bcec#code) 
 + Get balanceOf for multiple tokens in a single web3 request
 + Get the token balance in both the wallet and decentralized exchange in 1 request
 

@@ -1495,26 +1495,12 @@ var isAddressPage = true;
 
 	function download1() {
 		if (lastResult && (typeMode == 0 || typeMode == 2)) {
-			let val = $('#downloadTrades').val();
-			if (val) {
+			let exportFormat = $('#downloadTrades').val();
+			if (exportFormat) {
 				let allTrades = lastResult.filter((x) => { return (x.Type == 'Maker' || x.Type == 'Taker'); });
 				if (allTrades && allTrades.length > 0) {
 					$('#downloadTradesBtn').html('');
-					switch (Number(val)) {
-						case 1:
-							downloadDefaultTrades(allTrades);
-							break;
-						case 2:
-							downloadBitcoinTaxTrades(allTrades);
-							break;
-						case 3:
-							downloadCointrackingTrades(allTrades);
-							break;
-						case 4:
-							downloadCointracking2Trades(allTrades);
-							break;
-						default: return;
-					}
+					generateTradesData(allTrades, exportFormat);
 				}
 			}
 		}
@@ -1522,20 +1508,12 @@ var isAddressPage = true;
 
 	function download2() {
 		if (lastResult && (typeMode == 1 || typeMode == 2)) {
-			let val = $('#downloadFunds').val();
-			if (val) {
+			let exportFormat = $('#downloadFunds').val();
+			if (exportFormat) {
 				let allFunds = lastResult.filter((x) => { return (x.Type == 'Deposit' || x.Type == 'Withdraw'); });
 				if (allFunds && allFunds.length > 0) {
 					$('#downloadFundsBtn').html('');
-					switch (Number(val)) {
-						case 1:
-							downloadDefaultFunds(allFunds);
-							break;
-						case 2:
-							downloadCointrackingFunds(allFunds);
-							break;
-						default: return;
-					}
+					generateFundsData(allFunds, exportFormat);
 				}
 			}
 		}
@@ -1587,244 +1565,211 @@ var isAddressPage = true;
 		dl.appendChild(a);
 	}
 
-	function downloadDefaultTrades(allTrades) {
-		if (allTrades) {
-			var A = [['Type', 'Trade', 'Token', 'Amount', 'Price', 'BaseCurrency', 'Total', 'Date', 'Block', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract', 'BaseCurrency Contract', 'Exchange']];
-			// initialize array of rows with header row as 1st item
-			for (var i = 0; i < allTrades.length; ++i) {
+	// format the trades data into a downloadable csv 
+	function generateTradesData(allTrades, exportFormat) {
+		let tableData = [];
+		let filePrefix = '';
 
+		if (exportFormat <= 1) {
+			// default format (v2)
+			const headers = ['Type', 'Trade', 'Token', 'Amount', 'Price', 'BaseCurrency', 'Total', 'Date', 'Block', 'Transaction Hash', 'Buyer', 'Seller', 'Fee', 'FeeToken', 'Token Contract', 'BaseCurrency Contract', 'Exchange'];
+			tableData = [headers];
+			for (var i = 0; i < allTrades.length; ++i) {
 				let exchange = allTrades[i].Exchange;
-
-				var arr = [allTrades[i]['Type'], allTrades[i]['Trade'], allTrades[i]['Token'].name, allTrades[i]['Amount'], allTrades[i]['Price'], allTrades[i]['Base'].name,
-				allTrades[i]['Total'], _util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'],
-				allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr, allTrades[i]['Base'].addr, exchange];
-
-				for (let j = 0; j < arr.length; j++) {
-					//remove exponential notation
-					if (A[0][j] == 'Amount' || A[0][j] == 'Price' || A[0][j] == 'Total ETH' || A[0][j] == 'Fee') {
-						if (arr[j])
-							arr[j] = _util.exportNotation(arr[j]);
-					}
-
-					// add quotes
-					//arr[j] = `\"${arr[j]}\"`;
-				}
-				A.push(arr);
+				var row = [
+					allTrades[i]['Type'], allTrades[i]['Trade'], allTrades[i]['Token'].name, allTrades[i]['Amount'], allTrades[i]['Price'], allTrades[i]['Base'].name,
+					allTrades[i]['Total'], _util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Buyer'], allTrades[i]['Seller'],
+					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Token'].addr, allTrades[i]['Base'].addr, exchange
+				];
+				tableData.push(row);
 			}
-
-
-			var csvRows = [];
-			for (var i = 0, l = A.length; i < l; ++i) {
-				csvRows.push(A[i].join(','));   // unquoted CSV row
-			}
-			var csvString = csvRows.join("\r\n");
-
-			makeTradesCSV(csvString, '');
+			tableData = fixDownloadNumberNotation(tableData, ['Amount', 'Price', 'Total ETH', 'Fee']);
 		}
-	}
+		else if (exportFormat == 2) {
+			// Bitcoin.Tax
+			filePrefix = 'BitcoinTax_';
+			const headers = ['Date', 'Action', 'Source', 'Volume', 'Symbol', 'Price', 'Currency', 'Fee', 'FeeCurrency', 'Memo'];
+			tableData = [headers];
 
-	function downloadDefaultFunds(allTrades) {
-		if (allTrades) {
-			var A = [['Type', 'Token', 'Amount', 'Date', 'Block', 'Transaction Hash', 'Token Contract', 'Exchange']];
-			// initialize array of rows with header row as 1st item
 			for (var i = 0; i < allTrades.length; ++i) {
-
-				let exchange = allTrades[i].Exchange;
-				var arr = [allTrades[i]['Type'], allTrades[i]['Token'].name, allTrades[i]['Amount'], _util.formatDateOffset(allTrades[i]['Date']),
-				allTrades[i]['Block'], allTrades[i]['Hash'], allTrades[i]['Token'].addr, exchange];
-
-				for (let j = 0; j < arr.length; j++) {
-					//remove exponential notation
-					if (A[0][j] == 'Amount') {
-						if (arr[j])
-							arr[j] = _util.exportNotation(arr[j]);
-					}
-
-					// add quotes
-					//arr[j] = `\"${arr[j]}\"`;
-				}
-				A.push(arr);
-			}
-
-
-			var csvRows = [];
-			for (var i = 0, l = A.length; i < l; ++i) {
-				csvRows.push(A[i].join(','));   // unquoted CSV row
-			}
-			var csvString = csvRows.join("\r\n");
-
-			makeFundsCSV(csvString, '');
-		}
-	}
-
-	function downloadBitcoinTaxTrades(allTrades) {
-		if (allTrades) {
-			var A = [['Date', 'Action', 'Source', 'Volume', 'Symbol', 'Price', 'Currency', 'Fee', 'FeeCurrency', 'Memo']];
-
-			// initialize array of rows with header row as 1st item
-			for (var i = 0; i < allTrades.length; ++i) {
-				var arr = undefined;
+				var row = [];
 				var memoString = '"Transaction Hash ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr + '"';
-
 				let exchange = allTrades[i].Exchange;
 
 				//if (allTrades[i]['Trade'] === 'Buy') {
-				arr = [_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), exchange, allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Price'], allTrades[i]['Base'].name,
-				allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
+				row = [
+					_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), exchange, allTrades[i]['Amount'],
+					allTrades[i]['Token'].name, allTrades[i]['Price'], allTrades[i]['Base'].name,
+					allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString
+				];
 				//	}
 				// add token fee to total for correct balance in bitcoin tax
 				//	else {
-				//		arr = [_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), exchange, allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], allTrades[i]['Base'].name,
+				//		row = [_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Trade'].toUpperCase(), exchange, allTrades[i]['Amount'] + allTrades[i]['Fee'], allTrades[i]['Token'].name, allTrades[i]['Price'], allTrades[i]['Base'].name,
 				//		allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, memoString];
 				//	}
-
-				for (let j = 0; j < arr.length; j++) {
-					//remove exponential notation
-					if (A[0][j] == 'Volume' || A[0][j] == 'Price' || A[0][j] == 'Fee' || A[0][j] == 'Total') {
-						if (arr[j])
-							arr[j] = _util.exportNotation(arr[j]);
-					}
-
-					// add quotes
-					//arr[j] = `\"${arr[j]}\"`;
-				}
-				A.push(arr);
+				tableData.push(row);
 			}
-			var csvRows = [];
-			for (var i = 0, l = A.length; i < l; ++i) {
-				csvRows.push(A[i].join(','));   // unquoted CSV row
-			}
-			var csvString = csvRows.join("\r\n");
+			tableData = fixDownloadNumberNotation(tableData, ['Volume', 'Price', 'Total', 'Fee']);
+		} else if (exportFormat == 3) {
+			// Cointracking.info - CSV
+			filePrefix = 'Cointracking_CSV_';
+			const headers = ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'Group', 'Comment', 'Trade ID', 'Date'];
+			tableData = [headers];
 
-			makeTradesCSV(csvString, 'BitcoinTax_');
-
-		}
-	}
-
-	//csv columns
-	function downloadCointrackingTrades(allTrades) {
-		if (allTrades) {
-			var A = [['\"Type\"', '\"Buy\"', '\"Cur.\"', '\"Sell\"', '\"Cur.\"', '\"Fee\"', '\"Cur.\"', '\"Exchange\"', '\"Group\"', '\"Comment\"', '\"Trade ID\"', '\"Date\"']];
-			// initialize array of rows with header row as 1st item
 			for (var i = 0; i < allTrades.length; ++i) {
-				var arr = [];
+				var row = [];
 				let exchange = allTrades[i].Exchange;
 
 				if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
-					arr = ['Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-						exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])];
-
+					row = [
+						'Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])
+					];
 				}
 				else {  //sell add fee to token total
-					arr = ['Trade', allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-						exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])];
+					row = [
+						'Trade', allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])
+					];
 				}
-
-				for (let j = 0; j < arr.length; j++) {
-					//remove exponential notation
-					if (A[0][j] == '\"Buy\"' || A[0][j] == '\"Sell\"' || A[0][j] == '\"Fee\"') {
-						if (arr[j])
-							arr[j] = _util.exportNotation(arr[j]);
-					}
-
-					// add quotes
-					arr[j] = `\"${arr[j]}\"`;
-				}
-
-				A.push(arr);
+				tableData.push(row);
 			}
-			var csvRows = [];
-			for (var i = 0, l = A.length; i < l; ++i) {
-				csvRows.push(A[i].join(','));   // unquoted CSV row
-			}
-			var csvString = csvRows.join("\r\n");
-
-			makeTradesCSV(csvString, 'Cointracking_CSV_');
+			tableData = fixDownloadNumberNotation(tableData, ['Buy', 'Sell', 'Fee']);
+			// add quotes around each cell data
+			tableData = tableData.map((row) => {
+				return row.map((cell) => {
+					return `\"${cell}\"`
+				});
+			});
 		}
-	}
+		else if (exportFormat == 4) {
+			//Cointracking.info - Custom Exchange
+			filePrefix = 'Cointracking_Custom_';
+			const headers = ['Date', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Trade ID', 'Comment', 'Exchange', 'Type'];
+			tableData = [headers];
 
-	//csv columns
-	function downloadCointrackingFunds(allTrades) {
-		if (allTrades) {
-			var A = [['\"Type\"', '\"Buy\"', '\"Cur.\"', '\"Sell\"', '\"Cur.\"', '\"Fee\"', '\"Cur.\"', '\"Exchange\"', '\"Group\"', '\"Comment\"', '\"Trade ID\"', '\"Date\"']];
-			// initialize array of rows with header row as 1st item
 			for (var i = 0; i < allTrades.length; ++i) {
-				var arr = [];
-				let exchange = allTrades[i].Exchange;
-
-				if (allTrades[i]['Type'] === 'Deposit') { // deposit is 'buy'
-					arr = ['Deposit', allTrades[i]['Amount'], allTrades[i]['Token'].name, "", "", "", "",
-						exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
-						allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])];
-				}
-				else {  //withdraw is 'sell'
-					arr = ['Withdrawal', "", "", allTrades[i]['Amount'], allTrades[i]['Token'].name, "", "",
-						exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
-						allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])];
-				}
-
-				for (let j = 0; j < arr.length; j++) {
-					//remove exponential notation
-					if (A[0][j] == '\"Buy\"' || A[0][j] == '\"Sell\"') {
-						if (arr[j])
-							arr[j] = _util.exportNotation(arr[j]);
-					}
-
-					// add quotes
-					arr[j] = `\"${arr[j]}\"`;
-				}
-
-				A.push(arr);
-			}
-			var csvRows = [];
-			for (var i = 0, l = A.length; i < l; ++i) {
-				csvRows.push(A[i].join(','));   // unquoted CSV row
-			}
-			var csvString = csvRows.join("\r\n");
-			makeFundsCSV(csvString, 'Cointracking_');
-		}
-	}
-
-	//custom exchange columns
-	function downloadCointracking2Trades(allTrades) {
-		if (allTrades) {
-
-			var A = [['\"Date\"', '\"Buy\"', '\"Cur.\"', '\"Sell\"', '\"Cur.\"', '\"Fee\"', '\"Cur.\"', '\"Trade ID\"', '\"Comment\"', '\"Exchange\"', '\"Type\"']];
-
-			// initialize array of rows with header row as 1st item
-			for (var i = 0; i < allTrades.length; ++i) {
-				var arr = [];
+				var row = [];
 				let exchange = allTrades[i].Exchange;
 
 				if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
-					arr = [_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-					allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, exchange, 'Trade'];
-
+					row = [
+						_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name,
+						allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
+						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, exchange, 'Trade'
+					];
 				}
 				else { //sell add fee to token total
-					arr = [_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-					allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, exchange, 'Trade'];
+					row = [
+						_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']),
+						allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Hash'],
+						'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, exchange, 'Trade'
+					];
 				}
-
-				for (let j = 0; j < arr.length; j++) {
-					//remove exponential notation
-					if (A[0][j] == '\"Buy\"' || A[0][j] == '\"Sell\"' || A[0][j] == '\"Fee\"') {
-						if (arr[j])
-							arr[j] = _util.exportNotation(arr[j]);
-					}
-
-					// add quotes
-					arr[j] = `\"${arr[j]}\"`;
-				}
-				A.push(arr);
+				tableData.push(row);
 			}
-			var csvRows = [];
-			for (var i = 0, l = A.length; i < l; ++i) {
-				csvRows.push(A[i].join(','));   // unquoted CSV row
-			}
-			var csvString = csvRows.join("\r\n");
-			makeTradesCSV(csvString, 'Cointracking_Custom_');
+			tableData = fixDownloadNumberNotation(tableData, ['Buy', 'Sell', 'Fee']);
+			// add quotes around each cell data
+			tableData = tableData.map((row) => {
+				return row.map((cell) => {
+					return `\"${cell}\"`
+				});
+			});
+		} else {
+			console.log('invalid trade export format');
+			return;
 		}
+
+		// turn table in rows of text
+		let csvString = tableData.map((row) => {
+			return row.join(',');
+		}).join("\r\n");
+
+		makeTradesCSV(csvString, filePrefix);
+	}
+
+	// format the funding (deposit/withdraw) data into a downloadable csv 
+	function generateFundsData(allFunds, exportFormat) {
+		let tableData = [];
+		let filePrefix = '';
+
+		if (exportFormat <= 1) {
+			// Default (v2) export
+			const headers = ['Type', 'Token', 'Amount', 'Date', 'Block', 'Transaction Hash', 'Token Contract', 'Exchange'];
+			tableData = [headers];
+			for (var i = 0; i < allFunds.length; ++i) {
+				let exchange = allFunds[i].Exchange;
+				var row = [
+					allFunds[i]['Type'], allFunds[i]['Token'].name, allFunds[i]['Amount'], _util.formatDateOffset(allFunds[i]['Date']),
+					allFunds[i]['Block'], allFunds[i]['Hash'], allFunds[i]['Token'].addr, exchange
+				];
+				tableData.push(row);
+			}
+			tableData = fixDownloadNumberNotation(tableData, ['Amount']);
+		}
+		else if (exportFormat == 2) {
+			// Cointracking.info Funds export
+			filePrefix = 'Cointracking_';
+			const headers = ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'Group', 'Comment', 'Trade ID', 'Date'];
+			tableData = [headers];
+			for (var i = 0; i < allFunds.length; ++i) {
+				var row = [];
+				let exchange = allFunds[i].Exchange;
+
+				if (allFunds[i]['Type'] === 'Deposit') { // deposit is 'buy'
+					row = [
+						'Deposit', allFunds[i]['Amount'], allFunds[i]['Token'].name, "", "", "", "",
+						exchange, '', 'Hash: ' + allFunds[i]['Hash'] + " -- " + allFunds[i]['Token'].name + " token contract " + allFunds[i]['Token'].addr,
+						allFunds[i]['Hash'], _util.formatDateOffset(allFunds[i]['Date'])
+					];
+				}
+				else {  //withdraw is 'sell'
+					row = [
+						'Withdrawal', "", "", allFunds[i]['Amount'], allFunds[i]['Token'].name, "", "",
+						exchange, '', 'Hash: ' + allFunds[i]['Hash'] + " -- " + allFunds[i]['Token'].name + " token contract " + allFunds[i]['Token'].addr,
+						allFunds[i]['Hash'], _util.formatDateOffset(allFunds[i]['Date'])
+					];
+				}
+
+				tableData.push(row);
+			}
+			tableData = fixDownloadNumberNotation(tableData, ['Buy', 'Sell']);
+			// add quotes around each cell data
+			tableData = tableData.map((row) => {
+				return row.map((cell) => {
+					return `\"${cell}\"`
+				});
+			});
+		} else {
+			console.log('invalid funds export format');
+			return;
+		}
+
+		// turn table in rows of text
+		let csvString = tableData.map((row) => {
+			return row.join(',');
+		}).join("\r\n");
+
+		makeFundsCSV(csvString, filePrefix);
+	}
+
+	//remove exponential notation for numbers in rows with certain headers like Price and amount ['Price', 'Amount']
+	function fixDownloadNumberNotation(table, headersToCheck) {
+		for (let i = 1; i < table.length; i++) {  // i==0 is table headers, start at 1
+			// loop table rows
+			for (let j = 0; j < table[i].length; j++) {
+				for (let k = 0; k < headersToCheck.length; k++) {
+					if (table[0][j] == headersToCheck[k]) {  // e.g  header == 'Price'
+						if (table[i][j]) {
+							table[i][j] = _util.exportNotation(table[i][j]); // fix string notation of number
+						}
+						break;
+					}
+				}
+			}
+		}
+		return table;
 	}
 
 	function placeholderTable() {

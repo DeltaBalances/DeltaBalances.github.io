@@ -1621,18 +1621,39 @@ var isAddressPage = true;
 				var row = [];
 				let exchange = allTrades[i].Exchange;
 
-				if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
-					row = [
-						'Trade', allTrades[i]['Amount'], allTrades[i]['Token'].name, allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-						exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])
-					];
+				let buyAmount = 0;
+				let buyToken = "";
+				let sellAmount = 0;
+				let sellToken = "";
+				let feeAmount = allTrades[i]['Fee'];
+				let feeToken = allTrades[i]['FeeToken'].name;
+				if (allTrades[i]['Trade'] === 'Buy') {
+					buyAmount = allTrades[i]['Amount'];
+					buyToken = allTrades[i]['Token'].name;
+					sellAmount = allTrades[i]['Total'];
+					sellToken = allTrades[i]['Base'].name;
+				} else {
+					sellAmount = allTrades[i]['Amount'];
+					sellToken = allTrades[i]['Token'].name;
+					buyAmount = allTrades[i]['Total'];
+					buyToken = allTrades[i]['Base'].name;
 				}
-				else {  //sell add fee to token total
-					row = [
-						'Trade', allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']), allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-						exchange, '', 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])
-					];
+				// add fee to total if the same currency
+				if (feeToken) {
+					if (sellToken === feeToken) {
+						sellAmount = sellAmount.plus(feeAmount);
+					} else if (buyToken === feeToken) {
+						buyAmount = buyAmount.plus(feeAmount);
+					}
 				}
+
+				row = [
+					'Trade', buyAmount, buyToken, sellAmount, sellToken,
+					feeAmount, feeToken, exchange, '',
+					'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
+					allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])
+				];
+
 				tableData.push(row);
 			}
 			tableData = fixDownloadNumberNotation(tableData, ['Buy', 'Sell', 'Fee']);
@@ -1653,20 +1674,39 @@ var isAddressPage = true;
 				var row = [];
 				let exchange = allTrades[i].Exchange;
 
-				if (allTrades[i]['Trade'] === 'Buy') { //buy add fee to eth total
-					row = [
-						_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Amount'], allTrades[i]['Token'].name,
-						allTrades[i]['Total'].plus(allTrades[i]['Fee']), allTrades[i]['Base'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name,
-						allTrades[i]['Hash'], 'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, exchange, 'Trade'
-					];
+				let buyAmount = 0;
+				let buyToken = "";
+				let sellAmount = 0;
+				let sellToken = "";
+				let feeAmount = allTrades[i]['Fee'];
+				let feeToken = allTrades[i]['FeeToken'].name;
+				if (allTrades[i]['Trade'] === 'Buy') {
+					buyAmount = allTrades[i]['Amount'];
+					buyToken = allTrades[i]['Token'].name;
+					sellAmount = allTrades[i]['Total'];
+					sellToken = allTrades[i]['Base'].name;
+				} else {
+					sellAmount = allTrades[i]['Amount'];
+					sellToken = allTrades[i]['Token'].name;
+					buyAmount = allTrades[i]['Total'];
+					buyToken = allTrades[i]['Base'].name;
 				}
-				else { //sell add fee to token total
-					row = [
-						_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Total'], allTrades[i]['Base'].name, allTrades[i]['Amount'].plus(allTrades[i]['Fee']),
-						allTrades[i]['Token'].name, allTrades[i]['Fee'], allTrades[i]['FeeToken'].name, allTrades[i]['Hash'],
-						'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr, exchange, 'Trade'
-					];
+				// add fee to total if the same currency
+				if (feeToken) {
+					if (sellToken === feeToken) {
+						sellAmount = sellAmount.plus(feeAmount);
+					} else if (buyToken === feeToken) {
+						buyAmount = buyAmount.plus(feeAmount);
+					}
 				}
+
+				row = [
+					_util.formatDateOffset(allTrades[i]['Date']), buyAmount, buyToken,
+					sellAmount, sellToken, feeAmount, feeToken, allTrades[i]['Hash'],
+					'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
+					exchange, 'Trade'
+				];
+
 				tableData.push(row);
 			}
 			tableData = fixDownloadNumberNotation(tableData, ['Buy', 'Sell', 'Fee']);

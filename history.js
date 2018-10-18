@@ -1716,6 +1716,42 @@ var isAddressPage = true;
 					return `\"${cell}\"`
 				});
 			});
+		} else if (exportFormat == 5) {
+			//Cointracking.info - Custom Exchange
+			filePrefix = 'TokenTax_';
+			const headers = ['Type', 'BuyAmount', 'BuyCurrency', 'SellAmount', 'SellCurrency', 'FeeAmount', 'FeeCurrency', 'Exchange', 'Group', 'Comment', 'Date'];
+			tableData = [headers];
+
+			for (var i = 0; i < allTrades.length; ++i) {
+				var row = [];
+				let exchange = allTrades[i].Exchange;
+				var comment = '"Transaction Hash ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr + '"';
+
+				let buyAmount = 0;
+				let buyToken = "";
+				let sellAmount = 0;
+				let sellToken = "";
+				let feeAmount = allTrades[i]['Fee'];
+				let feeToken = allTrades[i]['FeeToken'].name;
+				if (allTrades[i]['Trade'] === 'Buy') {
+					buyAmount = allTrades[i]['Amount'];
+					buyToken = allTrades[i]['Token'].name;
+					sellAmount = allTrades[i]['Total'];
+					sellToken = allTrades[i]['Base'].name;
+				} else {
+					sellAmount = allTrades[i]['Amount'];
+					sellToken = allTrades[i]['Token'].name;
+					buyAmount = allTrades[i]['Total'];
+					buyToken = allTrades[i]['Base'].name;
+				}
+
+				row = [
+					'Trade', buyAmount, buyToken, sellAmount, sellToken,
+					feeAmount, feeToken, exchange, "", comment, _util.formatDateOffset(allTrades[i]['Date']),
+				];
+				tableData.push(row);
+			}
+			tableData = fixDownloadNumberNotation(tableData, ['BuyAmount', 'SellAmount', 'FeeAmount']);
 		} else {
 			console.log('invalid trade export format');
 			return;

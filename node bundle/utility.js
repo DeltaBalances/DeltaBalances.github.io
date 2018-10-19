@@ -164,6 +164,16 @@ module.exports = (config) => {
     return num.replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1');
   };
 
+  utility.displayNotation = function (num, fixed) {
+    num = new BigNumber(num);
+    if(num.greaterThan(1000000000)) {
+      num = num.toExponential(fixed);
+    } else {
+      num = num.toFixed(fixed);
+    }
+    return this.commaNotation(num);
+  };
+
   // add comma separators to high numbers: 100,000,000.346583746853
   utility.commaNotation = function (num) {
     var n = num.toString();

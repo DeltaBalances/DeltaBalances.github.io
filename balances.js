@@ -1627,8 +1627,7 @@ var isAddressPage = true;
 						if (head == 'Bid' || head == 'Ask') {
 							dec += 2;
 						}
-						var num = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(dec) + '</span>';
-						num = _util.commaNotation(num);
+						var num = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, dec) + '</span>';
 						row$.append($('<td/>').html(num));
 					} else {
 						row$.append($('<td/>').html(cellValue));

@@ -1397,7 +1397,7 @@ var isAddressPage = true;
 						var dec = fixedDecimals;
 						if (head == 'Price')
 							dec += 2;
-						var num = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(dec) + '</span>';
+						var num = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, dec) + '</span>';
 						row$.append($('<td/>').html(num));
 					}
 					else {

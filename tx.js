@@ -1082,11 +1082,11 @@ var isAddressPage = false;
 					}
 					else if (keys[i] == 'price' || keys[i] == 'minPrice' || keys[i] == 'maxPrice' || keys[i] == 'fee' || keys[i] == 'takerFee' || keys[i] == 'makerFee') {
 						if (cellValue !== "")
-							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(5) + '</span>';
+							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, 6) + '</span>';
 					}
 					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'balance') {
 						if (cellValue !== "")
-							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + cellValue.toFixed(3) + '</span>';
+							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, 3) + '</span>';
 					}
 					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'maker' || keys[i] == 'taker' || keys[i] == 'wallet' || keys[i] == 'signer') {
 						if (cellValue)

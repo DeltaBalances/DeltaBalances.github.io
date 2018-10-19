@@ -18,6 +18,7 @@ Batch hundreds of tokens into a single web3 request:
 
 # Exchange support
 Decentralized exchanges supported by the DeltaBalances website
+
 | Exchange | Deposited Tokens | Recent tx (input)| Tx details (input + events) | History (events) |
 |----------|------------------|------------------|-----------------------------|------------------|
 | 0x Protocol v1 | - | Yes| Yes| Yes |
@@ -47,6 +48,7 @@ Decentralized exchanges supported by the DeltaBalances website
 ##### 0x Protocol Relayers
 Exchanges using the same 0x Protocol smart contract.
 Relayers not on the list will show up as `unknown 0x`
+
 | Relayers |
 |-------------------|
 |~~[Amadeus](https://amadeusrelay.org/)~~|

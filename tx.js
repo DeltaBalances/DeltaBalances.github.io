@@ -718,15 +718,19 @@ var isAddressPage = false;
 			sum += 'Status: Transaction is pending, try again later. For a faster transaction raise your gas price next time.<br> Pending for a really long time? Try to <a href="https://www.reddit.com/r/EtherDelta/comments/72tctz/guide_how_to_cancel_a_pending_transaction/" target="_blank">cancel or replace</a> it. <br>';
 		}
 		else if (transaction.status === 'Error: Bad jump destination' || transaction.status === 'Error: Reverted') {
-			if (transaction.input[0].type === 'Taker Sell' || transaction.input[0].type === 'Taker Buy') {
-				sum += 'Status: transaction failed, order already filled or cancelled.<br>';
-			}
-			else if (transaction.input[0].type === 'Token Deposit' || transaction.input[0].type === 'Token Withdraw') {
-				sum += 'Status: transaction failed, you might not have had the right account balance left. Otherwise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br><br>';
-			} else if (transaction.input[0].type === 'Deposit' || transaction.input[0].type === 'Withdraw') {
-				sum += 'Status: transaction failed, you might not have had the right account balance left.<br>';
-			}
-			else {
+			if (transaction.input) {
+				if (transaction.input[0].type === 'Taker Sell' || transaction.input[0].type === 'Taker Buy') {
+					sum += 'Status: transaction failed, order already filled or cancelled.<br>';
+				}
+				else if (transaction.input[0].type === 'Token Deposit' || transaction.input[0].type === 'Token Withdraw') {
+					sum += 'Status: transaction failed, you might not have had the right account balance left. Otherwise check if the token is not locked. (Still in ICO, rewards period, disabled etc.)<br><br>';
+				} else if (transaction.input[0].type === 'Deposit' || transaction.input[0].type === 'Withdraw') {
+					sum += 'Status: transaction failed, you might not have had the right account balance left.<br>';
+				}
+				else {
+					sum += 'Status: transaction failed.<br>';
+				}
+			} else {
 				sum += 'Status: transaction failed.<br>';
 			}
 		} else if (transaction.status === 'Failed') {

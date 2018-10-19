@@ -20,6 +20,8 @@ var isAddressPage = true;
 	var progressTable = undefined;
 	var tableHeaders = [];
 
+	var activePopover = undefined;
+
 	var exchanges =
 	{
 		'Wallet': {
@@ -180,13 +182,9 @@ var isAddressPage = true;
 
 		//dismiss popovers on click outside
 		$('body').on('click', function (e) {
-			$('[data-toggle="popover"]').each(function () {
-				//the 'is' for buttons that trigger popups
-				//the 'has' for icons within a button that triggers a popup
-				if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
-					hidePopover(this);
-				}
-			});
+			if (activePopover) {
+				hidePopovers(false);
+			}
 			if (!$('#refreshButtonSearch').is(e.target)) {
 				hideError();
 			}
@@ -254,18 +252,26 @@ var isAddressPage = true;
 		}
 	}
 
-	function hidePopovers() {
+	function hidePopovers(unbind) {
 		$('[data-toggle="popover"]').each(function () {
 			hidePopover(this);
 		});
+		if (unbind) {
+			$('[data-toggle="popover"]').unbind();
+		}
+		$('.popover').unbind();
+		$('.popover').hide();
+		activePopover = undefined;
 	}
 
 	function hidePopover(element) {
 		try {
 			$(element).popover('hide');
 			$(element).data("bs.popover").inState = { click: false, hover: false, focus: false };
+			$(element).data("bs.popover").isVisible = false; //custom attribute
 		} catch (e) { }
 	}
+
 
 	function checkCollapseSettings(init) {
 		//check bootstrap classes for visibility
@@ -669,7 +675,7 @@ var isAddressPage = true;
 		if (!publicAddr)
 			return;
 
-		hidePopovers();
+		hidePopovers(true);
 
 		requestID++;
 		running = true;
@@ -1318,7 +1324,7 @@ var isAddressPage = true;
 
 	//balances table
 	function makeTable(result, hideZeros) {
-		hidePopovers();
+		hidePopovers(true);
 
 		var loaded = table1Loaded;
 		var filtered = result;
@@ -1509,9 +1515,65 @@ var isAddressPage = true;
 					"infoFiltered": "(filtered from _MAX_ )"
 				},
 				"drawCallback": function (settings) {
-					setTimeout(function () {
-						$("[data-toggle=popover]").popover();
-					}, 300);
+					hidePopovers(true);
+
+
+					// Token name popovers
+					$("[data-toggle=popover]").popover({
+						html: true,
+						trigger: 'manual'
+					}).on('click', function (e) {
+
+						let hideThis = false;
+						if ($(this).data("bs.popover")) {
+							if ($(this).data("bs.popover").isVisible) {
+								hideThis = true;
+							}
+						}
+
+						if (activePopover) {
+							hidePopover(activePopover);
+							activePopover = undefined;
+						}
+						if (!hideThis) {
+							$(this).popover('show');
+							if ($(this).data("bs.popover")) {
+								$(this).data("bs.popover").isVisible = true; //custom attribute
+							}
+							activePopover = this;
+						}
+						// handle clicking on the popover itself
+						$('.popover').off('click').on('click', function (e) {
+							e.stopPropagation(); // prevent event for bubbling up => will not get caught with document.onclick
+						});
+						e.stopPropagation();
+					});
+
+					// Number raw value tooltip
+					$('[data-toggle=tooltip]').unbind();
+					$('[data-toggle=tooltip]').tooltip({
+						'placement': 'top',
+						'container': 'body',
+						'trigger': 'manual'
+					}).on("mouseenter", function () {
+						let _this = this;
+						$('[data-toggle=tooltip]').each(function () {
+							if (this !== _this) {
+								$(this).tooltip('hide');
+							}
+						});
+						$(_this).tooltip("show");
+						$(".tooltip").on("mouseleave", function () {
+							$(_this).tooltip('hide');
+						});
+					}).on("mouseleave", function () {
+						let _this = this;
+						setTimeout(function () {
+							if (!$(".tooltip:hover").length) {
+								$(_this).tooltip("hide");
+							}
+						}, 300);
+					});
 				}
 			});
 			updateToggleToolbar();
@@ -1533,32 +1595,6 @@ var isAddressPage = true;
 		//	balanceTable.columns.adjust().fixedColumns().relayout().draw();
 		balanceTable.draw();
 
-		$("[data-toggle=popover]").popover();
-
-		$('[data-toggle=tooltip]').unbind();
-		$('[data-toggle=tooltip]').tooltip({
-			'placement': 'top',
-			'container': 'body',
-			'trigger': 'manual'
-		}).on("mouseenter", function () {
-			let _this = this;
-			$('[data-toggle=tooltip]').each(function () {
-				if (this !== _this) {
-					$(this).tooltip('hide');
-				}
-			});
-			$(_this).tooltip("show");
-			$(".tooltip").on("mouseleave", function () {
-				$(_this).tooltip('hide');
-			});
-		}).on("mouseleave", function () {
-			let _this = this;
-			setTimeout(function () {
-				if (!$(".tooltip:hover").length) {
-					$(_this).tooltip("hide");
-				}
-			}, 300);
-		});
 
 		var allDisplayed = true;
 		for (let i = 0; i < keys.length; i++) {

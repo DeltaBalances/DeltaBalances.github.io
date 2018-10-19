@@ -846,6 +846,39 @@ var isAddressPage = true;
 										//internal tx to unwrap eth token
 										trans.Incomplete = true;
 									}
+								} //OasisDex proxies like OasisDirect
+								else if ((unpacked.name == 'execute' && obj && obj.type !== "Indirect execution") // indirect delegatecall of functions below
+									|| (
+										( unpacked.name == 'buyAllAmount'
+											|| (unpacked.name == 'buyAllAmountPayEth' && !contract)
+											|| unpacked.name == 'buyAllAmountBuyEth'
+											|| unpacked.name == 'createAndBuyAllAmount'
+											|| (unpacked.name == 'createAndBuyAllAmountPayEth' && !contract)
+											|| unpacked.name == 'createAndBuyAllAmountBuyEth'
+											|| unpacked.name == 'sellAllAmount'
+											|| (unpacked.name == 'sellAllAmountPayEth' && !contract)
+											|| unpacked.name == 'sellAllAmountBuyEth'
+											|| unpacked.name == 'createAndSellAllAmount'
+											|| (unpacked.name == 'createAndSellAllAmountPayEth' && !contract)
+											|| unpacked.name == 'createAndSellAllAmountBuyEth'
+										)
+										&& (unpacked.params[0].name == 'otc' || unpacked.params[0].name == 'factory')
+									)
+								) {
+
+									if (obj.type == 'Buy up to') {
+										if (obj.baseAmount) {
+											trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
+										} else if (obj.amount) {
+											trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
+										}
+									} else if (obj.type == 'Sell up to') {
+										if (obj.amount) {
+											trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
+										} else {
+											trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
+										}
+									}
 								}
 								else if (unpacked.name === 'approve') {
 									if (!exchange) {
@@ -1055,6 +1088,10 @@ var isAddressPage = true;
 						}
 						// (trade?) returning ETH, seen as unwrap ETH by internal transaction result (generiv version of bancor above)
 						else if (oldTrans.Type == 'Unwrap ETH' && transs.Type !== 'Unwrap ETH' && transs.Exchange) {
+							outputHashes[mainHash] = transs;
+						} else if (oldTrans.Exchange == 'OasisDirect ' && oldTrans.Type.indexOf('up to') !== -1) {
+							// don't add ETH refund
+						} else if (transs.Exchange == 'OasisDirect ' && transs.Type.indexOf('up to') !== -1) {
 							outputHashes[mainHash] = transs;
 						}
 						else { // more than 1 in, 1 out, just display tx multiple times

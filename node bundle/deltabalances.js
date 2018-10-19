@@ -1881,9 +1881,23 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                 }
             }
-            //oasisdex offer
-            else if (unpacked.name == 'offer') {
+            //oasisdex placing new offer
+            else if (unpacked.name == 'offer' || unpacked.name == 'make') {
                 //Function: offer(uint256 pay_amt, address pay_gem, uint256 buy_amt, address buy_gem, uint256 pos)
+                // function make(ERC20 pay_gem, ERC20 buy_gem, uint128  pay_amt, uint128  buy_amt)
+
+                if (unpacked.name == 'make') {
+                    //transfor input to offer format
+
+                    let newParams = [
+                        unpacked.params[2],
+                        unpacked.params[0],
+                        unpacked.params[3],
+                        unpacked.params[1],
+                    ];
+                    unpacked.params = newParams;
+                }
+
                 var tradeType = 'Sell';
                 var token = undefined;
                 var base = undefined;
@@ -1948,8 +1962,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'maker': txFrom,
                     };
                 }
-                //oasisdex buy
-            } else if (unpacked.name == 'buy' && unpacked.params.length == 2) {
+                //oasisdex buy with ID
+            } else if ((unpacked.name == 'buy' || unpacked.name == 'take') && unpacked.params.length == 2) {
+                //take(bytes32 id, uint128 maxTakeAmount)
+                //buy(uint id, uint amount)
 
                 var exchange = '';
                 let addrName = this.addressName(txTo);
@@ -1967,6 +1983,304 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'orderID': new BigNumber(unpacked.params[0].value),
                     'note': ' Fill a trade order',
                 };
+            }
+
+            // OasisDex buy all, OasisDirect  (Oasis proxy, oasisProxy factory)
+            else if (!badFromTo && (unpacked.name == 'buyAllAmount'
+                || (unpacked.name == 'buyAllAmountPayEth' && !badFromTo)
+                || unpacked.name == 'buyAllAmountBuyEth'
+                || unpacked.name == 'createAndBuyAllAmount'
+                || (unpacked.name == 'createAndBuyAllAmountPayEth' && !badFromTo)
+                || unpacked.name == 'createAndBuyAllAmountBuyEth')
+                && (unpacked.params[0].name == 'otc' || unpacked.params[0].name == 'factory')
+            ) {
+                /*
+                buyAllAmount(OtcInterface otc, TokenInterface buyToken, uint buyAmt, TokenInterface payToken, uint maxPayAmt)
+                createAndBuyAllAmount(DSProxyFactory factory, OtcInterface otc, TokenInterface buyToken, uint buyAmt, TokenInterface payToken, uint maxPayAmt)
+                
+                buyAllAmountBuyEth(OtcInterface otc, TokenInterface wethToken, uint wethAmt, TokenInterface payToken, uint maxPayAmt)
+                createAndBuyAllAmountBuyEth(DSProxyFactory factory, OtcInterface otc, uint wethAmt, TokenInterface payToken, uint maxPayAmt)  
+               
+                buyAllAmountPayEth(OtcInterface otc, TokenInterface buyToken, uint buyAmt, TokenInterface wethToken)
+                createAndBuyAllAmountPayEth(DSProxyFactory factory, OtcInterface otc, TokenInterface buyToken, uint buyAmt)
+                  
+                */
+
+                let WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+                // format createAnd input to similar one
+                if (unpacked.name == 'createAndBuyAllAmount') {
+                    unpacked.name = 'buyAllAmount'
+                    unpacked.params = unpacked.params.slice(1);
+                } else if (unpacked.name == 'createAndBuyAllAmountBuyEth') {
+                    unpacked.name = 'buyAllAmountBuyEth';
+                    unpacked.params = [unpacked.params[1], { value: WETH }, unpacked.params[2], unpacked.params[3], unpacked.params[4]];
+                } else if (unpacked.name == 'createAndBuyAllAmountPayEth') {
+                    unpacked.name = 'buyAllAmountPayEth';
+                    unpacked.params = unpacked.params.slice(1);
+                    unpacked.params.push({ value: WETH });
+                }
+
+                var tradeType = 'Buy';
+                var token = undefined;
+                var base = undefined;
+                let tokenGet; //= this.setToken(unpacked.params[1].value);
+                let tokenGive;// = this.setToken(unpacked.params[3].value);
+                let tokenGetAmount;
+                let tokenGiveAmount;
+                if (unpacked.name == 'buyAllAmount' || unpacked.name == 'buyAllAmountBuyEth') {
+                    tokenGet = this.setToken(unpacked.params[3].value);
+                    tokenGive = this.setToken(unpacked.params[1].value);
+                    tokenGetAmount = new BigNumber(unpacked.params[4].value);
+                    tokenGiveAmount = new BigNumber(unpacked.params[2].value);
+                }
+                else if (unpacked.name == 'buyAllAmountPayEth') {
+                    tokenGet = this.setToken(unpacked.params[3].value);
+                    tokenGive = this.setToken(unpacked.params[1].value);
+                    tokenGetAmount = new BigNumber(tx.value);
+                    tokenGiveAmount = new BigNumber(unpacked.params[2].value);
+                }
+
+                var exchange = '';
+                let addrName = this.addressName(txTo);
+                if (badFromTo && addrName.indexOf('0x') >= 0) {
+                    addrName = this.addressName(txFrom);
+                }
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                } else {
+                    exchange = 'OasisDirect ';
+                }
+
+                let rawAmount;
+                let rawBaseAmount;
+                if (this.isBaseToken(tokenGet, tokenGive)) // get eth  -> sell
+                {
+                    tradeType = 'Buy';
+                    token = tokenGive;
+                    rawAmount = tokenGiveAmount;
+                    base = tokenGet;
+                    rawBaseAmount = tokenGetAmount;
+                }
+                else if (this.isBaseToken(tokenGive, tokenGet)) // buy
+                {
+                    tradeType = 'Sell';
+                    token = tokenGet;
+                    rawAmount = tokenGetAmount;
+                    base = tokenGive;
+                    rawBaseAmount = tokenGiveAmount
+                }
+                else {
+                    console.log('unknown base token');
+                    return undefined;
+                }
+
+                if (token && base && token.addr && base.addr) {
+
+                    var amount = utility.weiToToken(rawAmount, token);
+                    var baseAmount = utility.weiToToken(rawBaseAmount, base);
+
+                    var orderSize = new BigNumber(0);
+                    var price = new BigNumber(0);
+                    if (amount.greaterThan(0)) {
+                        price = baseAmount.div(amount);
+                    }
+
+                    if (tradeType === 'Sell') {
+                        return {
+                            'type': tradeType + ' up to',
+                            'exchange': exchange,
+                            'note': 'Trade on OasisDex',
+                            'token': token,
+                            'estAmount': amount,
+                            'minPrice': price,
+                            'base': base,
+                            'baseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                        };
+                    } else {
+                        return {
+                            'type': tradeType + ' up to',
+                            'exchange': exchange,
+                            'note': 'Trade on OasisDex',
+                            'token': token,
+                            'amount': amount,
+                            'maxPrice': price,
+                            'base': base,
+                            'estBaseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                        };
+                    }
+                }
+            }
+            // OasisDex sell all, OasisDirect  (Oasis proxy, oasisProxy factory)
+            else if ((unpacked.name == 'sellAllAmount'
+                || (unpacked.name == 'sellAllAmountPayEth' && !badFromTo)
+                || unpacked.name == 'sellAllAmountBuyEth'
+                || unpacked.name == 'createAndSellAllAmount'
+                || (unpacked.name == 'createAndSellAllAmountPayEth' && !badFromTo)
+                || unpacked.name == 'createAndSellAllAmountBuyEth')
+                && (unpacked.params[0].name == 'otc' || unpacked.params[0].name == 'factory')
+            ) {
+                /*
+                sellAllAmount(OtcInterface otc, TokenInterface payToken, uint payAmt, TokenInterface buyToken, uint minBuyAmt)
+                createAndSellAllAmount(DSProxyFactory factory, OtcInterface otc, TokenInterface payToken, uint payAmt, TokenInterface buyToken, uint minBuyAmt)
+                
+                sellAllAmountPayEth(OtcInterface otc, TokenInterface wethToken, TokenInterface buyToken, uint minBuyAmt) 
+                createAndSellAllAmountPayEth(DSProxyFactory factory, OtcInterface otc, TokenInterface buyToken, uint minBuyAmt)
+                
+                sellAllAmountBuyEth(OtcInterface otc, TokenInterface payToken, uint payAmt, TokenInterface wethToken, uint minBuyAmt)
+                createAndSellAllAmountBuyEth(DSProxyFactory factory, OtcInterface otc, TokenInterface payToken, uint payAmt, uint minBuyAmt)
+                  
+                */
+
+                let WETH = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+                // format createAnd input to similar one
+                if (unpacked.name == 'createAndSellAllAmount') {
+                    unpacked.name = 'sellAllAmount'
+                    unpacked.params = unpacked.params.slice(1);
+                } else if (unpacked.name == 'createAndSellAllAmountBuyEth') {
+                    unpacked.name = 'sellAllAmountBuyEth';
+                    unpacked.params = [unpacked.params[1], unpacked.params[2], unpacked.params[3], { value: WETH }, unpacked.params[4]];
+                } else if (unpacked.name == 'createAndSellAllAmountPayEth') {
+                    unpacked.name = 'sellAllAmountPayEth';
+                    unpacked.params = [unpacked.params[1], { value: WETH }, unpacked.params[2], unpacked.params[3]];
+                }
+
+                var tradeType = 'Buy';
+                var token = undefined;
+                var base = undefined;
+                let tokenGet; //= this.setToken(unpacked.params[1].value);
+                let tokenGive;// = this.setToken(unpacked.params[3].value);
+                let tokenGetAmount;
+                let tokenGiveAmount;
+                if (unpacked.name == 'sellAllAmount' || unpacked.name == 'sellAllAmountBuyEth') {
+                    tokenGet = this.setToken(unpacked.params[1].value);
+                    tokenGive = this.setToken(unpacked.params[3].value);
+                    tokenGetAmount = new BigNumber(unpacked.params[2].value);
+                    tokenGiveAmount = new BigNumber(unpacked.params[4].value);
+                }
+                else if (unpacked.name == 'sellAllAmountPayEth') {
+                    tokenGet = this.setToken(unpacked.params[1].value);
+                    tokenGive = this.setToken(unpacked.params[2].value);
+                    tokenGetAmount = new BigNumber(tx.value);
+                    tokenGiveAmount = new BigNumber(unpacked.params[3].value);
+                }
+
+                var exchange = '';
+                let addrName = this.addressName(txTo);
+                if (badFromTo && addrName.indexOf('0x') >= 0) {
+                    addrName = this.addressName(txFrom);
+                }
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                } else {
+                    exchange = 'OasisDirect ';
+                }
+
+                let rawAmount;
+                let rawBaseAmount;
+                if (this.isBaseToken(tokenGet, tokenGive)) // get eth  -> sell
+                {
+                    tradeType = 'Buy';
+                    token = tokenGive;
+                    rawAmount = tokenGiveAmount;
+                    base = tokenGet;
+                    rawBaseAmount = tokenGetAmount;
+                }
+                else if (this.isBaseToken(tokenGive, tokenGet)) // buy
+                {
+                    tradeType = 'Sell';
+                    token = tokenGet;
+                    rawAmount = tokenGetAmount;
+                    base = tokenGive;
+                    rawBaseAmount = tokenGiveAmount
+                }
+                else {
+                    console.log('unknown base token');
+                    return undefined;
+                }
+
+                if (token && base && token.addr && base.addr) {
+
+                    var amount = utility.weiToToken(rawAmount, token);
+                    var baseAmount = utility.weiToToken(rawBaseAmount, base);
+
+                    var orderSize = new BigNumber(0);
+                    var price = new BigNumber(0);
+                    if (amount.greaterThan(0)) {
+                        price = baseAmount.div(amount);
+                    }
+
+                    if (tradeType === 'Sell') {
+                        return {
+                            'type': tradeType + ' up to',
+                            'exchange': exchange,
+                            'note': 'Trade on OasisDex',
+                            'token': token,
+                            'amount': amount,
+                            'minPrice': price,
+                            'base': base,
+                            'estBaseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                        };
+                    } else {
+                        return {
+                            'type': tradeType + ' up to',
+                            'exchange': exchange,
+                            'note': 'Trade on OasisDex',
+                            'token': token,
+                            'estAmount': amount,
+                            'maxPrice': price,
+                            'base': base,
+                            'baseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                        };
+                    }
+                }
+            }
+
+            //OasisDex using proxy execute()
+            if (unpacked.name == 'execute') {
+
+                let exchange = 'OasisDirect ';
+                let returns = [
+                    //signed execution
+                    {
+                        'type': 'Indirect execution',
+                        'Exchange': exchange,
+                        'note': 'Call OasisDirect through a proxy',
+                        'sender': tx.from,
+                    }
+                ];
+
+                //try to add parsed subcall
+                try {
+                    const data = unpacked.params[1].value;
+                    let unpacked2 = utility.processInput(data);
+                    if (unpacked2) {
+                        let newTx = tx;
+
+                        let subCall = this.processUnpackedInput(newTx, unpacked2);
+                        if (subCall) {
+                            if (Array.isArray(subCall)) {
+                                returns = returns.concat(subCall);
+                            } else {
+                                returns.push(subCall);
+                            }
+                        } else {
+                            if(unpacked2.name.indexOf('pay') && newTx.contractAddress) {
+                                // ignore as tx value will be wrong
+                            } else {
+                                console.log('unable to process subcall');
+                            }
+                        }
+                    } else {
+                        console.log('unable to parse execute subcall');
+                    }
+                } catch (e) { }
+
+                return returns;
+
             }
             //Bancor token conversions 
             else if (unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized' || (unpacked.name === 'convert' && unpacked.params.length == 4)

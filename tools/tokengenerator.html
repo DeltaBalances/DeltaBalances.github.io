@@ -67,7 +67,9 @@
                     if (customToken.spam) {
                         token.spam = true;
                     }
-					
+					if (customToken.blockIDEX) {
+                        token.blockIDEX = true;
+                    }
 					if (!customTokens[token.address]) {
 						customTokens[token.address] = token;
 					}
@@ -251,9 +253,10 @@
 		}
 
         
-         for(let i = 0; i < idexDelisted.length; i++) {
-            if(idexDelisted[i] && idexDelisted[i].addr) {
-                idexBlock[idexDelisted[i].addr] = true;
+		// legacy compatiblity
+         for(let i = 0; i < offlineCustomTokens.length; i++) {
+            if(offlineCustomTokens[i] && offlineCustomTokens[i].blockIDEX) {
+                idexBlock[offlineCustomTokens[i].addr] = true;
             }
         }
         
@@ -278,12 +281,13 @@
 			let ethplorerIdex = undefined;
             let ethplorerStore = undefined;
             let ethplorerDdex = undefined;
+			let idexTick = undefined;
 			let loaded = 0;
 
 			function done() {
 
-				if (loaded >= 4) {
-					if (/*mewTokens && mcTokens &&*/ ethplorerED && ethplorerIdex && ethplorerStore && ethplorerDdex) {
+				if (loaded >= 5) {
+					if (/*mewTokens && mcTokens &&*/ ethplorerED && ethplorerIdex && ethplorerStore && ethplorerDdex && idexTick) {
 						//parseMewTokens(mewTokens);
 						//parseMewTokens(mcTokens);
 						parseEthplorer(ethplorerED);
@@ -292,6 +296,33 @@
 						parseEthplorer(ethplorerDdex);
 
 						let customTokensList = Object.values(customTokens);
+						
+						// filter idex unlisted tokens, (not in ticker)
+						for(let i = 0; i < customTokensList.length; i++) {
+							let token = customTokensList[i];
+							if(token.IDEX) {
+								let correct = false;
+								for(let j = 0; j< idexTick.length; j++) {
+									if(token.IDEX == idexTick[j]){
+										correct = true;
+										// falsely saved as delisted
+										if(token.blockIDEX) {
+											delete customTokensList[i].blockIDEX;
+										}
+										continue;
+									}
+								}
+								//not in ticker, define as delisted
+								if(!correct) {
+									customTokensList[i].blockIDEX = true;
+									continue;
+								}
+								
+							} else {
+								continue;
+							}
+						}
+						
 
 						customTokensList = customTokensList.sort(function (a, b) {
 							return (a.symbol + a.address).localeCompare(b.symbol + b.address);
@@ -372,6 +403,18 @@
 				loaded++;
 				if (data && data.tokens)
 					ethplorerIdex = data;
+				done();
+			}).fail(function () {
+				loaded++;
+				done();
+			});
+			
+			// idex ticker for active market filtering
+			$.getJSON('https://api.idex.market/returnTicker').done(function (data) {
+				loaded++;
+				if (data) {
+					idexTick = Object.keys(data).map( (x) => { return x.replace('ETH_', '')});
+				}
 				done();
 			}).fail(function () {
 				loaded++;

@@ -347,9 +347,13 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
 
 
             token.IDEX = token.name;
-            if (!token.blockIDEX) {
+            if(this.uniqueTokens[token.addr].blockIDEX || token.blockIDEX) {
+                token.blockIDEX = true;
+                token.unlisted = true; // compare to all
+            } else {
                 token.unlisted = false;
             }
+
             if (this.uniqueTokens[token.addr]) {
                 this.uniqueTokens[token.addr].IDEX = token.name;
                 if (!token.blockIDEX) {

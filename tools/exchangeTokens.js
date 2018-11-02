@@ -2336,7 +2336,7 @@ let idexOfflineTokens = [
   {"name":"UP","decimals":2,"addr":"0xe49203f0adaa0a4fbfa7b5ab59642e43dfce11a9","name2":"UpToken"},
   {"name":"BOSS","decimals":18,"addr":"0xb334ac3a2f65dd597734b888324fd48285dad8a2","name2":"Boss Token"},
   {"name":"DPP","decimals":18,"addr":"0x01b3ec4aae1b8729529beb4965f27d008788b0eb","name2":"DA Power Play"},
-  {"name":"VIU","decimals":18,"addr":"0x519475b31653e46d20cd09f9fdcf3b12bdacb4f5","name2":"Viuly"},
+  {"name":"VIUOLD","decimals":18,"addr":"0x519475b31653e46d20cd09f9fdcf3b12bdacb4f5","name2":"Viuly Token"},
   {"name":"GET","decimals":18,"addr":"0x8a854288a5976036a725879164ca3e91d30c6a1b","name2":"GUTS"},
   {"name":"ALPHA","decimals":18,"addr":"0x66e3ad9f57f23564a3f7aec06d2fc2a55380dfa7","name2":"Alpha Investing"},
   {"name":"STP","decimals":8,"addr":"0xecd570bbf74761b960fa04cc10fe2c4e86ffda36","name2":"StashPay"},
@@ -2393,7 +2393,6 @@ let idexOfflineTokens = [
   {"name":"GUESS","decimals":2,"addr":"0xbdcfbf5c4d91abc0bc9709c7286d00063c0e6f22","name2":"PeerGuess"},
   {"name":"PRPS","decimals":18,"addr":"0x7641b2ca9ddd58addf6e3381c1f994aac5f1a32f","name2":"Purpose"},
   {"name":"DUBI","decimals":18,"addr":"0xd4cffeef10f60eca581b5e1146b5aca4194a4c3b","name2":"DUBI"},
-  {"name":"HORSE","decimals":18,"addr":"0x5b0751713b2527d7f002c0c4e2a37e1219610a6b","name2":"Ethorse"},
   {"name":"LEV","decimals":9,"addr":"0x0f4ca92660efad97a9a70cb0fe969c755439772c","name2":"LeverJ"},
   {"name":"RCC","decimals":18,"addr":"0x9b6443b0fb9c241a7fdac375595cea13e6b7807a","name2":"RealityClash"},
   {"name":"EDT","decimals":8,"addr":"0xce53a179047ebed80261689367c093c90a94cc08","name2":"EtherDelta Token"},
@@ -2638,7 +2637,7 @@ let idexOfflineTokens = [
   {"name":"EZT","decimals":8,"addr":"0x5e6016ae7d7c49d347dcf834860b9f3ee282812b","name2":"EZToken"},
   {"name":"CPAY","decimals":0,"addr":"0x0ebb614204e47c09b6c3feb9aaecad8ee060e23e","name2":"CPAY Token"},
   {"name":"NBTK","decimals":0,"addr":"0xb0e6f83eba6a4ea20617e134b1aee30fcb0ac634","name2":"Nebeus"},
-  {"name":"FSBT","decimals":18,"addr":"0x1ed7ae1f0e2fa4276dd7ddc786334a3df81d50c0","name2":"Forty Seven Bank Token"},
+  {"name":"FSBT","decimals":18,"addr":"0x1ed7ae1f0e2fa4276dd7ddc786334a3df81d50c0","name2":"FSBT Tech"},
   {"name":"BBN","decimals":18,"addr":"0x35a69642857083ba2f30bfab735dacc7f0bac969","name2":"Banyan"},
   {"name":"DPY","decimals":18,"addr":"0x6c2adc2073994fb2ccc5032cc2906fa221e9b391","name2":"Delphy Token"},
   {"name":"ANN","decimals":18,"addr":"0xe0e73e8fc3a0fa161695be1d75e1bc3e558957c4","name2":"Agent Not Needed"},
@@ -2852,7 +2851,6 @@ let idexOfflineTokens = [
   {"name":"UPP","decimals":18,"addr":"0xc86d054809623432210c107af2e3f619dcfbf652","name2":"Sentinel Protocol"},
   {"name":"HAV","decimals":18,"addr":"0xc011a72400e58ecd99ee497cf89e3775d4bd732f","name2":"Havven"},
   {"name":"TMT","decimals":18,"addr":"0x3209f98bebf0149b769ce26d71f7aea8e435efea","name2":"Traxia"},
-  {"name":"FTM","decimals":18,"addr":"0x4e15361fd6b4bb609fa63c81a2be19d873717870","name2":"Fantom"},
   {"name":"DGX","decimals":9,"addr":"0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf","name2":"Digix Gold"},
   {"name":"PST","decimals":18,"addr":"0x5d4abc77b8405ad177d8ac6682d584ecbfd46cec","name2":"Primas"},
   {"name":"TEN","decimals":18,"addr":"0xdd16ec0f66e54d453e6756713e533355989040e4","name2":"TOKENOMY"},
@@ -2990,7 +2988,6 @@ let idexOfflineTokens = [
   {"name":"CST","decimals":18,"addr":"0xbb49a51ee5a66ca3a8cbe529379ba44ba67e6771","name2":"CryptosolarTech"},
   {"name":"HAND","decimals":0,"addr":"0x48c1b2f3efa85fbafb2ab951bf4ba860a08cdbb7","name2":"SHOWHAND"},
   {"name":"KWATT","decimals":18,"addr":"0x241ba672574a78a3a604cdd0a94429a73a84a324","name2":"KWATT"},
-  {"name":"AMO","decimals":18,"addr":"0x38c87aa89b2b8cd9b95b736e1fa7b612ea972169","name2":"AMO Coin"},
   {"name":"GENE","decimals":18,"addr":"0x884181554dfa9e578d36379919c05c25dc4a15bb","name2":"GeneSourceCodeChain"},
   {"name":"POD","decimals":18,"addr":"0x14ee347f1c49181f36d0784077faca539872e370","name2":"Proof of Dilligence"},
   {"name":"DSCP","decimals":18,"addr":"0x03e3f0c25965f13dbbc58246738c183e27b26a56","name2":"Disciplina"},
@@ -3037,7 +3034,6 @@ let idexOfflineTokens = [
   {"name":"3DES","decimals":18,"addr":"0x115e7b7ecdd9792d6995cb426b2ef4d6119682a7","name2":"3DES Token"},
   {"name":"BRN","decimals":18,"addr":"0x4083c75ab1f20ac0a1787a591c98bacd43ae777a","name2":"Brainmab"},
   {"name":"UBBEY","decimals":18,"addr":"0x6cb1c2b61e24ad08bf5fff4d2b13ea987d211a88","name2":"UBBEY"},
-  {"name":"SPND","decimals":18,"addr":"0xddd460bbd9f79847ea08681563e8a9696867210c","name2":"Spendcoin"},
   {"name":"TBE","decimals":18,"addr":"0xb3c61539af156438951ea6cd48756d22a48fce62","name2":"TowerBee"},
   {"name":"UCN","decimals":18,"addr":"0xaaf37055188feee4869de63464937e683d61b2a1","name2":"UChain Token"},
   {"name":"PYN","decimals":18,"addr":"0x0142c3b2fc51819b5af5dfc4aa52df9722790851","name2":"Paycent"},
@@ -3063,7 +3059,21 @@ let idexOfflineTokens = [
   {"name":"IBT","decimals":18,"addr":"0x791425156956e39f2ab8ab06b79de189c18e95e5","name2":"ICOBay"},
   {"name":"ALT","decimals":18,"addr":"0x419b8ed155180a8c9c64145e76dad49c0a4efb97","name2":"Alt.Estate Token"},
   {"name":"JSE","decimals":18,"addr":"0x2d184014b5658c453443aa87c8e9c4d57285620b","name2":"JSECOIN"},
-  {"name":"ENK","decimals":18,"addr":"0x8993db1795b9a7b317b98ebfa4c971f225bf1248","name2":"Enkidu"}
+  {"name":"ENK","decimals":18,"addr":"0x8993db1795b9a7b317b98ebfa4c971f225bf1248","name2":"Enkidu"},
+  {"name":"ENTRY","decimals":18,"addr":"0x358465f17278e217c4ef171f9203c0f7737ca965","name2":"ENTRY"},
+  {"name":"BC","decimals":18,"addr":"0x2ecb13a8c458c379c4d9a7259e202de03c8f3d19","name2":"Block-chain.com"},
+  {"name":"BTNT","decimals":18,"addr":"0xd9964e1306dda055f5284c52048712c35ddb61fd","name2":"BitNautic Token"},
+  {"name":"AMO","decimals":18,"addr":"0x38c87aa89b2b8cd9b95b736e1fa7b612ea972169","name2":"AMO Coin"},
+  {"name":"TYPE","decimals":4,"addr":"0xeaf61fc150cd5c3bea75744e830d916e60ea5a9f","name2":"Typerium"},
+  {"name":"VOCO","decimals":18,"addr":"0xb5ca46cf1da09248126682a7bd72401fd7a6b151","name2":"VOCO"},
+  {"name":"FTM","decimals":18,"addr":"0x4e15361fd6b4bb609fa63c81a2be19d873717870","name2":"Fantom"},
+  {"name":"SPND","decimals":18,"addr":"0xddd460bbd9f79847ea08681563e8a9696867210c","name2":"Spendcoin"},
+  {"name":"LQD","decimals":18,"addr":"0xd29f0b5b3f50b07fe9a9511f7d86f4f4bac3f8c4","name2":"Liquid"},
+  {"name":"BDT","decimals":18,"addr":"0x033030feebd93e3178487c35a9c8ca80874353c9","name2":"BDT Token"},
+  {"name":"PSK","decimals":18,"addr":"0x1c5f43710a1776b0ea7191b7ead75d4b98d69858","name2":"Pool of Stake Token"},
+  {"name":"POR","decimals":18,"addr":"0x08c507046e12cd1538741d067d28411f2b922062","name2":"Proof of Review Token"},
+  {"name":"WORK","decimals":8,"addr":"0xa686514faf7d54289266f483d1e4852c99e13ec7","name2":"Aworker Token"},
+  {"name":"VIU","decimals":18,"addr":"0x464baddce9bd32581a7d59d9bb8350c7c7764668","name2":"Viuly Token"}
 ]; // end idexOfflineTokens
 
 
@@ -3130,6 +3140,7 @@ let ddexOfflineTokens = [
   {"symbol":"POWR","address":"0x595832f8fc6bf59c85c527fec3740a1b7a361269","decimals":6},
   {"symbol":"AOA","address":"0x9ab165d795019b6d8b3e971dda91071421305e5a","decimals":18},
   {"symbol":"EMPR","address":"0xe7d7b37e72510309db27c460378f957b1b04bd5d","decimals":18},
+  {"symbol":"FUN","address":"0x419d0d8bdd9af5e606ae2232ed285aff190e711b","decimals":8},
   {"symbol":"DRGN","address":"0x419c4db4b9e25d6db2ad9691ccb832c8d9fda05e","decimals":18},
   {"symbol":"MAN","address":"0xe25bcec5d3801ce3a794079bf94adf1b8ccd802d","decimals":18},
   {"symbol":"BCO","address":"0x865d176351f287fe1b0010805b110d08699c200a","decimals":8},
@@ -3226,7 +3237,18 @@ let ddexOfflineTokens = [
   {"symbol":"BCZERO","address":"0xd45247c07379d94904e0a87b4481f0a1ddfa0c64","decimals":18},
   {"symbol":"IMVR","address":"0x7878424e994d8a2b8e329d31096922b7ceabe660","decimals":18},
   {"symbol":"NOKU","address":"0x1fc52f1abade452dd4674477d4711951700b3d27","decimals":18},
-  {"symbol":"SWETH","address":"0x1a1c504b41231c529a707726469606dbcd29fa9e","decimals":18}
+  {"symbol":"SWETH","address":"0x1a1c504b41231c529a707726469606dbcd29fa9e","decimals":18},
+  {"symbol":"CVC","address":"0x41e5560054824ea6b0732e656e3ad64e20e94e45","decimals":8},
+  {"symbol":"BLZ","address":"0x5732046a883704404f284ce41ffadd5b007fd668","decimals":18},
+  {"symbol":"NCASH","address":"0x809826cceab68c387726af962713b64cb5cb3cca","decimals":18},
+  {"symbol":"DENT","address":"0x3597bfd533a99c9aa083587b074434e61eb0a258","decimals":8},
+  {"symbol":"IMP","address":"0x48ff53777f747cfb694101222a944de070c15d36","decimals":7},
+  {"symbol":"CHT","address":"0x799d214d7143b766cdd4979cd0280939288ba931","decimals":2},
+  {"symbol":"GVT","address":"0x103c3a209da59d3e7c4a89307e66521e081cfdf0","decimals":18},
+  {"symbol":"BIX","address":"0xb3104b4b9da82025e8b9f8fb28b3553ce2f67069","decimals":18},
+  {"symbol":"STORJ","address":"0xb64ef51c888972c908cfacf59b47c1afbc0ab8ac","decimals":8},
+  {"symbol":"KNC","address":"0xdd974d5c2e2928dea5f71b9825b8b646686bd200","decimals":18},
+  {"symbol":"STORM","address":"0xd0a4b8946cb52f0661273bfbc6fd0e0c75fc6433","decimals":18}
 ]; // end ddexOfflineTokens
 
 let radarOfflineTokens = [
@@ -3407,7 +3429,8 @@ let radarOfflineTokens = [
   {"symbol":"IOST","address":"0xfa1a856cfa3409cfa145fa4e20eb270df3eb21ab","decimals":18,"name":"IOSToken"},
   {"symbol":"BTT","address":"0xfa456cf55250a839088b27ee32a424d7dacb54ff","decimals":18,"name":"Blocktrade"},
   {"symbol":"ART","address":"0xfec0cf7fe078a500abf15f1284958f22049c2c7e","decimals":18,"name":"Maecenas"},
-  {"symbol":"PASS","address":"0x22365168c8705e95b2d08876c23a8c13e3ad72e2","decimals":0,"name":"Gods Unchained Tournament Pass"}
+  {"symbol":"PASS","address":"0x22365168c8705e95b2d08876c23a8c13e3ad72e2","decimals":0,"name":"Gods Unchained Tournament Pass"},
+  {"symbol":"DNN","address":"0x9d9832d1beb29cc949d75d61415fd00279f84dc2","decimals":18,"name":"Decentralized News Network"}
 ]; //end radar offline
 
 let kyberOfflineTokens = [
@@ -3431,8 +3454,9 @@ let kyberOfflineTokens = [
   {"symbol":"ZIL","address":"0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27","decimals":12,"name":"Zilliqa"},
   {"symbol":"LINK","address":"0x514910771af9ca656af840dff83e8264ecf986ca","decimals":18,"name":"Chain Link"},
   {"symbol":"DAI","address":"0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359","decimals":18,"name":"Dai Stablecoin"},
-  {"symbol":"AION","address":"0x4CEdA7906a5Ed2179785Cd3A40A69ee8bc99C466","decimals":8,"name":"AION"},
   {"symbol":"SUB","address":"0x12480e24eb5bec1a9d4369cab6a80cad3c0a377a","decimals":2,"name":"Substratum"},
+  {"symbol":"MKR","address":"0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2","decimals":18,"name":"Maker"},
+  {"symbol":"DCC","address":"0xffa93aacf49297d51e211817452839052fdfb961","decimals":18,"name":"Distributed Credit Chain"},
   {"symbol":"ENJ","address":"0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c","decimals":18,"name":"EnjinCoin"},
   {"symbol":"DGX","address":"0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf","decimals":9,"name":"Digix Gold"},
   {"symbol":"MOT","address":"0x263c618480dbe35c300d8d5ecda19bbb986acaed","decimals":18,"name":"Olympus Labs"},

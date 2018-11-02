@@ -20,6 +20,7 @@ module.exports = {
     '0xProxy2': { addr: '0x2240dab907db71e64d3e0dba4800c83b5c502d4e', name: '0x ERC20 Proxy ', supportedDex: true },
     // ethfinex uses 0x clone?
     'Ethfinex': { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex ', supportedDex:true },
+    'EthfinexProxy': {addr: '0x7e03d2b8edc3585ecd8a5807661fff0830a0b603', name: 'Ethfinex Proxy ', supportedDex:true },
 
     '0xForwarder': { addr: '0x7afc2d5107af94c462a194d2c21b5bdd238709d6', name: '0x Forwarder ', supportedDex: false },
     OasisDex: { addr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425', name: 'OasisDex ', supportedDex: true },
@@ -493,7 +494,8 @@ module.exports = {
     { m: "Jun 2018", blockFrom: 5710964, blockTo: 5883490 },
     { m: "Jul 2018", blockFrom: 5883490, blockTo: 6065980 },
     { m: "Aug 2018", blockFrom: 6065980, blockTo: 6249399 },
-	{ m: "Sept 2018", blockFrom: 6249399, blockTo: 6430273 },
+    { m: "Sept 2018", blockFrom: 6249399, blockTo: 6430273 },
+    { m: "Oct 2018", blockFrom: 6430273, blockTo: 6620476 },
   ],
 
   history: {

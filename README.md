@@ -29,7 +29,7 @@ Decentralized exchanges supported by the DeltaBalances website
 | [Dexy](https://dexy.market) |Yes| No| No | No|
 | [EasyTrade](https://easytrade.io) |-| Yes| Yes | Yes|
 | [Enclaves Dex](https://enclaves.io) | Yes | Yes| Yes | Yes|
-| [Etfinex trustless v1](https://trustless.ethfinex.com) | - | Yes | Yes | No |
+| [Etfinex trustless v1](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
 | [ETHEN](https://ethen.market) |No|Yes|Yes|Yes|
 | [EtherC](https://etherc.io) |Yes|Yes|Yes|Yes|
 | [EtherDelta](https://etherdelta.com)| Yes| Yes| Yes| Yes | 

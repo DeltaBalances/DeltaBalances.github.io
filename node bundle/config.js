@@ -50,6 +50,11 @@ module.exports = {
     Ethex: { addr: '0xb746aed479f18287dc8fc202fe06f25f1a0a60ae', name: 'ETHEX ', supportedDex: true },
     Singularx: { addr: '0x9a2d163ab40f88c625fd475e807bbc3556566f80', name: 'SingularX ', supportedDex: true },
     EtherC: { addr: '0xd8d48e52f39ab2d169c8b562c53589e6c71ac4d3', name: 'EtherC ', supportedDex: true },
+    
+    //bithumb R1 protocol?
+    R1: { addr: '0x7b45a572ea991887a01fd919c05edf1cac79c311', name: 'R1 Protocol', supportedDex: false },
+    Martle: { addr: '0x551d56781e0cd16ac2c61a03e6537844a41c7709', name: 'Martle instant', supportedDex: false},
+    
     /* exchange aggregators */
     EasyTrade: { addr: '0x9ae4ed3bf7a3a529afbc126b4541c0d636d455f6', name: 'EasyTrade ', supportedDex: true },
     EasyTrade2: { addr: '0x0c577fbf29f8797d9d29a33de59001b872a1d4dc', name: 'EasyTrade ', supportedDex: true },
@@ -548,6 +553,18 @@ module.exports = {
       hideFees: false,
       hideOpponent: false,
     },
+    'Ethfinex': { //0x v1 clone
+        contract: 'Ethfinex',
+        minBlock: 6293901,
+        tradeTopic: '0x0d0b9391970d9a25552f37d436d2aae2925e2bfe1b2a923754bada030c498cb3',
+        withdrawTopic: undefined,
+        depositTopic: undefined,
+        createTx: '0x5a1fd20ae25f77649d04fdf1439feb555ec9de275b29a83f6c4b12ee2fb5480a',
+        userIndexed: false, // only if maker
+        showExchange: true,
+        hideFees: false,
+        hideOpponent: false,
+      },
     '0x Protocol v2': {
       contract: '0x2',
       minBlock: 6271590,

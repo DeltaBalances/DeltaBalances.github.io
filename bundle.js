@@ -2838,18 +2838,18 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
 
 
             token.IDEX = token.name;
-            if(this.uniqueTokens[token.addr].blockIDEX || token.blockIDEX) {
-                token.blockIDEX = true;
-                token.unlisted = true; // compare to all
+            if(token.blockIDEX) {
+                token.unlisted = true;
             } else {
                 token.unlisted = false;
             }
 
             if (this.uniqueTokens[token.addr]) {
+				if(!this.uniqueTokens[token.addr].blockIDEX) {
+					this.uniqueTokens[token.addr].unlisted = false;
+				}	
                 this.uniqueTokens[token.addr].IDEX = token.name;
-                if (!token.blockIDEX) {
-                    this.uniqueTokens[token.addr].unlisted = false;
-                }
+                // take full name from IDEX if none is known
                 if (token.name2 && !this.uniqueTokens[token.addr].name2) {
                     this.uniqueTokens[token.addr].name2 = token.name2;
                 }
@@ -2857,7 +2857,6 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             else {
                 this.uniqueTokens[token.addr] = token;
             }
-
         }
     } catch (e) {
         console.log('failed to parse IDEX token list');
@@ -3470,13 +3469,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         if (newTx.to !== signer) {
                             newTx.from = signer;
                         }
-                        /*if (myAddr && signer == myAddr) {
-                            if (txFrom == myAddr) {
-                                newTx.from = signer;
-                            } else if (txTo == myAddr) {
-                                newTx.to = signer;
-                            }
-                        }*/
 
                         let subCall = this.processUnpackedInput(newTx, unpacked2);
                         if (subCall) {
@@ -5277,7 +5269,23 @@ DeltaBalances.prototype.isExchangeAddress = function (addr, allowNonSupported) {
     return false;
 };
 
-DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
+DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) {
+
+    if(!myAddresses) {
+        myAddresses = [];
+    } else if(typeof myAddresses === 'string') {
+        myAddresses = [myAddresses];
+    }
+
+    function isMyAddress(addr){
+        for(let i = 0; i < myAddresses.length; i++) {
+            if(myAddresses[i].toLowerCase() === addr.toLowerCase()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     try {
         if (unpacked && unpacked.events) {
 
@@ -5290,7 +5298,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var taker = unpacked.events[5].value.toLowerCase();
 
                 var transType = 'Taker';
-                if (maker === myAddr) {
+                if (isMyAddress(maker)) {
                     transType = 'Maker';
                 }
 
@@ -5346,9 +5354,9 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     }
 
                     // history only??
-                    if (buyUser === myAddr)
+                    if (isMyAddress(buyUser))
                         tradeType = "Buy";
-                    else if (sellUser === myAddr)
+                    else if (isMyAddress(sellUser))
                         tradeType = "Sell";
 
 
@@ -5407,8 +5415,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     return {
                         'type': transType + ' ' + tradeType,
                         'exchange': exchange,
-                        // myAddr works in tx.js , history doesn't show note anyway
-                        'note': utility.addressLink(myAddr, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
+                        'note': utility.addressLink(taker, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
                         'token': token,
                         'amount': amount,
                         'price': price,
@@ -5448,7 +5455,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 }
 
                 var transType = 'Taker';
-                if (maker === myAddr) {
+                if (isMyAddress(maker)) {
                     transType = 'Maker';
                 }
 
@@ -5474,9 +5481,9 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 baseAmount = amount.times(price);
 
                 // history only??
-                if (buyUser === myAddr)
+                if (isMyAddress(buyUser))
                     tradeType = "Buy";
-                else if (sellUser === myAddr)
+                else if (isMyAddress(sellUser))
                     tradeType = "Sell";
 
 
@@ -5502,8 +5509,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 return {
                     'type': transType + ' ' + tradeType,
                     'exchange': exchange,
-                    // myAddr works in tx.js , history doesn't show note anyway
-                    'note': utility.addressLink(myAddr, true, true) + ' selected an order in the orderbook to trade.',
+                    'note': utility.addressLink(taker, true, true) + ' selected an order in the orderbook to trade.',
                     'token': token,
                     'amount': amount,
                     'price': price,
@@ -5583,7 +5589,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var base = undefined;
 
                 var transType = 'Taker';
-                if (maker === myAddr) {
+                if (isMyAddress(maker)) {
                     transType = 'Maker';
                 }
 
@@ -5687,7 +5693,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var base = undefined;
 
                 var transType = 'Taker';
-                if (maker === myAddr) {
+                if (isMyAddress(maker)) {
                     transType = 'Maker';
                 }
 
@@ -5834,7 +5840,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var base = undefined;
 
                 var transType = 'Taker';
-                if (maker === myAddr) {
+                if (isMyAddress(maker)) {
                     transType = 'Maker';
                 }
 
@@ -5888,16 +5894,15 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                         fee = takerFee;
                     }
 
-                    if (buyUser === myAddr)
+                    if (isMyAddress(buyUser))
                         tradeType = "Buy";
-                    else if (sellUser === myAddr)
+                    else if (isMyAddress(sellUser))
                         tradeType = "Sell";
 
                     return {
                         'type': transType + ' ' + tradeType,
                         'exchange': exchange,
-                        // myAddr works in tx.js , history doesn't show note anyway
-                        'note': utility.addressLink(myAddr, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
+                        'note': utility.addressLink(taker, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
                         'token': token,
                         'amount': amount,
                         'price': price,
@@ -6000,8 +6005,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     return {
                         'type': transType + ' ' + tradeType,
                         'exchange': exchange,
-                        // myAddr works in tx.js , history doesn't show note anyway
-                        'note': utility.addressLink(myAddr, true, true) + ' made a Bancor conversion.',
+                        'note': utility.addressLink(taker, true, true) + ' made a Bancor conversion.',
                         'token': token,
                         'amount': amount,
                         'price': price,
@@ -6344,7 +6348,6 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     return {
                         'type': 'Cancel' + ' ' + tradeType,
                         'exchange': exchange,
-                        // myAddr works in tx.js , history doesn't show note anyway
                         'note': utility.addressLink(maker, true, true) + 'Cancelled an open order in the orderbook.',
                         'token': token,
                         'amount': amount,
@@ -6461,7 +6464,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                 var base = undefined;
 
                 var transType = 'Taker';
-                if (maker === myAddr) {
+                if (isMyAddress(maker)) {
                     transType = 'Maker';
                 }
 
@@ -6596,7 +6599,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     buyer = taker;
                     seller = maker;
 
-                    if (maker == myAddr) {
+                    if (isMyAddress(maker)) {
                         tradeType = 'Sell';
                         transType = 'Maker';
                     }
@@ -6607,7 +6610,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddr) {
                     seller = taker;
                     buyer = maker;
 
-                    if (maker == myAddr) {
+                    if (isMyAddress(maker)) {
                         tradeType = 'Buy';
                         transType = 'Maker';
                     }

@@ -318,6 +318,7 @@ var isAddressPage = true;
 		}
 		else if (exchanges.length == 1) {
 			historyConfig = _delta.config.history[exchanges[0]];
+            minBlock = historyConfig.minBlock;
 		} else {
 
 			let currentConfig = {

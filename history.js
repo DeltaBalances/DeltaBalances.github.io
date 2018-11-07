@@ -1476,7 +1476,7 @@ var isAddressPage = true;
 		var array = _delta.config.blockMonths;
 
 		//Create and append the options
-		for (var i = array.length - 1; i > 0; i--) {
+		for (var i = array.length - 1; i >= 0; i--) {
 			if (array[i].blockTo >= minBlock /*&& (!historyConfig.maxBlock || array[i].blockFrom <= historyConfig.maxBlock)*/) {
 				var option = document.createElement("option");
 				option.value = i;

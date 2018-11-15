@@ -347,16 +347,16 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
 
 
             token.IDEX = token.name;
-            if(token.blockIDEX) {
+            if (token.blockIDEX) {
                 token.unlisted = true;
             } else {
                 token.unlisted = false;
             }
 
             if (this.uniqueTokens[token.addr]) {
-				if(!this.uniqueTokens[token.addr].blockIDEX) {
-					this.uniqueTokens[token.addr].unlisted = false;
-				}	
+                if (!this.uniqueTokens[token.addr].blockIDEX) {
+                    this.uniqueTokens[token.addr].unlisted = false;
+                }
                 this.uniqueTokens[token.addr].IDEX = token.name;
                 // take full name from IDEX if none is known
                 if (token.name2 && !this.uniqueTokens[token.addr].name2) {
@@ -2264,7 +2264,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                                 returns.push(subCall);
                             }
                         } else {
-                            if(unpacked2.name.indexOf('pay') && newTx.contractAddress) {
+                            if (unpacked2.name.indexOf('pay') && newTx.contractAddress) {
                                 // ignore as tx value will be wrong
                             } else {
                                 console.log('unable to process subcall');
@@ -2780,15 +2780,15 @@ DeltaBalances.prototype.isExchangeAddress = function (addr, allowNonSupported) {
 
 DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) {
 
-    if(!myAddresses) {
+    if (!myAddresses) {
         myAddresses = [];
-    } else if(typeof myAddresses === 'string') {
+    } else if (typeof myAddresses === 'string') {
         myAddresses = [myAddresses];
     }
 
-    function isMyAddress(addr){
-        for(let i = 0; i < myAddresses.length; i++) {
-            if(myAddresses[i].toLowerCase() === addr.toLowerCase()) {
+    function isMyAddress(addr) {
+        for (let i = 0; i < myAddresses.length; i++) {
+            if (myAddresses[i].toLowerCase() === addr.toLowerCase()) {
                 return true;
             }
         }
@@ -2933,6 +2933,77 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         'unlisted': token.unlisted,
                         'buyer': buyUser,
                         'seller': sellUser,
+                        'fee': fee,
+                        'feeCurrency': feeCurrency,
+                        'transType': transType,
+                        'tradeType': tradeType,
+                    };
+                }
+            }
+            // ancient Oasisdex trade event (contract jan 2017)
+            //	Trade (uint256 sell_how_much, index_topic_1 address sell_which_token, uint256 buy_how_much, index_topic_2 address buy_which_token)
+            else if (unpacked.name == 'Trade' && unpacked.address == '0xa1b5eedc73a978d181d1ea322ba20f0474bb2a25') {
+                var tradeType = 'Buy';
+                var token = undefined;
+                var base = undefined;
+
+                var transType = 'Taker';
+                let tokenGet = this.setToken(unpacked.events[1].value);
+                let tokenGive = this.setToken(unpacked.events[3].value);
+                var rawAmount = new BigNumber(0);
+                var rawBaseAmount = new BigNumber(0);
+
+                if (this.isBaseToken(tokenGet, tokenGive)) // get eth  -> sell
+                {
+                    tradeType = 'Sell';
+                    token = tokenGive;
+                    base = tokenGet;
+                    rawAmount = new BigNumber(unpacked.events[0].value);
+                    rawBaseAmount = new BigNumber(unpacked.events[2].value);
+                }
+                else if (this.isBaseToken(tokenGive, tokenGet)) // buy
+                {
+                    token = tokenGet;
+                    base = tokenGive;
+                    rawBaseAmount = new BigNumber(unpacked.events[2].value);
+                    rawAmount = new BigNumber(unpacked.events[0].value);
+                }
+                else {
+                    return { 'error': 'unknown token in trade event' };
+                    //  console.log('unknown base token');
+                    // return undefined;
+                }
+
+                var exchange = '';
+                let addrName = this.addressName(unpacked.address);
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                }
+
+                if (token && base && token.addr && base.addr) {
+
+                    var amount = utility.weiToToken(rawAmount, token);
+                    var baseAmount = utility.weiToToken(rawBaseAmount, base);
+                    var price = new BigNumber(0);
+                    if (amount.greaterThan(0)) {
+                        price = baseAmount.div(amount);
+                    }
+
+                    let fee = new BigNumber(0);
+                    let feeCurrency = '';
+
+                    return {
+                        'type': 'Taker' + ' ' + tradeType,
+                        'exchange': exchange,
+                        'note': 'OasisDex expiringMarket trade',
+                        'token': token,
+                        'amount': amount,
+                        'price': price,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        //'buyer': buyUser,
+                        //'seller': sellUser,
                         'fee': fee,
                         'feeCurrency': feeCurrency,
                         'transType': transType,
@@ -4060,8 +4131,9 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     'unlisted': token.unlisted,
                 };
             }
-            // erc20 approve
-            else if (unpacked.name == 'Approval') {
+            // erc20 approve  (exlcude weird contract in ancient OasisDex trade)
+            else if (unpacked.name == 'Approval' && unpacked.address !== '0x96477a1c968a0e64e53b7ed01d0d6e4a311945c2') {
+
                 var sender = unpacked.events[0].value.toLowerCase();
                 var to = unpacked.events[1].value.toLowerCase();
                 var rawAmount = unpacked.events[2].value;

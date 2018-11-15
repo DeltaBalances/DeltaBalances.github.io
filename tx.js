@@ -545,7 +545,7 @@ var isAddressPage = false;
 				transaction.gasEth = _util.weiToEth(tx.gasPrice).times(txLog.gasUsed);
 
 
-				if (Number(txLog.status) === 1) {
+				if ((txLog.logs && txLog.logs.length > 0) || Number(txLog.status) === 1) {
 
 					if (transaction.value.greaterThan(0)) {
 						addTransfer(transaction.from, transaction.to, transaction.value, false);

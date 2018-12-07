@@ -281,19 +281,21 @@
 			let ethplorerIdex = undefined;
             let ethplorerStore = undefined;
             let ethplorerDdex = undefined;
+			let ethplorerEthfinex = undefined;
 			let idexTick = undefined;
 			let loaded = 0;
 
 			function done() {
 
-				if (loaded >= 5) {
-					if (/*mewTokens && mcTokens &&*/ ethplorerED && ethplorerIdex && ethplorerStore && ethplorerDdex && idexTick) {
+				if (loaded >= 6) {
+					if (/*mewTokens && mcTokens &&*/ ethplorerED && ethplorerIdex && ethplorerStore && ethplorerDdex && ethplorerEthfinex &&idexTick) {
 						//parseMewTokens(mewTokens);
 						//parseMewTokens(mcTokens);
 						parseEthplorer(ethplorerED);
 						parseEthplorer(ethplorerIdex);
                         parseEthplorer(ethplorerStore);
 						parseEthplorer(ethplorerDdex);
+						parseEthplorer(ethplorerEthfinex);
 
 						let customTokensList = Object.values(customTokens);
 						
@@ -362,7 +364,7 @@
 						$('#output').html('something went wrong');
 					}
 				} else {
-					$('#output').html('loading... , loaded ' + loaded + '/4');
+					$('#output').html('loading... , loaded ' + loaded + '/5');
 				}
 			}
 
@@ -421,11 +423,25 @@
 				done();
 			});
             
+			
+			
+			
             //token store contract
             $.getJSON('https://api.ethplorer.io/getAddressInfo/0x1ce7ae555139c5ef5a57cc8d814a867ee6ee33d8?apiKey='+key).done(function (data) {
 				loaded++;
 				if (data && data.tokens)
 					ethplorerStore = data;
+				done();
+			}).fail(function () {
+				loaded++;
+				done();
+			});
+			
+			//ethfinex trustless admin
+			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x61b9898c9b60a159fc91ae8026563cd226b7a0c1?apiKey='+key).done(function (data) {
+				loaded++;
+				if (data && data.tokens)
+					ethplorerEthfinex = data;
 				done();
 			}).fail(function () {
 				loaded++;

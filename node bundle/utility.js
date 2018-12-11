@@ -434,6 +434,9 @@ module.exports = (config) => {
     if (tokenObj && tokenObj.Binance && tokenObj.Binance.indexOf('ETH') !== -1) {
       let name = tokenObj.Binance.replace("ETH", "_ETH");
       url += name;
+    } else if (tokenObj && tokenObj.Binance && tokenObj.Binance.indexOf('BTC') !== -1) {
+        let name = tokenObj.Binance.replace("BTC", "_BTC");
+        url += name;
     } else {
       labelClass = 'label-default';
       url = '';

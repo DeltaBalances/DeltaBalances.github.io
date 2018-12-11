@@ -426,9 +426,11 @@ module.exports = {
   },
   apiServer: 'https://api.etherdelta.com', /*'https://api.forkdelta.com', 'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/
   etherscanAPIKey: 'YHBUWV6P5B5ITKMI91JIRZZYBP1CG1V65R',
-  infuraURL: 'https://mainnet.infura.io/DeltaBalances',
+  infuraURL: 'https://mainnet.infura.io/v3/cf8e91135185496e9d4998c03226ac2c', // Infura V3 dashboard project
+                //'https://mainnet.infura.io/DeltaBalances', // Infura legacy, Deprecated Jan-March 2019
   web3URLs: {
-    Infura: 'https://mainnet.infura.io/DeltaBalances',
+    Infura: 'https://mainnet.infura.io/v3/cf8e91135185496e9d4998c03226ac2c',  // Infura V3 dashboard project
+            //'https://mainnet.infura.io/DeltaBalances', // Infura legacy, Deprecated Jan-March 2019
     myEtherApi: 'https://api.myetherwallet.com/eth',//'https://api.myetherapi.com/eth',
     //myCryptoApi: 'https://api.mycryptoapi.com/eth',
   },

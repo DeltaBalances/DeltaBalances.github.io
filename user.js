@@ -6,27 +6,59 @@ var publicAddr = '';
 var savedAddr = '';
 var metamaskAddr = '';
 
+//secondary addresses in search input
+var extraAddresses = [];
+
 // check if input address is valid
-function getAddress(addr) {
+function getAddress(paramAddr) {
 
     let address = '';
+    let txHash = '';
+
+    let secondaryAddresses = [];
+    if (paramAddr) { //possibly multiple addresses in url  #0x....-0x....
+        paramAddr = paramAddr.replace(/-/g, ",");
+    }
+
     //get address from input or else from html input
-    var inputAddress = addr ? addr : document.getElementById('address').value;
+    var inputAddress = paramAddr ? paramAddr : document.getElementById('address').value;
     if (inputAddress) {
-        address = _util.addressFromString(inputAddress);
-        if (!address) {
-            //transaction hash, redirect to tx info
-            let hash = _util.hashFromString(inputAddress);
-            if (hash) {
-                window.location = window.location.origin + window.location.pathname + '/../tx.html#' + hash;
-                return;
+
+        // if address read from html input, check for multiple
+        let inputAddresses = inputAddress.split(',');
+
+        for (let i = 0; i < inputAddresses.length; i++) {
+            let addr = _util.addressFromString(inputAddresses[i]);
+            if (!address) {
+                if (addr) {
+                    address = addr;
+                } else {
+                    // maybe a transaction hash
+                    let hash = _util.hashFromString(inputAddresses[i]);
+                    if (hash) {
+                        txHash = hash;
+                    }
+                }
+            } else { // we already have a primary addr
+                if (secondaryAddresses.length < 6 && addr !== address && secondaryAddresses.indexOf(addr) == -1) {
+                    secondaryAddresses.push(addr);
+                }
             }
         }
+
     }
+
+    // we only detected a tx hash, redirect to tx info
+    if (txHash && !address && !paramAddr) {
+        window.location = window.location.origin + window.location.pathname + '/../tx.html#' + txHash;
+        return;
+    }
+
     //address either vald or ''
-    if (!publicAddr || publicAddr !== address) {
-        setAddressUI(address);
+    if (!publicAddr || publicAddr !== address || secondaryAddresses.length > 0 || secondaryAddresses.length < extraAddresses.length) {
+        setAddressUI(address, secondaryAddresses);
     }
+    extraAddresses = secondaryAddresses;
 
     if (!address)
         address = undefined;
@@ -34,10 +66,12 @@ function getAddress(addr) {
     return address;
 }
 
-function setAddressUI(address) {
+function setAddressUI(address, secondaryAddresses) {
     if (!address) {
         address = '';
     }
+
+    let supportsSecondary = (document.getElementById('extraAddresses') !== null);
 
     //image icons
     setAddrImage(address);
@@ -83,8 +117,15 @@ function setAddressUI(address) {
 
     if (address) {
         if (isAddressPage) {
-            //input text box
-            document.getElementById('address').value = address;
+
+            if (!supportsSecondary || secondaryAddresses.length == 0) {
+                //input text box
+                document.getElementById('address').value = address;
+                window.location.hash = address;
+            } else {
+                document.getElementById('address').value = address + ', ' + secondaryAddresses.join(', ');
+                window.location.hash = address + '-' + secondaryAddresses.join('-');
+            }
         }
 
         //handle user wallet right-sidebar
@@ -101,6 +142,17 @@ function setAddressUI(address) {
         document.getElementById('currentAddrDescr').innerHTML = 'Input address';
 
         $('#walletInfo').addClass('hidden');
+    }
+
+    // if page support extra address display (trade history only for now)
+    if (supportsSecondary) {
+        let htmlText = '';
+        if (secondaryAddresses.length > 0) {
+            for (let i = 0; i < secondaryAddresses.length; i++) {
+                htmlText += '<li> <i class="fa fa-plus dim" aria-hidden="true"></i> ' + _util.addressLink(secondaryAddresses[i], true, false) + '</li>';
+            }
+        }
+        document.getElementById('extraAddresses').innerHTML = htmlText;
     }
 }
 
@@ -155,7 +207,6 @@ function loadSaved() {
         $('#forget').removeClass('hidden');
         setStorage();
         if (isAddressPage) {
-            window.location.hash = savedAddr;
             myClick();
         }
 
@@ -172,7 +223,6 @@ function loadMetamask() {
         $('#metamaskSection').addClass('hidden');
         setStorage();
         if (isAddressPage) {
-            window.location.hash = metamaskAddr;
             myClick();
         }
     }

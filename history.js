@@ -37,6 +37,7 @@ var isAddressPage = true;
 	// user input & data
 	/* publicAddr, savedAddr, metamaskAddr  moved to user.js */
 	var lastResult = undefined;
+	var oneAddress = false;
 
 	// config
 	var blocktime = 14;
@@ -194,8 +195,6 @@ var isAddressPage = true;
 			}
 		});
 
-		getStorage();
-
 		placeholderTable();
 
 		// url hash #0x..
@@ -209,12 +208,17 @@ var isAddressPage = true;
 			if (addr) {
 				publicAddr = addr;
 			}
+			oneAddress = extraAddresses.length == 0;
+		}
+
+		// no address in url, check local/session storage
+		if (!publicAddr) {
+			getStorage();
 		}
 
 		if (publicAddr) {
 			//autoStart = true;
 			//myClick();
-			window.location.hash = publicAddr;
 			$('#loadingTransactions').show();
 			$("#findTransactions").show();
 		} else if (savedAddr) {//autoload when remember is active
@@ -318,7 +322,7 @@ var isAddressPage = true;
 		}
 		else if (exchanges.length == 1) {
 			historyConfig = _delta.config.history[exchanges[0]];
-            minBlock = historyConfig.minBlock;
+			minBlock = historyConfig.minBlock;
 		} else {
 
 			let currentConfig = {
@@ -431,11 +435,11 @@ var isAddressPage = true;
 		// validate address
 		if (!autoStart) {
 			publicAddr = getAddress();
+			oneAddress = extraAddresses.length == 0
 		}
 
 		autoStart = false;
 		if (publicAddr) {
-			window.location.hash = publicAddr;
 			getAll(false, requestID);
 		}
 		else {
@@ -455,7 +459,6 @@ var isAddressPage = true;
 
 		if (publicAddr) {
 			setStorage();
-			window.location.hash = publicAddr;
 			getTrans(rqid);
 		} else {
 			running = false;
@@ -639,22 +642,23 @@ var isAddressPage = true;
 		var topics = [];
 		if (typeMode == 0) { // Trades
 			// kyber and oasisdex, use address in topic filter for speedup
-			if (historyConfig.userIndexed && historyConfig.userTopic == 1) {
+			if (oneAddress && historyConfig.userIndexed && historyConfig.userTopic == 1) {
 				let myTopicAddr = "0x000000000000000000000000" + publicAddr.slice(2).toLowerCase();
 				//for Kyber, add user topic to search for speedup
 				topics = [historyConfig.tradeTopic, myTopicAddr];
 			}
-			else
+			else {
 				topics = [historyConfig.tradeTopic];
+			}
 		}
 		else if (typeMode == 1) { // Funds
 			if (historyConfig == _delta.config.history.ETHEN) { //ethen.market only
 				let innerTopics = historyConfig.withdrawTopic.concat(historyConfig.depositTopic);
 				topics = [innerTopics];
 			}
-			else if (historyConfig !== _delta.config.history.Enclaves) { // all other withdraw/deposit exchanges
+			else if (!oneAddress || historyConfig !== _delta.config.history.Enclaves) { // all other withdraw/deposit exchanges
 				topics = [[historyConfig.depositTopic, historyConfig.withdrawTopic]];
-			} else { // enclavesdex only
+			} else { // enclavesdex only (if searching for 1 address)
 				let myTopicAddr = "0x000000000000000000000000" + publicAddr.slice(2).toLowerCase();
 				topics = [[historyConfig.depositTopic, historyConfig.withdrawTopic], undefined, myTopicAddr];
 			}
@@ -884,10 +888,25 @@ var isAddressPage = true;
 
 		function parseOutput(outputLogs) {
 			var outputs = [];
-			var myAddr = publicAddr.toLowerCase();
-			var addrrr = myAddr.slice(2);
+			let myAddrs = oneAddress ? [publicAddr] : [publicAddr].concat(extraAddresses);
+			myAddrs.map(addr => {
+				return addr.toLowerCase();
+			});
 
 			let filteredLogs;
+
+			//check if event data or topic contains one of m requested addresses
+			function containsMyAddress(inputString) {
+				if (inputString) {
+					for (let i = 0; i < myAddrs.length; i++) {
+						let addr = myAddrs[i].slice(2);
+						if (inputString.indexOf(addr) !== -1) {
+							return true;
+						}
+					}
+				}
+				return false;
+			}
 
 
 			let ethenOrders = {};
@@ -896,31 +915,32 @@ var isAddressPage = true;
 				// mark the hash if one of 2 events contains your address
 				if (historyConfig == _delta.config.history.ETHEN ||
 					(Array.isArray(historyConfig.contract) && historyConfig.contract.indexOf('Ethen') !== -1)
-				)
+				) {
 					outputLogs.map((log) => {
 						if (log.address === _delta.config.exchangeContracts.Ethen.addr) {
-							if (log.data.indexOf(addrrr) !== -1) {
+							if (containsMyAddress(log.data)) {
 								ethenOrders[log.transactionHash] = true;
 							}
 						}
 					});
+				}
 			}
 
 			//kyber check only topic1
 			if (historyConfig == _delta.config.history.Kyber) {
 				filteredLogs = outputLogs.filter((log) => {
-					return log.topics[historyConfig.userTopic].indexOf(addrrr) !== -1;
+					return containsMyAddress(log.topics[historyConfig.userTopic]);
 				});
 			}
 			// oasis, check only topic 2 && 3
 			else if (historyConfig == _delta.config.history.OasisDex) {
 				filteredLogs = outputLogs.filter((log) => {
-					return log.topics[2].indexOf(addrrr) !== -1 || log.topics[3].indexOf(addrrr) !== -1;
+					return containsMyAddress(log.topics[2]) || containsMyAddress(log.topics[3]);
 				});
 			}
 			else {
 				filteredLogs = outputLogs.filter((log) => {
-					if (log.data.indexOf(addrrr) !== -1) {
+					if (containsMyAddress(log.data)) {
 						return true;
 					} else if (ethenOrders[log.transactionHash]) {
 						return true;
@@ -929,9 +949,9 @@ var isAddressPage = true;
 						return false;
 					}
 					else {
-						// start at 1, topic 0  is event signature
+						// check all event topics, start at 1, topic 0  is event signature
 						for (let i = 1; i < log.topics.length; i++) {
-							if (log.topics[i].indexOf(addrrr) !== -1)
+							if (containsMyAddress(log.topics[i]))
 								return true;
 						}
 					}
@@ -982,7 +1002,7 @@ var isAddressPage = true;
 					continue;
 				}
 
-				let obj = _delta.processUnpackedEvent(unpacked, myAddr);
+				let obj = _delta.processUnpackedEvent(unpacked, myAddrs);
 				if (obj && !obj.error) {
 
 					var obj2 = undefined;
@@ -1161,6 +1181,7 @@ var isAddressPage = true;
 					sessionStorage.removeItem("address");
 				}
 			}
+			oneAddress = extraAddresses.length == 0
 		}
 	}
 
@@ -1546,7 +1567,12 @@ var isAddressPage = true;
 			filename += exchanges[0];
 		else
 			filename += 'DEX';
-		filename += "_Trades_" + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+		filename += "_Trades_" + _util.formatDate(_util.toDateTimeNow(true), true);
+		if (oneAddress) {
+			filename += '_' + publicAddr + ".csv";
+		} else {
+			filename += ".csv";
+		}
 		a.download = filename;
 		dl.appendChild(a);
 	}
@@ -1562,7 +1588,13 @@ var isAddressPage = true;
 			filename += exchanges[0];
 		else
 			filename += 'DEX';
-		a.download = filename + "_Funds_" + _util.formatDate(_util.toDateTimeNow(true), true) + '_' + publicAddr + ".csv";
+		filename += "_Funds_" + _util.formatDate(_util.toDateTimeNow(true), true);
+		if (oneAddress) {
+			filename += '_' + publicAddr + ".csv";
+		} else {
+			filename += ".csv";
+		}
+		a.download = filename;
 		dl.appendChild(a);
 	}
 
@@ -1661,7 +1693,7 @@ var isAddressPage = true;
 			// add quotes around each cell data
 			tableData = tableData.map((row) => {
 				return row.map((cell) => {
-					return `\"${cell}\"`
+					return `\"${cell}\"`;
 				});
 			});
 		}
@@ -1718,7 +1750,7 @@ var isAddressPage = true;
 				});
 			});
 		} else if (exportFormat == 5) {
-			//Cointracking.info - Custom Exchange
+			//TokenTax
 			filePrefix = 'TokenTax_';
 			const headers = ['Type', 'BuyAmount', 'BuyCurrency', 'SellAmount', 'SellCurrency', 'FeeAmount', 'FeeCurrency', 'Exchange', 'Group', 'Comment', 'Date'];
 			tableData = [headers];

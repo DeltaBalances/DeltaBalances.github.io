@@ -1647,7 +1647,8 @@ var isAddressPage = true;
 		} else if (exportFormat == 3) {
 			// Cointracking.info - CSV
 			filePrefix = 'Cointracking_CSV_';
-			const headers = ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'Group', 'Comment', 'Trade ID', 'Date'];
+			// format https://cointracking.info/import/import_csv/
+			const headers = ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'Group', 'Comment', 'Date', 'Trade ID'];
 			tableData = [headers];
 
 			for (var i = 0; i < allTrades.length; ++i) {

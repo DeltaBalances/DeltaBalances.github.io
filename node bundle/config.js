@@ -23,8 +23,9 @@ module.exports = {
 
     '0xForwarder': { addr: '0x7afc2d5107af94c462a194d2c21b5bdd238709d6', name: '0x Forwarder ', supportedDex: false },
     OasisDex: { addr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425', name: 'OasisDex ', supportedDex: true },
+    OasisDex2: { addr: '0xb7ac09c2c0217b07d7c103029b4918a2c401eecb', name: 'OasisDex ', supportedDex: true },
     OasisDexOld: { addr: '0x3aa927a97594c3ab7d7bf0d47c71c3877d1de4a1', name: 'OasisDex (OLD) ', supportedDex: true },
-    OasisDexOld2: { addr: '0x83ce340889c15a3b4d38cfcd1fc93e5d8497691f', name: 'OasisDex (OLD2) ', supporteDex: true },
+    OasisDexOld2: { addr: '0x83ce340889c15a3b4d38cfcd1fc93e5d8497691f', name: 'OasisDex (OLD2) ', supportedDex: true },
     OasisDexOld3: { addr: '0xa1b5eedc73a978d181d1ea322ba20f0474bb2a25', name: 'OasisDex (OLD3) ', supportedDex: false },
 
     //Oasisdirect proxy creator
@@ -621,7 +622,7 @@ module.exports = {
       hideOpponent: false,
     },
     OasisDex: {
-      contract: ['OasisDex', 'OasisDexOld', 'OasisDexOld2'],
+      contract: ['OasisDex', 'OasisDex2', 'OasisDexOld', 'OasisDexOld2'],
       minBlock: 3435757, //4262057, //4751582,
       tradeTopic: '0x3383e3357c77fd2e3a4b30deea81179bc70a795d053d14d5b7f2f01d0fd4596f', // LogTake
       withdrawTopic: undefined,

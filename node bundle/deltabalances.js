@@ -1121,8 +1121,15 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'note': 'Cancel an open order',
                 };
             }
-            // etherdelta/decentrex/tokenstore use 11, idex has 4, enclaves has 12
-            else if (!badFromTo && (unpacked.name === 'trade' && (unpacked.params.length == 11 || unpacked.params.length == 12 || unpacked.params.length == 4) || unpacked.name === 'tradeEtherDelta' || unpacked.name === 'instantTrade')) {
+            // default 'trade' function for EtherDelta style exchanges (EtherDelta, IDEX, Token store, Enclaves, etc..)
+            // modified to accept the 'order' function as well (on-chain order creation)
+            else if (!badFromTo &&
+                (  // etherdelta/decentrex/tokenstore use 11 params, idex has 4, enclaves has 12
+                    unpacked.name === 'trade' && (unpacked.params.length == 11 || unpacked.params.length == 12 || unpacked.params.length == 4)
+                    || unpacked.name === 'tradeEtherDelta' || unpacked.name === 'instantTrade'
+                    || unpacked.name === 'order' //on-chain order
+                )
+            ) {
 
                 let idex = false;
                 //make idex trades fit the old etherdelta format
@@ -1177,7 +1184,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 if (token && base && token.addr && base.addr) {
                     var rawAmount = new BigNumber(0);
                     var rawBaseAmount = new BigNumber(0);
-                    var chosenAmount = new BigNumber(unpacked.params[10].value);
+
                     if (tradeType === 'Sell') {
                         rawAmount = new BigNumber(unpacked.params[1].value);
                         rawBaseAmount = new BigNumber(unpacked.params[3].value);
@@ -1195,24 +1202,29 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         price = baseAmount.div(amount);
                     }
 
-                    if (tradeType === 'Buy') {
-                        orderSize = amount;
-                        if (rawBaseAmount.greaterThan(chosenAmount)) {
-                            baseAmount = utility.weiToToken(chosenAmount, base);
-                            rawAmount = chosenAmount.div((rawBaseAmount.div(rawAmount)));
-                            amount = utility.weiToToken(rawAmount, token);
-                        }
-                    } else {
-                        orderSize = amount;
-                        if (rawAmount.greaterThan(chosenAmount)) {
-                            amount = utility.weiToToken(chosenAmount, token);
-                            rawBaseAmount = (chosenAmount.times(rawBaseAmount)).div(rawAmount);
-                            baseAmount = utility.weiToToken(rawBaseAmount, base);
+
+                    orderSize = amount;
+                    // selected amount, aailable in trades, not available in 'order'
+                    if (unpacked.params.length >= 11) {
+                        var chosenAmount = new BigNumber(unpacked.params[10].value);
+
+                        if (tradeType === 'Buy') {
+                            if (rawBaseAmount.greaterThan(chosenAmount)) {
+                                baseAmount = utility.weiToToken(chosenAmount, base);
+                                rawAmount = chosenAmount.div((rawBaseAmount.div(rawAmount)));
+                                amount = utility.weiToToken(rawAmount, token);
+                            }
+                        } else {
+                            if (rawAmount.greaterThan(chosenAmount)) {
+                                amount = utility.weiToToken(chosenAmount, token);
+                                rawBaseAmount = (chosenAmount.times(rawBaseAmount)).div(rawAmount);
+                                baseAmount = utility.weiToToken(rawBaseAmount, base);
+                            }
                         }
                     }
 
                     let takerAddr = idex ? unpacked.params[11].value : txFrom;
-                    let makerAddr = unpacked.params[6].value.toLowerCase();
+                    let makerAddr = unpacked.name !== 'order' ? unpacked.params[6].value.toLowerCase() : txFrom;
 
                     let takeFee = new BigNumber(0);
                     let makeFee = new BigNumber(0);
@@ -1247,29 +1259,45 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         }
                     }
 
+                    if (unpacked.name !== 'order') { // trade 
+                        var obj = {
+                            'type': 'Taker ' + tradeType,
+                            'exchange': exchange,
+                            'note': utility.addressLink(takerAddr, true, true) + ' selected ' + utility.addressLink(makerAddr, true, true) + '\'s order in the orderbook to trade.',
+                            'token': token,
+                            'amount': amount,
+                            'price': price,
+                            'base': base,
+                            'baseAmount': baseAmount,
+                            'order size': orderSize,
+                            'unlisted': token.unlisted,
+                            'taker': takerAddr,
+                            'maker': makerAddr,
+                        };
 
-                    var obj = {
-                        'type': 'Taker ' + tradeType,
-                        'exchange': exchange,
-                        'note': utility.addressLink(takerAddr, true, true) + ' selected ' + utility.addressLink(makerAddr, true, true) + '\'s order in the orderbook to trade.',
-                        'token': token,
-                        'amount': amount,
-                        'price': price,
-                        'base': base,
-                        'baseAmount': baseAmount,
-                        'order size': orderSize,
-                        'unlisted': token.unlisted,
-                        'taker': takerAddr,
-                        'maker': makerAddr,
-                    };
-
-                    if (idex) {
-                        obj['takerFee'] = takeFee;
-                        obj['FeeToken'] = takeFeeCurrency;
-                        obj['makerFee'] = makeFee;
-                        obj['FeeToken '] = makeFeeCurrency;
+                        if (idex) {
+                            obj['takerFee'] = takeFee;
+                            obj['FeeToken'] = takeFeeCurrency;
+                            obj['makerFee'] = makeFee;
+                            obj['FeeToken '] = makeFeeCurrency;
+                        }
+                        return obj;
+                    } else { // 'order'
+                        // make on-chain order EtherDelta style
+                        var obj = {
+                            'type': tradeType + ' offer',
+                            'exchange': exchange,
+                            'note': utility.addressLink(makerAddr, true, true) + ' placed an on-chain order.',
+                            'token': token,
+                            'amount': amount,
+                            'price': price,
+                            'base': base,
+                            'baseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                            'maker': makerAddr,
+                        };
+                        return obj;
                     }
-                    return obj;
                 }
             }
             // exchange trade with args in arrays (ethen.market)
@@ -2937,6 +2965,72 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         'feeCurrency': feeCurrency,
                         'transType': transType,
                         'tradeType': tradeType,
+                    };
+                }
+            }
+            // EtherDelta style on-chain order creation
+            else if (unpacked.name == 'Order' && unpacked.events.length == 7) {
+                var tradeType = 'Sell';
+                var token = undefined;
+                var base = undefined;
+                var maker = unpacked.events[6].value.toLowerCase();
+
+                let tokenGet = this.setToken(unpacked.events[0].value);
+                let tokenGive = this.setToken(unpacked.events[2].value);
+
+                if (this.isBaseToken(tokenGet, tokenGive)) // get eth  -> sell
+                {
+                    tradeType = 'Buy';
+                    token = tokenGive;
+                    base = tokenGet;
+                }
+                else if (this.isBaseToken(tokenGive, tokenGet)) // buy
+                {
+                    token = tokenGet;
+                    base = tokenGive;
+                }
+                else {
+                    return { 'error': 'unknown token in Order event' };
+                    //  console.log('unknown base token');
+                    // return undefined;
+                }
+
+                var exchange = '';
+                let addrName = this.addressName(unpacked.address);
+
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                }
+
+                if (token && base && token.addr && base.addr) {
+                    var rawAmount = new BigNumber(0);
+                    var rawBaseAmount = new BigNumber(0);
+                    if (tradeType === 'Sell') {
+                        rawAmount = new BigNumber(unpacked.events[1].value);
+                        rawBaseAmount = new BigNumber(unpacked.events[3].value);
+                    } else {
+                        rawBaseAmount = new BigNumber(unpacked.events[1].value);
+                        rawAmount = new BigNumber(unpacked.events[3].value);
+                    }
+
+                    var amount = utility.weiToToken(rawAmount, token);
+                    var baseAmount = utility.weiToToken(rawBaseAmount, base);
+                    var price = new BigNumber(0);
+                    if (amount.greaterThan(0)) {
+                        price = baseAmount.div(amount);
+                    }
+
+                    return {
+                        'type': tradeType + ' offer',
+                        'exchange': exchange,
+                        'note': utility.addressLink(maker, true, true) + 'placed an on-chain order.',
+                        'token': token,
+                        'amount': amount,
+                        'price': price,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        'maker': maker,
                     };
                 }
             }

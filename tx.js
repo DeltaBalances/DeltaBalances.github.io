@@ -610,7 +610,7 @@ var isAddressPage = false;
 							if (obj && !obj.error) {
 								if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 									unknownToken = true;
-								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion' || unpacked.name == 'Order' || unpacked.name == 'TakeBuyOrder' || unpacked.name == 'TakeSellOrder') {
+								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion' || (unpacked.name == 'Order' && unpacked.combinedEvents) || unpacked.name == 'TakeBuyOrder' || unpacked.name == 'TakeSellOrder') {
 									obj.feeToken = obj.feeCurrency;
 									delete obj.feeCurrency;
 									delete obj.transType;

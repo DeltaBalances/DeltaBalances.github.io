@@ -57,10 +57,13 @@ module.exports = {
     Singularx: { addr: '0x9a2d163ab40f88c625fd475e807bbc3556566f80', name: 'SingularX ', supportedDex: true },
     EtherC: { addr: '0xd8d48e52f39ab2d169c8b562c53589e6c71ac4d3', name: 'EtherC ', supportedDex: true },
     
+    /* exchanges with no parsing support yet */
     //bithumb R1 protocol?
     R1: { addr: '0x7b45a572ea991887a01fd919c05edf1cac79c311', name: 'R1 Protocol', supportedDex: false },
     Martle: { addr: '0x551d56781e0cd16ac2c61a03e6537844a41c7709', name: 'Martle instant', supportedDex: false},
-    
+    Switcheo: { addr: '0xba3ed686cc32ffa8664628b1e96d8022e40543de', name: 'Switcheo ', supportedDex: false },
+    // UniSwap (contract per token pair)
+
     /* exchange aggregators */
     EasyTrade: { addr: '0x9ae4ed3bf7a3a529afbc126b4541c0d636d455f6', name: 'EasyTrade ', supportedDex: true },
     EasyTrade2: { addr: '0x0c577fbf29f8797d9d29a33de59001b872a1d4dc', name: 'EasyTrade ', supportedDex: true },
@@ -90,6 +93,11 @@ module.exports = {
     AZExchange: { addr: '0xba74368aa52ad58d08309f1f549aa63bab0c7e2a', name: 'AZExchange ', supportedDex: true },
     EtherERC: { addr: '0x20ac542ea6b358066f2308c9805531be62747e90', name: 'EtherERC ', supportedDex: true },
     Polaris: { addr: '0x25066b77ae6174d372a9fe2b1d7886a2be150e9b', name: 'PolarisDEX ', supportedDex: true },
+    TradexOne: { addr: '0xf61a285edf078536a410a5fbc28013f9660e54a8', name: 'TradexOne ', supportedDex: true },
+    LSCX: { addr: '0x3da70c70b9574ff185b31d70878a8e3094603c4c', name: 'LSCX Dex ', supportedDex: true },
+    Scam: { addr: '0x1cd442aff7cdd247420a4dc76b44111994f521c9', name: 'SCAM EtherDelta ', supportedDex: true },
+    nDEx: { addr: '0x51a2b1a38ec83b56009d5e28e6222dbb56c23c22', name: 'nDex market ', supportedDex: true},
+    SeedDex: { addr: '0x7e21c13cac00528f5217f8c0c06706a91afe4a48', name: 'SeedDex ', supportedDex: true },
 
     /* unknown ED clones */
     // fake ED? 0x60394f71266901a5930bb4e90db5dd26b77f8dad
@@ -144,6 +152,7 @@ module.exports = {
     '0xd2045edc40199019e221d71c0913343f7908d0d5': 'Paradex Admin',
     '0xd3d0474124c1013ed6bfcfd9a49cfedb8c78fc44': 'Erc Dex Admin',
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex Admin',
+    '0x1f8cdd31345faa00bbdf946fa257b7feb706b535': 'Switcheo Admin',
   },
   wrappedETH: {
     "0x0000000000000000000000000000000000000000": 1, // EtherDelta, IDEX, tokenStore, Decentrex  reserved for ETH
@@ -239,7 +248,10 @@ module.exports = {
     '0x448a5065aebb8e423f0896e6c5d525c040f59af3': 'Maker CDP',
     '0xbda109309f9fafa6dd6a9cb9f1df4085b27ee8ef': 'Maker CDP',
     '0x9b0f70df76165442ca6092939132bbaea77f2d7a': 'Maker CDP',
-    '0x9b0ccf7c8994e19f39b2b4cf708e0a7df65fa8a3': 'Maker CDP'
+    '0x9b0ccf7c8994e19f39b2b4cf708e0a7df65fa8a3': 'Maker CDP',
+
+    '0x059550a1ca3c46a2adb803e9e3ea4585a34f004a': 'dYdX',
+    '0x36bf21c8e661b21e6166e4385f574941fdc6caff': 'dYdX',
   },
 
   bancorConverters: [ //some of the many bancor converter contracts, address not always necessary to find trades, but makes things easier
@@ -454,11 +466,12 @@ module.exports = {
   baseToken: {
     "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359": 1, // DAI stablecoin
     "0xdac17f958d2ee523a2206206994597c13d831ec7": 2, // USDT 
-    "0xe41d2489571d322189246dafa5ebde1f4699f498": 3, // ZRX, fee in 0x sometimes as a zrx trade
-    "0x0027449bf0887ca3e431d263ffdefb244d95b555": 4, // NOT coin openrelay
-    "0x1a9b2d827f26b7d7c18fec4c1b27c1e8deeba26e": 5,// USDT-W ethfinex
-    "0xd9ebebfdab08c643c5f2837632de920c70a56247": 6, // DAI-W
-    "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c": 7, //BNT
+    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": 3, // USDC
+    "0xe41d2489571d322189246dafa5ebde1f4699f498": 4, // ZRX, fee in 0x sometimes as a zrx trade
+    "0x0027449bf0887ca3e431d263ffdefb244d95b555": 5, // NOT coin openrelay
+    "0x1a9b2d827f26b7d7c18fec4c1b27c1e8deeba26e": 6,// USDT-W ethfinex
+    "0xd9ebebfdab08c643c5f2837632de920c70a56247": 7, // DAI-W
+    "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c": 8, //BNT
   },
   apiServer: 'https://api.etherdelta.com', /*'https://api.forkdelta.com', 'https://cache.etherdelta.com', 'https://cache1.etherdelta.com', 'https://cache2.etherdelta.com', 'https://cache3.etherdelta.com'*/
   etherscanAPIKey: 'YHBUWV6P5B5ITKMI91JIRZZYBP1CG1V65R',

@@ -51,6 +51,7 @@ Relayers not on the list will show up as `unknown 0x`
 
 | Relayers |
 |-------------------|
+|[3exchange](https://3xchange.io)|
 |~~[Amadeus](https://amadeusrelay.org/)~~|
 |[Bamboo Relay](https://bamboorelay.com)|
 |[DDEX](https://ddex.io/)|

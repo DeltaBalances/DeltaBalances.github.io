@@ -128,6 +128,7 @@ module.exports = {
     '0x4524baa98f9a3b9dec57caae7633936ef96bd708': 'LedgerDex',
     '0x7219612be7036d1bfa933e16ca1246008f38c5fe': 'The Ocean',
     '0x0e8ba001a821f3ce0734763d008c9d7c957f5852': 'Amadeus',
+    '0xab8199eba802e7e6634d4389bf23999b7ae6b253': '3xchange', 
 
     '0x8124071f810d533ff63de61d0c98db99eeb99d64': 'STAR BIT',
     '0x0681e844593a051e2882ec897ecd5444efe19ff2': 'STAR BIT',

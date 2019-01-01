@@ -240,9 +240,10 @@
 				if (customTokens[addr] && !customTokens[addr].name && tok.symbol !== tok.name && tok.name !== "") {
 					customTokens[addr].name = escapeHtml(tok.name);
 				}
-
+				//fix incorrect decimals
 				if (customTokens[addr] && customTokens[addr].decimal !== tok.decimals) {
-					customTokens[addr].decimal = Number(tok.decimals);
+					if(addr !== "0xecf8f87f810ecf450940c9f60066b4a7a501d6a7") // old MKR WETH reports bad decimals
+						customTokens[addr].decimal = Number(tok.decimals);
 				}
 
 				/*  if(customTokens[addr] && customTokens[addr].symbol !== tok.symbol) {

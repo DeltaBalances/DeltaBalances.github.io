@@ -1,46 +1,69 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 /* 
-    Contract for DeltaBalances.github.io V4.
-    Check ERC20 token balances & allowances for multiple tokens in 1 batched request.
+    Contract for DeltaBalances.github.io V5.
+    Check values for multiple ERC20 tokens in a single request
+    - token balances
+    - token allowances
+    - deposited token balances (decentralized exchanges)	
     
-    V4 changes:
-    - Small optimizations.
-    - Add token allowances.
-    - Removed unused functions.
+    V5 changes:
+    - Update to Solidity 0.5 (breaking changes)
+    - Add support for alternative balance functions using function selectors
     
-    For the previous versions, see 0x3E25F0BA291F202188Ae9Bda3004A7B3a803599a for code and comments.
     
-    Address 0x0 is used to indicate ETH (as used in EtherDelta, IDEX and more).
+    Address 0x0 is used to resemble ETH as a token (as used in EtherDelta, IDEX and more).
+    
+    
+    To call the new 'generic' functions, this contract uses function selectors based on the hash of function signatures (see getFunctionSelector).
+    
+    Some useful function signatures (bytes4):
+    
+    SIGNATURE                      SELECTOR     FUNCTION                   CONTRACTS
+    ----------------------------------------------------------------------------------------------------------------------------
+    "balanceOf(address)"           0x70a08231   balanceOf(user)            (ERC20, ERC223, ERC777 and more)
+    "allowance(address,address)"   0xdd62ed3e   allowance(owner, spender)  (ERC20 tokens)
+
+    "balanceOf(address,address)"   0xf7888aec   balanceOf(token, user)     (EtherDelta, IDEX, Token Store, R1 protocol, and more)
+    "getBalance(address,address)"  0xd4fac45d   getBalance(token, user)    (JOYSO)
+    "balances(address,address)"    0xc23f001f   balances(user, token)      (Switcheo)
+    "balances(address)"            0x27e235e3   balances(user)             (ETHEN ETH)
+    "tokens(address,address)"      0x508493bc   tokens(user, tokens)       (ETHEN tokens)
+    
+    
+    
+    Previous version (V4)  -> 0x40a38911e470fc088beeb1a9480c2d69c847bcec
 */
+
+
+
+// ERC20 contract interface for token transfers.
+contract Token {
+  function transfer(address to, uint tokens) public returns (bool success);
+}
 
 // Exchange contract Interface for EtherDelta and forks.
 contract Exchange {
   function balanceOf(address token, address user) public view returns (uint);
 }
 
-// ERC20 contract interface.
-contract Token {
-  function balanceOf(address tokenOwner) public view returns (uint balance);
-  function transfer(address to, uint tokens) public returns (bool success);
-  function allowance(address tokenOwner, address spenderContract) public view returns (uint remaining);
-}
-
 contract DeltaBalances {
     
-  address public admin; 
+  address payable public admin; 
 
   constructor() public {
     admin = msg.sender;
   }
+  
+  
+  /* admin functionality */
 
   // Limit withdrawals to the contract creator.
   modifier isAdmin() {
     require(msg.sender == admin);
     _;
   }
-
-
+  
   // Backup withdraw, in case ETH gets in here.
   function withdraw() external isAdmin {
     admin.transfer(address(this).balance);
@@ -52,10 +75,27 @@ contract DeltaBalances {
   }
 
 
-  /* Check the token balances of a wallet for multiple tokens.
+
+
+  /* public functions */
+
+
+ /* Get the function selector from a function signature.
+    functionSignature: 
+      - remove whitespace and variable names.
+        use "balanceOf(address,address)"  NOT "balanceOf(address token, address user)"
+      
+    See the top comment for common selectors.
+ */
+  function getFunctionSelector(string calldata functionSignature) external pure returns (bytes4) {
+    // calculate the keccak256 hash of the function signature and return a 4 bytes value
+    return bytes4(keccak256(abi.encodePacked(functionSignature)));
+  }
+
+  /* Check the ERC20 token balances of a wallet for multiple tokens.
      Returns array of token balances in wei units. */
-  function tokenBalances(address user,  address[] tokens) external view returns (uint[]) {
-    uint[] memory balances = new uint[](tokens.length);
+  function tokenBalances(address user,  address[] calldata tokens) external view returns (uint[] memory balances) {
+    balances = new uint[](tokens.length);
     
     for(uint i = 0; i < tokens.length; i++) {
       if(tokens[i] != address(0x0)) { 
@@ -66,24 +106,11 @@ contract DeltaBalances {
     }    
     return balances;
   }
-
-
-  /* Get multiple token balances deposited on a DEX (EtherDelta, IDEX, or similar exchange).
+  
+  /* Check the token allowances of a specific contract for multiple tokens.
      Returns array of deposited token balances in wei units. */
-  function depositedBalances(address exchange, address user, address[] tokens) external view returns (uint[]) {
-    Exchange ex = Exchange(exchange);
-    uint[] memory balances = new uint[](tokens.length);
-    
-    for(uint i = 0; i < tokens.length; i++) {
-      balances[i] = ex.balanceOf(tokens[i], user); //might error if exchange does not implement balanceOf correctly
-    }    
-    return balances;
-  }
-
-  /* Get multiple token allowances for a contract.
-     Returns array of deposited token balances in wei units. */
-  function tokenAllowances(address spenderContract, address user, address[] tokens) external view returns (uint[]) {
-    uint[] memory allowances = new uint[](tokens.length);
+  function tokenAllowances(address spenderContract, address user, address[] calldata tokens) external view returns (uint[] memory allowances) {
+    allowances = new uint[](tokens.length);
     
     for(uint i = 0; i < tokens.length; i++) {
       allowances[i] = tokenAllowance(spenderContract, user, tokens[i]); // check token allowance and catch errors
@@ -92,34 +119,108 @@ contract DeltaBalances {
   }
 
 
+  /* Get multiple token balances deposited on a DEX using the traditional balanceOf function (EtherDelta, IDEX, Token Store, R1 protocol and many more).
+     Returns array of deposited token balances in wei units. 
+     
+     This doesn't use the generic version (below) as this format is the most common and it is more efficient hardcoded
+  */
+  function depositedBalances(address exchange, address user, address[] calldata tokens) external view returns (uint[] memory balances) {
+    balances = new uint[](tokens.length);
+    Exchange ex = Exchange(exchange);
+    
+    for(uint i = 0; i < tokens.length; i++) {
+      balances[i] = ex.balanceOf(tokens[i], user); //Errors if exchange does not implement 'balanceOf' correctly, use depositedBalancesGeneric instead.
+    }    
+    return balances;
+  }
+
+  /* Get multiple token balances deposited on a DEX with a function selector
+       - Selector: hashed function signature, see 'getFunctionSelector'  
+       - userFist:  determines whether the function uses foo(user, token) or foo(token, user)
+     Returns array of deposited token balances in wei units. */
+  function depositedBalancesGeneric(address exchange, bytes4 selector, address user, address[] calldata tokens, bool userFirst) external view returns (uint[] memory balances) {
+    balances = new uint[](tokens.length);
+    
+    if(userFirst) {
+      for(uint i = 0; i < tokens.length; i++) {
+        balances[i] = getNumberTwoArgs(exchange, selector, user, tokens[i]);
+      } 
+    } else {
+      for(uint i = 0; i < tokens.length; i++) {
+        balances[i] = getNumberTwoArgs(exchange, selector, tokens[i], user);
+      } 
+    }
+    return balances;
+  }
+  
+  /* Get the deposited ETH balance for a DEX that uses a separate function for ETH balance instead of token 0x0.
+       - Selector: hashed function signature, see 'getFunctionSelector'  
+     Returns deposited balance in wei units. */
+  function depositedEtherGeneric(address exchange, bytes4 selector, address user) external view returns (uint) {
+    return getNumberOneArg(exchange, selector, user);
+  }
+
+  
+ /* Private functions */
+
+
  /* Check the token balance of a wallet in a token contract.
     Returns 0 on a bad token contract   */
   function tokenBalance(address user, address token) internal view returns (uint) {
-    // check if token is actually a contract
-    uint256 tokenCode;
-    assembly { tokenCode := extcodesize(token) } // contract code size
-   
-   // is it a contract and does it implement balanceOf() 
-    if(tokenCode > 0 && token.call(0x70a08231, user)) {    // bytes4(keccak256("balanceOf(address)")) == 0x70a08231  
-      return Token(token).balanceOf(user);
-    } else {
-      return 0; // not a valid token, return 0 instead of error
-    }
+    // token.balanceOf(user), selector 0x70a08231
+    return getNumberOneArg(token, 0x70a08231, user);
   }
   
   
   /* Check the token allowance of a wallet for a specific contract.
      Returns 0 on a bad token contract.   */
   function tokenAllowance(address spenderContract, address user, address token) internal view returns (uint) {
-    // check if token is actually a contract
-    uint256 tokenCode;
-    assembly { tokenCode := extcodesize(token) } // contract code size
-   
-   // is it a contract and does it implement allowance() 
-    if(tokenCode > 0 && token.call(0xdd62ed3e, user, spenderContract)) {    // bytes4(keccak256("allowance(address,address)")) == 0xdd62ed3e
-      return Token(token).allowance(user, spenderContract);
+      // token.allowance(owner, spender), selector 0xdd62ed3e
+      return getNumberTwoArgs(token, 0xdd62ed3e, user, spenderContract);
+  }
+  
+  
+  
+  
+  /* Generic private functions */
+  
+  // Get a token or exchange value that requires 1 address argument (most likely arg1 == user).
+  // selector is the hashed function signature (see top comments)
+  function getNumberOneArg(address contractAddr, bytes4 selector, address arg1) internal view returns (uint) {
+    if(isAContract(contractAddr)) {
+      (bool success, bytes memory result) = contractAddr.staticcall(abi.encodeWithSelector(selector, arg1));
+      // if the contract call succeeded & the result looks good to parse
+      if(success && result.length == 32) {
+        return abi.decode(result, (uint)); // return the result as uint
+      } else {
+        return 0; // function call failed, return 0
+      }
     } else {
-      return 0; // not a valid token, return 0 instead of error
+      return 0; // not a valid contract, return 0 instead of error
     }
+  }
+  
+  // Get an exchange balance requires 2 address arguments ( (token, user) and  (user, token) are both common).
+  // selector is the hashed function signature (see top comments)
+  function getNumberTwoArgs(address contractAddr, bytes4 selector, address arg1, address arg2) internal view returns (uint) {
+    if(isAContract(contractAddr)) {
+      (bool success, bytes memory result) = contractAddr.staticcall(abi.encodeWithSelector(selector, arg1, arg2));
+      // if the contract call succeeded & the result looks good to parse
+      if(success && result.length == 32) {
+        return abi.decode(result, (uint)); // return the result as uint
+      } else {
+        return 0; // function call failed, return 0
+      }
+    } else {
+      return 0; // not a valid contract, return 0 instead of error
+    }
+  }
+  
+  // check if contract (token, exchange) is actually a smart contract and not a 'regular' address
+  function isAContract(address contractAddr) internal view returns (bool) {
+    uint256 codeSize;
+    assembly { codeSize := extcodesize(contractAddr) } // contract code size
+    return codeSize > 0; 
+    // Might not be 100% foolproof, but reliable enough for an early return in 'view' functions 
   }
 }

@@ -5,6 +5,7 @@ var Token2 = artifacts.require("BadERC20");         // erc20 with revert inside 
 var Token3 = artifacts.require("AltERC20");         // erc20 that implements balanceOf/allowance as public mapping
 var Token4 = artifacts.require("KillERC20");        // erc20 that can be selfdestructed
 var Token5 = artifacts.require("IncompleteERC20");  // erc20 that doesn't implement balanceOf() and allowance()
+var Token6 = artifacts.require("TokenBBBasic");
 
 var Exchange = artifacts.require('DummyExchange');
 
@@ -21,6 +22,7 @@ contract("DeltaBalances Balances", function (accounts) {
     let altToken;
     let killToken;
     let incompleteToken;
+    let weirdToken;
 
     let deployer = accounts[0];
 
@@ -45,7 +47,8 @@ contract("DeltaBalances Balances", function (accounts) {
         await killToken.kill();
         //erc20 contract that doesn't implement balanceOf and allowance
         incompleteToken = await Token5.new(initTokenAmount, "Incomp", 18, "I", { from: deployer });
-
+        //incompatible token that returns a succesful result of 0 bytes on allowance calls
+        weirdToken = await Token6.new({ from: deployer });
 
         let tokenAmounts = [395836495, 3453245, 564245465];
 
@@ -150,22 +153,22 @@ contract("DeltaBalances Balances", function (accounts) {
             let tokenBalances = [];
             let depositedBalances = [];
             let tokenAddresses = [];
+            let divisor = web3.utils.toBN('2');
 
             //deposit some of each token into the exchange
             for (let j = 0; j < tokens.length; j++) {
                 tokenBalances[j] = await tokens[j].balanceOf(accounts[i]);
-                let amount = tokenBalances[j] / 2;
+                let amount = tokenBalances[j].div(divisor);
                 tokenAddresses[j] = tokens[j].address;
-
                 await tokens[j].approve(exchange.address, amount, { from: accounts[i] });
                 await exchange.depositToken(tokens[j].address, amount, { from: accounts[i] });
                 depositedBalances[j] = await exchange.balanceOf(tokens[j].address, accounts[i]);
             }
-
             //deposit ETH into the exchange
             tokenAddresses.push(ether);
             let etherBalance = await web3.eth.getBalance(accounts[i]);
-            await exchange.deposit({ value: (etherBalance / 2), from: accounts[i] });
+            etherBalance = web3.utils.toBN(etherBalance);
+            await exchange.deposit({ value: etherBalance.div(divisor), from: accounts[i] });
             let depositedEther = await exchange.balanceOf(ether, accounts[i]);
 
             //get deposited balances
@@ -177,6 +180,20 @@ contract("DeltaBalances Balances", function (accounts) {
             assert.equal(String(balances[tokens.length]), String(depositedEther), "Ether deposited balance correct");
             for (let j = 0; j < tokens.length; j++) {
                 assert.equal(String(balances[j]), String(depositedBalances[j]), "Token " + j + " deposited balance correct");
+            }
+
+            // test generic variant with function selectors
+
+            //get deposited balances for 'getBalance(token, user)'
+            let balances2 = await deltaBalances.depositedBalancesGeneric(exchange.address, "0xd4fac45d", accounts[i], tokenAddresses, false);
+            for (let j = 0; j < tokens.length; j++) {
+                assert.equal(String(balances[j]), String(balances2[j]), "Token " + j + "Generic balance correct");
+            }
+
+            //get deposited balances for 'tokens(user, token)'
+            let balances3 = await deltaBalances.depositedBalancesGeneric(exchange.address, "0x508493bc", accounts[i], tokenAddresses, true);
+            for (let j = 0; j < tokens.length; j++) {
+                assert.equal(String(balances[j]), String(balances3[j]), "Token " + j + "Generic balance2 correct");
             }
         }
     });
@@ -203,22 +220,18 @@ contract("DeltaBalances Balances", function (accounts) {
     it("Check ERC20 token allowances", async function () {
         for (let i = 1; i < 2; i++) {
             let tokenAllowances = [];
-
             //check tokens allowances in their own contract
             for (let j = 0; j < tokens.length; j++) {
                 await tokens[j].approve(exchange.address, 100000, { from: accounts[i] });
                 tokenAllowances[j] = await tokens[j].allowance(accounts[i], exchange.address);
             }
-
             let addresses = tokens.map((x) => x.address);
             //check token allowances batched with deltabalances
             let allowances = await deltaBalances.tokenAllowances(exchange.address, accounts[i], addresses);
             assert(allowances && allowances.length == tokenAllowances.length, 'correct allowances result format');
-
             for (let j = 0; j < tokens.length; j++) {
                 assert.equal(String(tokenAllowances[j]), String(allowances[j]), "Token " + j + " allowance correct");
             }
-
         }
     });
 
@@ -266,6 +279,19 @@ contract("DeltaBalances Balances", function (accounts) {
 
         //this should return 0 instead of error
         let allowances = await deltaBalances.tokenAllowances(exchange.address, accounts[0], [brokenToken.address]);
+        assert(allowances.length == 1, "Correct result size");
+        assert.equal(String(allowances[0]), "0", "Broken token returns 0");
+    });
+
+    it("Allowance does not fail on broken token2", async function () {
+        //brokenToken does a revert inside allowance(), try should fail
+        try {
+            let allowance = await weirdToken.allowance(accounts[0], exchange.address);
+            assert(false, "brokenToken allowance() should error");
+        } catch (e) {
+        }
+        //this should return 0 instead of error
+        let allowances = await deltaBalances.tokenAllowances(exchange.address, accounts[0], [weirdToken.address]);
         assert(allowances.length == 1, "Correct result size");
         assert.equal(String(allowances[0]), "0", "Broken token returns 0");
     });

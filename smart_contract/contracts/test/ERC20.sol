@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 // erc20 implementations for testing
 // needs some SafeMath for actual usage
@@ -20,9 +20,9 @@ contract IncompleteERC20 {
 	
     constructor (
         uint256 _initialAmount,
-        string _tokenName,
+        string memory _tokenName,
         uint8 _decimalUnits,
-        string _tokenSymbol
+        string memory _tokenSymbol
     ) public {
         balances[msg.sender] = _initialAmount;
         totalSupply = _initialAmount;
@@ -75,9 +75,9 @@ contract ERC20 is IncompleteERC20 {
 
     constructor (
         uint256 _initialAmount,
-        string _tokenName,
+        string memory _tokenName,
         uint8 _decimalUnits,
-        string _tokenSymbol
+        string memory _tokenSymbol
     )  IncompleteERC20(_initialAmount, _tokenName, _decimalUnits, _tokenSymbol) 
     public { }
     
@@ -95,9 +95,9 @@ contract BadERC20 is IncompleteERC20 {
     
     constructor (
         uint256 _initialAmount,
-        string _tokenName,
+        string memory _tokenName,
         uint8 _decimalUnits,
-        string _tokenSymbol
+        string memory _tokenSymbol
     )  IncompleteERC20(_initialAmount, _tokenName, _decimalUnits, _tokenSymbol) 
     public { }
 
@@ -117,9 +117,9 @@ contract KillERC20 is ERC20 {
     
     constructor (
         uint256 _initialAmount,
-        string _tokenName,
+        string memory _tokenName,
         uint8 _decimalUnits,
-        string _tokenSymbol
+        string memory _tokenSymbol
     )  ERC20(_initialAmount, _tokenName, _decimalUnits, _tokenSymbol) 
     public { }
 
@@ -136,9 +136,9 @@ contract AltERC20 is IncompleteERC20 {
 
     constructor (
         uint256 _initialAmount,
-        string _tokenName,
+        string memory _tokenName,
         uint8 _decimalUnits,
-        string _tokenSymbol
+        string memory _tokenSymbol
     )  IncompleteERC20(_initialAmount, _tokenName, _decimalUnits, _tokenSymbol) 
     public { }
     

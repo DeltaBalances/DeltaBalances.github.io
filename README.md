@@ -17,6 +17,7 @@ Batch hundreds of tokens into a single web3 request:
 + Get the token allowance for multiple tokens (BETA)
 
 Contract iterations:
+`V5 0xbf320b8336b131e0270295c15478d91741f9fc11`
 `V4 0x40a38911e470fc088beeb1a9480c2d69c847bcec`
 `V3 0x3E25F0BA291F202188Ae9Bda3004A7B3a803599a`
 `V2 0xf5f563D3A99152c18cE8b133232Fe34317F60FEF`
@@ -42,10 +43,12 @@ Decentralized exchanges supported by the DeltaBalances website
 | [ETHEX](https://ethex.market)|-|Yes|Yes|Yes|
 | [ForkDelta](https://forkDelta.app)| Yes| Yes| Yes| Yes | 
 | [IDEX](https://idex.market)| Yes |Yes |Yes| No |
+| [Joyso](https://joyso.io)|Yes| Not yet| Not yet | Not yet|
 | [Kyber Network](https://kyber.network) |-|Yes|Yes| Yes | Yes|
 | [OasisDex](https://oasisdex.com) |-|Yes| Yes | Yes|
 | [OasisDirect](https://oasis.direct) |-|Yes| Yes | No|
 | [SingularX](https://singularx.com)|Yes| Yes| Yes | Yes|
+| [Switcheo](https://switcheo.exchange)|Yes| Not yet| Not yet | Not yet|
 | [Token Store](https://token.store)| Yes| Yes| Yes| Yes |
 | [Token store Instant-trade](https://token.store)| - | Yes| Yes | No|
 

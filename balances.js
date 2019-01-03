@@ -28,61 +28,87 @@ var isAddressPage = true;
 			enabled: true,
 			loaded: 0, //async loading progress, number of tokens
 			displayed: 0, //async loading progress, number of tokens
-			contract: undefined
+			contract: undefined,
+			selector: undefined, // if exchange has a selector, use a different balance function in the contract
 		},
 		'EtherDelta': {
 			enabled: false,
 			loaded: 0,
 			displayed: 0,
-			contract: _delta.config.exchangeContracts.EtherDelta.addr
+			contract: _delta.config.exchangeContracts.EtherDelta.addr,
+			selector: undefined,
 		},
 		'IDEX': {
 			enabled: false,
 			loaded: 0,
 			displayed: 0,
-			contract: _delta.config.exchangeContracts.Idex.addr
+			contract: _delta.config.exchangeContracts.Idex.addr,
+			selector: undefined,
 		},
 		'Token store': {
 			enabled: false,
 			loaded: 0,
 			displayed: 0,
-			contract: _delta.config.exchangeContracts.TokenStore.addr
+			contract: _delta.config.exchangeContracts.TokenStore.addr,
+			selector: undefined,
+		},
+		'Switcheo': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.Switcheo.addr,
+			selector: "0xc23f001f",
+			userFirst: true,
+		},
+		'Joyso': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.Joyso.addr,
+			selector: "0xd4fac45d",
+			userFirst: false,
 		},
 		'Enclaves': {
 			enabled: false,
 			loaded: 0,
 			displayed: 0,
-			contract: _delta.config.exchangeContracts.Enclaves.addr
+			contract: _delta.config.exchangeContracts.Enclaves.addr,
+			selector: undefined,
 		},
 		'SingularX': {
 			enabled: false,
 			loaded: 0,
 			displayed: 0,
-			contract: _delta.config.exchangeContracts.Singularx.addr
+			contract: _delta.config.exchangeContracts.Singularx.addr,
+			selector: undefined,
 		},
 		'EtherC': {
 			enabled: false,
 			loaded: 0,
 			displayed: 0,
-			contract: _delta.config.exchangeContracts.EtherC.addr
+			contract: _delta.config.exchangeContracts.EtherC.addr,
+			selector: undefined,
 		},
 		'Decentrex': {
 			enabled: false,
 			loaded: 0,
 			displayed: 0,
-			contract: _delta.config.exchangeContracts.Decentrex.addr
+			contract: _delta.config.exchangeContracts.Decentrex.addr,
+			selector: undefined,
 		},
 		'Ethen': {
 			enabled: false,
 			loaded: 0,
 			displayed: 0,
-			contract: _delta.config.exchangeContracts.Ethen.addr
+			contract: _delta.config.exchangeContracts.Ethen.addr,
+			selector: undefined,
 		},
 		'DEXY': {
 			enabled: false,
 			loaded: 0,
 			displayed: 0,
-			contract: _delta.config.exchangeContracts.Dexy.addr
+			contract: _delta.config.exchangeContracts.Dexy.addr,
+			selector: undefined,
 		},
 	};
 
@@ -911,10 +937,8 @@ var isAddressPage = true;
 
 
 	var maxPerRequest = 500;   // don't make the web3 requests too large
-	// mode = 'All' or ''  is all balances in 1 request
-	// 'Wallet' is only wallet balances
-	// 'EtherDelta' is only Etherdelta balances
-	function getAllBalances(rqid, mode, addCustom) {
+
+	function getAllBalances(rqid, exchangeKey, addCustom) {
 
 		// select which tokens to be requested
 		var tokens2 = _delta.config.customTokens;
@@ -939,10 +963,15 @@ var isAddressPage = true;
 			var tokens = tokens3.slice(startIndex, endIndex);
 
 			var functionName = 'depositedBalances';
-			var arguments = [exchanges[mode].contract, publicAddr, tokens];
-			if (mode == 'Wallet') {
+			var arguments = [exchanges[exchangeKey].contract, publicAddr, tokens];
+			if (exchangeKey == 'Wallet') {
 				functionName = 'tokenBalances';
 				arguments = [publicAddr, tokens];
+			} 
+			// exchanges using a different function
+			else if (exchanges[exchangeKey].selector) {
+				functionName = 'depositedBalancesGeneric';
+				arguments = [exchanges[exchangeKey].contract, exchanges[exchangeKey].selector, publicAddr, tokens, exchanges[exchangeKey].userFirst];
 			}
 
 			var completed = 0;
@@ -951,8 +980,8 @@ var isAddressPage = true;
 
 			//get balances from 2 web3 sources at once, use the fastest response
 			// web3 provider (infura, myetherapi, mycryptoapi) or etherscan
-			makeCall(mode, functionName, arguments, 0);
-			makeCall(mode, functionName, arguments, 0);
+			makeCall(exchangeKey, functionName, arguments, 0);
+			makeCall(exchangeKey, functionName, arguments, 0);
 
 			function makeCall(exName, funcName, args, retried) {
 
@@ -985,7 +1014,7 @@ var isAddressPage = true;
 							if (!success) {
 								success = true;
 							}
-							if (funcName == 'tokenBalances' || funcName == 'depositedBalances') {
+							if (funcName == 'tokenBalances' || funcName.indexOf('depositedBalances') > -1) {
 								if (exchanges[exName].enabled) {
 
 									for (let i = 0; i < tokens.length; i++) {

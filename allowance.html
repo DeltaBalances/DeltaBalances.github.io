@@ -4,13 +4,13 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="View recent decentralized exchange transactions.">
+  <meta name="description" content="View ERC20 token allowances for decentralized exchanges.">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
   <link rel="icon" type="image/png" sizes="64x64" href="./favicon-64x64.png?1">
 
-  <title>Delta Balances - Recent TX</title>
+  <title>Delta Balances - Allowances</title>
 
   <!-- CSS:  Bootstrap, adminLTE, fontawesome & custom -->
   <link href="css/combinedStyles.css" rel="stylesheet">
@@ -22,9 +22,12 @@
   <script src="js/jquery.dataTables.fixed.min.js"></script>
 
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
-  <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
+  <script src="js/bootstrap.adminlte.blockies.min.js"></script>
 
+  <script src="js/bootstrap-toggle.min.js"></script>
   <script src="js/bootstrap-select.min.js"></script>
+
+
 
   <!-- JS socketIO  for exchange prices -->
   <script src="js/socket.io.js" defer></script>
@@ -38,7 +41,7 @@
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
   <script src="user.js"></script>
-  <script src="recent.js"></script>
+  <script src="allowances.js"></script>
 
 </head>
 
@@ -146,7 +149,7 @@
             <span>Token Balances</span>
           </a>
         </li>
-        <li class="active">
+        <li>
           <a id="recentNav" href="recent.html">
             <i class="sidebar-icon icon-recent"></i>
             <span>Recent Transactions</span>
@@ -164,7 +167,7 @@
             <span>Transaction Info</span>
           </a>
         </li>
-		<li>
+		<li class="active">
           <a id="allowNav" href="allowance.html">
             <i class="sidebar-icon icon-checked"></i>
             <span>Token Allowances</span>
@@ -269,6 +272,7 @@
     <!-- /.sidebar -->
   </aside>
 
+
   <div class="wrapper">
 
     <!-- Content Wrapper. Contains page content -->
@@ -308,10 +312,6 @@
                       <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
                       <label for="decimals">Show more decimals</label>
                     </li>
-                    <li>
-                      <label>Transactions from last
-                        <input type="number" id="days" onchange="validateDays(this.value)" value="5" min="1" max="999" step="1"> days</label>
-                    </li>
                   </ul>
                 </div>
 
@@ -321,229 +321,217 @@
             <!-- /.box -->
           </div>
 
+       <!-- <div class="row"> -->
+          <div class="col-md-12 col-lg-10">
+            <h4> Exchanges to check allowance for: </h4>
+          </div>
 
 
-          <div class="col-md-12 col-lg-10 s-fullwidth">
+          <div class="col-sm-12 col-md-8 col-lg-7 noPadM">
+
+            <div class="form-group">
+              <select id="exchangeDropdown" data-width="100%" data-none-selected-text="Click to select one or more exchange(s)" class="selectpicker"
+                multiple>
+				<optgroup label="Tokens move during order or trade">
+					<option data-icon="icon-zrx">0x Protocol v1</option>
+					<option data-icon="icon-zrx">0x Protocol v2</option>
+					<option data-icon="icon-airswap">AirSwap</option>
+					<option data-icon="icon-ethex">ETHEX</option>
+					<!--<option data-icon="icon-oasis">OasisDex</option>-->
+					<!--<option data-icon="icon-kyber">Kyber</option>-->
+					<option data-icon="icon-enclaves"data-subtext="trustless (v1)">Ethfinex</option>
+				</optgroup>
+					<optgroup label="Tokens move during deposit or withdrawal">	
+					<option data-icon="icon-etherdelta" data-subtext="ForkDelta">EtherDelta</option>
+					<option data-icon="icon-idex">IDEX</option>
+					<option data-icon="icon-tokenstore">Token store</option>
+					<option data-icon="icon-switcheo">Switcheo</option>
+					<!--<option data-icon="icon-enclaves">Enclaves</option>-->
+					<!-- <option>Ethen</option>-->
+					<option data-icon="icon-enclaves">SingularX</option>
+					<option data-icon="icon-enclaves">EtherC</option>
+					<option data-icon="icon-decentrex" data-subtext="(Discontinued)">Decentrex</option>
+					<option data-icon="icon-enclaves" data-subtext="(Discontinued)">DEXY</option>
+				</optgroup>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="col-xs-12 col-md-12 col-lg-10 s-fullwidth">
+
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body noPadTop">
-                <div class="col-md-9 noPadM" style="overflow:hidden;">
-                  <h2>Recent Transactions
-                    <button id='loadingTransactions2' onclick="getTrans()" class="fa fa-refresh" style="display:none;"></button>
+                <div class="col-md-12 noPadM">
+                  <h2>Allowances
+                    <button id='loadingBalances' onclick="getAllowances()" class="fa fa-refresh" style="display:none;"></button>
+                    <!-- <span class="pull-right" style="display:inline-block; vertical-align: middle;font-weight: 400; font-size: 0.5em;">
+                      <input style="width:110px;" id="tablesearcher" class="search form-control" data-column="0" type="search" placeholder="filter tokens">
+                    </span>
+                    -->
                   </h2>
-                  <p>Recent transactions from etherscan, filtered to show decentralized exchanges.</p>
-                </div>
-                <div class="col-sm-12 col-md-8 col-lg-8 noPadM">
-
-                  Show transaction types:
-                  <div class="form-group">
-                    <select id="typesDropdown" data-width="100%" data-none-selected-text="Select transaction types" class="selectpicker" multiple>
-                      <optgroup>
-                        <option data-subtext=" ">Taker trade</option>
-                        <option data-subtext="(no deposit DEX like EtherDelta, Token Store)">Maker trade</option>
-                        <option data-subtext=" (no IDEX, DDEX)">Cancel</option>
-                      </optgroup>
-                      <optgroup>
-                        <option>Transfer</option>
-                        <option>Approve</option>
-                      </optgroup>
-                      <optgroup>
-                        <option>Deposit</option>
-                        <option>Withdraw</option>
-                        <option>Wrap ETH</option>
-                        <option>Unwrap ETH</option>
-                      </optgroup>
-                    </select>
-                  </div>
-
-                </div>
-                <div class="col-md-12 noPad">
-                  <table class="table table-striped" id="transactionsTable2" style="width:100%">
+                  <table class="table" id="balanceProgress" style="float:left; padding-bottom:5px;">
                     <thead></thead>
                     <tbody></tbody>
                   </table>
                 </div>
-                <!--
-                <div class="col-md-4 noPadM">
+
+                <div class="col-md-12 noPad">
+
+
+                  <table class="table table-striped" id="resultTable" style="width:100%">
+                    <thead></thead>
+                    <tbody></tbody>
+                  </table>
                   <br>
+                </div>
+                <div class="col-md-12 noPadM">
+                  <span class="label label-primary">Name</span> Listed on one or more
+                  <span class="hidden-xs">supported</span> exchanges.
                   <br>
-                  <input type="checkbox">
-                  <span class="label label-success">Type</span> Deposit into exchange
-                  <br>
-                  <span class="label label-danger">Type</span> Withdraw to Wallet
-                  <br>
-                  <span class="label label-default">Type</span> Cancelled order
-                  <br>
-                  <span class="label label-info">Type</span> Taker trade (clicked on an order)
-                  <br>
-                </div> -->
+                  <span class="label label-warning">Name</span> Not listed, trades by address only.
+                </div>
               </div>
               <!-- /.box-body -->
             </div>
             <!-- /.box -->
           </div>
 
-          <div class="col-md-12 col-lg-10 s-fullwidth">
-            <div class="box box-default">
+          <div class="col-xs-12 col-md-12 col-lg-10 s-fullwidth">
+            <div class="box box-default bottom10M">
+
               <!-- /.box-header -->
               <div class="box-body">
                 <div class="col-md-12 noPadM">
-                  Recent Transactions supports:
-                  <br>
-                  <ul>
-                    <li>Deposit style exchanges:
-                      <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
-                      <a href="https://forkdelta.app" target="_blank">ForkDelta</a>),
-                      <a href="https://idex.market" target="_blank">IDEX</a>,
-                      <a href="https://token.store" target="_blank">Token Store</a>,
-                      <a href="https://www.enclaves.io" target="_blank">EnclavesDex</a>,
-                      <a href="https://www.ethen.market" target="_blank">ETHEN</a>,
-                      <a href="https://www.singularx.com" target="_blank">SingularX</a>,
-                      <a href="https://www.etherc.io" target="_blank">EtherC</a> and
-                      <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>.
-                    </li>
-                    <li> 0x (V1 & V2) relayers:
-                      <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>,
-                      <a href="https://ddex.io" target="_blank">DDEX</a>,
-                      <a href="https://paradex.io/" target="_blank">Paradex</a>,
-                      <a href="https://ercdex.com/" target="_blank">ERC dEX</a>,
-                      <a href="https://sharkrelay.com" target="_blank">Shark Relay</a>,
-                      <a href="https://tokenjar.io" target="_blank">Token Jar</a>,
-                      <a href="https://idtexchange.com" target="_blank">IDT</a>,
-                      <a href="https://bamboorelay.com" target="_blank">BambooRelay</a> and
-                      <a href="https://tokenlon.token.im/tokenlon" target="_blank">Tokenlon</a>.
-                    </li>
-                    <li> Other exchanges:
-                      <a href="https://airswap.io" target="_blank">AirSwap</a>, 
-                      <a href="https://kyber.network" target="_blank">Kyber Network</a>, 
-                      <a href="https://oasisdex.com" target="_blank">OasisDex</a>,
-					  <a href="https://oasis.direct" target="_blank">OasisDirect</a>,					  
-                      <a href="https://www.bancor.network" target="_blank">Bancor</a>, 
-                      <a href="https://www.ethex.market" target="_blank">ETHEX</a> and
-                      <a href="https://www.easytrade.io" target="_blank">EasyTrade</a>.
-                    </li>
-                  </ul>
-                  Maker trades
-                  <strong>do not</strong> show for most deposit style exchanges, see the trade history instead.
-                  <br> IDEX trades are retrieved from the IDEX API instead of etherscan.
+				<h4>What is a token allowance?</h4>
+                  A token allowance gives an ERC20 smart contract the permission to transfer a specific amount of tokens on your behalf. <br> 
+				  This is required for a deposit or trade on a decentralized exchanged. 
+				  <br> </br>
+				  The allowance can be higher than your balance, these numbers don't mean you own these tokens.
+				  <br> </br>
+				  Setting the allowance is done using a function called Approve. <br>
+				  Some 0x exchanges call this 'Enable trading' and will often set it to the maximum amount, 1.157e+59.
                 </div>
+                <!-- /.box-body -->
               </div>
-              <!-- /.box-body -->
+
+              <!-- /.box -->
             </div>
-            <!-- /.box -->
+
           </div>
-        </div>
       </section>
       <!-- /.content -->
+      </div>
+      <!-- /.content-wrapper -->
+
+      <!-- Main Footer -->
+      <footer class="main-footer">
+        <!-- To the right -->
+        <div class="pull-right hidden-xs">
+        </div>
+        <p> Powered by
+          <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
+          <a target="_blank" href="https://infura.io/">Infura</a>
+          <br> Contact:
+          <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
+          <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+          <br> Buy me a beer:
+          <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
+        </p>
+      </footer>
+
+      <!-- Control Sidebar -->
+      <aside class="control-sidebar control-sidebar-dark">
+        <!-- Create the tabs -->
+        <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+          <li class="active">
+            <a href="#control-sidebar-home-tab" data-toggle="tab">
+              <i class="fa fa-home"></i>
+            </a>
+          </li>
+          <li>
+            <a href="#control-sidebar-settings-tab" data-toggle="tab">
+              <i class="fa fa-gears"></i>
+            </a>
+          </li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+          <!-- Home tab content -->
+          <div class="tab-pane active" id="control-sidebar-home-tab">
+            <h3 class="control-sidebar-heading">Active address</h3>
+            <ul class="control-sidebar-menu">
+              <li>
+                <a href="" onclick="return false" style="pointer-events: none;">
+                  <i id="currentAddrImg" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
+                  <div class="menu-info">
+                    <h4 id="currentAddr" class="control-sidebar-subheading">0x......</h4>
+                    <p id="currentAddrDescr">Input address</p>
+                  </div>
+                </a>
+              </li>
+              <li id="walletInfo" class="hidden">
+                <a id="etherscan" href="#" target="_blank" class="menu-info control-sidebar-subheading">
+                  Etherscan
+                  <i class="fa fa-link pull-right"></i>
+                </a>
+                <a onclick="forget()" id="forget" href="#" class="menu-info control-sidebar-subheading">
+                  Forget
+                  <i class="fa fa-trash-o pull-right text-red"></i>
+                </a>
+                <a onclick="save()" id="save" href="#" class="hidden menu-info control-sidebar-subheading">
+                  Save
+                  <i class="fa fa-save pull-right text-blue"></i>
+                </a>
+              </li>
+            </ul>
+
+            <div id="savedSection" class="hidden">
+              <h3 class="control-sidebar-heading">Saved address</h3>
+              <ul class="control-sidebar-menu">
+                <li>
+                  <a onclick="loadSaved()" href="#">
+                    <i id="savedImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
+                    <div class="menu-info">
+                      <h4 id="savedAddress" class="control-sidebar-subheading">0x12345678</h4>
+                      <p>Saved</p>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div id="metamaskSection" class="hidden">
+              <h3 class="control-sidebar-heading">Detected Address</h3>
+              <ul class="control-sidebar-menu">
+                <li>
+                  <a onclick="loadMetamask()" href="#">
+                    <i id="metamaskImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
+                    <div class="menu-info">
+                      <h4 id="metamaskAddress" class="control-sidebar-subheading">0x12345678</h4>
+                      <p>Metamask</p>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- /.tab-pane -->
+          <!-- Settings tab content -->
+          <div class="tab-pane" id="control-sidebar-settings-tab">
+            <form>
+              <h3 class="control-sidebar-heading">Nothing here yet</h3>
+            </form>
+          </div>
+          <!-- /.tab-pane -->
+        </div>
+      </aside>
+      <!-- /.control-sidebar -->
+      <div class="control-sidebar-bg"></div>
     </div>
-    <!-- /.content-wrapper -->
-
-    <!-- Main Footer -->
-    <footer class="main-footer">
-      <!-- To the right -->
-      <div class="pull-right hidden-xs">
-      </div>
-      <!-- Default to the left -->
-      <p> Powered by
-        <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
-        <a target="_blank" href="https://infura.io/">Infura</a>
-        <br> Contact:
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
-        <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
-        <br> Buy me a beer:
-        <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
-      </p>
-    </footer>
-
-    <!-- Control Sidebar -->
-    <aside class="control-sidebar control-sidebar-dark">
-      <!-- Create the tabs -->
-      <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-        <li class="active">
-          <a href="#control-sidebar-home-tab" data-toggle="tab">
-            <i class="fa fa-home"></i>
-          </a>
-        </li>
-        <li>
-          <a href="#control-sidebar-settings-tab" data-toggle="tab">
-            <i class="fa fa-gears"></i>
-          </a>
-        </li>
-      </ul>
-      <!-- Tab panes -->
-      <div class="tab-content">
-        <!-- Home tab content -->
-        <div class="tab-pane active" id="control-sidebar-home-tab">
-          <h3 class="control-sidebar-heading">Active address</h3>
-          <ul class="control-sidebar-menu">
-            <li>
-              <a href="" onclick="return false" style="pointer-events: none;">
-                <i id="currentAddrImg" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
-                <div class="menu-info">
-                  <h4 id="currentAddr" class="control-sidebar-subheading">0x......</h4>
-                  <p id="currentAddrDescr">Input address</p>
-                </div>
-              </a>
-            </li>
-            <li id="walletInfo" class="hidden">
-              <a id="etherscan" href="#" target="_blank" class="menu-info control-sidebar-subheading">
-                Etherscan
-                <i class="fa fa-link pull-right"></i>
-              </a>
-              <a onclick="forget()" id="forget" href="#" class="menu-info control-sidebar-subheading">
-                Forget
-                <i class="fa fa-trash-o pull-right text-red"></i>
-              </a>
-              <a onclick="save()" id="save" href="#" class="hidden menu-info control-sidebar-subheading">
-                Save
-                <i class="fa fa-save pull-right text-blue"></i>
-              </a>
-            </li>
-          </ul>
-
-          <div id="savedSection" class="hidden">
-            <h3 class="control-sidebar-heading">Saved address</h3>
-            <ul class="control-sidebar-menu">
-              <li>
-                <a onclick="loadSaved()" href="#">
-                  <i id="savedImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
-                  <div class="menu-info">
-                    <h4 id="savedAddress" class="control-sidebar-subheading">0x12345678</h4>
-                    <p>Saved</p>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div id="metamaskSection" class="hidden">
-            <h3 class="control-sidebar-heading">Detected Address</h3>
-            <ul class="control-sidebar-menu">
-              <li>
-                <a onclick="loadMetamask()" href="#">
-                  <i id="metamaskImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
-                  <div class="menu-info">
-                    <h4 id="metamaskAddress" class="control-sidebar-subheading">0x12345678</h4>
-                    <p>Metamask</p>
-                  </div>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <!-- /.tab-pane -->
-        <!-- Settings tab content -->
-        <div class="tab-pane" id="control-sidebar-settings-tab">
-          <form>
-            <h3 class="control-sidebar-heading">Nothing here yet</h3>
-          </form>
-        </div>
-        <!-- /.tab-pane -->
-      </div>
-    </aside>
-    <!-- /.control-sidebar -->
-    <div class="control-sidebar-bg"></div>
-  </div>
-  <!-- ./wrapper -->
+    <!-- ./wrapper -->
 </body>
 
 </html>

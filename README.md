@@ -16,12 +16,12 @@ Batch hundreds of tokens into a single web3 request:
 + Get the exchange balance for multiple tokens 
 + Get the token allowance for multiple tokens (BETA)
 
-Contract iterations:
-`V5 0xbf320b8336b131e0270295c15478d91741f9fc11`
-`V4 0x40a38911e470fc088beeb1a9480c2d69c847bcec`
-`V3 0x3E25F0BA291F202188Ae9Bda3004A7B3a803599a`
-`V2 0xf5f563D3A99152c18cE8b133232Fe34317F60FEF`
-`V1 0x3150954EAE1a8a5e5EE1F1B8E8444Fe16EA9F94C`
+Contract iterations:  
+`V5 0xbf320b8336b131e0270295c15478d91741f9fc11`  
+`V4 0x40a38911e470fc088beeb1a9480c2d69c847bcec`  
+`V3 0x3E25F0BA291F202188Ae9Bda3004A7B3a803599a`  
+`V2 0xf5f563D3A99152c18cE8b133232Fe34317F60FEF`  
+`V1 0x3150954EAE1a8a5e5EE1F1B8E8444Fe16EA9F94C`  
 
 # Exchange support
 Decentralized exchanges supported by the DeltaBalances website

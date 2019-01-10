@@ -1174,6 +1174,7 @@ var isAddressPage = true;
 
 		let row2 = Object.values(loadingState);
 		progressTable.row(0).data(row2).invalidate();
+		progressTable.columns.adjust();
 	}
 
 

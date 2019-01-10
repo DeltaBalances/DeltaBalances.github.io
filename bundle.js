@@ -2945,6 +2945,35 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         console.log('failed to parse unknown token list');
     }
 
+    //token Store last, as it doesn't include decimals
+    try {
+        //tokenStore listed tokens
+        let tokenStoreTokens = [];
+        if (tokenStoreConfig && tokenStoreConfig.length > 0) {
+            tokenStoreTokens = tokenStoreConfig;
+        }
+        for (var i = 0; i < tokenStoreTokens.length; i++) {
+            var tok = tokenStoreTokens[i];
+            if (tok) {
+                let token = {};
+                token.addr = tok.address.toLowerCase();
+                token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
+               // token.decimals = Number(tok.decimals);
+                token.unlisted = false;
+                token.TokenStore = token.name.toUpperCase();
+                if (this.uniqueTokens[token.addr]) {
+                    this.uniqueTokens[token.addr].TokenStore = token.TokenStore;
+                    this.uniqueTokens[token.addr].unlisted = false;
+                }
+               /* else { // avoid for now, since we don't know decimals
+                    this.uniqueTokens[token.addr] = token;
+                } */
+            }
+        }
+    } catch (e) {
+        console.log('failed to parse tokenStore token list');
+    }
+
     let ethAddr = this.config.ethAddr;
     this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr] && (!x.unlisted || !x.blocked) && !x.killed; });
     let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !x.killed && !tokenBlacklist[x.addr] && x.addr !== ethAddr); });
@@ -29176,7 +29205,10 @@ module.exports = (config) => {
     var url = "https://token.store/trade/";
     var labelClass = "label-warning";
     if (tokenObj) {
-      url += tokenObj.addr;
+        if(tokenObj.TokenStore) {
+            labelClass = 'label-primary';
+        }
+        url += tokenObj.addr;
     } else {
       url = '';
     }

@@ -221,6 +221,48 @@ try {
 }
 
 
+var tokenStoreConfig = [];
+/*
+try {
+
+    let tokenStoreData = sessionStorage.getItem('tokenStoreTokens1');
+    // only get live tokens if we haven't saved them this session already
+    if (tokenStoreData !== undefined && tokenStoreData) {
+        let parsed = JSON.parse(tokenStoreData);
+        if (parsed && parsed.length > 0) {
+            tokenStoreConfig = parsed;
+        }
+    } else {
+
+        // if we have saved data from a previous session, pre-load it
+        let tokenStoreData2 = localStorage.getItem('tokenStoreTokens2');
+        if (tokenStoreData2 !== undefined && tokenStoreData2) {
+            let parsed = JSON.parse(tokenStoreData2);
+            if (parsed && parsed.length > tokenStoreConfig.length) {
+                tokenStoreData2 = parsed;
+            }
+        }
+
+        $.getJSON('https://token.store/api/ticker', function (jsonData) {
+            jsonData = Object.values(jsonData);
+            if (jsonData && jsonData.length > 0) {
+                tokenStoreConfig = jsonData.map((x) => { return { symbol: x.symbol, address: x.tokenAddr, decimals: -1} });
+                let string = JSON.stringify(tokenStoreConfig);
+                sessionStorage.setItem('tokenStoreTokens1', string);
+                localStorage.setItem('tokenStoreTokens2', string);
+                if(logTokens) {
+                    console.log('tokenStore');
+                    console.log(string);
+                }
+            }
+        });
+    }
+} catch (err) {
+    console.log('tokenStore tokens loading error ' + err);
+}
+*/
+
+
 
 var unknownTokenCache = [];
 try {

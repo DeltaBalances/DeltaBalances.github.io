@@ -377,7 +377,10 @@ module.exports = (config) => {
     var url = "https://token.store/trade/";
     var labelClass = "label-warning";
     if (tokenObj) {
-      url += tokenObj.addr;
+        if(tokenObj.TokenStore) {
+            labelClass = 'label-primary';
+        }
+        url += tokenObj.addr;
     } else {
       url = '';
     }

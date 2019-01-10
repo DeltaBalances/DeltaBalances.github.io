@@ -174,7 +174,7 @@
 			}
 		}
         
-           function parseKyberTokens(array) {
+        function parseKyberTokens(array) {
 			for (var i = 0; i < array.length; i++) {
 				let kyberToken = array[i];
                 if (kyberToken) {
@@ -195,6 +195,32 @@
 					} else {
                         if(!customTokens[token.address].Kyber) {
                             customTokens[token.address].Kyber = token.symbol;
+                        }
+                    }
+				}
+			}
+		}
+		
+		function parseTokenStoreTokens(array) {
+			for (var i = 0; i < array.length; i++) {
+				let newToken = array[i];
+                if (newToken) {
+					
+					let token = {
+                        symbol : escapeHtml(newToken.symbol),
+                        address : newToken.address.toLowerCase(),
+                        decimal : -1,
+                        name: escapeHtml(newToken.name)
+                    };
+	
+					
+                    token.TokenStore = token.symbol;
+                    
+					if (!customTokens[token.address]) {
+						customTokens[token.address] = token;
+					} else {
+                        if(!customTokens[token.address].TokenStore) {
+                            customTokens[token.address].TokenStore = token.symbol;
                         }
                     }
 				}
@@ -271,6 +297,7 @@
         parseDDEXTokens(ddexOfflineTokens);
         parseRadarTokens(radarOfflineTokens);
         parseKyberTokens(kyberOfflineTokens);
+		parseTokenStoreTokens(tokenStoreOfflineTokens); // these have decimals -1 !
         
 		//get list of tokens from myetherwallet & mycrypto
 		function getCustomTokens() {
@@ -283,13 +310,14 @@
             let ethplorerStore = undefined;
             let ethplorerDdex = undefined;
 			let ethplorerEthfinex = undefined;
+			let ethplorerSwitcheo = undefined;
 			let idexTick = undefined;
 			let loaded = 0;
 
 			function done() {
-
-				if (loaded >= 6) {
-					if (/*mewTokens && mcTokens &&*/ ethplorerED && ethplorerIdex && ethplorerStore && ethplorerDdex && ethplorerEthfinex &&idexTick) {
+				const num = 7; 
+				if (loaded >= num) {
+					if (/*mewTokens && mcTokens &&*/ ethplorerED && ethplorerIdex && ethplorerStore && ethplorerDdex && ethplorerEthfinex && ethplorerSwitcheo &&idexTick) {
 						//parseMewTokens(mewTokens);
 						//parseMewTokens(mcTokens);
 						parseEthplorer(ethplorerED);
@@ -297,6 +325,7 @@
                         parseEthplorer(ethplorerStore);
 						parseEthplorer(ethplorerDdex);
 						parseEthplorer(ethplorerEthfinex);
+						parseEthplorer(ethplorerSwitcheo);
 
 						let customTokensList = Object.values(customTokens);
 						
@@ -327,6 +356,7 @@
 						}
 						
 
+						customTokensList = customTokensList.filter(tok => tok.decimal >= 0);// filter any unset decimals from tokenstore
 						customTokensList = customTokensList.sort(function (a, b) {
 							return (a.symbol + a.address).localeCompare(b.symbol + b.address);
 						})
@@ -353,6 +383,7 @@
                         outputString = outputString.replace(/"DDEX"/g, 'DDEX');
                         outputString = outputString.replace(/"Radar"/g, 'Radar');
                         outputString = outputString.replace(/"Kyber"/g, 'Kyber');
+						outputString = outputString.replace(/"TokenStore"/g, 'TokenStore');
                         outputString = outputString.replace(/name:Kyber/g, 'name:"Kyber"');
 						outputString = outputString.replace(/{ /g, '{');
 						outputString = outputString.replace(/ }/g, '}');
@@ -365,7 +396,7 @@
 						$('#output').html('something went wrong');
 					}
 				} else {
-					$('#output').html('loading... , loaded ' + loaded + '/5');
+					$('#output').html('loading... , loaded ' + loaded + '/' + num);
 				}
 			}
 
@@ -459,6 +490,18 @@
 				loaded++;
 				done();
 			});
+			
+			//switcheo contract
+            $.getJSON('https://api.ethplorer.io/getAddressInfo/0xba3ed686cc32ffa8664628b1e96d8022e40543de?apiKey='+key).done(function (data) {
+				loaded++;
+				if (data && data.tokens)
+					ethplorerSwitcheo = data;
+				done();
+			}).fail(function () {
+				loaded++;
+				done();
+			});
+			
 		}
 
 

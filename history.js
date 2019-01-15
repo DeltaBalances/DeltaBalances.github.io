@@ -1685,7 +1685,7 @@ var isAddressPage = true;
 					'Trade', buyAmount, buyToken, sellAmount, sellToken,
 					feeAmount, feeToken, exchange, '',
 					'Hash: ' + allTrades[i]['Hash'] + " -- " + allTrades[i]['Token'].name + " token contract " + allTrades[i]['Token'].addr,
-					allTrades[i]['Hash'], _util.formatDateOffset(allTrades[i]['Date'])
+					_util.formatDateOffset(allTrades[i]['Date']), allTrades[i]['Hash']
 				];
 
 				tableData.push(row);

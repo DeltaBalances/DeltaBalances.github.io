@@ -1821,7 +1821,7 @@ var isAddressPage = true;
 		else if (exportFormat == 2) {
 			// Cointracking.info Funds export
 			filePrefix = 'Cointracking_';
-			const headers = ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'Group', 'Comment', 'Trade ID', 'Date'];
+			const headers = ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'Group', 'Comment', 'Date', 'Trade ID'];
 			tableData = [headers];
 			for (var i = 0; i < allFunds.length; ++i) {
 				var row = [];
@@ -1831,14 +1831,14 @@ var isAddressPage = true;
 					row = [
 						'Deposit', allFunds[i]['Amount'], allFunds[i]['Token'].name, "", "", "", "",
 						exchange, '', 'Hash: ' + allFunds[i]['Hash'] + " -- " + allFunds[i]['Token'].name + " token contract " + allFunds[i]['Token'].addr,
-						allFunds[i]['Hash'], _util.formatDateOffset(allFunds[i]['Date'])
+                        _util.formatDateOffset(allFunds[i]['Date']), allFunds[i]['Hash']
 					];
 				}
 				else {  //withdraw is 'sell'
 					row = [
 						'Withdrawal', "", "", allFunds[i]['Amount'], allFunds[i]['Token'].name, "", "",
 						exchange, '', 'Hash: ' + allFunds[i]['Hash'] + " -- " + allFunds[i]['Token'].name + " token contract " + allFunds[i]['Token'].addr,
-						allFunds[i]['Hash'], _util.formatDateOffset(allFunds[i]['Date'])
+                        _util.formatDateOffset(allFunds[i]['Date']), allFunds[i]['Hash']
 					];
 				}
 

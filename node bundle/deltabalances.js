@@ -563,8 +563,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'unlisted': token.unlisted,
                 };
             }
-            // exchange deposit/withdraw and 0x WETH (un)wrapping
-            else if (unpacked.name === 'deposit' || (unpacked.name === 'withdraw' && unpacked.address !== this.config.exchangeContracts.Idex.addr)
+            // exchange deposit/withdraw ETH (etherdelta, idex deposit, tokenstore, ethen, switcheo deopsit) and 0x WETH (un)wrapping
+            else if (unpacked.name === 'deposit' || (unpacked.name === 'withdraw' && unpacked.address !== this.config.exchangeContracts.Idex.addr && unpacked.params.length < 9)
                 || unpacked.name === 'withdrawEther' || unpacked.name === 'depositEther') {
                 var type = '';
                 var note = '';
@@ -630,7 +630,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     };
                 }
             }
-            // exhcnage erc20 deposit / withdraw
+            // exchange erc20 deposit / withdraw
             else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || /* enclaves */ unpacked.name === 'withdrawBoth' || unpacked.name === 'depositBoth'
                 || (unpacked.name === 'withdraw' && unpacked.address === this.config.exchangeContracts.Idex.addr)
             ) {
@@ -691,6 +691,83 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         let ethVal = utility.weiToEth(rawEthVal);
                         obj.baseAmount = ethVal;
                     }
+                    return obj;
+                }
+            }
+            // Switcheo admin withdraw
+            else if (unpacked.name === 'withdraw' && unpacked.params.length == 9) {
+                var token = this.setToken(unpacked.params[1].value);
+                var feeToken = this.setToken(unpacked.params[3].value);
+                if (token && feeToken && token.addr && feeToken.addr) {
+                    var rawAmount = new BigNumber(unpacked.params[2].value);
+                    var rawFee = new BigNumber(unpacked.params[4].value);
+
+                    var amount = utility.weiToToken(rawAmount, token);
+
+                    var type = '';
+                    var note = '';
+
+                    var feeVal = utility.weiToToken(rawFee, feeToken);
+
+                    var exchange = '';
+                    let addrName = this.addressName(txTo);
+                    // etherscan token transfer log (to, from are bad)
+                    if (badFromTo) {
+                        addrName = this.addressName(txFrom);
+                    }
+                    if (addrName.indexOf('0x') === -1) {
+                        exchange = addrName;
+                    }
+
+                    if (token.addr !== this.config.ethAddr) {
+                        type = 'Token Withdraw';
+                        note = utility.addressLink(unpacked.params[2].value, true, true) + ' requested Switcheo to withdraw tokens';
+                    } else {
+                        type = 'Withdraw';
+                        note = utility.addressLink(unpacked.params[2].value, true, true) + ' requested Switc to withdraw ETH';
+                    }
+
+                    return {
+                        'type': type,
+                        'exchange': exchange,
+                        'note': note,
+                        'token': token,
+                        'amount': amount,
+                        'to': unpacked.params[0].value.toLowerCase(),
+                        'unlisted': token.unlisted,
+                        'fee': feeVal,
+                        'feeToken': feeToken,
+                    };
+                }
+            }
+            //Switcheo token deposit
+            else if (unpacked.name == 'depositERC20') {
+                var token = this.setToken(unpacked.params[1].value);
+                if (token && token.addr) {
+                    var amount = utility.weiToToken(unpacked.params[2].value, token);
+                    var type = 'Deposit';
+
+                    var exchange = '';
+
+                    let addrName = this.addressName(txTo);
+                    if (addrName.indexOf('0x') === -1) {
+                        exchange = addrName;
+                    }
+                    var note = '';
+                    if (exchange) {
+                        note = 'Request the ' + exchange + 'contract to deposit ' + token.name;
+                    } else {
+                        note = 'Request the exchange contract to deposit ' + token.name;
+                    }
+
+                    var obj = {
+                        'type': 'Token ' + type,
+                        'exchange': exchange,
+                        'note': note,
+                        'token': token,
+                        'amount': amount,
+                        'unlisted': token.unlisted,
+                    };
                     return obj;
                 }
             }
@@ -1402,7 +1479,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
             }
             //kyber trade input
-            else if (unpacked.name === 'trade' && unpacked.params.length == 7) {
+            else if ((unpacked.name === 'trade' && unpacked.params.length == 7) || unpacked.name == 'tradeWithHint') {
                 /* trade(
                      ERC20 src,
                      uint srcAmount,
@@ -3821,6 +3898,64 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         'token': token,
                         'amount': amount,
                         'balance': balance,
+                        'unlisted': token.unlisted,
+                    };
+                }
+            }
+            //Switcheo balance change event, deposit/withdraw, trade, cancel
+            else if ( unpacked.name == 'BalanceIncrease' || unpacked.name == 'BalanceDecrease') {
+                 //BalanceIncrease (index_topic_1 address user, index_topic_2 address token, uint256 amount, index_topic_3 uint8 reason)
+                const reasons = {
+                    1: 'Deposit',
+                    2: 'Maker Trade',
+                    3: 'Taker Trade',
+                    4: 'Fee',
+                    5: 'Taker Trade',
+                    6: 'Maker Trade',
+                    7: 'Fee' ,
+                    8: 'Cancel',
+                    9: 'Withdraw',
+                    16: 'Fee', //0x10
+                    17: 'Fee', //0x11
+                    18: 'Fee',
+                    19: 'Fee',
+                    20: 'Fee',
+                    21: 'Fee',
+                }
+                let user = unpacked.events[0].value.toLowerCase();
+                let token = this.setToken(unpacked.events[1].value);
+                var exchange = '';
+                let addrName = this.addressName(unpacked.address);
+    
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                }
+
+                if(token && token.addr) {
+                    let rawAmount = unpacked.events[2].value;
+                    let amount = utility.weiToToken(rawAmount, token);
+                    
+                    let dir = '';
+                    if(unpacked.name == 'BalanceIncrease') {
+                        dir = '+';
+                    } else {
+                        dir = '-';
+                    }
+                    let reason = Number(unpacked.events[3].value);
+                    if(reasons[reason]) {
+                        reason = reasons[reason];
+                    } else {
+                        reason = '';
+                    }
+
+                    return {
+                        'type': reason,
+                        'change': dir,
+                        'exchange': exchange,
+                        'note': 'Updated the exchange balance',
+                        'token': token,
+                        'amount': amount,
+                        'wallet': user,
                         'unlisted': token.unlisted,
                     };
                 }

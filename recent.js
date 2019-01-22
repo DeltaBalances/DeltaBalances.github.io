@@ -457,12 +457,13 @@ var isAddressPage = true;
 	}
 
 	function getTransactions(rqid) {
-		outputHashes = {};
+		let outputHashes = {};
 
 		transLoaded = 0;
-		var transResult = [];
-		var inTransResult = [];
-		var tokenTxResult = [];
+		let transResult = [];
+		let inTransResult = [];
+        let tokenTxResult = [];
+        let idexTx = [];
 
 		let normalRetries = 0;
 		let internalRetries = 0;
@@ -476,7 +477,7 @@ var isAddressPage = true;
 
 
 
-
+        //get a list of recent outgoing tx from etherscan
 		function normalTransactions() {
 			$.getJSON('https://api.etherscan.io/api?module=account&action=txlist&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey).done((result) => {
 				if (requestID > rqid)
@@ -484,7 +485,7 @@ var isAddressPage = true;
 				if (result && result.status === '1')
 					transResult = result.result;
 				transLoaded++;
-				processTransactions(transResult);
+				processTransactions();
 			}).fail((result) => {
 				if (requestID > rqid)
 					return;
@@ -495,7 +496,7 @@ var isAddressPage = true;
 				} else {
 					showError('Failed to load recent transactions (deposit, trade & cancel) after 3 tries, try again later.');
 					transLoaded++;
-					processTransactions(transResult);
+					processTransactions();
 				}
 			});
 		}
@@ -508,7 +509,7 @@ var isAddressPage = true;
 				if (result && result.status === '1')
 					tokenTxResult = result.result;
 				transLoaded++;
-				processTransactions(tokenTxResult);
+				processTransactions();
 			}).fail((result) => {
 				if (requestID > rqid)
 					return;
@@ -519,7 +520,7 @@ var isAddressPage = true;
 				} else {
 					showError('Failed to load recent transactions (token transfers) after 3 tries, try again later.');
 					transLoaded++;
-					processTransactions(tokenTxResult);
+					processTransactions();
 				}
 			});
 		}
@@ -533,7 +534,7 @@ var isAddressPage = true;
 				if (result2 && result2.status === '1')
 					inTransResult = result2.result;
 				transLoaded++;
-				processTransactions(inTransResult);
+				processTransactions();
 			}).fail((result) => {
 				if (requestID > rqid)
 					return;
@@ -544,7 +545,7 @@ var isAddressPage = true;
 				} else {
 					showError('Failed to load recent transactions (withdraws) after 3 tries, try again later.');
 					transLoaded++;
-					processTransactions(inTransResult);
+					processTransactions();
 				}
 			});
 		}
@@ -563,13 +564,13 @@ var isAddressPage = true;
 						for (let t = 0; t < trades.length; t++) {
 							let trade = _delta.parseRecentIdexTrade(keys[k], trades[t], publicAddr);
 							if (trade) {
-								outputHashes[trade.Hash] = trade;
+								idexTx.push(trade);
 							}
 						}
 					}
 				}
 				transLoaded++;
-				processTransactions([]);
+				processTransactions();
 			}).fail((result) => {
 				if (requestID > rqid)
 					return;
@@ -580,44 +581,81 @@ var isAddressPage = true;
 				} else {
 					showError('Failed to load IDEX trades from the IDEX API');
 					transLoaded++;
-					processTransactions([]);
+					processTransactions();
 				}
 			});
 		}
 
 
-		var outputHashes = {};
+		function processTransactions() {
+            outputHashes = {};
+           
+            if(transLoaded >= 4) {
+                let breakp = 5;
+            }
+            let newTokens = [];
 
-		function processTransactions(resultArray) {
-			var myAddr = publicAddr.toLowerCase();
-			var inputTransactions = [];
+            let myAddr = publicAddr.toLowerCase();
+            let setNewDates = false; 
 
-			addTransactions(resultArray);
-			var setNewDates = false;
+            //idex trades from the API are independent, just add those
+            if(idexTx && idexTx.length > 0) {
+                for(let i = 0; i < idexTx.length; i++) {
+                    outputHashes[idexTx[i].Hash + '(0)'] = idexTx[i];
+                }
+            }
 
+            //first parse regular outgoing transactions
+            if(transResult && transResult.length > 0) {
+                let txs = prepareTransactions(transResult);
+                parseTransactions(txs);
+            }
+            // secondly do internal transfers (receive ETH from contract)
+            if(inTransResult && inTransResult.length > 0) {
+                let txs = prepareTransactions(inTransResult);
+                parseTransactions(txs);
+            }
+            // at last, hande tx from etherscan token transfer events (bad from & to addresses in input)
+            if(tokenTxResult && tokenTxResult.length > 0) {
+                let txs = prepareTransactions(tokenTxResult);
+                parseTransactions(txs);
+            }
+
+            // did we encounter previously unknown dates for blocknumbers
 			if (setNewDates)
-				setBlockStorage();
+                setBlockStorage();
+            
+            //save any unknown tokens we encountered
+            try {
+                if (unknownTokenCache && unknownTokenCache.length >= 0) {
+                    unknownTokenCache = unknownTokenCache.concat(newTokens);
+                    setStorage();
+                }
+            } catch (e) { console.log('failed to set token cache'); }
+           
+            done();
 
-			function addTransactions(array) {
-
+            // filter out duplicate transactions and non relevant tx
+			function prepareTransactions(array) {
+                let preparedTxs = [];
 				for (let i = 0; i < array.length; i++) {
-					let tx = array[i];
+                    let tx = array[i];
+                    let defaultHash = tx.hash + '(0)'
 					// only parse tx if..
 					if (
-						!outputHashes[tx.hash] ||  // we don't know it yet
-						outputHashes[tx.hash].Incomplete ||
-						outputHashes[tx.hash].exchange == "" || // we parsed it with no detected exchange, different source might help
+						!outputHashes[defaultHash] ||  // we don't know it yet
+						outputHashes[defaultHash].Incomplete ||
+						outputHashes[defaultHash].exchange == "" || // we parsed it with no detected exchange, different source might help
 						(tx.contractAddress && //token transfer event
-							(outputHashes[tx.hash].Token.unknown ||  //parsed it but didn't know token, we get new token data from etherscan transfer events
-								outputHashes[tx.hash].Token.addr === _delta.config.ethAddr // we parsed ETH, now we see a token transfer
+							(outputHashes[defaultHash].Token.unknown ||  //parsed it but didn't know token, we get new token data from etherscan transfer events
+								outputHashes[defaultHash].Token.addr === _delta.config.ethAddr // we parsed ETH, now we see a token transfer
 							)
 						) ||
-						(tx.type == "call") //internal eth transfer
+                        (tx.type == "call") //internal eth transfer 
 					) {
 
 						let from = tx.from.toLowerCase();
 						let to = tx.to.toLowerCase();
-						let myAddr = publicAddr.toLowerCase();
 						let contract = tx.contractAddress;
 						if (contract)
 							contract = contract.toLowerCase();
@@ -633,477 +671,612 @@ var isAddressPage = true;
 
 							if (Number(block) >= startblock) { // etherscan token events seem to return before startblock
 
-								// if we know a name for this address (token, exhcange, exchangeadmin), it is useful
+								// if we know a name for this address (token, exchange, exchangeadmin), it is useful
 								if (_delta.addressName(from) !== from || _delta.addressName(to) !== to || to == myAddr || from == myAddr || (contract && _delta.addressName(contract) !== contract)) {
-									inputTransactions.push(tx);
+									preparedTxs.push(tx);
 								}
 							}
-						}
+						} else {
+                            console.log('preparing tx without block number');
+                        }
 					}
-				}
-			}
+                }
+                return preparedTxs;
+            }
+            
+            //parse outgoing tx and token transfer tx from etherscan
+            function parseTransactions(inputTransactions) {
+                for (let i = 0; i < inputTransactions.length; i++) {
+                    var tx = inputTransactions[i];
+                    var from = tx.from.toLowerCase();
+                    var to = tx.to.toLowerCase();
+                    var value = _util.weiToEth(tx.value); // eth value of tx
+                    
+                    let contract = tx.contractAddress; //only on token transfer events form etherscan API
+                    let internal = tx.type == "call" || tx.gasUsed == "0"; //from internal tx request
+
+                    if(tx.hash == '0x7696b0c6c847fcbafa4fedb45be7a3a3d666b32f146c4e0c45c1dfd6698c53cd') {
+                        let breakp = 5;
+                    }
+
+                    if (contract) {
+                        tx.isError = '0';  // token events have no error param
+                        contract = contract.toLowerCase();
+
+                        //try to see if it is an unknown token
+                        try {
+                            if (!_delta.uniqueTokens[contract]) {
+
+                                if (tx.tokenSymbol !== "" && tx.tokenDecimal !== "") {
+                                    let newToken = {
+                                        addr: contract,
+                                        name: _util.escapeHtml(tx.tokenSymbol),
+                                        name2: _util.escapeHtml(tx.tokenName),
+                                        decimals: Number(tx.tokenDecimal),
+                                        unlisted: true,
+                                    };
+                                    _delta.uniqueTokens[contract] = newToken;
+                                    newTokens.push(newToken);
+                                }
+                            }
+                        } catch (e) { }   
+                    }
+
+                    // this is a token transfer seen after we already have a 'buy up to, sell up to'
+                    //oasisdex, kyber
+                    if(checkTradeupTo(0) || checkTradeupTo(1)) { //index 1 for oasisDirect subcall
+                        continue;
+                    }
+
+                    function checkTradeupTo(index) {
+                        if(contract || internal) {
+                            // this is a token/ETH transfer seen after we already have a 'buy up to, sell up to'
+                            //oasisdex, kyber
+                            let defaultHash = tx.hash + '('+ index + ')';
+                            if(outputHashes[defaultHash]) {
+                                let knownObj = outputHashes[defaultHash];
+                                if(knownObj.Type.indexOf('up to') !== -1) {
+                                    let token = undefined;
+                                    if(contract) {
+                                        token = _delta.uniqueTokens[contract];
+                                    } else if(internal) {
+                                        token = _delta.setToken(_delta.config.ethAddr);
+                                    }
+                                    
+                                    if(token) {
+                                        // amount + max/min price, unknown total
+                                        if(knownObj.Amount && knownObj.Price && !knownObj.Total) {
+                                            if(internal && _util.isWrappedETH(knownObj.Base.addr)) { // match ETH and WETH
+                                                knownObj.Base = token;
+                                            }
+
+                                            if(token.addr == knownObj.Base.addr) {
+                                                let dvsr = _delta.divisorFromDecimals(token.decimals)
+                                                let baseAmount = _util.weiToEth(tx.value, dvsr);
+
+                                                knownObj.Total = baseAmount;
+                                                knownObj.Price = baseAmount.div(knownObj.Amount);
+                                                if(knownObj.Type == 'Sell up to') {
+                                                    knownObj.Type = 'Taker Sell';
+                                                } else if(knownObj.Type == 'Buy up to') {
+                                                    knownObj.Type = 'Taker Buy';
+                                                }
+                                                knownObj.Incomplete = false;
+                                                outputHashes[defaultHash] = knownObj;
+                                                return true;
+                                            }
+                                        }
+                                        // total and max/min price, unknown amount
+                                        else if(!knownObj.Amount && knownObj.Price && knownObj.Total) {
+
+                                            if(internal && _util.isWrappedETH(knownObj.Token.addr)) { // match ETH and WETH
+                                                knownObj.Token = token;
+                                            }
+                                            if(token.addr == knownObj.Token.addr) {
+                                                let dvsr = _delta.divisorFromDecimals(token.decimals)
+                                                let amount = _util.weiToEth(tx.value, dvsr);
+                                                knownObj.Amount = amount;
+                                                knownObj.Price = knownObj.Total.div(amount);
+                                                if(knownObj.Type == 'Sell up to') {
+                                                    knownObj.Type = 'Taker Sell';
+                                                } else if(knownObj.Type == 'Buy up to') {
+                                                    knownObj.Type = 'Taker Buy';
+                                                }
+                                                knownObj.Incomplete = false;
+                                                outputHashes[defaultHash] = knownObj;
+                                                return true;
+                                            }
+                                        }
+
+                                    } 
+                                }
+                            }
+                        }
+                        return false;
+                    }
 
 
-			let newTokens = [];
+                    let fromName = _delta.addressName(from).toLowerCase();
+                    // internal tx (withdraw or unwrap ETH)
+                    if (to === myAddr && !contract && internal && fromName.indexOf('kyber') == -1) {
+                        var trans = undefined;
+                      
+                        if (_util.isWrappedETH(from)) {
+                            trans = createOutputTransaction('Unwrap ETH', _delta.setToken(tx.from), value, _delta.config.tokens[0], value, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+                            trans.Incomplete = true;
+                        }
+                        else if (_delta.isExchangeAddress(from)) {
+                            // IDEX, Switcheo withdraw, only found in internal tx
+                            if (_delta.config.exchangeContracts.Idex.addr == from || _delta.config.exchangeContracts.Switcheo.addr == from) {
+                                trans = createOutputTransaction('Withdraw', _delta.config.tokens[0], value, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
+                            }
+                            // used to detect airswap fails that send back the same ETH amount
+                            else if (_delta.config.exchangeContracts.AirSwap.addr == from && value.greaterThan(0)) {
+                                trans = createOutputTransaction('In', _delta.config.tokens[0], value, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', _delta.config.exchangeContracts.AirSwap.name);
+                                trans.Incomplete = true; //should be a tx with acutal input
+                            }
+                        } else if (value.greaterThan(0)) {
+                            let amount = value;
 
-			// process all recent tx from etherscan
-			for (var i = 0; i < inputTransactions.length; i++) {
-				var tx = inputTransactions[i];
-				var from = tx.from.toLowerCase();
-				var to = tx.to.toLowerCase();
-				var val = _delta.web3.toBigNumber(tx.value);
-				var myAddr = publicAddr.toLowerCase();
+                            let exchange = '';
+                            //Ether transfer
+                            if (tx.input !== '0x') {
+                                exchange = 'unknown ';
+                            }
+                            // do we know an alias, but not a token
+                            if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
+                                exchange = _delta.addressName(to);
+                            } else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
+                                exchange = _delta.addressName(from);
+                            }
 
-				//only on token transfer events
-				var contract = tx.contractAddress;
-				var internal = tx.type == "call" || tx.gasUsed == "0"; //from internal tx request
+                            if (to === myAddr) {
+                                trans = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+                                trans.Incomplete = true;
+                            } else if (from === myAddr) {
+                                trans = createOutputTransaction('Out', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+                                trans.Incomplete = true;
+                            }
+                        }
+                        if (trans) {
+                            addTransaction(trans, 0);
+                        }
+                    }
+                    // token deposit/withdraw, trades, cancels
+                    else {
+                        var unpacked = _util.processInput(tx.input);
+                        if (unpacked && unpacked.name) {
+                            let objs = _delta.processUnpackedInput(tx, unpacked);
 
-				if (contract) {
-					tx.isError = '0';  // token events have no error param
-					contract = contract.toLowerCase();
-					try {
-						if (!_delta.uniqueTokens[contract]) {
+                            if (objs) {
+                                if (!Array.isArray(objs)) {
+                                    objs = [objs];
+                                }
 
-							if (tx.tokenSymbol !== "" && tx.tokenDecimal !== "") {
-								let newToken = {
-									addr: contract,
-									name: _util.escapeHtml(tx.tokenSymbol),
-									name2: _util.escapeHtml(tx.tokenName),
-									decimals: Number(tx.tokenDecimal),
-									unlisted: true,
-								};
-								_delta.uniqueTokens[contract] = newToken;
-								newTokens.push(newToken);
-							}
-						}
-					} catch (e) { }
-				}
+                                for (let i = 0; i < objs.length; i++) {
+                                    let obj = objs[i];
 
-				// internal tx (withdraw or unwrap ETH)
-				if (to === myAddr && !contract && internal && from !== _delta.config.exchangeContracts.Kyber.addr) {
-					var trans = undefined;
+                                    let trans = undefined;
+                                    let exchange = obj.exchange;
+                                    let exName = ''
+                                    if (!exchange) {
+                                        exName = _delta.addressName(to, false);
+                                        if (contract && exName.slice(0, 2) == '0x')
+                                            exName = _delta.addressName(from, false);
+                                        if (exName.slice(0, 2) !== '0x')
+                                            exchange = exName;
+                                    }
+                                    if(exchange.slice(0, 2) === '0x') {
+                                        exchange = 'unknown ';
+                                    }
 
-					if (_util.isWrappedETH(from)) {
-						var val = _util.weiToEth(tx.value);
-						trans = createOutputTransaction('Unwrap ETH', _delta.setToken(tx.from), val, _delta.config.tokens[0], val, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
-						trans.Incomplete = true;
-					}
-					else if (_delta.isExchangeAddress(from)) {
-						// IDEX withdraw, only found in internal tx
-						if (_delta.config.exchangeContracts.Idex.addr == from) {
-							var val = _util.weiToEth(tx.value);
-							trans = createOutputTransaction('Withdraw', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
-						}
-						// used to detect airswap fails that send back the same ETH amount
-						else if (_delta.config.exchangeContracts.AirSwap.addr == from && val.greaterThan(0)) {
-							var val = _util.weiToEth(tx.value);
-							trans = createOutputTransaction('In', _delta.config.tokens[0], val, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', _delta.config.exchangeContracts.AirSwap.name);
-							trans.Incomplete = true; //should be a tx with acutal input
+                                    if (unpacked.name === 'deposit' || unpacked.name === 'depositEther') {
+                                        if (obj.type === 'Wrap ETH') {
+                                            trans = createOutputTransaction(obj.type, obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+                                        } else {
+                                            trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', exchange);
+                                        }
+                                    }
+                                    else if (unpacked.name === 'withdraw' && obj.type !== 'Token Withdraw') {
 
-						}
-					} else if (val.greaterThan(0)) {
-						let amount = _util.weiToEth(val, undefined);
+                                        if (obj.type === 'Unwrap ETH') {
+                                            trans = createOutputTransaction(obj.type, obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+                                        } else {
+                                            trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', exchange);
+                                        }
+                                    }
+                                    else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || unpacked.name === 'depositBoth') {
+                                        obj.type = obj.type.replace('Token ', '');
+                                        if (unpacked.name !== 'depositBoth') {
+                                            trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+                                        } else {
+                                            trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+                                        }
+                                    } else if (unpacked.name === 'adminWithdraw' || (unpacked.name == 'withdraw' && unpacked.params.length == 9)/*switcheo withdraw*/ ) {
 
-						let exchange = '';
-						//Ether transfer
-						if (tx.input !== '0x') {
-							exchange = 'unknown ';
-						}
-						// do we know an alias, but not a token
-						if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
-							exchange = _delta.addressName(to);
-						} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
-							exchange = _delta.addressName(from);
-						}
+                                        //this is only in etherscan tx events
+                                        exchange = _delta.addressName(from, false);
+                                        if(exchange.slice(0,2) == '0x') {
+                                            exchange = 'unknown ';
+                                        }
+                                        obj.type = obj.type.replace('Token ', '');
+                                        trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+                                    }
+                                    else if ((unpacked.name == 'kill' || unpacked.name == 'cancel') && unpacked.params.length == 1) {
+                                        trans = createOutputTransaction(obj.type, undefined, undefined, undefined, undefined, tx.hash, tx.timeStamp, undefined, undefined, tx.isError === '0', exchange);
+                                    } else if (unpacked.name == 'buy' && unpacked.params.length == 2) {
+                                        trans = createOutputTransaction(obj.type, undefined, undefined, undefined, undefined, tx.hash, tx.timeStamp, undefined, undefined, tx.isError === '0', exchange);
+                                    }
+                                    else if (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders' || unpacked.name === 'cancel' || unpacked.name == 'cancelAllSellOrders' || unpacked.name == 'cancelAllBuyOrders') {
+                                        let cancelAmount = '';
+                                        if (obj.baseAmount)
+                                            cancelAmount = obj.baseAmount;
+                                        if (obj.relayer) {
+                                            let relay = _util.relayName(obj.relayer);
+                                            if (relay) {
+                                                exchange = relay;
+                                            }
+                                        }
+                                        trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, cancelAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
+                                    } else if (unpacked.name === 'cancelOrdersUpTo') {
+                                        trans = createOutputTransaction('Cancel All', '', '', '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', obj.exchange);
+                                    }
+                                    else if (unpacked.name === 'trade' || unpacked.name === 'order' || unpacked.name === 'fill' || unpacked.name === 'tradeEtherDelta' || unpacked.name === 'instantTrade' || unpacked.name === 'tradeWithHint') {
 
-						if (to === myAddr) {
-							trans = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
-							trans.Incomplete = true;
-						} else if (from === myAddr) {
-							trans = createOutputTransaction('Out', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
-							trans.Incomplete = true;
-						}
-					}
-					if (trans) {
-						addTransaction(trans, 0);
-					}
-				}
-				// token deposit/withdraw, trades, cancels
-				else {
-					var unpacked = _util.processInput(tx.input);
-					if (unpacked && unpacked.name) {
-						let objs = _delta.processUnpackedInput(tx, unpacked);
+                                        if (unpacked.name === 'tradeWithHint' || (unpacked.name === 'trade' && unpacked.params.length === 7)) {
+                                            //kyber only
+                                            if (obj.type == 'Buy up to') {
+                                                trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
+                                            } else {
+                                                trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
+                                            }
+                                            trans.Incomplete = true; // interntal tx or token transfer might add info
+                                        } else {
+                                            // other trade
+                                            trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
+                                        }
+                                    } else if (unpacked.name == 'takeSellOrder' || unpacked.name == 'takeBuyOrder' || unpacked.name == 'makeSellOrder' || unpacked.name == 'makeBuyOrder') {
 
-						if (objs) {
-							if (!Array.isArray(objs)) {
-								objs = [objs];
-							}
+                                        if (obj.maker == myAddr) {// maker trade from etherscan token event
+                                            if (obj.type == 'Taker Buy') {
+                                                obj.type = 'Maker Sell';
+                                            } else if (obj.type == 'Taker Sell') {
+                                                obj.type = 'Maker Buy';
+                                            }
+                                        }
+                                        trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
+                                    }
+                                    else if (unpacked.name === 'buy' || unpacked.name == 'sell' || unpacked.name == 'createSellOrder' || unpacked.name == 'createBuyOrder') {
+                                        trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+                                    }
+                                    else if (unpacked.name === 'convert' || unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized'
+                                        || unpacked.name === 'convertFor' || unpacked.name == 'convertForPrioritized' || unpacked.name === 'convertForPrioritized2') {
 
-							for (let i = 0; i < objs.length; i++) {
-								let obj = objs[i];
+                                        if (obj.type == 'Buy up to') {
+                                            // did send ETH along with tx and base is wrapped ether
+                                            if (obj.base && _util.isWrappedETH(obj.base.addr) && value.greaterThan(0)) {
+                                                if (String(value) == String(obj.baseAmount)) {
+                                                    obj.base = _delta.setToken(_delta.config.ethAddr);
+                                                }
+                                            }
+                                            trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
+                                        } else {
+                                            trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
+                                            //internal tx to unwrap eth token
+                                            trans.Incomplete = true;
+                                        }
+                                    } //OasisDex proxies like OasisDirect
+                                    else if ((unpacked.name == 'execute' && obj && obj.type !== "Indirect execution") // indirect delegatecall of functions below
+                                        || (
+                                            ( unpacked.name == 'buyAllAmount'
+                                                || (unpacked.name == 'buyAllAmountPayEth' && !contract)
+                                                || unpacked.name == 'buyAllAmountBuyEth'
+                                                || unpacked.name == 'createAndBuyAllAmount'
+                                                || (unpacked.name == 'createAndBuyAllAmountPayEth' && !contract)
+                                                || unpacked.name == 'createAndBuyAllAmountBuyEth'
+                                                || unpacked.name == 'sellAllAmount'
+                                                || (unpacked.name == 'sellAllAmountPayEth' && !contract)
+                                                || unpacked.name == 'sellAllAmountBuyEth'
+                                                || unpacked.name == 'createAndSellAllAmount'
+                                                || (unpacked.name == 'createAndSellAllAmountPayEth' && !contract)
+                                                || unpacked.name == 'createAndSellAllAmountBuyEth'
+                                            )
+                                            && (unpacked.params[0].name == 'otc' || unpacked.params[0].name == 'factory')
+                                        )
+                                    ) {
+                                        if(!contract) {
+                                            if (obj.type == 'Buy up to') {
+                                                if (obj.baseAmount) {
+                                                    trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
+                                                } else if (obj.amount) {
+                                                    trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
+                                                }
+                                            } else if (obj.type == 'Sell up to') {
+                                                if (obj.amount) {
+                                                    trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
+                                                } else {
+                                                    trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
+                                                }
+                                            }
+                                            trans.Incomplete = true; // interntal tx or token transfer might add info
+                                        } 
+                                        // someone else using oasisDirect, fills my order?
+                                        else if (contract && to == myAddr) {
+                                                if (obj.type === 'Buy up to') {
+                                                    if(contract == obj.token.addr) {
+                                                        obj.type = 'Maker Sell';
+                                                    } else {
+                                                        continue;
+                                                    }
+                                                }
+                                                else if (obj.type === 'Sell up to') {
+                                                    if(contract == obj.token.addr) {
+                                                        obj.type = 'Maker Buy';
+                                                       
+                                                    } else {
+                                                        continue;
+                                                    }
+                                                }
+                                                
+                                                exchange = 'OasisDex ';
+                                                let token = obj.token;
+                                                let dvsr = _delta.divisorFromDecimals(token.decimals);
+                                                let amount = _util.weiToEth(tx.value, dvsr);
+                                                trans = createOutputTransaction(obj.type, obj.token, amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, undefined, tx.isError === '0', exchange);
+                                            }
+                                    }
+                                    else if (unpacked.name === 'approve') {
+                                        if (!exchange) {
+                                            if (_delta.isExchangeAddress(obj.to)) {
+                                                exchange = _delta.addressName(obj.to.toLowerCase(), false);
+                                            } else {
+                                                exchange = '';
+                                            }
+                                        }
+                                        if (obj.amount.greaterThan(999999999999999))
+                                            obj.amount = '';
+                                        trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+                                    }
+                                    else if (unpacked.name === 'fillOrder' // 0xv1 0xv2
+                                        || unpacked.name === 'fillOrKillOrder' //0xv1 0xv2
+                                        || unpacked.name === 'batchFillOrders' //0xv1 0xv2
+                                        || unpacked.name === 'batchFillOrKillOrders' //0xv1 0xv2
+                                        || unpacked.name === 'fillOrdersUpTo' //0xv1
+                                        || unpacked.name === 'fillOrderNoThrow' //0xv2
+                                        || unpacked.name === 'batchFillOrdersNoThrow' //0xv2
+                                        || unpacked.name === 'marketSellOrders' //0xv2
+                                        || unpacked.name === 'marketSellOrdersNoThrow' //0xv2
+                                        || unpacked.name === 'marketBuyOrders' //0xv2
+                                        || unpacked.name === 'marketBuyOrdersNoThrow' //0xv2
+                                        || unpacked.name === 'matchOrders' //0xv2
+                                        || (unpacked.name == 'executeTransaction' && obj.type !== "Signed execution") //0xv2
+                                    ) {
+                                        if ((!contract && (obj.maker == myAddr || obj.taker == myAddr))
+                                            || (contract && (to == myAddr || from == myAddr))) {
 
-								let trans = undefined;
-								let exchange = obj.exchange;
-								let exName = ''
-								if (!exchange) {
-									exName = _delta.addressName(to, false);
-									if (contract && exName.slice(0, 2) == '0x')
-										exName = _delta.addressName(from, false);
-									if (exName.slice(0, 2) !== '0x')
-										exchange = exName;
-								}
+                                            if (obj.maker === myAddr) {
+                                                if (obj.type == 'Taker Buy') {
+                                                    obj.type = 'Maker Sell';
+                                                } else if (obj.type == 'Taker Sell') {
+                                                    obj.type = 'Maker Buy';
+                                                }
+                                            }
+                                            let price = obj.price;
+                                            if (unpacked.name === 'fillOrdersUpTo') {
+                                                if (i == 0) {
+                                                    price = obj.maxPrice;
+                                                }
+                                                else {
+                                                    continue;
+                                                }
+                                            }
+                                            if (obj.relayer) {
+                                                let relay = _util.relayName(obj.relayer);
+                                                if (relay) {
+                                                    exchange = relay;
+                                                }
+                                            }
+                                            trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, price, tx.isError === '0', exchange);
+                                        }
+                                    } else if (unpacked.name === 'offer') {
+                                        let type = obj.type;
+                                        if (contract && to == myAddr) {
+                                            if (type === 'Buy offer') {
+                                                if(contract == obj.token.addr) {
+                                                    type = 'Maker Buy';
+                                                } else {
+                                                    type = 'Maker Sell';
+                                                }
+                                            }
+                                            else if (type === 'Sell offer') {
+                                                if(contract == obj.token.addr) {
+                                                    type = 'Maker Sell';
+                                                } else {
+                                                    type = 'Maker Buy';
+                                                }
+                                            }
+                                            if (exchange == "") {
+                                                exchange = 'OasisDex ';
+                                            }
+                                        }
+                                        trans = createOutputTransaction(type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
+                                        trans.Incomplete = true;
+                                    } else if (unpacked.name === 'transfer') {
+                                        let newType = '';
+                                        if (obj.from == myAddr) {
+                                            newType = 'Out';
+                                        } else if (obj.to.toLowerCase() == myAddr) {
+                                            newType = 'In';
+                                        }
+                                        let exch = '';
+                                        if (_delta.config.exchangeWallets[from]) {
+                                            exch = _delta.config.exchangeWallets[from];
+                                        } else if (_delta.config.exchangeWallets[to]) {
+                                            exch = _delta.config.exchangeWallets[to];
+                                        }
 
+                                        trans = createOutputTransaction(newType, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exch);
+                                    }
 
-								if (unpacked.name === 'deposit') {
-									if (obj.type === 'Wrap ETH') {
-										trans = createOutputTransaction(obj.type, obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
-									} else {
-										trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(to, false));
-									}
-								}
-								else if (unpacked.name === 'withdraw') {
-
-									if (obj.type === 'Unwrap ETH') {
-										trans = createOutputTransaction(obj.type, obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
-									} else {
-										trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(to, false));
-									}
-								}
-								else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || unpacked.name === 'depositBoth') {
-									obj.type = obj.type.replace('Token ', '');
-									if (unpacked.name !== 'depositBoth') {
-										trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
-									} else {
-										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
-									}
-								} else if (unpacked.name === 'adminWithdraw') {
-
-									//this is only in etherscan tx events
-									exchange = _delta.addressName(from, false);
-									obj.type = obj.type.replace('Token ', '');
-									trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
-								}
-								else if ((unpacked.name == 'kill' || unpacked.name == 'cancel') && unpacked.params.length == 1) {
-									trans = createOutputTransaction(obj.type, undefined, undefined, undefined, undefined, tx.hash, tx.timeStamp, undefined, undefined, tx.isError === '0', exchange);
-								} else if (unpacked.name == 'buy' && unpacked.params.length == 2) {
-									trans = createOutputTransaction(obj.type, undefined, undefined, undefined, undefined, tx.hash, tx.timeStamp, undefined, undefined, tx.isError === '0', exchange);
-								}
-								else if (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders' || unpacked.name === 'cancel' || unpacked.name == 'cancelAllSellOrders' || unpacked.name == 'cancelAllBuyOrders') {
-									let cancelAmount = '';
-									if (obj.baseAmount)
-										cancelAmount = obj.baseAmount;
-									if (obj.relayer) {
-										let relay = _util.relayName(obj.relayer);
-										if (relay) {
-											exchange = relay;
-										}
-									}
-									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, cancelAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
-								} else if (unpacked.name === 'cancelOrdersUpTo') {
-									trans = createOutputTransaction('Cancel All', '', '', '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', obj.exchange);
-								}
-								else if (unpacked.name === 'trade' || unpacked.name === 'order' || unpacked.name === 'fill' || unpacked.name === 'tradeEtherDelta' || unpacked.name === 'instantTrade') {
-
-									if (unpacked.name === 'trade' && unpacked.params.length === 7) {
-										//kyber only
-										if (obj.type == 'Buy up to') {
-											trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
-										} else {
-											trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
-										}
-									} else {
-										// other trade
-										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
-									}
-								} else if (unpacked.name == 'takeSellOrder' || unpacked.name == 'takeBuyOrder' || unpacked.name == 'makeSellOrder' || unpacked.name == 'makeBuyOrder') {
-
-									if (obj.maker == myAddr) {// maker trade from etherscan token event
-										if (obj.type == 'Taker Buy') {
-											obj.type = 'Maker Sell';
-										} else if (obj.type == 'Taker Sell') {
-											obj.type = 'Maker Buy';
-										}
-									}
-									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
-								}
-								else if (unpacked.name === 'buy' || unpacked.name == 'sell' || unpacked.name == 'createSellOrder' || unpacked.name == 'createBuyOrder') {
-									trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
-								}
-								else if (unpacked.name === 'convert' || unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized'
-									|| unpacked.name === 'convertFor' || unpacked.name == 'convertForPrioritized' || unpacked.name === 'convertForPrioritized2') {
-
-									if (obj.type == 'Buy up to') {
-										// did send ETH along with tx and base is wrapped ether
-										if (obj.base && _util.isWrappedETH(obj.base.addr) && val.greaterThan(0)) {
-											let ethval = _util.weiToEth(val);
-											if (String(ethval) == String(obj.baseAmount)) {
-												obj.base = _delta.setToken(_delta.config.ethAddr);
-											}
-										}
-										trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
-									} else {
-										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
-										//internal tx to unwrap eth token
-										trans.Incomplete = true;
-									}
-								} //OasisDex proxies like OasisDirect
-								else if ((unpacked.name == 'execute' && obj && obj.type !== "Indirect execution") // indirect delegatecall of functions below
-									|| (
-										( unpacked.name == 'buyAllAmount'
-											|| (unpacked.name == 'buyAllAmountPayEth' && !contract)
-											|| unpacked.name == 'buyAllAmountBuyEth'
-											|| unpacked.name == 'createAndBuyAllAmount'
-											|| (unpacked.name == 'createAndBuyAllAmountPayEth' && !contract)
-											|| unpacked.name == 'createAndBuyAllAmountBuyEth'
-											|| unpacked.name == 'sellAllAmount'
-											|| (unpacked.name == 'sellAllAmountPayEth' && !contract)
-											|| unpacked.name == 'sellAllAmountBuyEth'
-											|| unpacked.name == 'createAndSellAllAmount'
-											|| (unpacked.name == 'createAndSellAllAmountPayEth' && !contract)
-											|| unpacked.name == 'createAndSellAllAmountBuyEth'
-										)
-										&& (unpacked.params[0].name == 'otc' || unpacked.params[0].name == 'factory')
-									)
-								) {
-
-									if (obj.type == 'Buy up to') {
-										if (obj.baseAmount) {
-											trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
-										} else if (obj.amount) {
-											trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
-										}
-									} else if (obj.type == 'Sell up to') {
-										if (obj.amount) {
-											trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
-										} else {
-											trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
-										}
-									}
-								}
-								else if (unpacked.name === 'approve') {
-									if (!exchange) {
-										if (_delta.isExchangeAddress(obj.to)) {
-											exchange = _delta.addressName(obj.to.toLowerCase(), false);
-										} else {
-											exchange = '';
-										}
-									}
-									if (obj.amount.greaterThan(999999999999999))
-										obj.amount = '';
-									trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
-								}
-								else if (unpacked.name === 'fillOrder' // 0xv1 0xv2
-									|| unpacked.name === 'fillOrKillOrder' //0xv1 0xv2
-									|| unpacked.name === 'batchFillOrders' //0xv1 0xv2
-									|| unpacked.name === 'batchFillOrKillOrders' //0xv1 0xv2
-									|| unpacked.name === 'fillOrdersUpTo' //0xv1
-									|| unpacked.name === 'fillOrderNoThrow' //0xv2
-									|| unpacked.name === 'batchFillOrdersNoThrow' //0xv2
-									|| unpacked.name === 'marketSellOrders' //0xv2
-									|| unpacked.name === 'marketSellOrdersNoThrow' //0xv2
-									|| unpacked.name === 'marketBuyOrders' //0xv2
-									|| unpacked.name === 'marketBuyOrdersNoThrow' //0xv2
-									|| unpacked.name === 'matchOrders' //0xv2
-									|| (unpacked.name == 'executeTransaction' && obj.type !== "Signed execution") //0xv2
-								) {
-									if ((!contract && (obj.maker == myAddr || obj.taker == myAddr))
-										|| (contract && (to == myAddr || from == myAddr))) {
-
-										if (obj.maker === myAddr) {
-											if (obj.type == 'Taker Buy') {
-												obj.type = 'Maker Sell';
-											} else if (obj.type == 'Taker Sell') {
-												obj.type = 'Maker Buy';
-											}
-										}
-										let price = obj.price;
-										if (unpacked.name === 'fillOrdersUpTo') {
-											if (i == 0) {
-												price = obj.maxPrice;
-											}
-											else {
-												continue;
-											}
-										}
-										if (obj.relayer) {
-											let relay = _util.relayName(obj.relayer);
-											if (relay) {
-												exchange = relay;
-											}
-										}
-										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, price, tx.isError === '0', exchange);
-									}
-								} else if (unpacked.name === 'offer') {
-									let type = obj.type;
-									if (contract && to == myAddr) {
-										if (type === 'Buy offer')
-											type = 'Maker Sell';
-										else if (type === 'Sell offer') {
-											type = 'Maker Buy'
-										}
-										if (exchange == "") {
-											exchange = 'OasisDex ';
-										}
-									}
-									trans = createOutputTransaction(type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
-								} else if (unpacked.name === 'transfer') {
-									let newType = '';
-									if (obj.from == myAddr) {
-										newType = 'Out';
-									} else if (obj.to.toLowerCase() == myAddr) {
-										newType = 'In';
-									}
-									let exch = '';
-									if (_delta.config.exchangeWallets[from]) {
-										exch = _delta.config.exchangeWallets[from];
-									} else if (_delta.config.exchangeWallets[to]) {
-										exch = _delta.config.exchangeWallets[to];
-									}
-
-									trans = createOutputTransaction(newType, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exch);
-								}
-
-								if (trans) {
-									addTransaction(trans, i);
-								}
-							}
-						}
-					}
-					// not a recognized function call, but ETH or tokens still moved
-					else {
-						let trans2 = undefined;
-						let exchange = '';
+                                    if (trans) {
+                                        addTransaction(trans, i);
+                                    }
+                                }
+                            }
+                        }
+                        // not a recognized function call, but ETH or tokens still moved
+                        else {
+                            let trans2 = undefined;
+                            let exchange = '';
 
 
-						//Ether transferred or unknown func accepting ETH
-						if (!contract && val.greaterThan(0)) {
+                            //Ether transferred or unknown func accepting ETH
+                            if (!contract && value.greaterThan(0)) {
 
-							let amount = _util.weiToEth(val, undefined);
+                                let amount = value;
 
-							// Ether token wrapping that uses fallback
-							if (_util.isWrappedETH(to)) {
-								trans2 = createOutputTransaction("Wrap ETH", _delta.config.tokens[0], amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
-							} else {
-								//Ether transfer
-								if (tx.input !== '0x') {
-									exchange = 'unknown ';
-								}
+                                // Ether token wrapping that uses fallback
+                                if (_util.isWrappedETH(to)) {
+                                    trans2 = createOutputTransaction("Wrap ETH", _delta.config.tokens[0], amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+                                } else {
+                                    //Ether transfer
+                                    if (tx.input !== '0x') {
+                                        exchange = 'unknown ';
+                                    }
 
-								// do we know an alias, but not a token
-								if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
-									exchange = _delta.addressName(to);
-								} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
-									exchange = _delta.addressName(from);
-								}
+                                    // do we know an alias, but not a token
+                                    if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
+                                        exchange = _delta.addressName(to);
+                                    } else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
+                                        exchange = _delta.addressName(from);
+                                    }
 
-								if (to === myAddr) {
-									trans2 = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
-									trans2.Incomplete = true;
-								} else if (from === myAddr) {
-									trans2 = createOutputTransaction('Out', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
-									trans2.Incomplete = true;
-								}
+                                    if (to === myAddr) {
+                                        trans2 = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+                                        trans2.Incomplete = true;
+                                    } else if (from === myAddr) {
+                                        trans2 = createOutputTransaction('Out', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+                                        trans2.Incomplete = true;
+                                    }
 
-							}
-						}
-						//unknown source of token transfer
-						else if (contract) {
-							let newType = '';
-							if (from == myAddr) {
-								newType = 'Out';
-							} else if (to == myAddr) {
-								newType = 'In';
-							}
+                                }
+                            }
+                            //unknown source of token transfer
+                            else if (contract) {
+                                let newType = '';
+                                if (from == myAddr) {
+                                    newType = 'Out';
+                                } else if (to == myAddr) {
+                                    newType = 'In';
+                                }
 
-							exchange = 'unknown ';
-							// do we know an alias, but not a token
-							if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
-								exchange = _delta.addressName(to);
-							} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
-								exchange = _delta.addressName(from);
-							}
+                                exchange = 'unknown ';
+                                // do we know an alias, but not a token
+                                if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
+                                    exchange = _delta.addressName(to);
+                                } else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
+                                    exchange = _delta.addressName(from);
+                                }
 
-							let token = _delta.setToken(contract);
-							if (token) {
-								let dvsr = _delta.divisorFromDecimals(token.decimals);
-								let amount = _util.weiToEth(val, dvsr);
-								trans2 = createOutputTransaction(newType, token, amount, '', '', tx.hash, tx.timeStamp, token.unlisted, '', tx.isError === '0', exchange);
-								trans2.Incomplete = true;
-							}
-						}
+                                let token = _delta.setToken(contract);
+                                if (token) {
+                                    let dvsr = _delta.divisorFromDecimals(token.decimals);
+                                    let amount = _util.weiToEth(tx.value, dvsr);
+                                    trans2 = createOutputTransaction(newType, token, amount, '', '', tx.hash, tx.timeStamp, token.unlisted, '', tx.isError === '0', exchange);
+                                    trans2.Incomplete = true;
+                                }
+                            }
 
-						addTransaction(trans2, 0);
-					}
-				}
-			}
-			try {
-				if (unknownTokenCache && unknownTokenCache.length >= 0) {
-					unknownTokenCache = unknownTokenCache.concat(newTokens);
-					setStorage();
-				}
-			} catch (e) { console.log('failed to set token cache'); }
-			done();
+                            addTransaction(trans2, 0);
+                        }
+                    }
+                }
 
-			function addTransaction(transs, index) {
-				if (transs && transs.Hash) {
+                function addTransaction(transs, index = 0) {
+                    if (transs && transs.Hash) {
+    
+                        let mainHash = transs.Hash + "(" + index + ")";
+    
+                        let oldTrans = outputHashes[mainHash];
+    
+                        // don't know it, or know it without knowing the token
+                        if (!oldTrans || (transs.Type === oldTrans.Type && oldTrans.Token.unknown)) {
+                            outputHashes[mainHash] = transs;
+                        }
 
-					let mainHash = transs.Hash + "(" + index + ")";
+                        // we parsed a different token the second time   (etherscan regular tx input vs erc20 event )
+                        // see if we can refine details by combining info from 2 sources
+                        else if (oldTrans.Token.addr !== transs.Token.addr || transs.Type !== oldTrans.Type) {
+    
+                            //get exchange or wallet name
+                            let exchange = 'unknown ';
+                            if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
+                                exchange = _delta.addressName(to);
+                            } else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
+                                exchange = _delta.addressName(from);
+                            }
 
-					let oldTrans = outputHashes[mainHash];
+                            // oasisdex/kyber corrected from 'buy up to'to 'taker buy'
+                            if(oldTrans.Type.indexOf('Taker') !== -1 && transs.Type.indexOf('up to') !== -1) {
+                                return;
+                            }
 
-					// don't know it, or know it without knowing the token
-					if (!oldTrans || (transs.Type === oldTrans.Type && oldTrans.Token.unknown)) {
-						outputHashes[mainHash] = transs;
-					}
-					// we parsed a different token the second time   (etherscan regular tx input vs erc20 event )
-					else if (oldTrans.Token.addr !== transs.Token.addr || transs.Type !== oldTrans.Type) {
+                            // detect where one token goes in and another goes out in same tx
+                            else if (transs.Type == 'In' && oldTrans.Type == 'Out') {
+                                let newTrans = createOutputTransaction('Trade', transs.Token, transs.Amount, oldTrans.Token, oldTrans.Amount, tx.hash, tx.timeStamp, transs.Token.unlisted, '', tx.isError === '0', exchange);
+                                outputHashes[mainHash] = newTrans;
+                            } else if (transs.Type == 'Out' && oldTrans.Type == 'In') {
+                                let newTrans = createOutputTransaction('Trade', oldTrans.Token, oldTrans.Amount, transs.Token, transs.Amount, tx.hash, tx.timeStamp, oldTrans.Token.unlisted, '', tx.isError === '0', exchange);
+                                outputHashes[mainHash] = newTrans;
+                            }
 
-						let exchange = 'unknown ';
-						if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
-							exchange = _delta.addressName(to);
-						} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
-							exchange = _delta.addressName(from);
-						}
-						// detect where one token goes in and another goes out in same tx
-						if (transs.Type == 'In' && oldTrans.Type == 'Out') {
-							let newTrans = createOutputTransaction('Trade', transs.Token, transs.Amount, oldTrans.Token, oldTrans.Amount, tx.hash, tx.timeStamp, transs.Token.unlisted, '', tx.isError === '0', exchange);
-							outputHashes[mainHash] = newTrans;
-						} else if (transs.Type == 'Out' && oldTrans.Type == 'In') {
-							let newTrans = createOutputTransaction('Trade', oldTrans.Token, oldTrans.Amount, transs.Token, transs.Amount, tx.hash, tx.timeStamp, oldTrans.Token.unlisted, '', tx.isError === '0', exchange);
-							outputHashes[mainHash] = newTrans;
-						}
-						// detect AirSwap sending back the same amount
-						else if (oldTrans.Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'In' && oldTrans.Type == 'Taker Buy' && String(transs.Amount) == String(oldTrans.Total)) {
-							outputHashes[mainHash].Status = false;
-						} else if (transs.Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'Taker Buy' && oldTrans.Type == 'In' && String(transs.Total) == String(oldTrans.Amount)) {
-							transs.Status = false;
-							outputHashes[mainHash] = transs;
-						}
-						// bancor sell for ETH token & unwrap ETH token, make sell for ETH
-						else if (oldTrans.Type == 'Unwrap ETH' && transs.Type === 'Sell up to' && transs.Exchange.indexOf('Bancor') !== -1) {
-							transs.Base = oldTrans.Base;
-							outputHashes[mainHash] = transs;
-						} else if (oldTrans.Type == 'Sell up to' && transs.Type === 'Unwrap ETH' && oldTrans.Exchange.indexOf('Bancor') !== -1) {
-							outputHashes[mainHash].Base = transs.Base;
-						}
-						// (trade?) returning ETH, seen as unwrap ETH by internal transaction result (generiv version of bancor above)
-						else if (oldTrans.Type == 'Unwrap ETH' && transs.Type !== 'Unwrap ETH' && transs.Exchange) {
-							outputHashes[mainHash] = transs;
-						} else if (oldTrans.Exchange == 'OasisDirect ' && oldTrans.Type.indexOf('up to') !== -1) {
-							// don't add ETH refund
-						} else if (transs.Exchange == 'OasisDirect ' && transs.Type.indexOf('up to') !== -1) {
-							outputHashes[mainHash] = transs;
-						}
-						else { // more than 1 in, 1 out, just display tx multiple times
-							let newHash = mainHash;
-							while (outputHashes[newHash]) {
-								newHash += ' ';
-							}
-							outputHashes[newHash] = transs;
-						}
-					}
-				}
-			}
+                            //oasisDex  offer from input,  token transfer tx info makes it a full trade
+                            else if(oldTrans.Type.indexOf('offer') !== -1 && transs.Type.indexOf('Maker') !== -1) {
+                                outputHashes[mainHash] = transs;
+                            }
+                            else if(transs.Type.indexOf('offer') !== -1 && oldTrans.Type.indexOf('Maker') !== -1) {
+                                outputHashes[mainHash] = oldTrans;
+                            }
+
+
+
+                            // detect AirSwap sending back the same amount
+                            else if (oldTrans.Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'In' && oldTrans.Type == 'Taker Buy' && String(transs.Amount) == String(oldTrans.Total)) {
+                                outputHashes[mainHash].Status = false;
+                            } else if (transs.Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'Taker Buy' && oldTrans.Type == 'In' && String(transs.Total) == String(oldTrans.Amount)) {
+                                transs.Status = false;
+                                outputHashes[mainHash] = transs;
+                            }
+                            // bancor sell for ETH token & unwrap ETH token, make sell for ETH
+                            else if (oldTrans.Type == 'Unwrap ETH' && transs.Type === 'Sell up to' && transs.Exchange.indexOf('Bancor') !== -1) {
+                                transs.Base = oldTrans.Base;
+                                outputHashes[mainHash] = transs;
+                            } else if (oldTrans.Type == 'Sell up to' && transs.Type === 'Unwrap ETH' && oldTrans.Exchange.indexOf('Bancor') !== -1) {
+                                outputHashes[mainHash].Base = transs.Base;
+                            }
+                            // (trade?) returning ETH, seen as unwrap ETH by internal transaction result (generic version of bancor above)
+                            else if (oldTrans.Type == 'Unwrap ETH' && transs.Type !== 'Unwrap ETH' && transs.Exchange) {
+                                outputHashes[mainHash] = transs;
+                            } else if (oldTrans.Exchange == 'OasisDirect ' && oldTrans.Type.indexOf('up to') !== -1) {
+                                // don't add ETH refund
+                            } else if (transs.Exchange == 'OasisDirect ' && transs.Type.indexOf('up to') !== -1) {
+                                outputHashes[mainHash] = transs;
+                            }
+                            else { // more than 1 in, 1 out, just display tx multiple times
+                                let newHash = mainHash;
+                                while (outputHashes[newHash]) {
+                                    newHash += ' ';
+                                }
+                                outputHashes[newHash] = transs;
+                            }
+                        }
+                    }
+                }
+
+            } //end parseTransactions
+
+
+			
 
 			function createOutputTransaction(type, token, val, base, total, hash, timeStamp, unlisted, price, status, exchange) {
 

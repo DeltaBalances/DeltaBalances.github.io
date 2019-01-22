@@ -589,10 +589,6 @@ var isAddressPage = true;
 
 		function processTransactions() {
             outputHashes = {};
-           
-            if(transLoaded >= 4) {
-                let breakp = 5;
-            }
             let newTokens = [];
 
             let myAddr = publicAddr.toLowerCase();
@@ -694,10 +690,6 @@ var isAddressPage = true;
                     
                     let contract = tx.contractAddress; //only on token transfer events form etherscan API
                     let internal = tx.type == "call" || tx.gasUsed == "0"; //from internal tx request
-
-                    if(tx.hash == '0x7696b0c6c847fcbafa4fedb45be7a3a3d666b32f146c4e0c45c1dfd6698c53cd') {
-                        let breakp = 5;
-                    }
 
                     if (contract) {
                         tx.isError = '0';  // token events have no error param
@@ -865,9 +857,6 @@ var isAddressPage = true;
                                             exName = _delta.addressName(from, false);
                                         if (exName.slice(0, 2) !== '0x')
                                             exchange = exName;
-                                    }
-                                    if(exchange.slice(0, 2) === '0x') {
-                                        exchange = 'unknown ';
                                     }
 
                                     if (unpacked.name === 'deposit' || unpacked.name === 'depositEther') {

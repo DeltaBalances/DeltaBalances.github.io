@@ -192,7 +192,6 @@ DeltaBalances.prototype.initContracts = function initContracts(callback) {
 };
 
 DeltaBalances.prototype.initTokens = function (useBlacklist) {
-
     let smartKeys = Object.keys(smartRelays);
     let smartrelays = Object.values(smartRelays);
 
@@ -273,159 +272,11 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         }
     }
 
-    //check listed tokens with updated/cached exchange listings  (not in backupTokens.js)
-    try {
-        // check for listed tokens at forkdelta
-        let forkTokens = [];
-        if (forkDeltaConfig && forkDeltaConfig.tokens) {
-            forkTokens = forkDeltaConfig.tokens;
-        }
-        //forkTokens = forkTokens.filter((x) => { return !(this.uniqueTokens[x.addr]) });
-        for (var i = 0; i < forkTokens.length; i++) {
-            var token = forkTokens[i];
-            if (token) {
-                token.name = utility.escapeHtml(token.name); // escape nasty stuff in token symbol/name
-                token.addr = token.addr.toLowerCase();
-                token.unlisted = false;
-                token.ForkDelta = token.name;
-
-                if (token.fullName && token.fullName !== "") {
-                    token.name2 = token.fullName;
-                }
-
-                if (this.uniqueTokens[token.addr]) {
-                    this.uniqueTokens[token.addr].ForkDelta = token.name;
-                    this.uniqueTokens[token.addr].unlisted = false;
-
-                    if (token.name2 && !this.uniqueTokens[token.addr].name2) {
-                        this.uniqueTokens[token.addr].name2 = token.name2;
-                    }
-                }
-                else {
-                    this.uniqueTokens[token.addr] = token;
-                }
-            }
-        }
-    } catch (e) {
-        console.log('failed to parse ForkDelta token list');
-    }
-
-    try {
-        //ddex listed tokens
-        let ddexTokens = [];
-        if (ddexConfig && ddexConfig.tokens) {
-            ddexTokens = ddexConfig.tokens;
-        }
-        for (var i = 0; i < ddexTokens.length; i++) {
-            var tok = ddexTokens[i];
-            if (tok) {
-                let token = {};
-                token.addr = tok.address.toLowerCase();
-                token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
-
-                token.decimals = tok.decimals;
-                token.unlisted = false;
-                token.DDEX = token.name;
-                if (this.uniqueTokens[token.addr]) {
-                    this.uniqueTokens[token.addr].DDEX = token.name;
-                    this.uniqueTokens[token.addr].unlisted = false;
-                }
-                else {
-                    this.uniqueTokens[token.addr] = token;
-                }
-            }
-        }
-    } catch (e) {
-        console.log('failed to parse DDEX token list');
-    }
-
-    try {
-        //check listing for idex
-        for (var i = 0; i < idexConfig.length; i++) {
-            var token = idexConfig[i];
-            token.addr = token.addr.toLowerCase();
-
-
-            token.IDEX = token.name;
-            if (token.blockIDEX) {
-                token.unlisted = true;
-            } else {
-                token.unlisted = false;
-            }
-
-            if (this.uniqueTokens[token.addr]) {
-                if (!this.uniqueTokens[token.addr].blockIDEX) {
-                    this.uniqueTokens[token.addr].unlisted = false;
-                }
-                this.uniqueTokens[token.addr].IDEX = token.name;
-                // take full name from IDEX if none is known
-                if (token.name2 && !this.uniqueTokens[token.addr].name2) {
-                    this.uniqueTokens[token.addr].name2 = token.name2;
-                }
-            }
-            else {
-                this.uniqueTokens[token.addr] = token;
-            }
-        }
-    } catch (e) {
-        console.log('failed to parse IDEX token list');
-    }
-
-    try {
-        //radar listed tokens
-        let radarTokens = [];
-        if (radarConfig && radarConfig.length > 0) {
-            radarTokens = radarConfig;
-        }
-        for (var i = 0; i < radarTokens.length; i++) {
-            var tok = radarTokens[i];
-            if (tok) {
-                let token = {};
-                token.addr = tok.address.toLowerCase();
-                token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
-                token.decimals = Number(tok.decimals);
-                token.unlisted = false;
-                token.Radar = token.name.toUpperCase();
-                if (this.uniqueTokens[token.addr]) {
-                    this.uniqueTokens[token.addr].Radar = token.Radar;
-                    this.uniqueTokens[token.addr].unlisted = false;
-                }
-                else {
-                    this.uniqueTokens[token.addr] = token;
-                }
-            }
-        }
-    } catch (e) {
-        console.log('failed to parse Radar token list');
-    }
-
-    try {
-        //kyber listed tokens
-        let kyberTokens = [];
-        if (kyberConfig && kyberConfig.length > 0) {
-            kyberTokens = kyberConfig;
-        }
-        for (var i = 0; i < kyberTokens.length; i++) {
-            var tok = kyberTokens[i];
-            if (tok) {
-                let token = {};
-                token.addr = tok.address.toLowerCase();
-                token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
-                token.decimals = Number(tok.decimals);
-                token.unlisted = false;
-                token.Kyber = token.name.toUpperCase();
-                if (this.uniqueTokens[token.addr]) {
-                    this.uniqueTokens[token.addr].Kyber = token.Kyber;
-                    this.uniqueTokens[token.addr].unlisted = false;
-                }
-                else {
-                    this.uniqueTokens[token.addr] = token;
-                }
-            }
-        }
-    } catch (e) {
-        console.log('failed to parse Kyber token list');
-    }
+    loadCachedTokens('ForkDelta');
+    loadCachedTokens('DDEX');
+    loadCachedTokens('IDEX');
+    loadCachedTokens('Radar');
+    loadCachedTokens('Kyber');
 
     try {
         //unknown tokens saved from etherscan responses
@@ -440,8 +291,7 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
                 }
                 token.unlisted = true;
                 if (this.uniqueTokens[token.addr]) {
-
-                    if (token.name2 && !this.uniqueTokens[token.addr].name2) {
+                    if (token.name2 && token.name !== token.name2 && !this.uniqueTokens[token.addr].name2) {
                         this.uniqueTokens[token.addr].name2 = token.name2;
                     }
                 }
@@ -454,39 +304,77 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         console.log('failed to parse unknown token list');
     }
 
-    //token Store last, as it doesn't include decimals
-    try {
-        //tokenStore listed tokens
-        let tokenStoreTokens = [];
-        if (tokenStoreConfig && tokenStoreConfig.length > 0) {
-            tokenStoreTokens = tokenStoreConfig;
-        }
-        for (var i = 0; i < tokenStoreTokens.length; i++) {
-            var tok = tokenStoreTokens[i];
-            if (tok) {
-                let token = {};
-                token.addr = tok.address.toLowerCase();
-                token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
-               // token.decimals = Number(tok.decimals);
-                token.unlisted = false;
-                token.TokenStore = token.name.toUpperCase();
-                if (this.uniqueTokens[token.addr]) {
-                    this.uniqueTokens[token.addr].TokenStore = token.TokenStore;
-                    this.uniqueTokens[token.addr].unlisted = false;
-                }
-               /* else { // avoid for now, since we don't know decimals
-                    this.uniqueTokens[token.addr] = token;
-                } */
-            }
-        }
-    } catch (e) {
-        console.log('failed to parse tokenStore token list');
-    }
+    //load this last as it doesn't include decimals, we might get them from another source
+    loadCachedTokens('TokenStore');
 
     let ethAddr = this.config.ethAddr;
     this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr] && (!x.unlisted || !x.blocked) && !x.killed; });
     let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !x.killed && !tokenBlacklist[x.addr] && x.addr !== ethAddr); });
     this.config.tokens = [this.uniqueTokens[ethAddr]].concat(listedTokens);
+
+    function loadCachedTokens(exchangeName) {
+        if(exchangeTokens && exchangeName) {
+            try {
+                let lowercase = exchangeName.toLowerCase();
+                let exTokens = exchangeTokens[lowercase];
+                if(exTokens && exTokens.length > 0) {
+                    for (let i = 0; i < exTokens.length; i++) {
+                        let tok = exTokens[i];
+                        if (tok) {
+                            // these 2 use { addr: , name:, decimals}
+                            if(lowercase == 'etherdelta' || lowercase == 'forkdelta') {
+                                tok.symbol = tok.name;
+                                tok.address = tok.addr;
+                                delete tok.name;
+                                if (tok.fullName && tok.fullName !== "") { //forkdelta uses fullName
+                                    tok.name = tok.fullName;
+                                }
+                            }
+
+                            //legacy format, symbol is called 'name',  name is called 'name2'
+                            let token = {};
+                            token.addr = utility.escapeHtml(tok.address.toLowerCase());
+                            token.name = utility.escapeHtml(tok.symbol); // escape nasty stuff in token symbol/name
+                            if(tok.name) {
+                                token.name2 = utility.escapeHtml(tok.name);
+                            }
+            
+                            token.decimals = Number(tok.decimals);
+                            token[exchangeName] = token.name.toUpperCase();
+
+                            //do we already know this token?
+                            if (_delta.uniqueTokens[token.addr]) {
+                                _delta.uniqueTokens[token.addr][exchangeName] = token.name;
+                                // mae the token listed, except for a special case for idex
+                                if (!(_delta.uniqueTokens[token.addr].blockIDEX && exchangeName == 'IDEX')) {
+                                    _delta.uniqueTokens[token.addr].unlisted = false;
+                                }
+
+                                // we found a new name ('name2') for this token
+                                if (token.name2 && token.name !== token.name2 && !_delta.uniqueTokens[token.addr].name2) {
+                                    _delta.uniqueTokens[token.addr].name2 = token.name2;
+                                }
+                                
+                            }
+                            //we don't know this token
+                            else if(exchangeName !== 'TokenStore') { //avoid TS as they don't include decimals
+                                
+                                // special case for idex tokens that are no longer listed but returned by API
+                                if (exchangeName == 'IDEX' && tok.blockIDEX) {
+                                    token.unlisted = true;
+                                } else {
+                                    token.unlisted = false;
+                                }
+                                _delta.uniqueTokens[token.addr] = token;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('failed to parse ' + exchangeName + ' token list');
+            }
+        }
+    }
 }
 
 DeltaBalances.prototype.setToken = function (address) {

@@ -60,9 +60,13 @@ module.exports = {
     Singularx: { addr: '0x9a2d163ab40f88c625fd475e807bbc3556566f80', name: 'SingularX ', supportedDex: true },
     EtherC: { addr: '0xd8d48e52f39ab2d169c8b562c53589e6c71ac4d3', name: 'EtherC ', supportedDex: true },
     
+
     /* exchanges with no parsing support yet */
-    //bithumb R1 protocol?
-    R1: { addr: '0x7b45a572ea991887a01fd919c05edf1cac79c311', name: 'R1 Protocol ', supportedDex: false },
+    DDEX: { addr: '0x2cb4b49c0d6e9db2164d94ce48853bf77c4d883e', name: 'DDEX Hydro ', supportedDex: false},
+    DDEXproxy: { addr: '0x74622073a4821dbfd046e9aa2ccf691341a076e1', name: 'DDEX Hydro ', supportedDex: false},
+    R1: { addr: '0x7b45a572ea991887a01fd919c05edf1cac79c311', name: 'R1 Protocol ', supportedDex: false }, //bithumb R1 protocol?
+    // old R1? 0xE18898c76a39ba4Cd46a544b87ebe1166fbe7052
+    BithumbDex: { addr: '0xc7c9b856d33651cc2bcd9e0099efa85f59f78302', name: 'BithumbDex ', supportedDex:false },     //bithumb dex R1
     Martle: { addr: '0x551d56781e0cd16ac2c61a03e6537844a41c7709', name: 'Martle instant ', supportedDex: false},
     Switcheo: { addr: '0xba3ed686cc32ffa8664628b1e96d8022e40543de', name: 'Switcheo ', supportedDex: true }, //partial
     DutchX: {addr:'0x039fb002d21c1c5eeb400612aef3d64d49eb0d94', name:'DutchX ', supportedDex: false},
@@ -152,12 +156,14 @@ module.exports = {
   admins: {
     '0xceceaa8edc0830c7cec497e33bb3a3c28dd55a32': 'IDEX Admin',
     '0xa7a7899d944fe658c4b0a1803bab2f490bd3849e': 'IDEX Admin',
-    // '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX Admin',
+    '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX Admin', //0x v1
+    '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX Admin', // Hydro ex
     '0x4969358e80cdc3d74477d7447bffa3b2e2acbe92': 'Paradex Admin',
     '0xd2045edc40199019e221d71c0913343f7908d0d5': 'Paradex Admin',
     '0xd3d0474124c1013ed6bfcfd9a49cfedb8c78fc44': 'Erc Dex Admin',
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex Admin',
     '0x1f8cdd31345faa00bbdf946fa257b7feb706b535': 'Switcheo Admin',
+    '0x457804851eaf090dad4871f9609010c6868d99d4': 'BithumbDex Admin ', 
   },
   wrappedETH: {
     "0x0000000000000000000000000000000000000000": 1, // EtherDelta, IDEX, tokenStore, Decentrex  reserved for ETH

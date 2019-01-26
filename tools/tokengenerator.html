@@ -23,11 +23,14 @@
 </head>
 
 <body>
-	A quick script to get a big list of tokens
+	A quick script to get a big list of tokens deposited in exchange contracts/wallets according to ethplorer.io. (Filter tokens on >=10 deposited  and < 0.5*totalSupply in exchange)
 	<ul>
-		<li> myetherwallet's ethTokens</li>
-		<li> myCrypto's ethTokens</li>
-		<li> Tokens deposited in exchange contracts accoring to ethplorer.io (Filter tokens on >=10 deposited and >=100 token holders.)</li>
+        <li>etherdelta</li>
+        <li>idex</li>
+        <li>tokenstore</li>
+        <li>ethfinex</li>
+        <li>switcheo</li>
+        <li>ddex</li>
 
 	</ul>
 
@@ -81,7 +84,11 @@
 			for (var i = 0; i < array.length; i++) {
 				let EDtoken = array[i];
                 if (EDtoken) {
-                
+                    if(EDtoken.address) { // convert idex to old format
+                        EDtoken.addr = EDtoken.address;
+                        EDtoken.name2 = EDtoken.name;
+                        EDtoken.name = EDtoken.symbol;
+                    }
                     if(!EDtoken.decimals)
                         EDtoken.decimals = 0;
                         
@@ -133,6 +140,7 @@
                         symbol : escapeHtml(ddexToken.symbol),
                         address : ddexToken.address.toLowerCase(),
                         decimal : Number(ddexToken.decimals),
+						name: escapeHtml(ddexToken.name),
                     };
                     token.DDEX = token.symbol;
                     
@@ -142,6 +150,9 @@
                         if(!customTokens[token.address].DDEX) {
                             customTokens[token.address].DDEX = token.symbol;
                         }
+						if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
+							customTokens[token.address].name = token.name;
+						}
                     }
 				}
 			}
@@ -169,6 +180,9 @@
                         if(!customTokens[token.address].Radar) {
                             customTokens[token.address].Radar = token.symbol;
                         }
+						if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
+							customTokens[token.address].name = token.name;
+						}
                     }
 				}
 			}
@@ -196,6 +210,9 @@
                         if(!customTokens[token.address].Kyber) {
                             customTokens[token.address].Kyber = token.symbol;
                         }
+						if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
+							customTokens[token.address].name = token.name;
+						}
                     }
 				}
 			}
@@ -222,6 +239,9 @@
                         if(!customTokens[token.address].TokenStore) {
                             customTokens[token.address].TokenStore = token.symbol;
                         }
+						if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
+							customTokens[token.address].name = token.name;
+						}
                     }
 				}
 			}
@@ -232,24 +252,33 @@
 			for (let i = 0; i < response.tokens.length; i++) {
                 let tokenResponse = response.tokens[i];
 				let tok = response.tokens[i].tokenInfo;
-				let addr = tok.address.toLowerCase();
+                let addr = tok.address.toLowerCase();
+                tok.address = addr;
                 if (!customTokens[addr]){ 
                 
+					// any real token has balance > 10 and less than totalsupply in 1 contract
                     if(tok.symbol && tokenResponse.balance > 10 && tokenResponse.balance < (Number(tok.totalSupply) / 2)) {
                         
-                        if(tok.price) {
-                            addToken(tok);
+                        if(tok.holdersCount){
+                            if(tok.holdersCount > 10) {
+                                if(tok.holdersCount <= 150) {
+                                    tok.blocked = 1; // block for balance loading below 150 users
+                                }
+                                addToken(tok);
+                            }
+						} else if(tok.price) {
+							addToken(tok);
                         }
-                        else if(tok.holdersCount && tok.holdersCount > 100) {
-                            addToken(tok);
-                        } 
                     }
                 
                     function addToken(token) {
                         if (token.symbol !== token.name && token.name !== "") {
-                            customTokens[addr] = { symbol: escapeHtml(token.symbol), address: addr,  decimal: Number(token.decimals), name: escapeHtml(token.name) };
+                            customTokens[token.address] = { symbol: escapeHtml(token.symbol), address: token.address,  decimal: Number(token.decimals), name: escapeHtml(token.name) };
                         } else {
-                            customTokens[addr] = { symbol: escapeHtml(token.symbol), address: addr, decimal: Number(token.decimals) };
+                            customTokens[token.address] = { symbol: escapeHtml(token.symbol), address: token.address, decimal: Number(token.decimals) };
+                        }
+                        if(token.blocked) {
+                            customTokens[token.address].blocked = token.blocked;
                         }
                     }
       
@@ -346,15 +375,14 @@
 								}
 								//not in ticker, define as delisted
 								if(!correct) {
-									customTokensList[i].blockIDEX = true;
+                                    customTokensList[i].blockIDEX = true;
 									continue;
 								}
 								
 							} else {
 								continue;
-							}
+                            }
 						}
-						
 
 						customTokensList = customTokensList.filter(tok => tok.decimal >= 0);// filter any unset decimals from tokenstore
 						customTokensList = customTokensList.sort(function (a, b) {
@@ -481,7 +509,7 @@
 			});
             
             //ddex admin address (fee receiver)
-            $.getJSON('https://api.ethplorer.io/getAddressInfo/0xe269e891a2ec8585a378882ffa531141205e92e9?apiKey='+key).done(function (data) {
+            $.getJSON('https://api.ethplorer.io/getAddressInfo/0x49497a4d914ae91d34ce80030fe620687bf333fd?apiKey='+key).done(function (data) {
 				loaded++;
 				if (data && data.tokens)
 					ethplorerDdex = data;

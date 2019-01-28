@@ -154,7 +154,8 @@ var isAddressPage = true;
 			var selected = []
 			selected = $('#exchangeDropdown').val();
 
-			setExchanges(selected, true);
+            setExchanges(selected, true);
+            setStorage();
 		});
 
 		setExchanges(exchanges, true);
@@ -211,10 +212,7 @@ var isAddressPage = true;
 			oneAddress = extraAddresses.length == 0;
 		}
 
-		// no address in url, check local/session storage
-		if (!publicAddr) {
-			getStorage();
-		}
+		getStorage();
 
 		if (publicAddr) {
 			//autoStart = true;
@@ -415,7 +413,7 @@ var isAddressPage = true;
 				setDaySelector();
 			else
 				setMonthSelector();
-		}
+        }
 	}
 
 	function myClick() {
@@ -1146,12 +1144,32 @@ var isAddressPage = true;
 				localStorage.setItem("address", savedAddr);
 			} else {
 				localStorage.removeItem('address');
-			}
+            }
+            
+            // is this multi exchange trade history?
+            if(window.location.pathname.toLowerCase().indexOf('/trades')) {
+                //save exchange selection
+                localStorage.setItem("exchanges-tradeHistory", JSON.stringify(exchanges));
+            }
 		}
 	}
 
 	function getStorage() {
 		if (typeof (Storage) !== "undefined") {
+
+            // is this multi exchange trade history?
+            if(window.location.pathname.toLowerCase().indexOf('/trades')) {
+                //load exchange selection
+                let selected = localStorage.getItem("exchanges-tradeHistory");
+                if(selected !== null && selected.length > 0) {
+                    try {
+                        let sel = JSON.parse(selected);
+                        if(sel && Array.isArray(sel)) {
+                            setExchanges(sel);
+                        }
+                    } catch(e) {}
+                }
+            }
 
 			// check for saved address
 			if (localStorage.getItem("address") !== null) {
@@ -1647,7 +1665,7 @@ var isAddressPage = true;
 		} else if (exportFormat == 3) {
 			// Cointracking.info - CSV
 			filePrefix = 'Cointracking_CSV_';
-			// format https://cointracking.info/import/import_csv/
+			// format https://www.cointracking.info/enter_coins.php
 			const headers = ['Type', 'Buy', 'Cur.', 'Sell', 'Cur.', 'Fee', 'Cur.', 'Exchange', 'Group', 'Comment', 'Date', 'Trade ID'];
 			tableData = [headers];
 

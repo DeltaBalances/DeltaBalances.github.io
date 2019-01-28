@@ -1076,9 +1076,14 @@ var isAddressPage = true;
 			localStorage.setItem("listedTokens", showListed);
 			localStorage.setItem("decimals", decimals);
 
+			let enabledExchanges = {};
 			Object.keys(exchanges).forEach(function (key) {
-				localStorage.setItem('allow:'+key, exchanges[key].enabled);
+				enabledExchanges[key] = exchanges[key].enabled;
+				
+				// remove legacy data
+				localStorage.removeItem('allow:' + key);
 			});
+			localStorage.setItem('enabledExchanges-Allowance', JSON.stringify(enabledExchanges));
 		}
 	}
 
@@ -1112,15 +1117,15 @@ var isAddressPage = true;
 				decimals = dec === "true";
 			}
 
-			Object.keys(exchanges).forEach(function (key) {
-				let enabled = localStorage.getItem('allow:'+key);
-				if (enabled !== null) {
-					enabled = (enabled === "true");
-					if(exchanges[key]) {
-						exchanges[key].enabled = enabled;
-					}
-				}
-			});
+			let enabledExchanges = localStorage.getItem('enabledExchanges-Allowance');
+			if(enabledExchanges !== null && enabledExchanges.length > 0) {
+				try {
+					enabledExchanges = JSON.parse(enabledExchanges);
+					Object.keys(exchanges).forEach(function (key) {
+						exchanges[key].enabled = enabledExchanges[key];
+					});
+				} catch(e) {}
+			}
 
 			// check for saved address
 			if (localStorage.getItem("address") !== null) {

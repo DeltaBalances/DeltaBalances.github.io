@@ -162,7 +162,7 @@ var isAddressPage = true;
 
 			// array of exchange names
 			setTimeout(function () {
-				toggleFilter(selected);
+                toggleFilter(selected);
 			}, 100);
 
 		});
@@ -237,7 +237,7 @@ var isAddressPage = true;
 
 
 
-	function toggleFilter(selected) {
+	function toggleFilter(selected, dontSave) {
 
 		let changed = false;
 		let displFilt = Object.keys(displayFilter);
@@ -258,7 +258,10 @@ var isAddressPage = true;
 				makeTable2(lastResult2);
 			} else {
 				placeholderTable();
-			}
+            }
+            
+            if(!dontSave)
+                setStorage();
 		}
 	}
 
@@ -1373,6 +1376,9 @@ var isAddressPage = true;
 	// save address for next time
 	function setStorage() {
 		if (typeof (Storage) !== "undefined") {
+
+            localStorage.setItem('recent-options', JSON.stringify(displayFilter));
+
 			if (publicAddr) {
 				sessionStorage.setItem('address', publicAddr);
 			} else {
@@ -1401,6 +1407,24 @@ var isAddressPage = true;
 
 	function getStorage() {
 		if (typeof (Storage) !== "undefined") {
+
+
+            //load dropdown selection from cache
+            let selection = localStorage.getItem('recent-options');
+            if(selection !== null && selection.length > 0) {
+                try {
+                    selection = JSON.parse(selection);
+                    let filter = [];
+                    Object.keys(selection).forEach(function (key) {
+                        if(displayFilter.hasOwnProperty(key)) {
+                            if(selection[key]) {
+                                filter.push(key);
+                            }
+                        }
+                    });
+                    toggleFilter(filter, true);
+                } catch(e) {}
+            }
 
 			if (localStorage.getItem("usd") === null) {
 				showDollars = true;

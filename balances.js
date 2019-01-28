@@ -1412,12 +1412,17 @@ var isAddressPage = true;
 			localStorage.setItem("customTokens", showCustomTokens);
 			localStorage.setItem("listedTokens", showListed);
 			localStorage.setItem("decimals", decimals);
-			localStorage.setItem("hideZero", hideZero);
+			//localStorage.setItem("hideZero", hideZero);
 			localStorage.setItem('fiat', showFiat);
 
+			let enabledExchanges = {};
 			Object.keys(exchanges).forEach(function (key) {
-				localStorage.setItem(key, exchanges[key].enabled);
+				enabledExchanges[key] = exchanges[key].enabled;
+				
+				// remove legacy data
+				localStorage.removeItem(key);
 			});
+			localStorage.setItem('enabledExchanges-Balance', JSON.stringify(enabledExchanges));
 		}
 	}
 
@@ -1460,14 +1465,17 @@ var isAddressPage = true;
 				decimals = dec === "true";
 			}
 
-			Object.keys(exchanges).forEach(function (key) {
-				let enabled = localStorage.getItem(key);
-				if (enabled !== null) {
-					enabled = (enabled === "true");
-					exchanges[key].enabled = enabled;
-				}
-				exchanges['Wallet'].enabled = true;
-			});
+
+			let enabledExchanges = localStorage.getItem('enabledExchanges-Balance');
+			if(enabledExchanges !== null && enabledExchanges.length > 0) {
+				try {
+					enabledExchanges = JSON.parse(enabledExchanges);
+					Object.keys(exchanges).forEach(function (key) {
+						exchanges[key].enabled = enabledExchanges[key];
+					});
+				} catch(e) {}
+			}
+			exchanges['Wallet'].enabled = true;
 
 
 			// check for saved address

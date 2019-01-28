@@ -1147,7 +1147,7 @@ var isAddressPage = true;
             }
             
             // is this multi exchange trade history?
-            if(window.location.pathname.toLowerCase().indexOf('/trades')) {
+            if(window.location.pathname.toLowerCase().indexOf('/trades') !== -1) {
                 //save exchange selection
                 localStorage.setItem("exchanges-tradeHistory", JSON.stringify(exchanges));
             }
@@ -1158,7 +1158,7 @@ var isAddressPage = true;
 		if (typeof (Storage) !== "undefined") {
 
             // is this multi exchange trade history?
-            if(window.location.pathname.toLowerCase().indexOf('/trades')) {
+            if(window.location.pathname.toLowerCase().indexOf('/trades') !== -1) {
                 //load exchange selection
                 let selected = localStorage.getItem("exchanges-tradeHistory");
                 if(selected !== null && selected.length > 0) {

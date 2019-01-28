@@ -2,7 +2,7 @@
 Offline backup of supported ERC20 tokens.
 On the live website this gets appended with cached tokens from exchange listings (forkdelta, idex, ddex) and etherscan token transfer data.
 
-Generated with tokengenerator.html 2019-01-26
+Generated with tokengenerator.html 2019-01-28
 
 
 Additional sources for unlisted tokens:
@@ -1956,7 +1956,7 @@ let offlineCustomTokens = [
   {symbol:"ETM",address:"0x28926c46bc5c0aeab39c72f7c1201bfb8056d509",decimal:18,name:"Ethermoney",TokenStore:"ETM"},
   {symbol:"ETM",address:"0x2a2896bc39ba09e798b5021ef8eddf5dc8dbc986",decimal:18,name:"Ethereum Metal",blocked:1},
   {symbol:"ETM",address:"0x63bfb3f9e8468f1f9a540acd66df56bea878808b",decimal:2,name:"Electromagnum"},
-  {symbol:"ETM",address:"0xceedf087d386109ff18dd38b0684efb0355a13e8",decimal:6,name:"Ethereum Mobile",TokenStore:"ETM_"},
+  {symbol:"ETM",address:"0xceedf087d386109ff18dd38b0684efb0355a13e8",decimal:6,name:"Ethereum Mobile"},
   {symbol:"ETM",address:"0xec6b50a3f3f1e8a07557ca2ef048b3eecab1cd5e",decimal:18,name:"Ethereum Metal",blocked:2},
   {symbol:"ETN",address:"0x0b3dd26b80fd679af3fec73b1e60eb716c311b72",decimal:8,name:"EtherNex",blocked:1},
   {symbol:"ETN",address:"0x81f89694ac96fefd794cb2c8526d2bd8da74b1fb",decimal:18,name:"electroneum",blocked:1},
@@ -3122,7 +3122,7 @@ let offlineCustomTokens = [
   {symbol:"LTE",address:"0xcd3b77b229c3afd1b88e5d28ece0d1c6fa57117a",decimal:18},
   {symbol:"LTF",address:"0x411a81c8cd604941be13dbbd33b54e6f25d84683",decimal:18,name:"Letsfair",blocked:1},
   {symbol:"LTG",address:"0x0879e0c9822b75f31f0b0ed2a30be9f484a57c2f",decimal:0,name:"LiteCoinGold",EtherDelta:"LTG",ForkDelta:"LTG"},
-  {symbol:"LTG",address:"0xb4c9abc8a74bd2e0e0b7ac5ece30792e65d86c59",decimal:8,name:"Lite Gold",blocked:1,TokenStore:"LTG"},
+  {symbol:"LTG",address:"0xb4c9abc8a74bd2e0e0b7ac5ece30792e65d86c59",decimal:8,name:"Lite Gold",blocked:1},
   {symbol:"LTGO",address:"0x01e4501446947dcbcdb3d5951a2b4de2f68d3bde",decimal:0,name:"LitecoinGolden",blocked:1},
   {symbol:"LTK",address:"0x8a732bc91c33c167f868e0af7e6f31e0776d0f71",decimal:18,name:"Litecoin Token"},
   {symbol:"LTO",address:"0x3db6ba6ab6f95efed1a6e794cad492faaabf294d",decimal:8,name:"LTO Network Token",IDEX:"LTO"},
@@ -3436,7 +3436,7 @@ let offlineCustomTokens = [
   {symbol:"NAVI",address:"0xc15a399c4ea7815fe36857c9e290ee452a5d6b21",decimal:18,name:"BoatPilot Token",DDEX:"NAVY"},
   {symbol:"NBAI",address:"0x17f8afb63dfcdcc90ebe6e84f060cc306a98257d",decimal:18,name:"Nebula AI Token",IDEX:"NBAI",DDEX:"NBAI"},
   {symbol:"NBK",address:"0xab8de12efcbf03bf3fc86738f4e598a5de8af001",decimal:18,name:"NewBank"},
-  {symbol:"NBT",address:"0x0574586d9c3741c638998434cea480c67e4aa88f",decimal:8,name:"NinsaBToken",blocked:1,TokenStore:"NBT"},
+  {symbol:"NBT",address:"0x0574586d9c3741c638998434cea480c67e4aa88f",decimal:8,name:"NinsaBToken",blocked:1},
   {symbol:"NBT",address:"0x3f9c0a5773817ffaa5a1061e1e33c1d9c8888dff",decimal:8,name:"Noblebit"},
   {symbol:"NBTK",address:"0xb0e6f83eba6a4ea20617e134b1aee30fcb0ac634",decimal:0,name:"Nebeus",blockIDEX:true,IDEX:"NBTK"},
   {symbol:"NBW",address:"0x095cd13b069f9f7105a928fcaada1edc625598f2",decimal:18,name:"netbanwork",blocked:1},

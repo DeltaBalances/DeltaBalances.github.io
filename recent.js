@@ -1043,8 +1043,11 @@ var isAddressPage = true;
                                         || unpacked.name === 'matchOrders' //0xv2
                                         || (unpacked.name == 'executeTransaction' && obj.type !== "Signed execution") //0xv2
                                     ) {
-                                        if ((!contract && (obj.maker == myAddr || obj.taker == myAddr))
-                                            || (contract && (to == myAddr || from == myAddr))) {
+                                        if ( (obj.maker == myAddr || obj.taker == myAddr)
+                                            && (!contract  //tx sent by me
+                                                || (contract && (to == myAddr || from == myAddr) && obj.type.indexOf('up to') == -1) //tx received as maker ('up to' excludes fillUpTo and marketBuy/marketSell)
+                                            ) )
+                                        {
 
                                             if (obj.maker === myAddr) {
                                                 if (obj.type == 'Taker Buy') {
@@ -1054,12 +1057,32 @@ var isAddressPage = true;
                                                 }
                                             }
                                             let price = obj.price;
+
                                             if (unpacked.name === 'fillOrdersUpTo') {
                                                 if (i == 0) {
                                                     price = obj.maxPrice;
-                                                }
-                                                else {
-                                                    continue;
+                                                } else {
+                                                    // maker side of market buy/sell, check if entire order was filled by amount of tokens transferred
+                                                    if(contract) { // etherscan token transfer api
+                                                        if(contract == obj.token.addr) {
+                                                            let dvsr = _delta.divisorFromDecimals(obj.token.decimals)
+                                                            let amount = _util.weiToEth(tx.value, dvsr);
+            
+                                                            if(obj.amount.greaterThan(amount)) {
+                                                                obj.amount = amount;
+                                                                obj.baseAmount = obj.amount.times(obj.price);
+                                                            }
+                                                           
+                                                        } else if(contract == obj.base.addr) {
+                                                            let dvsr = _delta.divisorFromDecimals(obj.base.decimals)
+                                                            let amount = _util.weiToEth(tx.value, dvsr);
+            
+                                                            if(obj.baseAmount.greaterThan(amount)) {
+                                                                obj.baseAmount = amount;
+                                                                obj.amount = obj.baseAmount.div(obj.price);
+                                                            }
+                                                        }
+                                                    }
                                                 }
                                             }
                                             if (obj.relayer) {

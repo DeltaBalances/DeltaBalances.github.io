@@ -4280,15 +4280,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'taker': taker3,
                     };
 
+                    // buy up to// sell up to  has either an amount or baseAmount
                     if (isAmount) {
                         delete initObj.baseAmount;
                     } else {
                         delete initObj.amount;
-                    }
-
-                    for (let i = 0; i < objs.length; i++) {
-                        delete objs[i].amount;
-                        delete objs[i].baseAmount;
                     }
 
                     return [initObj].concat(objs);

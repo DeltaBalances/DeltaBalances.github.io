@@ -32,6 +32,7 @@ Decentralized exchanges supported by the DeltaBalances website
 | 0x Protocol v2 | - | Yes| Yes| Yes |
 | [AirSwap](https://airswap.io)| - | Yes |Yes |Yes|
 | [Bancor](https://bancor.network)  | - | Yes| Yes | No|
+| [DDEX hydro](https://ddex.io/)| - | Not yet| Partial (WIP)| Not yet |
 | Decentrex †| Yes| Yes| Yes| Yes |
 | [Dexy](https://dexy.market) |Yes| No| No | No|
 | [EasyTrade](https://easytrade.io) |-| Yes| Yes | Yes|
@@ -43,12 +44,12 @@ Decentralized exchanges supported by the DeltaBalances website
 | [ETHEX](https://ethex.market)|-|Yes|Yes|Yes|
 | [ForkDelta](https://forkDelta.app)| Yes| Yes| Yes| Yes | 
 | [IDEX](https://idex.market)| Yes |Yes |Yes| No |
-| [Joyso](https://joyso.io)|Yes| Not yet| Not yet | Not yet|
+| [Joyso](https://joyso.io)|Yes| Not yet| Not yet | No|
 | [Kyber Network](https://kyber.network) |-|Yes|Yes| Yes | Yes|
 | [OasisDex](https://oasisdex.com) |-|Yes| Yes | Yes|
 | [OasisDirect](https://oasis.direct) |-|Yes| Yes | No|
 | [SingularX](https://singularx.com)|Yes| Yes| Yes | Yes|
-| [Switcheo](https://switcheo.exchange)|Yes| Not yet| Not yet | Not yet|
+| [Switcheo](https://switcheo.exchange)|Yes| Partial (WIP)| Partial (WIP) | Not yet|
 | [Token Store](https://token.store)| Yes| Yes| Yes| Yes |
 | [Token store Instant-trade](https://token.store)| - | Yes| Yes | No|
 

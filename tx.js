@@ -615,7 +615,7 @@ var isAddressPage = false;
 									delete obj.feeCurrency;
 									delete obj.transType;
 									delete obj.tradeType;
-								} else if (unpacked.name === 'LogFill' || unpacked.name === 'Fill') {
+								} else if (unpacked.name === 'LogFill' || unpacked.name === 'Fill' || unpacked.name === 'Match') {
 									delete obj.transType;
 									delete obj.tradeType;
 									delete obj.relayer;
@@ -786,7 +786,7 @@ var isAddressPage = false;
 		if (Object.keys(operations).length > 0)
 			sum += '<br>';
 
-		if (transaction.input && transaction.input[0].type === 'Transfer') {
+		if (transaction.input && transaction.input.length > 0 && transaction.input[0].type === 'Transfer') {
 			if (_delta.uniqueTokens[transaction.input[0].to]) {
 				sum += '<strong>Warning</strong>, you sent tokens to a token contract. These tokens are most likely lost forever. <br>';
 			}
@@ -891,7 +891,7 @@ var isAddressPage = false;
 
 		$('#ethval').html('<span data-toggle="tooltip" title="' + _util.exportNotation(transaction.value) + '">' + transaction.value.toString() + '</span>');
 		$('#inputdata').html('');
-		if (transaction.input && transaction.input[0].type) {
+		if (transaction.input && transaction.input.length > 0 && transaction.input[0].type) {
 			$('#inputtype').html(transaction.input[0].type);
 		} else {
 			if (tradeCount == 0) {

@@ -140,10 +140,16 @@ function _decodeMethod(data) {
             return param2.map((val, index2) => {
               let type = abiItem.inputs[index].components[index2].type;
               if (type.indexOf("uint") == 0 || type.indexOf("int") == 0) {
-                return parseArrayNumber(val);
-              } else {
-                return val;
+                val = parseArrayNumber(val);
+              } else if(type.indexOf('tuple') !== -1) {
+                  //recursive on nested tuples
+                val = parseTuple(val, ((type.match(/]/g) || []).length));
               }
+              return {
+                name: abiItem.inputs[index].components[index2].name,
+                value: val,
+                type: abiItem.inputs[index].components[index2].type,
+              };
             });
           }
         }

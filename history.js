@@ -994,7 +994,8 @@ var isAddressPage = true;
 						unpacked.name != 'Buy' &&
 						unpacked.name != 'Sell' &&
 						unpacked.name != 'FillBuyOrder' &&
-						unpacked.name != 'FillSellOrder'
+                        unpacked.name != 'FillSellOrder' /*&&
+                        unpacked.name != 'Match' */
 					)
 				) {
 					continue;

@@ -1029,6 +1029,13 @@ var isAddressPage = true;
                                             obj.amount = '';
                                         trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
                                     }
+                                    //ddex hydro trade input
+                                    else if(unpacked.name == 'matchOrders' && unpacked.params.length == 3) {
+                                      /*  if ( obj.maker == myAddr || obj.taker == myAddr) {
+                                            trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
+                                        } */
+                                    }
+
                                     else if (unpacked.name === 'fillOrder' // 0xv1 0xv2
                                         || unpacked.name === 'fillOrKillOrder' //0xv1 0xv2
                                         || unpacked.name === 'batchFillOrders' //0xv1 0xv2

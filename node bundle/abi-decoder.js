@@ -36,19 +36,25 @@ function _addABI(abiArray) {
 // get an unhashed function signature 'function(address,uin256)'
 function _getSignature(abiItem) {
   if (abiItem.name) {
-    return abiItem.name + _concatInput(abiItem.inputs);
+    return abiItem.name + '(' + _concatInput(abiItem.inputs, false) + ')';
   } else {
     throw new Error("Expected a function or event name");
   }
 }
 
-function _concatInput(inputArray) {
+// get a string of types in a function/event definition
+// The 'tuple' word for structs is omitted in function signatures, but used in decoding
+function _concatInput(inputArray, addTupleKeyword) {
+
   inputArray = inputArray.map(function (input) {
     //check for structs (tuple in abi)
     if (input.type.indexOf('tuple') === -1) {
       return input.type;
     } else {
-      let type = _concatInput(input.components);
+      let type = '(' + _concatInput(input.components, addTupleKeyword) + ')';
+      if (addTupleKeyword) {
+        type = 'tuple' + type;
+      }
       //adjust for tuple arrays  "tuple[]", "tuple[][]"
       let length = input.type.length - 5;
       while (length >= 2) {
@@ -58,7 +64,7 @@ function _concatInput(inputArray) {
       return type;
     }
   });
-  return "(" + inputArray.join(',') + ")";
+  return inputArray.join(',');
 }
 
 
@@ -69,14 +75,7 @@ function _getInputTypes(inputArray) {
     if (input.type.indexOf('tuple') === -1) {
       return input.type;
     } else {
-      let type = 'tuple' + _concatInput(input.components);
-      //add (multi) arrays  "tuple[]", "tuple[][]"
-      let length = input.type.length - 5;
-      while (length >= 2) {
-        type += "[]";
-        length -= 2;
-      }
-      return type;
+      return _concatInput([input], true);
     }
   });
 }
@@ -192,7 +191,10 @@ function _decodeLogs(logs) {
 
       ///////////////////////////
 
-      /* overload hack (indexed vs non-indexed), just assume first topic.length args are indexed */
+      /* Quick code to handle event overloading (indexed vs non-indexed) 
+        EtherDelta & EnclavesDex have similar events with the same signature, but a difference in indexed variables.
+        If both ABIs are loaded, one of the 2 will fail to decode.
+      */
 
       //check if we have indexd topics, but ABI doesn't have indexed
       const isIndexed = logItem.topics && logItem.topics.length > 1 && !method.inputs.reduce((acc, inp) => { return (acc || inp.indexed); }, false);
@@ -252,7 +254,7 @@ function _decodeLogs(logs) {
 
       ///////////////////////////
 
-      /* restore hack above */
+      /* Restore overloading indexed 'hack' */
       if (isIndexed) {
         for (let i = 0; i < method.inputs.length; i++) {
           method.inputs[i].indexed = false;

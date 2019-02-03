@@ -32,7 +32,7 @@ Decentralized exchanges supported by the DeltaBalances website
 | 0x Protocol v2 | - | Yes| Yes| Yes |
 | [AirSwap](https://airswap.io)| - | Yes |Yes |Yes|
 | [Bancor](https://bancor.network)  | - | Yes| Yes | No|
-| [DDEX hydro](https://ddex.io/)| - | Not yet| Partial (WIP)| Not yet |
+| [DDEX hydro](https://ddex.io/)| - | Yes| Yes| Not yet |
 | Decentrex †| Yes| Yes| Yes| Yes |
 | [Dexy](https://dexy.market) |Yes| No| No | No|
 | [EasyTrade](https://easytrade.io) |-| Yes| Yes | Yes|

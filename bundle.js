@@ -3239,11 +3239,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                 let maker = unpacked.params[0].value[0].value.toLowerCase();
                 let relayer = unpacked.params[0].value[1].value.toLowerCase();
-                let base = _delta.setToken(unpacked.params[0].value[2].value);
-                let token = _delta.setToken(unpacked.params[0].value[3].value);
+                let base = _delta.setToken(unpacked.params[0].value[3].value);
+                let token = _delta.setToken(unpacked.params[0].value[2].value);
 
-                let rawBaseAmount = new BigNumber(unpacked.params[0].value[4].value);
-                let rawTokenAmount = new BigNumber(unpacked.params[0].value[5].value);
+                let rawBaseAmount = new BigNumber(unpacked.params[0].value[5].value);
+                let rawTokenAmount = new BigNumber(unpacked.params[0].value[4].value);
 
                 let rawData = unpacked.params[0].value[1].value.toLowerCase();
                 let cancelType =  rawData.slice(4,6); // 0-1 is 0x,  2-3 is version, 4-5 side
@@ -4036,52 +4036,32 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 takeOrder.type = takeOrder.type.replace('Maker ', '');
                 takeOrder.type += ' up to';
                 let makeOrders = unpacked.params[1].value.map(x => unpackOrderInput(x));
-                makeOrders = makeOrders.map(x => {
+                /* makeOrders = makeOrders.map(x => {
                     if(x.type.indexOf('Sell') !== -1) {
                         x.type = x.type.replace('Sell', 'Buy');
                     } else {
                         x.type = x.type.replace('Buy', 'Sell');
                     }
-                    return x;
-                })
+                    return x; 
+                }) */
 
                 return [takeOrder].concat(makeOrders);
 
                 function unpackOrderInput(orderStructArray) {
                     let maker = orderStructArray[0].value.toLowerCase();
-                    let makerToken = _delta.setToken(orderAddressStructArray[0].value);
-                    let takerToken = _delta.setToken(orderAddressStructArray[1].value);
+                    let base = _delta.setToken(orderAddressStructArray[1].value);
+                    let token = _delta.setToken(orderAddressStructArray[0].value);
                     let relayer = orderAddressStructArray[2].value.toLowerCase();
     
-                    let rawMakeAmount = new BigNumber(orderStructArray[1].value);
-                    let rawTakeAmount = new BigNumber(orderStructArray[2].value);
-
-                    let rawBaseAmount = undefined;
-                    let rawTokenAmount = undefined;
+                    let rawBaseAmount = new BigNumber(orderStructArray[2].value);
+                    let rawTokenAmount = new BigNumber(orderStructArray[1].value);
     
                     let rawData = orderStructArray[4].value.toLowerCase();
-                   /* let tradeType =  rawData.slice(4,6); // 0-1 is 0x,  2-3 is version, 4-5 side
+                    let tradeType =  rawData.slice(4,6); // 0-1 is 0x,  2-3 is version, 4-5 side
                     if(tradeType == '00') {
                         tradeType = 'Buy';
                     } else {
                         tradeType =  'Sell';
-                    } */
-                    let tradeType = 'Buy';
-                    if (_delta.isBaseToken(takerToken, makerToken)) // get eth  -> sell
-                    {
-                        tradeType = 'Sell';
-                        token = makerToken;
-                        base = takerToken;
-                        rawBaseAmount = rawTakeAmount;
-                        rawTokenAmount = rawMakeAmount;
-                    }
-                    else //if (this.isBaseToken(makerToken, takerToken)) // buy
-                    {
-                        tradeType = 'Buy';
-                        token = takerToken;
-                        base = makerToken;
-                        rawBaseAmount = rawMakeAmount;
-                        rawTokenAmount = rawTakeAmount;
                     }
     
                     let exchange = '';
@@ -5796,22 +5776,16 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
             else if (unpacked.name == 'Match') {
                 /* event Match( address baseToken, address quoteToken, address relayer, address maker, address taker, uint256 baseTokenAmount, uint256 quoteTokenAmount, 
                 uint256 makerFee, uint256 takerFee, uint256 makerGasFee, uint256 makerRebate, uint256 takerGasFee ); */
-                let tradeType = 'Sell';
-                let token = undefined;
-                let base = undefined;
+              //  let tradeType = 'Sell';
                 let maker = unpacked.events[3].value.toLowerCase();
                 let taker = unpacked.events[4].value.toLowerCase();
                 let relayer = unpacked.events[2].value.toLowerCase();
 
-                let makerToken = this.setToken(unpacked.events[0].value);
-                let takerToken = this.setToken(unpacked.events[1].value);
+                let base = this.setToken(unpacked.events[1].value);
+                let token = this.setToken(unpacked.events[0].value);
 
-                let makerAmount = new BigNumber(unpacked.events[5].value);
-                let takerAmount = new BigNumber(unpacked.events[6].value);
-
-                let rawBaseAmount = undefined;
-                let rawTokenAmount = undefined;
-               
+                let rawBaseAmount = new BigNumber(unpacked.events[6].value);
+                let rawTokenAmount = new BigNumber(unpacked.events[5].value);
                
                 let transType = 'Taker';
                 if (isMyAddress(maker)) {
@@ -5829,37 +5803,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     }
                 }
 
-
-                if (this.isBaseToken(takerToken, makerToken)) // get eth  -> sell
-                {
-                    tradeType = 'Sell';
-                    token = makerToken;
-                    base = takerToken;
-                    rawBaseAmount = takerAmount;
-                    rawTokenAmount = makerAmount;
-                }
-                else //if (this.isBaseToken(makerToken, takerToken)) // buy
-                {
-                    tradeType = 'Buy';
-                    token = takerToken;
-                    base = makerToken;
-                    rawBaseAmount = makerAmount;
-                    rawTokenAmount = takerAmount;
-                }
-
                 if (token && base && token.addr && base.addr) {
-                    rawTokenAmount = new BigNumber(rawTokenAmount);
-                    rawBaseAmount = new BigNumber(rawBaseAmount);
-                    let buyUser = '';
-                    let sellUser = '';
-                    if (tradeType === 'Sell') {
-                        sellUser = taker;
-                        buyUser = maker;
-                    } else {
-                        sellUser = maker;
-                        buyUser = taker;
-                    }
-
                     let amount = utility.weiToToken(rawTokenAmount, token);
                     let baseAmount = utility.weiToToken(rawBaseAmount, base);
                     let price = new BigNumber(0);
@@ -5884,13 +5828,13 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         fee = fee.plus(utility.weiToToken(takerGasAmount, base));
                     }
 
-                    if (isMyAddress(buyUser))
+                    /*if (isMyAddress(buyUser))
                         tradeType = "Buy";
                     else if (isMyAddress(sellUser))
                         tradeType = "Sell";
-
+                    */
                     return {
-                        'type': transType + ' ' + tradeType,
+                        'type': transType + ' ' + 'Trade',
                         'exchange': exchange,
                         'note': utility.addressLink(taker, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
                         'token': token,
@@ -5899,8 +5843,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         'base': base,
                         'baseAmount': baseAmount,
                         'unlisted': token.unlisted,
-                        'buyer': buyUser,
-                        'seller': sellUser,
+                        'maker': maker,
+                        'taker': taker, 
                         'fee': fee,
                         'feeCurrency': feeToken,
                         'transType': transType,

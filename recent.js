@@ -1031,11 +1031,73 @@ var isAddressPage = true;
                                     }
                                     //ddex hydro trade input
                                     else if(unpacked.name == 'matchOrders' && unpacked.params.length == 3) {
-                                      /*  if ( obj.maker == myAddr || obj.taker == myAddr) {
-                                            trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
-                                        } */
-                                    }
+                                        if ( obj.maker == myAddr /*|| obj.taker == myAddr*/) {
+                                             // maker trade, verify amount filled with tokens received/sent based on buy/sell
+                                            if(contract && i > 0 && ((obj.type == 'Maker Buy' && to == myAddr) || (obj.type == 'Maker Sell' && from == myAddr))) { // etherscan token transfer api  
+                                                if(contract == obj.token.addr) {
+                                                    let dvsr = _delta.divisorFromDecimals(obj.token.decimals)
+                                                    let amount = _util.weiToEth(tx.value, dvsr);
+    
+                                                    if(obj.amount.greaterThan(amount)) {
+                                                        obj.amount = amount;
+                                                        obj.baseAmount = obj.amount.times(obj.price);
+                                                    }    
+                                                } else if(contract == obj.base.addr) {
+                                                    let dvsr = _delta.divisorFromDecimals(obj.base.decimals)
+                                                    let amount = _util.weiToEth(tx.value, dvsr);
+    
+                                                    if(obj.baseAmount.greaterThan(amount)) {
+                                                        obj.baseAmount = amount;
+                                                        obj.amount = obj.baseAmount.div(obj.price);
+                                                    }
+                                                }
+                                                
+                                                trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
+                                            } 
+                                            //taker trade, verify amount with tokens sent/received based on buy/sell
+                                            else if(contract && i == 0 && ((obj.type == 'Buy up to' && to == myAddr) || (obj.type == 'Sell up to' && from == myAddr))) {
+                                                if(contract == obj.token.addr) {
+                                                    let dvsr = _delta.divisorFromDecimals(obj.token.decimals)
+                                                    let amount = _util.weiToEth(tx.value, dvsr);
 
+                                                    if(amount.equals(obj.amount)) {
+                                                        obj.type  =  'Taker ' + obj.type.replace(' up to', '');
+                                                    } else if(obj.amount.greaterThan(amount)) {
+                                                        obj.amount = amount;
+                                                        obj.baseAmount = undefined;
+                                                    }
+
+                                                } else if(contract == obj.base.addr) {
+                                                    let dvsr = _delta.divisorFromDecimals(obj.base.decimals)
+                                                    let amount = _util.weiToEth(tx.value, dvsr);
+
+                                                    if(amount.equals(obj.baseAmount)) {
+                                                        obj.type  =  'Taker ' + obj.type.replace(' up to', '');
+                                                    } else if(obj.baseAmount.greaterThan(amount)) {
+                                                        obj.baseAmount = amount;
+                                                        obj.amount = undefined;
+                                                    }
+                                                }
+
+                                                /* taker trade can fill multiple maker trades with multiple token transactions, check if we processed one before, and if so, add them up */
+                                                let skipTrans = false;
+                                                let mainHash = tx.hash + '('+i+')';
+                                                if(outputHashes[mainHash] && outputHashes[mainHash].Type == obj.type && obj.type.indexOf('up to') !== -1) {
+                                                    if(!obj.amount) {
+                                                        outputHashes[mainHash].Total =  outputHashes[mainHash].Total.plus(obj.baseAmount);
+                                                        skipTrans = true;
+                                                    } else if(!obj.baseAmount) {
+                                                        outputHashes[mainHash].Amount =  outputHashes[mainHash].Amount.plus(obj.amount);
+                                                        skipTrans = true;
+                                                    }
+                                                }
+                                                if(!skipTrans) {
+                                                    trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
+                                                    trans.Incomplete = true;
+                                                }
+                                            }
+                                        }
+                                    }
                                     else if (unpacked.name === 'fillOrder' // 0xv1 0xv2
                                         || unpacked.name === 'fillOrKillOrder' //0xv1 0xv2
                                         || unpacked.name === 'batchFillOrders' //0xv1 0xv2
@@ -1259,6 +1321,7 @@ var isAddressPage = true;
                             else if(transs.Type.indexOf('offer') !== -1 && oldTrans.Type.indexOf('Maker') !== -1) {
                                 outputHashes[mainHash] = oldTrans;
                             }
+
 
 
 

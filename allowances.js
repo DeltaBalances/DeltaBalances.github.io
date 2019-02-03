@@ -78,6 +78,12 @@ var isAddressPage = true;
 			displayed: 0,
 			contract: _delta.config.exchangeContracts.TokenStore.addr
 		},
+		'DDEX': {
+			enabled: false,
+			loaded: 0,
+			displayed: 0,
+			contract: _delta.config.exchangeContracts.DDEXproxy.addr 
+		},
 		'Switcheo': {
 			enabled: false,
 			loaded: 0,

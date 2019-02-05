@@ -500,6 +500,8 @@ var isAddressPage = false;
 				pending = true;
 			}
 
+			let parsedInput = parseInput(tx, tx.input);
+
 			var transaction = {
 				hash: tx.hash,
 				from: tx.from,
@@ -511,7 +513,8 @@ var isAddressPage = false;
 				gasGwei: (Number(tx.gasPrice) / 1000000000),
 				gasLimit: Number(tx.gas),
 				status: 'Pending',
-				input: parseInput(tx, tx.input),
+				inputName: parsedInput.name,
+				input: parsedInput.obj,
 				rawInput: tx.input,
 			}
 
@@ -636,10 +639,10 @@ var isAddressPage = false;
 			}
 
 			function parseInput(tx, input) {
-				var unpacked = _util.processInput(input);
+				let unpacked = _util.processInput(input);
 				if (!unpacked)
-					return undefined;
-
+					return {name:'', obj:undefined};
+				let funcName = unpacked.name;
 				let obj = _delta.processUnpackedInput(tx, unpacked);
 				if (obj) {
 					if (!Array.isArray(obj))
@@ -654,9 +657,12 @@ var isAddressPage = false;
 							delete obj[i].feeCurrency;
 						}
 					}
+					if (obj.length == 0) {
+						obj = undefined;
+					}
 				}
-				return obj;
-
+				
+				return {name:funcName, obj:obj};
 			}
 
 		}
@@ -908,6 +914,9 @@ var isAddressPage = false;
 		if (transaction.input) {
 			displayParse(transaction.input, "#inputdata");
 		}
+		if(transaction.inputName) {
+			$('#inputfunction').html('Function: <i>' + transaction.inputName + '</i>');
+		}
 
 		$('#outputdata').html('');
 		if (transaction.output) {
@@ -948,7 +957,7 @@ var isAddressPage = false;
 		$('#ethval').html('');
 		$('#inputdata').html('');
 		$('#inputtype').html('');
-		$('#inputtype').html('');
+		$('#inputfunction').html('');
 		$('#outputdata').html('');
 	}
 

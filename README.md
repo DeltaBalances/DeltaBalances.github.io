@@ -52,6 +52,7 @@ Decentralized exchanges supported by the DeltaBalances website
 | [Switcheo](https://switcheo.exchange)|Yes| Partial (WIP)| Partial (WIP) | Not yet|
 | [Token Store](https://token.store)| Yes| Yes| Yes| Yes |
 | [Token store Instant-trade](https://token.store)| - | Yes| Yes | No|
+| [Uniswap](https://uniswap.exchange)| - | Partial (WIP)| Partial (WIP) | Not yet|
 
 
 

@@ -613,7 +613,8 @@ var isAddressPage = false;
 							if (obj && !obj.error) {
 								if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 									unknownToken = true;
-								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion' || (unpacked.name == 'Order' && unpacked.combinedEvents) || unpacked.name == 'TakeBuyOrder' || unpacked.name == 'TakeSellOrder') {
+								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion' 
+								|| (unpacked.name == 'Order' && unpacked.combinedEvents) || unpacked.name == 'TakeBuyOrder' || unpacked.name == 'TakeSellOrder' || unpacked.name == 'EthPurchase' || unpacked.name == 'TokenPurchase') {
 									obj.feeToken = obj.feeCurrency;
 									delete obj.feeCurrency;
 									delete obj.transType;
@@ -627,6 +628,11 @@ var isAddressPage = false;
 								} else if (unpacked.name === 'LogCancel') {
 									delete obj.relayer;
 								}
+								
+								if(unpacked.name == 'EthPurchase' || unpacked.name == 'TokenPurchase') {
+									delete obj.feeToken;
+									delete obj.fee;
+								} 
 								outputs.push(obj);
 							} else {
 								unknownEvents++;
@@ -986,6 +992,9 @@ var isAddressPage = false;
 			else if (uniqueType.indexOf(' up to') !== -1 || uniqueType.indexOf('offer') !== -1) {
 				wideOutput = true;
 			}
+			else if (uniqueType.indexOf('liquidity') !== -1) {
+				wideOutput = true;
+			}
 			if (!types[uniqueType])
 				types[uniqueType] = [];
 
@@ -1079,7 +1088,7 @@ var isAddressPage = false;
 				if (columns[keys[i]]) {
 
 					var cellValue = myList[i];
-					if (keys[i] == 'token' || keys[i] == 'base' || keys[i] == 'feeToken' || keys[i] == 'FeeToken ' || keys[i] == 'FeeToken' || keys[i] == 'token In' || keys[i] == 'token Out') {
+					if (keys[i] == 'token' || keys[i] == 'token ' || keys[i] == 'base' || keys[i] == 'feeToken' || keys[i] == 'FeeToken ' || keys[i] == 'FeeToken' || keys[i] == 'token In' || keys[i] == 'token Out' || keys[i] == 'liqToken' ) {
 
 						let token = cellValue;
 						if (token) {
@@ -1093,7 +1102,7 @@ var isAddressPage = false;
 						if (cellValue !== "")
 							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, 6) + '</span>';
 					}
-					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'balance') {
+					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'amount ' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'balance' ||  keys[i] == 'minimum' || keys[i] == 'minimum ' || keys[i] == 'maximum') {
 						if (cellValue !== "")
 							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, 3) + '</span>';
 					}

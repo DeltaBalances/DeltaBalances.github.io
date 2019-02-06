@@ -726,7 +726,7 @@ var isAddressPage = true;
                     function checkTradeupTo(index) {
                         if(contract || internal) {
                             // this is a token/ETH transfer seen after we already have a 'buy up to, sell up to'
-                            //oasisdex, kyber
+                            //oasisdex, kyber, uniswap
                             let defaultHash = tx.hash + '('+ index + ')';
                             if(outputHashes[defaultHash]) {
                                 let knownObj = outputHashes[defaultHash];
@@ -1205,6 +1205,34 @@ var isAddressPage = true;
                                         }
 
                                         trans = createOutputTransaction(newType, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exch);
+                                    } 
+                                    // uniswap taker trade (partial support)
+                                    else if( 
+                                        (
+                                            (unpacked.name.indexOf('ethToToken') !== -1 ) ||
+                                            (unpacked.name.indexOf('tokenToEth') !== -1 )
+                                        ) &&
+                                        (
+                                            (unpacked.name.indexOf('Transfer') !== -1 ) ||
+                                            (unpacked.name.indexOf('Swap') !== -1 )
+                                        )
+                                    ) {
+                                        //trades are made with either min-tokens or max_eth variables, omit either Total or Amount
+                                        let amount = undefined;
+                                        let baseAmount = undefined;
+                                        let price = undefined;
+                                        if(obj.amount) {
+                                            amount = obj.amount;
+                                            baseAmount = obj.estBaseAmount;
+                                        } else {
+                                            baseAmount = obj.baseAmount;
+                                            amount = obj.estAmount;
+                                        }
+                                        trans = createOutputTransaction(obj.type, obj.token, amount, obj.base, baseAmount, tx.hash, tx.timeStamp, obj.unlisted, price, tx.isError === '0', obj.exchange);
+                                        trans.Incomplete = true; // interntal tx or token transfer might add info
+                                        if (unpacked.name.indexOf('ethToToken') !== -1  && unpacked.name.indexOf('Output') !== -1) {
+                                            trans.refundEth = true;
+                                        }
                                     }
 
                                     if (trans) {

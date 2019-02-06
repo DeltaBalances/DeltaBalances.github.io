@@ -192,7 +192,9 @@ DeltaBalances.prototype.initContracts = function initContracts(callback) {
 };
 
 DeltaBalances.prototype.initTokens = function (useBlacklist) {
-    let smartKeys = Object.keys(smartRelays);
+
+    //init known bancor smartRelay tokens (smartRelays 'addr': name)
+    let smartKeys = Object.keys(smartRelays).map(x => x.toLowerCase());
     let smartrelays = Object.values(smartRelays);
 
     for (var i = 0; i < smartrelays.length; i++) {
@@ -306,6 +308,21 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
 
     //load this last as it doesn't include decimals, we might get them from another source
     loadCachedTokens('TokenStore');
+
+    {  //init internal uniswap tokens
+        let uniKeys = Object.keys(this.config.uniswapContracts).map(x => x.toLowerCase());
+        let uniTokens = Object.values(this.config.uniswapContracts).map(x => x.toLowerCase()); //tokens traded on the contracts
+        for (let i = 0; i < uniKeys.length; i++) {
+            if (!this.uniqueTokens[uniKeys[i]]) {
+                let name = 'UNI-V1';
+                if(this.uniqueTokens[uniTokens[i]]) {
+                    name += ' (' + this.uniqueTokens[uniTokens[i]].name + ')';
+                }
+                let token = { addr: uniKeys[i], name: name, decimals: 18, unlisted: true, blocked:1};
+                this.uniqueTokens[token.addr] = token;
+            }
+        }
+    }
 
     let ethAddr = this.config.ethAddr;
     this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr] && (!x.unlisted || !x.blocked) && !x.killed; });
@@ -2730,7 +2747,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     return {
                         'type': tradeType + ' up to',
                         'exchange': exchange,
-                        'note': utility.addressLink(txFrom, true, true) + ' iniated a trade thorugh an exchange aggregator.',
+                        'note': utility.addressLink(txFrom, true, true) + ' iniated a trade through an exchange aggregator.',
                         'token': token,
                         'amount': tokenAmount,
                         'price': '',
@@ -2741,7 +2758,205 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     };
                 }
             }
+            //uniswap trades
+            else if(
+                    (
+                        (unpacked.name.indexOf('ethToToken') !== -1 ) ||
+                        (unpacked.name.indexOf('tokenToEth') !== -1 )
+                    ) &&
+                    (
+                        (unpacked.name.indexOf('Transfer') !== -1 ) ||
+                        (unpacked.name.indexOf('Swap') !== -1 )
+                    )
+                ) {
+                    /*
+                    function ethToTokenSwapInput(uint256 min_tokens, uint256 deadline) 
+                    function ethToTokenTransferInput(uint256 min_tokens, uint256 deadline, address recipient)
+                    function ethToTokenSwapOutput(uint256 tokens_bought, uint256 deadline) 
+                    function ethToTokenTransferOutput(uint256 tokens_bought, uint256 deadline, address recipient)
+                    
+                    function tokenToEthSwapInput(uint256 tokens_sold, uint256 min_eth, uint256 deadline)
+                    function tokenToEthTransferInput(uint256 tokens_sold, uint256 min_eth, uint256 deadline, address recipient) 
+                    function tokenToEthSwapOutput(uint256 eth_bought, uint256 max_tokens, uint256 deadline)
+                    function tokenToEthTransferOutput(uint256 eth_bought, uint256 max_tokens, uint256 deadline, address recipient)
+                    
+                    function tokenToTokenSwapInput(uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address token_addr)
+                    function tokenToTokenTransferInput(uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address token_addr)
+                    function tokenToTokenSwapOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address token_addr)
+                    function tokenToTokenSwapOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address token_addr)
+                    
+                    function tokenToExchangeSwapInput(uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address exchange_addr)
+                    function tokenToExchangeTransferInput(uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address exchange_addr)
+                    function tokenToExchangeSwapOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address exchange_addr)
+                    function tokenToExchangeTransferOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address exchange_addr)
 
+                    */
+
+                /* 
+                uniswap is taker trading only, we don't usually want to get info from etherscan token transfers (badFromTo), regular outgoing tx are sufficient
+                but we might find a uniswap contract that is yet unknown by a token transfer
+                */
+                if(badFromTo) {
+                    let token = undefined;
+                    let addr = tx.contractAddress.toLowerCase();
+                    if(this.uniqueTokens[addr]) {
+                        token = this.uniqueTokens[addr];
+                    } else if(tx.decimals && tx.symbol) {
+                        token = { addr: addr, name: tx.symbol, unknown: true, decimals: Number(tx.decimals), unlisted: true };
+                    }
+
+                    // we send eth && receive tokens
+                    if(unpacked.name.indexOf('ethToToken') !== -1 && !this.config.uniswapContracts[txFrom]) {
+                        this.config.uniswapContracts[txFrom] = token.addr;
+                    } else if(unpacked.name.indexOf('tokenToEth') !== -1 && !this.config.uniswapContracts[txTo] ) {
+                        this.config.uniswapContracts[txTo] = token.addr;
+                    } else {
+                        return undefined;
+                    }
+                }
+
+                let token = undefined;
+                let base = undefined;
+                let deadline = undefined;
+                let rawTokenAmount = undefined;
+                let rawBaseAmount = undefined;
+                let tradeType = '';
+                let fixedBaseAmount = false;
+                let recipientIndex = -1;
+
+                if(unpacked.name.indexOf('ethToToken') !== -1) {
+                    token = this.uniqueTokens[this.config.uniswapContracts[txTo]];
+                    base = this.uniqueTokens[this.config.ethAddr];
+                    deadline = Number(unpacked.params[1].value);
+                    rawTokenAmount = new BigNumber(unpacked.params[0].value);
+                    rawBaseAmount = new BigNumber(tx.value);
+                    tradeType = 'Buy';
+                    if(unpacked.name.indexOf('Input') !== -1) {
+                        fixedBaseAmount = true;
+                    }
+                    recipientIndex = 2;
+                } else if(unpacked.name.indexOf('tokenToEth') !== -1) {
+                    token = this.uniqueTokens[this.config.uniswapContracts[txTo]];
+                    base = this.uniqueTokens[this.config.ethAddr];
+                    deadline = Number(unpacked.params[2].value);
+                    if(unpacked.name.indexOf('Output') == -1) {
+                        rawTokenAmount = new BigNumber(unpacked.params[0].value);
+                        rawBaseAmount = new BigNumber(unpacked.params[1].value);
+                    } else {
+                        rawTokenAmount = new BigNumber(unpacked.params[1].value);
+                        rawBaseAmount = new BigNumber(unpacked.params[0].value);
+                        fixedBaseAmount = true;
+                    }
+                    tradeType = 'Sell';
+                    recipientIndex = 3;
+                } else {
+                    return undefined;
+                }
+                if(token && base) {
+                    deadline = utility.formatDate(utility.toDateTime(deadline), false, false);
+
+                    let tokenAmount = utility.weiToToken(rawTokenAmount, token);
+                    let baseAmount = utility.weiToToken(rawBaseAmount, base);
+
+                    let taker = txFrom;
+                    if(unpacked.name.indexOf == 'Transfer') {
+                        let recipient = unpacked.params[recipientIndex].value.toLowerCase();
+                        taker = recipient;
+                    }
+
+                    
+
+                    let price = new BigNumber(0);
+                    if (tokenAmount.greaterThan(0)) {
+                        price = baseAmount.div(tokenAmount);
+                    }
+
+                    let exchange = 'Uniswap';
+                    let result = {
+                        'type': tradeType + ' up to',
+                        'exchange': exchange,
+                        'note': utility.addressLink(taker, true, true) + ' bought tokens from Uniswap',
+                        'token': token,
+                        'amount': tokenAmount,
+                        'estAmount': tokenAmount,
+                        'maxPrice': price,
+                        'minPrice': price,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'estBaseAmount' : baseAmount,
+                        'unlisted': token.unlisted,
+                        'taker': taker,
+                        // 'maker': maker,
+                    };
+                    if(fixedBaseAmount) { //min tokens amount)
+                        delete result.estBaseAmount;
+                        delete result.amount;
+                    } else { 
+                        delete result.baseAmount;
+                        delete result.estAmount;
+                    }
+
+                    if(tradeType == 'Buy') {
+                        delete result.minPrice;
+                    } else {
+                        delete result.maxPrice;
+                    }
+                    return result;
+
+                }
+            }
+            //uniswap liquidity
+            else if(!badFromTo && unpacked.name == 'addLiquidity' ) {
+                let liquidityToken = this.uniqueTokens[txTo];
+                let token = this.uniqueTokens[this.config.uniswapContracts[txTo]];
+                if(liquidityToken && token) {
+                    let minLiq = utility.weiToToken(unpacked.params[0].value, liquidityToken);
+                    let maxTokens = utility.weiToToken(unpacked.params[1].value, token);
+                    let deadline = Number(unpacked.params[2].value);
+                    deadline = utility.formatDate(utility.toDateTime(deadline), false, false);
+                    
+                    return {
+                        type: 'Add Liquidity',
+                        'exchange': 'Uniswap',
+                        'minimum': minLiq,
+                        'liqToken': liquidityToken,
+                        'maximum': maxTokens,
+                        'token': token,
+                        'deadline': deadline,
+                    };
+                }
+            /*
+             function addLiquidity(uint256 min_liquidity, uint256 max_tokens, uint256 deadline) external payable returns (uint256);
+            */
+            }
+            //uniswap liquidity
+            else if(!badFromTo && unpacked.name == 'removeLiquidity' ) {
+                let liquidityToken = this.uniqueTokens[txTo];
+                let token = this.uniqueTokens[this.config.uniswapContracts[txTo]];
+                let ethToken = this.uniqueTokens[this.config.ethAddr];
+                if(liquidityToken && token) {
+                    let liqTokens = utility.weiToToken(unpacked.params[0].value, liquidityToken);
+                    let minEth = utility.weiToToken(unpacked.params[1].value, token);
+                    let minTokens = utility.weiToToken(unpacked.params[2].value, token);
+                    let deadline = Number(unpacked.params[3].value);
+                    deadline = utility.formatDate(utility.toDateTime(deadline), false, false);
+                    
+                    return {
+                        type: 'Remove Liquidity',
+                        'exchange': 'Uniswap',
+                        'amount': liqTokens,
+                        'liqToken': liquidityToken,
+                        'minimum': minEth,
+                        'token': ethToken,
+                        'minimum ': minTokens,
+                        'token ': token,
+                        'deadline': deadline,
+                    };
+                }
+            /*
+              function removeLiquidity(uint256 amount, uint256 min_eth, uint256 min_tokens, uint256 deadline) external returns (uint256, uint256);
+            */
+            }
         } else {
             return undefined;
         }
@@ -2840,11 +3055,12 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
 
     let name = '';
 
-    if (this.uniqueTokens[addr]) {
-        name = this.uniqueTokens[addr].name + " Contract ";
-    }
-    else if (this.uniqueTokens[lcAddr]) {
+    if (this.uniqueTokens[lcAddr]) {
         name = this.uniqueTokens[lcAddr].name + " Contract ";
+        //override tokens, as uniswap contracts are themself tokens
+        if(this.config.uniswapContracts[lcAddr]) {
+            name = 'Uniswap (' + this.uniqueTokens[this.config.uniswapContracts[lcAddr]].name + ') ';
+        }
     }
     else if (this.config.zrxRelayers[lcAddr]) {
         name = this.config.zrxRelayers[lcAddr] + ' Admin ';
@@ -2892,6 +3108,11 @@ DeltaBalances.prototype.isExchangeAddress = function (addr, allowNonSupported) {
     }
     for (let j = 0; j < this.config.bancorConverters.length; j++) {
         if (lcAddr === this.config.bancorConverters[j])
+            return true;
+    }
+    let uniKeys = Object.keys(this.config.uniswapContracts);
+    for (let k = 0; k < uniKeys.length; k++) {
+        if (lcAddr === uniKeys[k].toLowerCase())
             return true;
     }
 
@@ -4686,8 +4907,89 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 }
 
             }
+            else if(unpacked.name == 'TokenPurchase' || unpacked.name == 'EthPurchase') {
 
-            // ED onchain-Order ?
+                //event TokenPurchase(address indexed buyer, uint256 indexed eth_sold, uint256 indexed tokens_bought);
+                // event EthPurchase(address indexed buyer, uint256 indexed tokens_sold, uint256 indexed eth_bought);
+                let addr = unpacked.address.toLowerCase();
+                if(this.config.uniswapContracts[addr]) {
+                    let ethToken = this.uniqueTokens[this.config.ethAddr];
+                    let token = this.uniqueTokens[this.config.uniswapContracts[addr]];
+                    let taker = unpacked.events[0].value.toLowerCase();
+                    let ethAmount = undefined;
+                    let tokenAmount = undefined;
+
+                    let tradeType = 'Sell';
+                    let buyUser = '';
+                    let sellUser = '';
+
+                    if(unpacked.name == 'TokenPurchase') {
+                        tradeType = 'Buy';
+                        ethAmount = utility.weiToToken(unpacked.events[1].value, ethToken);
+                        tokenAmount = utility.weiToToken(unpacked.events[2].value, token);
+                        buyUser = taker;
+                    } else {
+                        ethAmount = utility.weiToToken(unpacked.events[2].value, ethToken);
+                        tokenAmount = utility.weiToToken(unpacked.events[1].value, token);
+                        sellUser = taker;
+                    }
+
+                    let exchange = 'Uniswap';
+
+                    let price = new BigNumber(0);
+                    if (tokenAmount.greaterThan(0)) {
+                        price = ethAmount.div(tokenAmount);
+                    }
+
+                    return {
+                        'type': 'Taker ' + tradeType,
+                        'exchange': exchange,
+                        'note': utility.addressLink(taker, true, true) + 'traded with Uniswap',
+                        'token': token,
+                        'amount': tokenAmount,
+                        'price': price,
+                        'base': ethToken,
+                        'baseAmount': ethAmount,
+                        'unlisted': token.unlisted,
+                        //  'maker': maker,
+                        //  'taker': taker,
+                        'buyer': buyUser,
+                        'seller': sellUser,
+                        'feeCurrency': '',
+                        'fee': '',
+                        'transType': 'Taker',
+                        'tradeType': tradeType,
+                    };
+                }
+            }
+            //uniswap liquidity
+            else if(unpacked.name == 'AddLiquidity' || unpacked.name == 'RemoveLiquidity') {
+
+                //AddLiquidity: event({provider: indexed(address), eth_amount: indexed(uint256(wei)), token_amount: indexed(uint256)})
+               // RemoveLiquidity: event({provider: indexed(address), eth_amount: indexed(uint256(wei)), token_amount: indexed(uint256)})
+                let addr = unpacked.address.toLowerCase();
+                if(this.config.uniswapContracts[addr]) {
+                    let ethToken = this.uniqueTokens[this.config.ethAddr];
+                    let token = this.uniqueTokens[this.config.uniswapContracts[addr]];
+
+                    let wallet = unpacked.events[0].value.toLowerCase();
+                    let ethAmount = utility.weiToToken(unpacked.events[1].value, ethToken);
+                    let tokenAmount = utility.weiToToken(unpacked.events[2].value, token);
+                    let deadline = Number(unpacked.events[2].value);
+                    deadline = utility.formatDate(utility.toDateTime(deadline), false, false);
+
+                    let type = unpacked.name.replace('Liq', ' Liq');
+                    return {
+                        type: type,
+                        'amount': ethAmount,
+                        'token': ethToken,
+                        'amount ': tokenAmount,
+                        'token ': token,
+                        'wallet': wallet,
+                    };
+                }
+            }
+            
         } else {
             return { 'error': 'unknown event output' };
         }

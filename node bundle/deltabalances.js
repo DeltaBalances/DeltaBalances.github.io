@@ -1631,6 +1631,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 || unpacked.name === 'marketBuyOrders' //0xv2
                 || unpacked.name === 'marketBuyOrdersNoThrow' //0xv2
                 || unpacked.name === 'matchOrders' //0xv2
+                || unpacked.name == 'marketBuyOrdersWithEth' //0xv2 Forwarder
+                || unpacked.name == 'marketSellOrdersWithEth' //0xv2 Forwarder
             ) {
 
                 /* //0x v2 order
@@ -1669,6 +1671,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 var _delta = this;
 
                 let isV2 = unpacked.params.find((x) => { return x.type && x.type.indexOf('tuple') !== -1; });
+                let oldName = '';
                 // Convert v2 orders to matching v1 orders to re-use the old trade parsing
                 if (isV2) {
 
@@ -1680,6 +1683,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         let takeAmount = unpacked.params[1].value;
 
                         //make compatible with a v1 style 'fillOrder'
+                        oldName = unpacked.name;
                         unpacked.name = 'fillOrder';
                         unpacked.params[0].value = order.orderAddresses;
                         unpacked.params[1].value = order.orderValues;
@@ -1733,13 +1737,16 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         }
 
                         //make compatible with a v1 style 'batchFillOrders'
+                        oldName = unpacked.name;
                         unpacked.name = 'batchFillOrders';
                         unpacked.params[0].value = allOrderAdresses;
                         unpacked.params[1].value = allOrderValues;
                         unpacked.params[2].value = allTakeAmounts;
 
                     } else if (unpacked.name == 'marketSellOrders' || unpacked.name == 'marketSellOrdersNoThrow'
-                        || unpacked.name == 'marketBuyOrders' || unpacked.name == 'marketBuyOrdersNoThrow') {
+                        || unpacked.name == 'marketBuyOrders' || unpacked.name == 'marketBuyOrdersNoThrow'
+                        || unpacked.name == 'marketBuyOrdersWithEth' || unpacked.name == 'marketSellOrdersWithEth' // WithEth is 0x Forwarder2
+                        ) {
 
                         let orders = unpacked.params[0].value;
                         let allOrderAdresses = [];
@@ -1749,9 +1756,19 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         let makerAsset = orders[0][10].value;
                         let takerAsset = orders[0][11].value;
 
+                        if(unpacked.name.indexOf('WithEth') !== -1) {
+                            let fakeAsset = '0xf47261b' + '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // WETH
+                            // forwarder leaves asset blank for ETH
+                            if(takerAsset == '0x') {
+                                takerAsset = fakeAsset
+                            } else if(makerAsset == '0x') {
+                                makerAsset = fakeAsset;
+                            }
+                        }   
+
                         for (let i = 0; i < orders.length; i++) {
                             // if orders past the 1st have no asset data, assume identical to the 1st
-                            if (i > 0) {
+                            if (i > 0 || unpacked.name.indexOf('WithEth') !== -1) {
                                 if (orders[i][10].value == '0x') {
                                     orders[i][10].value = makerAsset;
                                 }
@@ -1769,6 +1786,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                             return undefined;
                         }
 
+                        oldName = unpacked.name;
                         unpacked.name = 'fillOrdersUpTo';
                         unpacked.params[0].value = allOrderAdresses;
                         unpacked.params[1].value = allOrderValues;
@@ -1823,6 +1841,9 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let orderValues1 = unpacked.params[1].value;
                     let fillTakerTokenAmount1 = new BigNumber(unpacked.params[2].value);
 
+                    if(oldName) {
+                        unpacked.name = oldName;
+                    }
                     return unpackOrderInput(orderAddresses1, orderValues1, fillTakerTokenAmount1);
                 } else if (unpacked.name === 'batchFillOrders' || unpacked.name == 'batchFillOrKillOrders') {
                     let orderAddresses2 = unpacked.params[0].value;
@@ -1834,6 +1855,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         var obj = unpackOrderInput(orderAddresses2[i], orderValues2[i], fillTakerTokenAmounts2[i]);
                         if (obj)
                             objs.push(obj);
+                    }
+
+                    if(oldName) {
+                        unpacked.name = oldName;
                     }
                     return objs;
                 } else if (unpacked.name === 'matchOrders') {
@@ -1853,6 +1878,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     // order 1 amount/total is based on order2
                     objs[0].baseAmount = objs[1].baseAmount;
                     objs[0].amount = objs[0].baseAmount.div(objs[0].price);
+                    if(oldName) {
+                        unpacked.name = oldName;
+                    }
+
                     return objs;
                 }
                 else if (unpacked.name === 'fillOrdersUpTo') {
@@ -1867,9 +1896,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                             objs.push(obj);
                     }
 
-                    if (objs.length <= 1)
-                        return objs;
-
+                    if(objs.length == 0) {
+                        return undefined;
+                    }
+                    
                     let minPrice = objs[0].price;
                     let maxPrice = minPrice;
                     for (let i = 1; i < objs.length; i++) {
@@ -1928,12 +1958,42 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'taker': taker3,
                     };
 
-                    // buy up to// sell up to  has either an amount or baseAmount
-                    if (isAmount) {
-                        delete initObj.baseAmount;
-                    } else {
-                        delete initObj.amount;
+
+                    if(oldName) {
+                        unpacked.name = oldName;
                     }
+
+                    if(!badFromTo && oldName.indexOf('WithEth') !== -1) {
+                        initObj.exchange = '0x Instant ';
+                        if(utility.isWrappedETH(initObj.base.addr)) {
+                            initObj.baseAmount = utility.weiToEth(tx.value);
+                            if(initObj.type.indexOf('Buy') !== -1) {
+                                delete initObj.minPrice;
+                            } else {
+                                delete initObj.maxPrice;
+                            }
+                        }
+                    } else {
+                         // buy up to// sell up to  has either an amount or baseAmount
+                        if (isAmount) {
+                            delete initObj.baseAmount;
+                        } else {
+                            delete initObj.amount;
+                        }
+                    }
+
+                    objs = objs.map(obj => {
+                        //these are the maker orders filled by the taker, switch them around
+                        if(obj.type.indexOf('Taker') !== -1) {
+                            obj.type = obj.type.replace('Taker', 'Maker');
+                            if(obj.type.indexOf('Buy') !== -1) {
+                                obj.type = obj.type.replace('Buy', 'Sell');
+                            } else {
+                                obj.type = obj.type.replace('Sell', 'Buy');
+                            }
+                        }
+                        return obj;
+                    });
 
                     return [initObj].concat(objs);
                 }
@@ -2789,7 +2849,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     function tokenToExchangeTransferInput(uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address exchange_addr)
                     function tokenToExchangeSwapOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address exchange_addr)
                     function tokenToExchangeTransferOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address exchange_addr)
-
                     */
 
                 /* 

@@ -28,6 +28,7 @@ Decentralized exchanges supported by the DeltaBalances website
 
 | Exchange | Deposited Tokens | Recent tx (input)| Tx details (input + events) | History (events) |
 |----------|------------------|------------------|-----------------------------|------------------|
+| 0x Instant (0x v2) | - | Yes| Yes| No |
 | 0x Protocol v1 | - | Yes| Yes| Yes |
 | 0x Protocol v2 | - | Yes| Yes| Yes |
 | [AirSwap](https://airswap.io)| - | Yes |Yes |Yes|

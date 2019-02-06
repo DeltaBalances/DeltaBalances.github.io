@@ -731,9 +731,9 @@ var isAddressPage = true;
                             if(outputHashes[defaultHash]) {
                                 let knownObj = outputHashes[defaultHash];
                                 
-                                if(contract && knownObj.refundEth) {// don't evalute tokens if we need to check ETH
+                               if(contract && knownObj.refundEth && !knownObj.anotherIteration) {// don't evalute tokens if we need to check ETH
                                     return false;
-                                }
+                                } 
                                 if(knownObj.Type.indexOf('up to') !== -1) {
                                     let token = undefined;
                                     if(contract) {
@@ -751,12 +751,17 @@ var isAddressPage = true;
 
                                         const dvsr = _delta.divisorFromDecimals(token.decimals)
                                         let newAmount = _util.weiToEth(tx.value, dvsr);
-                                        
+                                        let anotherIteration = false; //after fixing with internal tx, also use token tx
+
                                         if(token.addr == knownObj.Base.addr) {
                                              // amount + max/min price, unknown total
                                             if(knownObj.Amount) {
-                                                if(knownObj.Total && knownObj.refundEth) {
-                                                    knownObj.Total = knownObj.Total.minus(newAmount);
+                                                if(knownObj.refundEth && token.addr == _delta.config.ethAddr) {
+                                                    if(knownObj.Total) {
+                                                        knownObj.Total = knownObj.Total.minus(newAmount);
+                                                    } else {
+                                                        return false;
+                                                    }
                                                 } else {
                                                     knownObj.Total = newAmount;
                                                 }
@@ -773,12 +778,16 @@ var isAddressPage = true;
                                         } else {
                                             return false;
                                         }
-                                        if(knownObj.Type == 'Sell up to') {
-                                            knownObj.Type = 'Taker Sell';
-                                        } else if(knownObj.Type == 'Buy up to') {
-                                            knownObj.Type = 'Taker Buy';
+                                        if(!anotherIteration) {
+                                            if(knownObj.Type == 'Sell up to') {
+                                                knownObj.Type = 'Taker Sell';
+                                            } else if(knownObj.Type == 'Buy up to') {
+                                                knownObj.Type = 'Taker Buy';
+                                            }
+                                            knownObj.Incomplete = false;
+                                        } else {
+                                            knownObj.anotherIteration = true;
                                         }
-                                        knownObj.Incomplete = false;
                                         outputHashes[defaultHash] = knownObj;
                                         return true;
                                     } 
@@ -1115,6 +1124,8 @@ var isAddressPage = true;
                                         || unpacked.name === 'marketBuyOrders' //0xv2
                                         || unpacked.name === 'marketBuyOrdersNoThrow' //0xv2
                                         || unpacked.name === 'matchOrders' //0xv2
+                                        || unpacked.name == 'marketBuyOrdersWithEth' //0x instant v2
+                                        || unpacked.name == 'marketSellOrdersWithEth' //0x instant v2
                                         || (unpacked.name == 'executeTransaction' && obj.type !== "Signed execution") //0xv2
                                     ) {
                                         if ( (obj.maker == myAddr || obj.taker == myAddr)
@@ -1131,11 +1142,15 @@ var isAddressPage = true;
                                                 }
                                             }
                                             let price = obj.price;
+                                            let incomplete = false;
 
-                                            if (unpacked.name === 'fillOrdersUpTo') {
+                                            if (unpacked.name === 'fillOrdersUpTo' || unpacked.name.indexOf('market') !== -1) {
                                                 if (i == 0) {
                                                     price = obj.maxPrice;
                                                 } else {
+                                                    if(!contract && obj.taker == myAddr) {
+                                                        continue;
+                                                    }
                                                     // maker side of market buy/sell, check if entire order was filled by amount of tokens transferred
                                                     if(contract) { // etherscan token transfer api
                                                         if(contract == obj.token.addr) {
@@ -1158,14 +1173,19 @@ var isAddressPage = true;
                                                         }
                                                     }
                                                 }
+                                                incomplete = true;
                                             }
-                                            if (obj.relayer) {
+                                            if (obj.relayer &&  unpacked.name.indexOf('WithEth') == -1) { //exclude 0x instant from
                                                 let relay = _util.relayName(obj.relayer);
                                                 if (relay) {
                                                     exchange = relay;
                                                 }
                                             }
                                             trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, price, tx.isError === '0', exchange);
+                                            trans.Incomplete = incomplete;
+                                            if(unpacked.name.indexOf('WithEth') !== -1) {
+                                                trans.refundEth = true;
+                                            }
                                         }
                                     } else if (unpacked.name === 'offer') {
                                         let type = obj.type;

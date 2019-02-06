@@ -730,6 +730,10 @@ var isAddressPage = true;
                             let defaultHash = tx.hash + '('+ index + ')';
                             if(outputHashes[defaultHash]) {
                                 let knownObj = outputHashes[defaultHash];
+                                
+                                if(contract && knownObj.refundEth) {// don't evalute tokens if we need to check ETH
+                                    return false;
+                                }
                                 if(knownObj.Type.indexOf('up to') !== -1) {
                                     let token = undefined;
                                     if(contract) {
@@ -739,50 +743,44 @@ var isAddressPage = true;
                                     }
                                     
                                     if(token) {
-                                        // amount + max/min price, unknown total
-                                        if(knownObj.Amount && knownObj.Price && !knownObj.Total) {
-                                            if(internal && _util.isWrappedETH(knownObj.Base.addr)) { // match ETH and WETH
-                                                knownObj.Base = token;
-                                            }
-
-                                            if(token.addr == knownObj.Base.addr) {
-                                                let dvsr = _delta.divisorFromDecimals(token.decimals)
-                                                let baseAmount = _util.weiToEth(tx.value, dvsr);
-
-                                                knownObj.Total = baseAmount;
-                                                knownObj.Price = baseAmount.div(knownObj.Amount);
-                                                if(knownObj.Type == 'Sell up to') {
-                                                    knownObj.Type = 'Taker Sell';
-                                                } else if(knownObj.Type == 'Buy up to') {
-                                                    knownObj.Type = 'Taker Buy';
-                                                }
-                                                knownObj.Incomplete = false;
-                                                outputHashes[defaultHash] = knownObj;
-                                                return true;
-                                            }
-                                        }
-                                        // total and max/min price, unknown amount
-                                        else if(!knownObj.Amount && knownObj.Price && knownObj.Total) {
-
-                                            if(internal && _util.isWrappedETH(knownObj.Token.addr)) { // match ETH and WETH
-                                                knownObj.Token = token;
-                                            }
-                                            if(token.addr == knownObj.Token.addr) {
-                                                let dvsr = _delta.divisorFromDecimals(token.decimals)
-                                                let amount = _util.weiToEth(tx.value, dvsr);
-                                                knownObj.Amount = amount;
-                                                knownObj.Price = knownObj.Total.div(amount);
-                                                if(knownObj.Type == 'Sell up to') {
-                                                    knownObj.Type = 'Taker Sell';
-                                                } else if(knownObj.Type == 'Buy up to') {
-                                                    knownObj.Type = 'Taker Buy';
-                                                }
-                                                knownObj.Incomplete = false;
-                                                outputHashes[defaultHash] = knownObj;
-                                                return true;
-                                            }
+                                        if(internal && _util.isWrappedETH(knownObj.Token.addr)) { // match ETH and WETH
+                                            knownObj.Token = token;
+                                        } else if(internal && _util.isWrappedETH(knownObj.Base.addr)) { // match ETH and WETH
+                                            knownObj.Base = token;
                                         }
 
+                                        const dvsr = _delta.divisorFromDecimals(token.decimals)
+                                        let newAmount = _util.weiToEth(tx.value, dvsr);
+                                        
+                                        if(token.addr == knownObj.Base.addr) {
+                                             // amount + max/min price, unknown total
+                                            if(knownObj.Amount) {
+                                                if(knownObj.Total && knownObj.refundEth) {
+                                                    knownObj.Total = knownObj.Total.minus(newAmount);
+                                                } else {
+                                                    knownObj.Total = newAmount;
+                                                }
+                                                knownObj.Price = knownObj.Total.div(knownObj.Amount);
+                                            }
+
+                                        } else if(token.addr == knownObj.Token.addr) {
+                                            // total and max/min price, unknown amount
+                                            if(knownObj.Total) {
+                                                knownObj.Amount = newAmount;
+                                                knownObj.Price = knownObj.Total.div(knownObj.Amount);
+                                            }
+
+                                        } else {
+                                            return false;
+                                        }
+                                        if(knownObj.Type == 'Sell up to') {
+                                            knownObj.Type = 'Taker Sell';
+                                        } else if(knownObj.Type == 'Buy up to') {
+                                            knownObj.Type = 'Taker Buy';
+                                        }
+                                        knownObj.Incomplete = false;
+                                        outputHashes[defaultHash] = knownObj;
+                                        return true;
                                     } 
                                 }
                             }
@@ -938,9 +936,15 @@ var isAddressPage = true;
                                         }
                                         trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
                                     }
+                                    // easytrade
                                     else if (unpacked.name === 'buy' || unpacked.name == 'sell' || unpacked.name == 'createSellOrder' || unpacked.name == 'createBuyOrder') {
                                         trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+                                        if(unpacked.name === 'buy' || unpacked.name == 'createBuyOrder') {
+                                            trans.Incomplete = true;
+                                            trans.refundEth = true;
+                                        }
                                     }
+                                    //bancor
                                     else if (unpacked.name === 'convert' || unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized'
                                         || unpacked.name === 'convertFor' || unpacked.name == 'convertForPrioritized' || unpacked.name === 'convertForPrioritized2') {
 
@@ -952,6 +956,7 @@ var isAddressPage = true;
                                                 }
                                             }
                                             trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
+                                            trans.Incomplete = true;
                                         } else {
                                             trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
                                             //internal tx to unwrap eth token

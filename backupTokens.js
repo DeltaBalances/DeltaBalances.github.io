@@ -4998,6 +4998,7 @@ let offlineCustomTokens = [
   {symbol:"USDC",address:"0xb9e31a22e3a1c743c6720f3b723923e91f3c0f8b",decimal:18},
   {symbol:"USDC",address:"0xc93a59888e7e6f2849ba94acf767266299c4c415",decimal:8,name:"USD CLASSIC",blocked:2,spam:true,TokenStore:"USDCLASSIC"},
   {symbol:"USDM",address:"0xd760addfb24d9c01fe4bfea7475c5e3636684058",decimal:2,name:"Mether",blocked:1},
+  {symbol:"USDS",address:"0xa4bdb11dc0a2bec88d24a3aa1e6bb17201112ebe",decimal:6,name:"StableUSD"},
   {symbol:"USDT-W",address:"0x1a9b2d827f26b7d7c18fec4c1b27c1e8deeba26e",decimal:6,name:"USDT wrapper (ethfinex)"},
   {symbol:"USDT",address:"0xdac17f958d2ee523a2206206994597c13d831ec7",decimal:6,name:"Tether USD",TokenStore:"USDT"},
   {symbol:"USE",address:"0x54d1e22d7cc4e9cf6955c525c27b0d96466b923f",decimal:0,name:"USE-STUFF",blocked:1},

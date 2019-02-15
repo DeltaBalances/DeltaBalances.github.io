@@ -39,6 +39,7 @@ Decentralized exchanges supported by the DeltaBalances website
 | [EasyTrade](https://easytrade.io) |-| Yes| Yes | Yes|
 | [Enclaves Dex](https://enclaves.io) | Yes | Yes| Yes | Yes|
 | [Etfinex trustless v1](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
+| [Eth2Dai](https://eth2dai.com/) |-|Yes| Yes | Yes|
 | [ETHEN](https://ethen.market) |No|Yes|Yes|Yes|
 | [EtherC](https://etherc.io) |Yes|Yes|Yes|Yes|
 | [EtherDelta](https://etherdelta.com)| Yes| Yes| Yes| Yes | 
@@ -47,7 +48,7 @@ Decentralized exchanges supported by the DeltaBalances website
 | [IDEX](https://idex.market)| Yes |Yes |Yes| No |
 | [Joyso](https://joyso.io)|Yes| Not yet| Not yet | No|
 | [Kyber Network](https://kyber.network) |-|Yes|Yes| Yes | Yes|
-| [OasisDex](https://oasisdex.com) |-|Yes| Yes | Yes|
+| [OasisDex](https://oasisdex.com) [OasisCommunity](https://oasiscommunity.github.io/dex/) |-|Yes| Yes | Yes|
 | [OasisDirect](https://oasis.direct) |-|Yes| Yes | No|
 | [SingularX](https://singularx.com)|Yes| Yes| Yes | Yes|
 | [Switcheo](https://switcheo.exchange)|Yes| Partial (WIP)| Partial (WIP) | Not yet|

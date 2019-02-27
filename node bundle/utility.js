@@ -206,6 +206,9 @@ module.exports = (config) => {
   };
 
   utility.escapeHtml = function (text) {
+    if(!text) {
+        return '';
+    }
     const map = {
       '&': '&amp;',
       '<': '&lt;',

@@ -565,7 +565,12 @@ var isAddressPage = true;
 					for (let k = 0; k < keys.length; k++) {
 						let trades = result[keys[k]];
 						for (let t = 0; t < trades.length; t++) {
-							let trade = _delta.parseRecentIdexTrade(keys[k], trades[t], publicAddr);
+                            let trade = undefined;
+                            try {
+                                trade = _delta.parseRecentIdexTrade(keys[k], trades[t], publicAddr);
+                            } catch(e) {
+                                console.log('failed to parse idex trade');
+                            }
 							if (trade) {
 								idexTx.push(trade);
 							}

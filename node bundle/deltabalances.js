@@ -230,6 +230,9 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             if (x.blocked) {
                 token.blocked = x.blocked;
             }
+            if (x.old) {
+                token.old = true;
+            }
             if (x.killed) {
                 token.killed = true;
             }
@@ -3029,8 +3032,12 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 //trade from IDEX api for in recent trades page
 DeltaBalances.prototype.parseRecentIdexTrade = function (key, obj, userAddress) {
 
+    /*
     let delta = this;
-
+    let keys = key.split('_');
+    let baseToken = matchToken(keys[0]);
+    let token = matchToken(keys[1]);
+    
     function matchToken(symbol) {
         if (symbol === 'ETH')
             return delta.uniqueTokens[delta.config.ethAddr];
@@ -3042,17 +3049,37 @@ DeltaBalances.prototype.parseRecentIdexTrade = function (key, obj, userAddress) 
                 return token;
         }
         return undefined;
-    }
+    } */
+
+    let baseToken = undefined
+    let token = undefined;
+    let buyToken = this.setToken(obj.tokenBuy);
+    let sellToken =  this.setToken(obj.tokenSell);
 
     // match idex token
+    if(obj.type == 'sell') {
+        if(obj.taker == userAddress.toLowerCase()) {
+            token = buyToken;
+            baseToken = sellToken;
+        } else {
+            token = sellToken;
+            baseToken = buyToken;
+        }
+
+    } else { ///buy
+        if(obj.taker == userAddress.toLowerCase()) {
+            token = sellToken;
+            baseToken = buyToken;
+        } else {
+            token = buyToken;
+            baseToken = sellToken;
+        }
+    }
 
     let baseAmount = new BigNumber(obj.total);
     let amount = new BigNumber(obj.amount);
     let price = new BigNumber(obj.price);
 
-    let keys = key.split('_');
-    let baseToken = matchToken(keys[0]);
-    let token = matchToken(keys[1]);
     let hash = obj.transactionHash;
     let tradeType = obj.type;
     // capitalize first letter
@@ -5088,6 +5115,9 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     } else {
                         contents = 'Contract: ' + utility.tokenLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals;
                     }
+                    if (token.old) {
+                        contents += '<br> <i class="text-red fa fa-exclamation-triangle" aria-hidden="true"></i> Token contract is deprecated.';
+                    }
                     if (token.locked || token.killed) {
                         contents += '<br> <i class="text-red fa fa-lock" aria-hidden="true"></i> Token Locked or Paused.';
                     }
@@ -5116,7 +5146,10 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
         let name = token.name;
         if (token.locked) {
             name += ' <i class="fa fa-lock" aria-hidden="true"></i>';
+        } else if (token.old) {
+            name += ' <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
         }
+        
         let popover = '<a tabindex="0" class="label ' + labelClass + '" role="button" data-html="true" data-toggle="popover" data-placement="auto right"  title="' + title + '" data-container="body" data-content=\'' + contents + '\'>' + name + '</a>';
 
         return popover;

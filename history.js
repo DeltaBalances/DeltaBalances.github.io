@@ -1805,6 +1805,62 @@ var isAddressPage = true;
 				tableData.push(row);
 			}
 			tableData = fixDownloadNumberNotation(tableData, ['BuyAmount', 'SellAmount', 'FeeAmount']);
+		} else if (exportFormat == 6) {
+			// CryptoTax.io (CSV)
+
+			filePrefix = 'CryptoTax_CSV_';
+			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset', 'sell_asset', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee', 'fee_asset',  'transaction_type', 'clarification'];
+			tableData = [headers];
+
+			for (var i = 0; i < allTrades.length; ++i) {
+				var row = [];
+				
+				const exchange = allTrades[i].Exchange;
+				const transactionDate = allTrades[i]['Date'].toISOString();
+				const transactionType = 'trade';
+				const clarificationType = '';
+				let buyAmount = 0;
+				let buyToken = '';
+				let sellAmount = 0;
+				let feeAmount = allTrades[i]['Fee'];
+				let feeToken = allTrades[i]['FeeToken'].name; 
+
+				if (allTrades[i]['Trade'] === 'Buy') {
+					buyAmount = allTrades[i]['Amount'];
+					buyToken = allTrades[i]['Token'].name;
+					sellAmount = allTrades[i]['Total'];
+					sellToken = allTrades[i]['Base'].name;
+				} else {
+					sellAmount = allTrades[i]['Amount'];
+					sellToken = allTrades[i]['Token'].name;
+					buyAmount = allTrades[i]['Total'];
+					buyToken = allTrades[i]['Base'].name;
+				}
+
+				if (feeAmount && feeToken) {
+					// apply CryptoTax fee rules
+					if (feeToken === buyToken) {
+						buyAmount = buyAmount + feeAmount;
+					} else if (feeToken === sellToken) {
+						sellAmount = sellAmount - feeAmount;
+					}
+				}
+
+				row = [
+					exchange, exchange, transactionDate,
+					buyToken, sellToken, buyAmount, sellAmount, allTrades[i]['Hash'],
+					feeAmount, feeToken, transactionType, clarificationType
+				];
+
+				tableData.push(row);
+			}
+			tableData = fixDownloadNumberNotation(tableData, ['buy_amount', 'sell_amount', 'fee']);
+			// add quotes around each cell data
+			tableData = tableData.map((row) => {
+				return row.map((cell) => {
+					return `\"${cell}\"`;
+				});
+			});
 		} else {
 			console.log('invalid trade export format');
 			return;
@@ -1868,6 +1924,52 @@ var isAddressPage = true;
 			tableData = tableData.map((row) => {
 				return row.map((cell) => {
 					return `\"${cell}\"`
+				});
+			});
+		} else if (exportFormat == 6) {
+			// CryptoTax.io funds export (CSV)
+
+			filePrefix = 'CryptoTax_CSV_';
+			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset', 'sell_asset', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee', 'fee_asset',  'transaction_type', 'clarification'];
+			tableData = [headers];
+
+			for (var i = 0; i < allFunds.length; ++i) {
+				var row = [];
+
+				const exchange = allFunds[i].Exchange;
+				const transactionDate = allFunds[i]['Date'].toISOString();
+				const feeAmount = '';
+				const feeToken = '';
+				const clarificationType = '';
+				let buyAmount = '';
+				let buyToken = '';
+				let sellAmount = '';
+				let sellToken = '';
+				let transactionType = '';
+
+				if (allFunds[i]['Type'] === 'Deposit') {
+					buyAmount = allFunds[i]['Amount'];
+					buyToken = allFunds[i]['Token'].name;
+					transactionType = 'deposit';
+				} else {
+					sellAmount = allFunds[i]['Amount'];
+					sellToken = allFunds[i]['Token'].name;
+					transactionType = 'withdrawal';
+				}
+
+				row = [
+					exchange, exchange, transactionDate,
+					buyToken, sellToken, buyAmount, sellAmount, allFunds[i]['Hash'],
+					feeAmount, feeToken, transactionType, clarificationType
+				];
+
+				tableData.push(row);
+			}
+			tableData = fixDownloadNumberNotation(tableData, ['buy_amount', 'sell_amount', 'fee']);
+			// add quotes around each cell data
+			tableData = tableData.map((row) => {
+				return row.map((cell) => {
+					return `\"${cell}\"`;
 				});
 			});
 		} else {

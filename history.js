@@ -1837,15 +1837,6 @@ var isAddressPage = true;
 					buyToken = allTrades[i]['Base'].name;
 				}
 
-				if (feeAmount && feeToken) {
-					// apply CryptoTax fee rules
-					if (feeToken === buyToken) {
-						buyAmount = buyAmount + feeAmount;
-					} else if (feeToken === sellToken) {
-						sellAmount = sellAmount - feeAmount;
-					}
-				}
-
 				row = [
 					exchange, exchange, transactionDate,
 					buyToken, sellToken, buyAmount, sellAmount, allTrades[i]['Hash'],

@@ -141,8 +141,8 @@ function _decodeMethod(data) {
               let type = abiItem.inputs[index].components[index2].type;
               if (type.indexOf("uint") == 0 || type.indexOf("int") == 0) {
                 val = parseArrayNumber(val);
-              } else if(type.indexOf('tuple') !== -1) {
-                  //recursive on nested tuples
+              } else if (type.indexOf('tuple') !== -1) {
+                //recursive on nested tuples
                 val = parseTuple(val, ((type.match(/]/g) || []).length));
               }
               return {

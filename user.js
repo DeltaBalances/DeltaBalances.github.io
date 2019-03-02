@@ -168,7 +168,7 @@ function forget() {
     }
     //$('#address').val('');
     //publicAddr = getAddress('');
-    
+
     setStorage();
     if (!publicAddr && !savedAddr && !metamaskAddr) {
         $('#userToggle').click();
@@ -177,7 +177,7 @@ function forget() {
 
     if (isAddressPage) {
         window.location.hash = "";
-       // myClick();
+        // myClick();
     }
 
     return false;

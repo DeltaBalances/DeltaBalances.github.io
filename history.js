@@ -154,8 +154,8 @@ var isAddressPage = true;
 			var selected = []
 			selected = $('#exchangeDropdown').val();
 
-            setExchanges(selected, true);
-            setStorage();
+			setExchanges(selected, true);
+			setStorage();
 		});
 
 		setExchanges(exchanges, true);
@@ -413,7 +413,7 @@ var isAddressPage = true;
 				setDaySelector();
 			else
 				setMonthSelector();
-        }
+		}
 	}
 
 	function myClick() {
@@ -994,7 +994,7 @@ var isAddressPage = true;
 						unpacked.name != 'Buy' &&
 						unpacked.name != 'Sell' &&
 						unpacked.name != 'FillBuyOrder' &&
-                        unpacked.name != 'FillSellOrder' /*&&
+						unpacked.name != 'FillSellOrder' /*&&
                         unpacked.name != 'Match' */
 					)
 				) {
@@ -1145,32 +1145,32 @@ var isAddressPage = true;
 				localStorage.setItem("address", savedAddr);
 			} else {
 				localStorage.removeItem('address');
-            }
-            
-            // is this multi exchange trade history?
-            if(window.location.pathname.toLowerCase().indexOf('/trades') !== -1) {
-                //save exchange selection
-                localStorage.setItem("exchanges-tradeHistory", JSON.stringify(exchanges));
-            }
+			}
+
+			// is this multi exchange trade history?
+			if (window.location.pathname.toLowerCase().indexOf('/trades') !== -1) {
+				//save exchange selection
+				localStorage.setItem("exchanges-tradeHistory", JSON.stringify(exchanges));
+			}
 		}
 	}
 
 	function getStorage() {
 		if (typeof (Storage) !== "undefined") {
 
-            // is this multi exchange trade history?
-            if(window.location.pathname.toLowerCase().indexOf('/trades') !== -1) {
-                //load exchange selection
-                let selected = localStorage.getItem("exchanges-tradeHistory");
-                if(selected !== null && selected.length > 0) {
-                    try {
-                        let sel = JSON.parse(selected);
-                        if(sel && Array.isArray(sel)) {
-                            setExchanges(sel);
-                        }
-                    } catch(e) {}
-                }
-            }
+			// is this multi exchange trade history?
+			if (window.location.pathname.toLowerCase().indexOf('/trades') !== -1) {
+				//load exchange selection
+				let selected = localStorage.getItem("exchanges-tradeHistory");
+				if (selected !== null && selected.length > 0) {
+					try {
+						let sel = JSON.parse(selected);
+						if (sel && Array.isArray(sel)) {
+							setExchanges(sel);
+						}
+					} catch (e) { }
+				}
+			}
 
 			// check for saved address
 			if (localStorage.getItem("address") !== null) {
@@ -1809,12 +1809,12 @@ var isAddressPage = true;
 			// CryptoTax.io (CSV)
 
 			filePrefix = 'CryptoTax_CSV_';
-			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset', 'sell_asset', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee', 'fee_asset',  'transaction_type', 'clarification'];
+			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset', 'sell_asset', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee', 'fee_asset', 'transaction_type', 'clarification'];
 			tableData = [headers];
 
 			for (var i = 0; i < allTrades.length; ++i) {
 				var row = [];
-				
+
 				const exchange = allTrades[i].Exchange;
 				const transactionDate = allTrades[i]['Date'].toISOString();
 				const transactionType = 'trade';
@@ -1823,7 +1823,7 @@ var isAddressPage = true;
 				let buyToken = '';
 				let sellAmount = 0;
 				let feeAmount = allTrades[i]['Fee'];
-				let feeToken = allTrades[i]['FeeToken'].name; 
+				let feeToken = allTrades[i]['FeeToken'].name;
 
 				if (allTrades[i]['Trade'] === 'Buy') {
 					buyAmount = allTrades[i]['Amount'];
@@ -1897,14 +1897,14 @@ var isAddressPage = true;
 					row = [
 						'Deposit', allFunds[i]['Amount'], allFunds[i]['Token'].name, "", "", "", "",
 						exchange, '', 'Hash: ' + allFunds[i]['Hash'] + " -- " + allFunds[i]['Token'].name + " token contract " + allFunds[i]['Token'].addr,
-                        _util.formatDateOffset(allFunds[i]['Date']), allFunds[i]['Hash']
+						_util.formatDateOffset(allFunds[i]['Date']), allFunds[i]['Hash']
 					];
 				}
 				else {  //withdraw is 'sell'
 					row = [
 						'Withdrawal', "", "", allFunds[i]['Amount'], allFunds[i]['Token'].name, "", "",
 						exchange, '', 'Hash: ' + allFunds[i]['Hash'] + " -- " + allFunds[i]['Token'].name + " token contract " + allFunds[i]['Token'].addr,
-                        _util.formatDateOffset(allFunds[i]['Date']), allFunds[i]['Hash']
+						_util.formatDateOffset(allFunds[i]['Date']), allFunds[i]['Hash']
 					];
 				}
 
@@ -1921,7 +1921,7 @@ var isAddressPage = true;
 			// CryptoTax.io funds export (CSV)
 
 			filePrefix = 'CryptoTax_CSV_';
-			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset', 'sell_asset', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee', 'fee_asset',  'transaction_type', 'clarification'];
+			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset', 'sell_asset', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee', 'fee_asset', 'transaction_type', 'clarification'];
 			tableData = [headers];
 
 			for (var i = 0; i < allFunds.length; ++i) {

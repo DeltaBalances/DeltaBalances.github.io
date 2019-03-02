@@ -29904,6 +29904,7 @@ module.exports = (config) => {
     return '<a target = "_blank" href="' + url + '">' + displayHash + ' </a>';
   };
 
+  // Make an etherscan link for an address (address, output as html anchor, shorten the address with ...)
   utility.addressLink = function (addr, html, short) {
     var url = 'https://etherscan.io/address/' + addr;
     if (!html)
@@ -29913,6 +29914,22 @@ module.exports = (config) => {
       displayText = displayText.slice(0, 6) + '..';
     else {
       displayText = bundle.DeltaBalances.addressName(addr, !short);
+
+      //show addres after name 'Contract A 0xab12cd34..' in a smaller size
+      if(html && !short && displayText && displayText !== addr) {
+        let split = displayText.split(' ');
+        let changed = false;
+        for (let i = 0; i < split.length; i++) {
+            //found the address in the name, wrap it in a span
+            if(split[i].length == 42 && split[i].slice(0,2) == '0x') {
+              split[i] = '<span class="dim">'+ split[i] + '</span>';
+              changed = true;
+            }
+        }
+        if(changed) {
+          displayText = split.join(' ');
+        }
+      }
     }
     return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
   };

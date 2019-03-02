@@ -5641,20 +5641,20 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
     let name = '';
 
     if (this.uniqueTokens[lcAddr]) {
-        name = this.uniqueTokens[lcAddr].name + " Contract ";
+        name = this.uniqueTokens[lcAddr].name + " Contract";
         //override tokens, as uniswap contracts are themself tokens
         if(this.config.uniswapContracts[lcAddr]) {
-            name = 'Uniswap (' + this.uniqueTokens[this.config.uniswapContracts[lcAddr]].name + ') ';
+            name = 'Uniswap (' + this.uniqueTokens[this.config.uniswapContracts[lcAddr]].name + ')';
         }
     }
     else if (this.config.zrxRelayers[lcAddr]) {
-        name = this.config.zrxRelayers[lcAddr] + ' Admin ';
+        name = this.config.zrxRelayers[lcAddr] + ' Admin';
     } else if (this.config.admins[lcAddr]) {
-        name = this.config.admins[lcAddr] + ' ';
+        name = this.config.admins[lcAddr];
     } else if (this.config.exchangeWallets[lcAddr]) {
-        name = this.config.exchangeWallets[lcAddr] + ' ';
+        name = this.config.exchangeWallets[lcAddr];
     } else if (this.config.bancorConverters.indexOf(lcAddr) !== -1) {
-        name = "Bancor ";
+        name = "Bancor";
     } else {
         let exchanges = Object.values(this.config.exchangeContracts);
         for (let i = 0; i < exchanges.length; i++) {
@@ -5667,7 +5667,7 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
     }
 
     if (name !== '') {
-        return name + (showAddr ? lcAddr : '');
+        return name + (showAddr ? (' ' + lcAddr) : '');
     } else {
         // no known alias, return address
         return lcAddr;

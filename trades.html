@@ -25,9 +25,6 @@
   <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
   <script src="js/bootstrap-select.min.js"></script>
 
-  <!-- JS socketIO  for exchange prices -->
-  <!--<script src="js/socket.io.js" defer></script>-->
-
   <!-- JS  Token discover / loading -->
   <script src="backupTokens.js"></script>
   <script src="loadTokens.js"></script>
@@ -38,10 +35,9 @@
   <script src="bundle.min.js"></script>
   <script>
     var exchanges = ['EtherDelta', '0x Protocol v1'];
-   </script>
-   <script src="user.js"></script>
+  </script>
+  <script src="user.js"></script>
   <script src="history.js"></script>
-
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -169,7 +165,7 @@
             <span>Transaction Info</span>
           </a>
         </li>
-		<li>
+        <li>
           <a id="allowNav" href="allowance.html">
             <i class="sidebar-icon icon-checked"></i>
             <span>Token Allowances</span>
@@ -223,7 +219,7 @@
                 <span>OasisDex <span class="text75"> - Eth2Dai</span></span>
               </a>
             </li>
-			<li>
+            <li>
               <a id="historyNav10" href="history10.html">
                 <i class="sidebar-icon icon-ethex"></i>
                 <span>ETHEX</span>
@@ -303,33 +299,32 @@
                       <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;" id="addr">Enter your public address </p>
                     </div>
                   </div>
-				  <ul id="extraAddresses" class="list-unstyled">
-				  </ul>
+                  <ul id="extraAddresses" class="list-unstyled">
+                  </ul>
                   <br>
                 </div>
-                 <div class="col-md-12 col-lg-8 noPadM">
-                    <h4>Select exchanges</h4>
-                    <div class="form-group">
-                      <select id="exchangeDropdown" data-actions-box="true" data-container="body" data-width="100%" data-none-selected-text="Click to select one or more exchange(s)" class="selectpicker"
-                        multiple>
-                        <option data-icon="icon-etherdelta" data-subtext="ForkDelta">EtherDelta</option>
-                        <option data-icon="icon-zrx" data-subtext="(RadarRelay, DDEX 2018, Paradex, etc.)">0x Protocol v1</option>
-                        <option data-icon="icon-zrx" data-subtext="(From Sept 2018)">0x Protocol v2</option>
-						<option data-icon="icon-tokenstore">Token store</option>
-						<!--<option data-icon="icon-link" data-subtext="(Hydro - From Dec 2018)">DDEX</option>-->
-						<option data-icon="icon-oasis" data-subtext="Eth2Dai, <strike>OasisDirect</strike>">OasisDex</option>
-						<option data-icon="icon-kyber">Kyber</option>
-                        <option data-icon="icon-airswap" >AirSwap</option>
-                        <option data-icon="icon-enclaves" data-subtext="Trustless (v1)">Ethfinex</option>
-                        <option data-icon="icon-enclaves">Enclaves</option>
-                        <option data-icon="icon-link">ETHEX</option>
-                        <option data-icon="icon-link">EasyTrade</option>
-                        <option data-icon="icon-enclaves">SingularX</option>
-                        <option data-icon="icon-enclaves">EtherC</option>
-						<option data-icon="icon-enclaves">ETHEN</option>
-                        <option data-icon="icon-decentrex" data-subtext="(Discontinued)">Decentrex</option>
-                      </select>
-                    </div>
+                <div class="col-md-12 col-lg-8 noPadM">
+                  <h4>Select exchanges</h4>
+                  <div class="form-group">
+                    <select id="exchangeDropdown" data-actions-box="true" data-container="body" data-width="100%" data-none-selected-text="Click to select one or more exchange(s)" class="selectpicker" multiple>
+                      <option data-icon="icon-etherdelta" data-subtext="ForkDelta">EtherDelta</option>
+                      <option data-icon="icon-zrx" data-subtext="(RadarRelay, DDEX 2018, Paradex, etc.)">0x Protocol v1</option>
+                      <option data-icon="icon-zrx" data-subtext="(From Sept 2018)">0x Protocol v2</option>
+                      <option data-icon="icon-tokenstore">Token store</option>
+                      <!--<option data-icon="icon-link" data-subtext="(Hydro - From Dec 2018)">DDEX</option>-->
+                      <option data-icon="icon-oasis" data-subtext="Eth2Dai, <strike>OasisDirect</strike>">OasisDex</option>
+                      <option data-icon="icon-kyber">Kyber</option>
+                      <option data-icon="icon-airswap">AirSwap</option>
+                      <option data-icon="icon-enclaves" data-subtext="Trustless (v1)">Ethfinex</option>
+                      <option data-icon="icon-enclaves">Enclaves</option>
+                      <option data-icon="icon-link">ETHEX</option>
+                      <option data-icon="icon-link">EasyTrade</option>
+                      <option data-icon="icon-enclaves">SingularX</option>
+                      <option data-icon="icon-enclaves">EtherC</option>
+                      <option data-icon="icon-enclaves">ETHEN</option>
+                      <option data-icon="icon-decentrex" data-subtext="(Discontinued)">Decentrex</option>
+                    </select>
+                  </div>
 
                 </div>
                 <div class="col-md-12 noPadM">
@@ -352,14 +347,13 @@
                             <li>
                               <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" checked>
                               <label for="r0"> The last
-                                <input class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;"
-                                  onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (14s per block)</label>
+                                <input class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;" onchange="validateDays()" value="1"
+                                  min="0.5" max="999" step="0.5"> days (14s per block)</label>
                             </li>
                             <li>
                               <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()">
                               <label for="r1"> Month
-                                <select style="display:inline; width: 60%; height:25px; padding-top:2px;" class="form-control" id="monthSelect" onChange="checkMonthInput()"
-                                  disabled></select>
+                                <select style="display:inline; width: 60%; height:25px; padding-top:2px;" class="form-control" id="monthSelect" onChange="checkMonthInput()" disabled></select>
                               </label>
                             </li>
                             <li>
@@ -387,7 +381,7 @@
                   </div>
                   <div class="col-md-7 noPad" style="overflow:hidden;">
                     <h4>Info</h4>
-                        For a faster experience, select as few exchanges as possible.
+                    For a faster experience, select as few exchanges as possible.
                     <span class="visible-xs">
                       <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
                       <br>
@@ -416,7 +410,7 @@
                       <option value="2">Bitcoin.tax (CSV)</option>
                       <option value="3">Cointracking.info (CSV)</option>
                       <option value="4">Cointracking.info (CustomExchange)</option>
-					  <option value="5">TokenTax (CSV)</option>
+                      <option value="5">TokenTax (CSV)</option>
                       <option value="1">myCryptoTaxCalculator.com (CSV)</option>
                       <option value="6">CryptoTax.io (CSV)</option>
                     </select>
@@ -505,18 +499,18 @@
                       <a href="https://ddex.io" target="_blank">DDEX (v1)</a>,
                       <a href="https://paradex.io/" target="_blank">Paradex</a>,
                       <a href="https://ercdex.com/" target="_blank">ERC dEX</a>,
-					  <a href="https://openrelay.xyz/" target="_blank">OpenRelay</a>,
+                      <a href="https://openrelay.xyz/" target="_blank">OpenRelay</a>,
                       <a href="https://sharkrelay.com" target="_blank">Shark Relay</a>,
                       <a href="https://tokenjar.io" target="_blank">Token Jar</a>,
                       <a href="https://idtexchange.com" target="_blank">IDT</a>,
                       <a href="https://bamboorelay.com" target="_blank">BambooRelay</a>
                       <a href="https://tokenlon.token.im/tokenlon" target="_blank">Tokenlon</a>,
-					   and more.
+                      and more.
                     </li>
                     <li> Other exchanges:
-                      <a href="https://airswap.io" target="_blank">AirSwap</a>, 
-                      <a href="https://kyber.network" target="_blank">Kyber Network</a>, 
-                      <a href="https://oasisdex.com" target="_blank">OasisDex</a> <a href="https://eth2dai.com" target="_blank">(Eth2Dai)</a>, 
+                      <a href="https://airswap.io" target="_blank">AirSwap</a>,
+                      <a href="https://kyber.network" target="_blank">Kyber Network</a>,
+                      <a href="https://oasisdex.com" target="_blank">OasisDex</a> <a href="https://eth2dai.com" target="_blank">(Eth2Dai)</a>,
                       <a href="https://www.ethex.market" target="_blank">ETHEX</a> and
                       <a href="https://www.easytrade.io" target="_blank">EasyTrade</a>.
                     </li>

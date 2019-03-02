@@ -24,9 +24,6 @@
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
   <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
 
-  <!-- JS socketIO  for exchange prices -->
-  <!--<script src="js/socket.io.js" defer></script>-->
-
   <!-- JS  Token discover / loading -->
   <script src="backupTokens.js"></script>
   <script src="loadTokens.js"></script>
@@ -35,7 +32,7 @@
   <!--  config excluded from bundle -->
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
-  <script> 
+  <script>
     var exchanges = ['Enclaves'];
   </script>
   <script src="user.js"></script>
@@ -165,7 +162,7 @@
             <span>Transaction Info</span>
           </a>
         </li>
-		<li>
+        <li>
           <a id="allowNav" href="allowance.html">
             <i class="sidebar-icon icon-checked"></i>
             <span>Token Allowances</span>
@@ -219,7 +216,7 @@
                 <span>OasisDex <span class="text75"> - Eth2Dai</span></span>
               </a>
             </li>
-			<li>
+            <li>
               <a id="historyNav10" href="history10.html">
                 <i class="sidebar-icon icon-ethex"></i>
                 <span>ETHEX</span>
@@ -296,8 +293,8 @@
                       <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;" id="addr">Enter your public address </p>
                     </div>
                   </div>
-				  <ul id="extraAddresses" class="list-unstyled">
-				  </ul>
+                  <ul id="extraAddresses" class="list-unstyled">
+                  </ul>
                   <br>
                 </div>
                 <div class="col-md-12 noPadM">
@@ -320,14 +317,13 @@
                             <li>
                               <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" checked>
                               <label for="r0"> The last
-                                <input class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;"
-                                  onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (14s per block)</label>
+                                <input class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;" onchange="validateDays()" value="1"
+                                  min="0.5" max="999" step="0.5"> days (14s per block)</label>
                             </li>
                             <li>
                               <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()">
                               <label for="r1"> Month
-                                <select style="display:inline; width: 60%; height:25px; padding-top:2px;" class="form-control" id="monthSelect" onChange="checkMonthInput()"
-                                  disabled></select>
+                                <select style="display:inline; width: 60%; height:25px; padding-top:2px;" class="form-control" id="monthSelect" onChange="checkMonthInput()" disabled></select>
                               </label>
                             </li>
                             <li>
@@ -389,7 +385,7 @@
                       <option value="2">Bitcoin.tax (CSV)</option>
                       <option value="3">Cointracking.info (CSV)</option>
                       <option value="4">Cointracking.info (CustomExchange)</option>
-					  <option value="5">TokenTax (CSV)</option>
+                      <option value="5">TokenTax (CSV)</option>
                       <option value="1">myCryptoTaxCalculator.com (CSV)</option>
                       <option value="6">CryptoTax.io (CSV)</option>
                     </select>

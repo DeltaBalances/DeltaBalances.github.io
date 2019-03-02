@@ -24,9 +24,6 @@
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
   <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
 
-  <!-- JS socketIO  for exchange prices -->
-  <!--<script src="js/socket.io.js" defer></script>-->
-
   <!-- JS  Token discover / loading -->
   <script src="backupTokens.js"></script>
   <script src="loadTokens.js"></script>
@@ -35,12 +32,11 @@
   <!--  config excluded from bundle -->
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
-  <script> 
+  <script>
     var exchanges = ['OasisDex'];
   </script>
   <script src="user.js"></script>
   <script src="history.js"></script>
-
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -165,7 +161,7 @@
             <span>Transaction Info</span>
           </a>
         </li>
-		<li>
+        <li>
           <a id="allowNav" href="allowance.html">
             <i class="sidebar-icon icon-checked"></i>
             <span>Token Allowances</span>
@@ -219,7 +215,7 @@
                 <span>OasisDex <span class="text75"> - Eth2Dai</span></span>
               </a>
             </li>
-			<li>
+            <li>
               <a id="historyNav10" href="history10.html">
                 <i class="sidebar-icon icon-ethex"></i>
                 <span>ETHEX</span>
@@ -296,8 +292,8 @@
                       <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;" id="addr">Enter your public address </p>
                     </div>
                   </div>
-				  <ul id="extraAddresses" class="list-unstyled">
-				  </ul>
+                  <ul id="extraAddresses" class="list-unstyled">
+                  </ul>
                   <br>
                 </div>
                 <div class="col-md-12 noPadM">
@@ -320,14 +316,13 @@
                             <li>
                               <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" checked>
                               <label for="r0"> The last
-                                <input class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;"
-                                  onchange="validateDays()" value="1" min="0.5" max="999" step="0.5"> days (14s per block)</label>
+                                <input class="form-control" style="width: 80px; height:25px;" type="number" id="days" style="text-align: center;height:85%;" onchange="validateDays()" value="1"
+                                  min="0.5" max="999" step="0.5"> days (14s per block)</label>
                             </li>
                             <li>
                               <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()">
                               <label for="r1"> Month
-                                <select style="display:inline; width: 60%; height:25px; padding-top:2px;" class="form-control" id="monthSelect" onChange="checkMonthInput()"
-                                  disabled></select>
+                                <select style="display:inline; width: 60%; height:25px; padding-top:2px;" class="form-control" id="monthSelect" onChange="checkMonthInput()" disabled></select>
                               </label>
                             </li>
                             <li>
@@ -357,16 +352,16 @@
                     <h4>Info</h4>
                     History for
                     <a href="https://oasisdex.com" target="_blank">OasisDex</a>, <a href="https://eth2dai.com/" target="_blank">Eth2Dai</a> and
-					<a href="https://oasiscommunity.github.io/dex/" target="_blank">OasisCommunity</a> at contracts: <br>
-					
-					
-					<a href="https://etherscan.io/address/0xB7ac09C2c0217B07d7c103029B4918a2C401eeCB" target="_blank">0xB7ac09..</a>,
-					<a href="https://etherscan.io/address/0x83ce340889c15a3b4d38cfcd1fc93e5d8497691f" target="_blank">0x83ce34..</a>,  
-					
-					<a href="https://etherscan.io/address/0x3aa927a97594c3ab7d7bf0d47c71c3877d1de4a1" target="_blank">0x3aa927..</a>,
+                    <a href="https://oasiscommunity.github.io/dex/" target="_blank">OasisCommunity</a> at contracts: <br>
+
+
+                    <a href="https://etherscan.io/address/0xB7ac09C2c0217B07d7c103029B4918a2C401eeCB" target="_blank">0xB7ac09..</a>,
+                    <a href="https://etherscan.io/address/0x83ce340889c15a3b4d38cfcd1fc93e5d8497691f" target="_blank">0x83ce34..</a>,
+
+                    <a href="https://etherscan.io/address/0x3aa927a97594c3ab7d7bf0d47c71c3877d1de4a1" target="_blank">0x3aa927..</a>,
                     <a href="https://etherscan.io/address/0x14fbca95be7e99c15cc2996c6c9d841e54b79425" target="_blank">0x14fbc..</a> and
-					<a href="https://etherscan.io/address/0x39755357759ce0d7f32dc8dc45414cca409ae24e" target="_blank">0x39755..</a>.
-					
+                    <a href="https://etherscan.io/address/0x39755357759ce0d7f32dc8dc45414cca409ae24e" target="_blank">0x39755..</a>.
+
                     <br>
                     <br>
 
@@ -394,12 +389,12 @@
                       </span>
                     </h4>
                     <select id="downloadTrades" onchange="download1()" style="display:inline; width:65%; " class="form-control">
-                     <option value="0" disabled selected>Select export format</option>
+                      <option value="0" disabled selected>Select export format</option>
                       <option value="1">Default V2 (CSV)</option>
                       <option value="2">Bitcoin.tax (CSV)</option>
                       <option value="3">Cointracking.info (CSV)</option>
                       <option value="4">Cointracking.info (CustomExchange)</option>
-					  <option value="5">TokenTax (CSV)</option>
+                      <option value="5">TokenTax (CSV)</option>
                       <option value="1">myCryptoTaxCalculator.com (CSV)</option>
                       <option value="6">CryptoTax.io (CSV)</option>
                     </select>

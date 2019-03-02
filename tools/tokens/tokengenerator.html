@@ -14,545 +14,548 @@
 	<script type="text/javascript" src="../../js/jquery-3.2.1.min.js"></script>
 	<!--<script src="js/bootstrap.min.js"></script> -->
 
-    <script src="./exchangeTokens.js"></script>
+	<script src="./exchangeTokens.js"></script>
 	<script src="../../backupTokens.js"></script>
 
 </head>
 
 <body>
-	A quick script to get a big list of tokens deposited in exchange contracts/wallets according to ethplorer.io. (Filter tokens on >=10 deposited  and < 0.5*totalSupply in exchange)
-	<ul>
-        <li>etherdelta</li>
-        <li>idex</li>
-        <li>tokenstore</li>
-        <li>ethfinex</li>
-        <li>switcheo</li>
-        <li>ddex</li>
+	A quick script to get a big list of tokens deposited in exchange contracts/wallets according to ethplorer.io. (Filter tokens on >=10 deposited and < 0.5*totalSupply in exchange) <ul>
+		<li>etherdelta</li>
+		<li>idex</li>
+		<li>tokenstore</li>
+		<li>ethfinex</li>
+		<li>switcheo</li>
+		<li>ddex</li>
 
-	</ul>
+		</ul>
 
 
-	<script>
-		var customTokens = {};
-        var idexBlock = {};
+		<script>
+			var customTokens = {};
+			var idexBlock = {};
 
-		function parseMewTokens(array) {
-			for (var i = 0; i < array.length; i++) {
-				var customToken = array[i];
-				if (customToken) {
-                    let token = {
-                        symbol : escapeHtml(customToken.symbol),
-                        address : customToken.address.toLowerCase(),
-                        decimal : Number(customToken.decimal),
-                        name: undefined
-                    };
-                    if(customToken.name) {
-                        token.name = escapeHtml(customToken.name);
-                    } else {
-                        delete token.name;
-                    }
-                    if(customToken.Binance) {
-                        token.Binance = customToken.Binance;
-                    }
-                    
-                    if(customToken.locked) {
-                        token.locked = true;
-                    } 
-                    if (customToken.blocked) {
-                        token.blocked = Number(customToken.blocked);
-                    }
-                    if (customToken.killed) {
-                        token.killed = true;
-                    }
-                    if (customToken.spam) {
-                        token.spam = true;
-                    }
-					if (customToken.blockIDEX) {
-                        token.blockIDEX = true;
-                    }
-					if (!customTokens[token.address]) {
-						customTokens[token.address] = token;
+			function parseMewTokens(array) {
+				for (var i = 0; i < array.length; i++) {
+					var customToken = array[i];
+					if (customToken) {
+						let token = {
+							symbol: escapeHtml(customToken.symbol),
+							address: customToken.address.toLowerCase(),
+							decimal: Number(customToken.decimal),
+							name: undefined
+						};
+						if (customToken.name) {
+							token.name = escapeHtml(customToken.name);
+						} else {
+							delete token.name;
+						}
+						if (customToken.Binance) {
+							token.Binance = customToken.Binance;
+						}
+
+						if (customToken.locked) {
+							token.locked = true;
+						}
+						if (customToken.blocked) {
+							token.blocked = Number(customToken.blocked);
+						}
+						if (customToken.killed) {
+							token.killed = true;
+						}
+						if (customToken.old) {
+							token.old = true;
+						}
+						if (customToken.spam) {
+							token.spam = true;
+						}
+						if (customToken.blockIDEX) {
+							token.blockIDEX = true;
+						}
+						if (!customTokens[token.address]) {
+							customTokens[token.address] = token;
+						}
 					}
 				}
 			}
-		}
-        
-        function parseEDTokens(array, exchange) {
-			for (var i = 0; i < array.length; i++) {
-				let EDtoken = array[i];
-                if (EDtoken) {
-                    if(EDtoken.address) { // convert idex to old format
-                        EDtoken.addr = EDtoken.address;
-                        EDtoken.name2 = EDtoken.name;
-                        EDtoken.name = EDtoken.symbol;
-                    }
-                    if(!EDtoken.decimals)
-                        EDtoken.decimals = 0;
-                        
-                    let token = {
-                        symbol : escapeHtml(EDtoken.name),
-                        address : EDtoken.addr.toLowerCase(),
-                        decimal : Number(EDtoken.decimals), 
-                    };
-                    if(EDtoken.fullName && EDtoken.fullName !== "" && EDtoken.name != EDtoken.fullName && EDtoken.fullName != "") {
-                        token.name = escapeHtml(EDtoken.fullName);
-                    } else if(EDtoken.name2 && EDtoken.name2 !== "" && EDtoken.name != EDtoken.name2 && EDtoken.name2 != "") {
-                        token.name = escapeHtml(EDtoken.name2);
-                    }
-                    
-                    if(exchange == 'IDEX' && idexBlock[token.address]) {
-                        token[exchange] = token.symbol;
-                        token['blockIDEX'] = true;
-                    } else {
-                        token[exchange] = token.symbol;
-                    }
-                    
-					if (!customTokens[token.address]) {
-						customTokens[token.address] = token;
-					} else {
-                        if(exchange == 'IDEX' && idexBlock[token.address]) {
-                            customTokens[token.address]['blockIDEX'] = true;
-                        }
-                        
-                        if(!customTokens[token.address][exchange]) {
-                            customTokens[token.address][exchange] = token.symbol;   
-                        }
-                        if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
-                            customTokens[token.address].name = token.name;
-                        }
-                    }
-				}
-			}
-		}
-        
-         function parseDDEXTokens(array) {
-			for (var i = 0; i < array.length; i++) {
-				let ddexToken = array[i];
-                if (ddexToken) {
-                
-                    if(!ddexToken.decimals)
-                        ddexToken.decimals = 0;
-                        
-                    let token = {
-                        symbol : escapeHtml(ddexToken.symbol),
-                        address : ddexToken.address.toLowerCase(),
-                        decimal : Number(ddexToken.decimals),
-						name: escapeHtml(ddexToken.name),
-                    };
-                    token.DDEX = token.symbol;
-                    
-					if (!customTokens[token.address]) {
-						customTokens[token.address] = token;
-					} else {
-                        if(!customTokens[token.address].DDEX) {
-                            customTokens[token.address].DDEX = token.symbol;
-                        }
-						if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
-							customTokens[token.address].name = token.name;
+
+			function parseEDTokens(array, exchange) {
+				for (var i = 0; i < array.length; i++) {
+					let EDtoken = array[i];
+					if (EDtoken) {
+						if (EDtoken.address) { // convert idex to old format
+							EDtoken.addr = EDtoken.address;
+							EDtoken.name2 = EDtoken.name;
+							EDtoken.name = EDtoken.symbol;
 						}
-                    }
-				}
-			}
-		}
-        
-        function parseRadarTokens(array) {
-			for (var i = 0; i < array.length; i++) {
-				let radarToken = array[i];
-                if (radarToken) {
-                
-                    if(!radarToken.decimals)
-                        radarToken.decimals = 0;
-                        
-                    let token = {
-                        symbol : escapeHtml(radarToken.symbol),
-                        address : radarToken.address.toLowerCase(),
-                        decimal : Number(radarToken.decimals),
-                        name: escapeHtml(radarToken.name)
-                    };
-                    token.Radar = token.symbol;
-                    
-					if (!customTokens[token.address]) {
-						customTokens[token.address] = token;
-					} else {
-                        if(!customTokens[token.address].Radar) {
-                            customTokens[token.address].Radar = token.symbol;
-                        }
-						if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
-							customTokens[token.address].name = token.name;
+						if (!EDtoken.decimals)
+							EDtoken.decimals = 0;
+
+						let token = {
+							symbol: escapeHtml(EDtoken.name),
+							address: EDtoken.addr.toLowerCase(),
+							decimal: Number(EDtoken.decimals),
+						};
+						if (EDtoken.fullName && EDtoken.fullName !== "" && EDtoken.name != EDtoken.fullName && EDtoken.fullName != "") {
+							token.name = escapeHtml(EDtoken.fullName);
+						} else if (EDtoken.name2 && EDtoken.name2 !== "" && EDtoken.name != EDtoken.name2 && EDtoken.name2 != "") {
+							token.name = escapeHtml(EDtoken.name2);
 						}
-                    }
-				}
-			}
-		}
-        
-        function parseKyberTokens(array) {
-			for (var i = 0; i < array.length; i++) {
-				let kyberToken = array[i];
-                if (kyberToken) {
-                
-                    if(!kyberToken.decimals)
-                        kyberToken.decimals = 0;
-                        
-                    let token = {
-                        symbol : escapeHtml(kyberToken.symbol),
-                        address : kyberToken.address.toLowerCase(),
-                        decimal : Number(kyberToken.decimals),
-                        name: escapeHtml(kyberToken.name)
-                    };
-                    token.Kyber = token.symbol;
-                    
-					if (!customTokens[token.address]) {
-						customTokens[token.address] = token;
-					} else {
-                        if(!customTokens[token.address].Kyber) {
-                            customTokens[token.address].Kyber = token.symbol;
-                        }
-						if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
-							customTokens[token.address].name = token.name;
+
+						if (exchange == 'IDEX' && idexBlock[token.address]) {
+							token[exchange] = token.symbol;
+							token['blockIDEX'] = true;
+						} else {
+							token[exchange] = token.symbol;
 						}
-                    }
-				}
-			}
-		}
-		
-		function parseTokenStoreTokens(array) {
-			for (var i = 0; i < array.length; i++) {
-				let newToken = array[i];
-                if (newToken) {
-					
-					let token = {
-                        symbol : escapeHtml(newToken.symbol),
-                        address : newToken.address.toLowerCase(),
-                        decimal : -1,
-                        name: escapeHtml(newToken.name)
-                    };
-	
-					
-                    token.TokenStore = token.symbol;
-                    
-					if (!customTokens[token.address]) {
-						customTokens[token.address] = token;
-					} else {
-                        if(!customTokens[token.address].TokenStore) {
-                            customTokens[token.address].TokenStore = token.symbol;
-                        }
-						if(token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
-							customTokens[token.address].name = token.name;
+
+						if (!customTokens[token.address]) {
+							customTokens[token.address] = token;
+						} else {
+							if (exchange == 'IDEX' && idexBlock[token.address]) {
+								customTokens[token.address]['blockIDEX'] = true;
+							}
+
+							if (!customTokens[token.address][exchange]) {
+								customTokens[token.address][exchange] = token.symbol;
+							}
+							if (token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
+								customTokens[token.address].name = token.name;
+							}
 						}
-                    }
+					}
 				}
 			}
-		}
 
+			function parseDDEXTokens(array) {
+				for (var i = 0; i < array.length; i++) {
+					let ddexToken = array[i];
+					if (ddexToken) {
 
-		function parseEthplorer(response) {
-			for (let i = 0; i < response.tokens.length; i++) {
-                let tokenResponse = response.tokens[i];
-				let tok = response.tokens[i].tokenInfo;
-                let addr = tok.address.toLowerCase();
-                tok.address = addr;
-                if (!customTokens[addr]){ 
-                
-					// any real token has balance > 10 and less than totalsupply in 1 contract
-                    if(tok.symbol && tokenResponse.balance > 10 && tokenResponse.balance < (Number(tok.totalSupply) / 2)) {
-                        
-                        if(tok.holdersCount){
-                            if(tok.holdersCount > 10) {
-                                if(tok.holdersCount <= 150) {
-                                    tok.blocked = 1; // block for balance loading below 150 users
-                                }
-                                addToken(tok);
-                            }
-						} else if(tok.price) {
-							addToken(tok);
-                        }
-                    }
-                
-                    function addToken(token) {
-                        if (token.symbol !== token.name && token.name !== "") {
-                            customTokens[token.address] = { symbol: escapeHtml(token.symbol), address: token.address,  decimal: Number(token.decimals), name: escapeHtml(token.name) };
-                        } else {
-                            customTokens[token.address] = { symbol: escapeHtml(token.symbol), address: token.address, decimal: Number(token.decimals) };
-                        }
-                        if(token.blocked) {
-                            customTokens[token.address].blocked = token.blocked;
-                        }
-                    }
-      
-				} else if(tok && tok.holdersCount) {
-                    if(Number(tok.holdersCount) < 150) {
-                        if(!customTokens[addr].blocked)
-                            customTokens[addr].blocked = 1;
-                    } else if(tok.holdersCount && Number(tok.holdersCount) >= 150 && customTokens[addr].blocked && customTokens[addr].blocked == 1 ) {
-                        delete customTokens[addr].blocked;
-                    }
-                }
-                
-                
-				if (customTokens[addr] && !customTokens[addr].name && tok.symbol !== tok.name && tok.name !== "") {
-					customTokens[addr].name = escapeHtml(tok.name);
+						if (!ddexToken.decimals)
+							ddexToken.decimals = 0;
+
+						let token = {
+							symbol: escapeHtml(ddexToken.symbol),
+							address: ddexToken.address.toLowerCase(),
+							decimal: Number(ddexToken.decimals),
+							name: escapeHtml(ddexToken.name),
+						};
+						token.DDEX = token.symbol;
+
+						if (!customTokens[token.address]) {
+							customTokens[token.address] = token;
+						} else {
+							if (!customTokens[token.address].DDEX) {
+								customTokens[token.address].DDEX = token.symbol;
+							}
+							if (token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
+								customTokens[token.address].name = token.name;
+							}
+						}
+					}
 				}
-				//fix incorrect decimals
-				if (customTokens[addr] && customTokens[addr].decimal !== tok.decimals) {
-					if(addr !== "0xecf8f87f810ecf450940c9f60066b4a7a501d6a7") // old MKR WETH reports bad decimals
-						customTokens[addr].decimal = Number(tok.decimals);
+			}
+
+			function parseRadarTokens(array) {
+				for (var i = 0; i < array.length; i++) {
+					let radarToken = array[i];
+					if (radarToken) {
+
+						if (!radarToken.decimals)
+							radarToken.decimals = 0;
+
+						let token = {
+							symbol: escapeHtml(radarToken.symbol),
+							address: radarToken.address.toLowerCase(),
+							decimal: Number(radarToken.decimals),
+							name: escapeHtml(radarToken.name)
+						};
+						token.Radar = token.symbol;
+
+						if (!customTokens[token.address]) {
+							customTokens[token.address] = token;
+						} else {
+							if (!customTokens[token.address].Radar) {
+								customTokens[token.address].Radar = token.symbol;
+							}
+							if (token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
+								customTokens[token.address].name = token.name;
+							}
+						}
+					}
 				}
+			}
 
-				/*  if(customTokens[addr] && customTokens[addr].symbol !== tok.symbol) {
-					  customTokens[addr].fixSymbol = tok.symbol;
-				  }
-				  */
-			} 
-		}
+			function parseKyberTokens(array) {
+				for (var i = 0; i < array.length; i++) {
+					let kyberToken = array[i];
+					if (kyberToken) {
 
-        
-		// legacy compatiblity
-         for(let i = 0; i < offlineCustomTokens.length; i++) {
-            if(offlineCustomTokens[i] && offlineCustomTokens[i].blockIDEX) {
-                idexBlock[offlineCustomTokens[i].addr] = true;
-            }
-        }
-        
-		//parse existing custom tokens from offlineCustomTokens (backupTokens.js)
-		parseMewTokens(offlineCustomTokens);
-        
-        // parse exisiting tokens from etherdelta/forkdelta
-        parseEDTokens(EDofflineTokens, 'EtherDelta');
-        parseEDTokens(forkOfflineTokens, 'ForkDelta');
-        parseEDTokens(idexOfflineTokens, 'IDEX');
-        parseDDEXTokens(ddexOfflineTokens);
-        parseRadarTokens(radarOfflineTokens);
-        parseKyberTokens(kyberOfflineTokens);
-		parseTokenStoreTokens(tokenStoreOfflineTokens); // these have decimals -1 !
-        
-		//get list of tokens from myetherwallet & mycrypto
-		function getCustomTokens() {
+						if (!kyberToken.decimals)
+							kyberToken.decimals = 0;
 
-			$('#output').html('loading.... (slow)');
-		//	let mewTokens = undefined;
-		//	let mcTokens = undefined;
-			let ethplorerED = undefined;
-			let ethplorerIdex = undefined;
-            let ethplorerStore = undefined;
-            let ethplorerDdex = undefined;
-			let ethplorerEthfinex = undefined;
-			let ethplorerSwitcheo = undefined;
-			let idexTick = undefined;
-			let loaded = 0;
+						let token = {
+							symbol: escapeHtml(kyberToken.symbol),
+							address: kyberToken.address.toLowerCase(),
+							decimal: Number(kyberToken.decimals),
+							name: escapeHtml(kyberToken.name)
+						};
+						token.Kyber = token.symbol;
 
-			function done() {
-				const num = 7; 
-				if (loaded >= num) {
-					if (/*mewTokens && mcTokens &&*/ ethplorerED && ethplorerIdex && ethplorerStore && ethplorerDdex && ethplorerEthfinex && ethplorerSwitcheo &&idexTick) {
-						//parseMewTokens(mewTokens);
-						//parseMewTokens(mcTokens);
-						parseEthplorer(ethplorerED);
-						parseEthplorer(ethplorerIdex);
-                        parseEthplorer(ethplorerStore);
-						parseEthplorer(ethplorerDdex);
-						parseEthplorer(ethplorerEthfinex);
-						parseEthplorer(ethplorerSwitcheo);
+						if (!customTokens[token.address]) {
+							customTokens[token.address] = token;
+						} else {
+							if (!customTokens[token.address].Kyber) {
+								customTokens[token.address].Kyber = token.symbol;
+							}
+							if (token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
+								customTokens[token.address].name = token.name;
+							}
+						}
+					}
+				}
+			}
 
-						let customTokensList = Object.values(customTokens);
-						
-						// filter idex unlisted tokens, (not in ticker)
-						for(let i = 0; i < customTokensList.length; i++) {
-							let token = customTokensList[i];
-							if(token.IDEX) {
-								let correct = false;
-								for(let j = 0; j< idexTick.length; j++) {
-									if(token.IDEX == idexTick[j]){
-										correct = true;
-										// falsely saved as delisted
-										if(token.blockIDEX) {
-											delete customTokensList[i].blockIDEX;
+			function parseTokenStoreTokens(array) {
+				for (var i = 0; i < array.length; i++) {
+					let newToken = array[i];
+					if (newToken) {
+
+						let token = {
+							symbol: escapeHtml(newToken.symbol),
+							address: newToken.address.toLowerCase(),
+							decimal: -1,
+							name: escapeHtml(newToken.name)
+						};
+
+
+						token.TokenStore = token.symbol;
+
+						if (!customTokens[token.address]) {
+							customTokens[token.address] = token;
+						} else {
+							if (!customTokens[token.address].TokenStore) {
+								customTokens[token.address].TokenStore = token.symbol;
+							}
+							if (token.name && token.name != customTokens[token.address].symbol && !customTokens[token.address].name) {
+								customTokens[token.address].name = token.name;
+							}
+						}
+					}
+				}
+			}
+
+
+			function parseEthplorer(response) {
+				for (let i = 0; i < response.tokens.length; i++) {
+					let tokenResponse = response.tokens[i];
+					let tok = response.tokens[i].tokenInfo;
+					let addr = tok.address.toLowerCase();
+					tok.address = addr;
+					if (!customTokens[addr]) {
+
+						// any real token has balance > 10 and less than totalsupply in 1 contract
+						if (tok.symbol && tokenResponse.balance > 10 && tokenResponse.balance < (Number(tok.totalSupply) / 2)) {
+
+							if (tok.holdersCount) {
+								if (tok.holdersCount > 10) {
+									if (tok.holdersCount <= 150) {
+										tok.blocked = 1; // block for balance loading below 150 users
+									}
+									addToken(tok);
+								}
+							} else if (tok.price) {
+								addToken(tok);
+							}
+						}
+
+						function addToken(token) {
+							if (token.symbol !== token.name && token.name !== "") {
+								customTokens[token.address] = { symbol: escapeHtml(token.symbol), address: token.address, decimal: Number(token.decimals), name: escapeHtml(token.name) };
+							} else {
+								customTokens[token.address] = { symbol: escapeHtml(token.symbol), address: token.address, decimal: Number(token.decimals) };
+							}
+							if (token.blocked) {
+								customTokens[token.address].blocked = token.blocked;
+							}
+						}
+
+					} else if (tok && tok.holdersCount) {
+						if (Number(tok.holdersCount) < 150) {
+							if (!customTokens[addr].blocked)
+								customTokens[addr].blocked = 1;
+						} else if (tok.holdersCount && Number(tok.holdersCount) >= 150 && customTokens[addr].blocked && customTokens[addr].blocked == 1) {
+							delete customTokens[addr].blocked;
+						}
+					}
+
+
+					if (customTokens[addr] && !customTokens[addr].name && tok.symbol !== tok.name && tok.name !== "") {
+						customTokens[addr].name = escapeHtml(tok.name);
+					}
+					//fix incorrect decimals
+					if (customTokens[addr] && customTokens[addr].decimal !== tok.decimals) {
+						if (addr !== "0xecf8f87f810ecf450940c9f60066b4a7a501d6a7") // old MKR WETH reports bad decimals
+							customTokens[addr].decimal = Number(tok.decimals);
+					}
+
+					/*  if(customTokens[addr] && customTokens[addr].symbol !== tok.symbol) {
+						  customTokens[addr].fixSymbol = tok.symbol;
+					  }
+					  */
+				}
+			}
+
+
+			// legacy compatiblity
+			for (let i = 0; i < offlineCustomTokens.length; i++) {
+				if (offlineCustomTokens[i] && offlineCustomTokens[i].blockIDEX) {
+					idexBlock[offlineCustomTokens[i].addr] = true;
+				}
+			}
+
+			//parse existing custom tokens from offlineCustomTokens (backupTokens.js)
+			parseMewTokens(offlineCustomTokens);
+
+			// parse exisiting tokens from etherdelta/forkdelta
+			parseEDTokens(EDofflineTokens, 'EtherDelta');
+			parseEDTokens(forkOfflineTokens, 'ForkDelta');
+			parseEDTokens(idexOfflineTokens, 'IDEX');
+			parseDDEXTokens(ddexOfflineTokens);
+			parseRadarTokens(radarOfflineTokens);
+			parseKyberTokens(kyberOfflineTokens);
+			parseTokenStoreTokens(tokenStoreOfflineTokens); // these have decimals -1 !
+
+			//get list of tokens from myetherwallet & mycrypto
+			function getCustomTokens() {
+
+				$('#output').html('loading.... (slow)');
+				//	let mewTokens = undefined;
+				//	let mcTokens = undefined;
+				let ethplorerED = undefined;
+				let ethplorerIdex = undefined;
+				let ethplorerStore = undefined;
+				let ethplorerDdex = undefined;
+				let ethplorerEthfinex = undefined;
+				let ethplorerSwitcheo = undefined;
+				let idexTick = undefined;
+				let loaded = 0;
+
+				function done() {
+					const num = 7;
+					if (loaded >= num) {
+						if (/*mewTokens && mcTokens &&*/ ethplorerED && ethplorerIdex && ethplorerStore && ethplorerDdex && ethplorerEthfinex && ethplorerSwitcheo && idexTick) {
+							//parseMewTokens(mewTokens);
+							//parseMewTokens(mcTokens);
+							parseEthplorer(ethplorerED);
+							parseEthplorer(ethplorerIdex);
+							parseEthplorer(ethplorerStore);
+							parseEthplorer(ethplorerDdex);
+							parseEthplorer(ethplorerEthfinex);
+							parseEthplorer(ethplorerSwitcheo);
+
+							let customTokensList = Object.values(customTokens);
+
+							// filter idex unlisted tokens, (not in ticker)
+							for (let i = 0; i < customTokensList.length; i++) {
+								let token = customTokensList[i];
+								if (token.IDEX) {
+									let correct = false;
+									for (let j = 0; j < idexTick.length; j++) {
+										if (token.IDEX == idexTick[j]) {
+											correct = true;
+											// falsely saved as delisted
+											if (token.blockIDEX) {
+												delete customTokensList[i].blockIDEX;
+											}
+											continue;
 										}
+									}
+									//not in ticker, define as delisted
+									if (!correct) {
+										customTokensList[i].blockIDEX = true;
 										continue;
 									}
-								}
-								//not in ticker, define as delisted
-								if(!correct) {
-                                    customTokensList[i].blockIDEX = true;
+
+								} else {
 									continue;
 								}
-								
-							} else {
-								continue;
-                            }
+							}
+
+							customTokensList = customTokensList.filter(tok => tok.decimal >= 0);// filter any unset decimals from tokenstore
+							customTokensList = customTokensList.sort(function (a, b) {
+								return (a.symbol + a.address).localeCompare(b.symbol + b.address);
+							})
+
+							let outputString = "[<br>";
+							for (let i = 0; i < customTokensList.length; i++) {
+								let str = JSON.stringify(customTokensList[i]);
+								outputString += str + ",<br>";
+							}
+							outputString += "]";
+							outputString = outputString.replace(/"address"/g, "address");
+							outputString = outputString.replace(/"symbol"/g, 'symbol');
+							outputString = outputString.replace(/"decimal"/g, 'decimal');
+							outputString = outputString.replace(/"name"/g, 'name');
+							outputString = outputString.replace(/"locked"/g, 'locked');
+							outputString = outputString.replace(/"blocked"/g, 'blocked');
+							outputString = outputString.replace(/"killed"/g, 'killed');
+							outputString = outputString.replace(/"old"/g, 'old');
+							outputString = outputString.replace(/"spam"/g, 'spam');
+							outputString = outputString.replace(/"blockIDEX"/g, 'blockIDEX');
+							outputString = outputString.replace(/"Binance"/g, 'Binance');
+							outputString = outputString.replace(/"EtherDelta"/g, 'EtherDelta');
+							outputString = outputString.replace(/"ForkDelta"/g, 'ForkDelta');
+							outputString = outputString.replace(/"IDEX"/g, 'IDEX');
+							outputString = outputString.replace(/"DDEX"/g, 'DDEX');
+							outputString = outputString.replace(/"Radar"/g, 'Radar');
+							outputString = outputString.replace(/"Kyber"/g, 'Kyber');
+							outputString = outputString.replace(/"TokenStore"/g, 'TokenStore');
+							outputString = outputString.replace(/name:Kyber/g, 'name:"Kyber"');
+							outputString = outputString.replace(/{ /g, '{');
+							outputString = outputString.replace(/ }/g, '}');
+							outputString = outputString.replace(/, /g, ',');
+							outputString = outputString.replace(/: /g, ':');
+
+							$('#output').html(outputString);
+
+						} else {
+							$('#output').html('something went wrong');
 						}
-
-						customTokensList = customTokensList.filter(tok => tok.decimal >= 0);// filter any unset decimals from tokenstore
-						customTokensList = customTokensList.sort(function (a, b) {
-							return (a.symbol + a.address).localeCompare(b.symbol + b.address);
-						})
-
-						let outputString = "[<br>";
-						for (let i = 0; i < customTokensList.length; i++) {
-							let str = JSON.stringify(customTokensList[i]);
-							outputString += str + ",<br>";
-						}
-						outputString += "]";
-						outputString = outputString.replace(/"address"/g, "address");
-						outputString = outputString.replace(/"symbol"/g, 'symbol');
-						outputString = outputString.replace(/"decimal"/g, 'decimal');
-                        outputString = outputString.replace(/"name"/g, 'name');
-                        outputString = outputString.replace(/"locked"/g, 'locked');
-                        outputString = outputString.replace(/"blocked"/g, 'blocked');
-                        outputString = outputString.replace(/"killed"/g, 'killed');
-                        outputString = outputString.replace(/"spam"/g, 'spam');
-                        outputString = outputString.replace(/"blockIDEX"/g, 'blockIDEX');
-						outputString = outputString.replace(/"Binance"/g, 'Binance');
-                        outputString = outputString.replace(/"EtherDelta"/g, 'EtherDelta');
-                        outputString = outputString.replace(/"ForkDelta"/g, 'ForkDelta');
-                        outputString = outputString.replace(/"IDEX"/g, 'IDEX');
-                        outputString = outputString.replace(/"DDEX"/g, 'DDEX');
-                        outputString = outputString.replace(/"Radar"/g, 'Radar');
-                        outputString = outputString.replace(/"Kyber"/g, 'Kyber');
-						outputString = outputString.replace(/"TokenStore"/g, 'TokenStore');
-                        outputString = outputString.replace(/name:Kyber/g, 'name:"Kyber"');
-						outputString = outputString.replace(/{ /g, '{');
-						outputString = outputString.replace(/ }/g, '}');
-						outputString = outputString.replace(/, /g, ',');
-						outputString = outputString.replace(/: /g, ':');
-
-						$('#output').html(outputString);
-
 					} else {
-						$('#output').html('something went wrong');
+						$('#output').html('loading... , loaded ' + loaded + '/' + num);
 					}
-				} else {
-					$('#output').html('loading... , loaded ' + loaded + '/' + num);
 				}
+
+
+				/*	$.getJSON('https://rawgit.com/kvhnuke/etherwallet/mercury/app/scripts/tokens/ethTokens.json?' + Date.now()).done(function (data) {
+						loaded++;
+						mewTokens = data;
+						done();
+					}).fail(function () {
+						loaded++;
+						done();
+					});
+		
+					$.getJSON('https://rawgit.com/MyCryptoHQ/mycrypto.com/master/app/scripts/tokens/ethTokens.json?' + Date.now()).done(function (data) {
+						loaded++;
+						mcTokens = data;
+						done();
+					}).fail(function () {
+						loaded++;
+						done();
+					});
+					*/
+
+				let key = 'enrrf9840PPmQ31';
+				//etherdelta contract
+				$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey=' + key).done(function (data) {
+					loaded++;
+					if (data && data.tokens)
+						ethplorerED = data;
+					done();
+				}).fail(function () {
+					loaded++;
+					done();
+				});
+
+				//idex contract
+				$.getJSON('https://api.ethplorer.io/getAddressInfo/0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208?apiKey=' + key).done(function (data) {
+					loaded++;
+					if (data && data.tokens)
+						ethplorerIdex = data;
+					done();
+				}).fail(function () {
+					loaded++;
+					done();
+				});
+
+				// idex ticker for active market filtering
+				$.getJSON('https://api.idex.market/returnTicker').done(function (data) {
+					loaded++;
+					if (data) {
+						idexTick = Object.keys(data).map((x) => { return x.replace('ETH_', '') });
+					}
+					done();
+				}).fail(function () {
+					loaded++;
+					done();
+				});
+
+
+
+
+				//token store contract
+				$.getJSON('https://api.ethplorer.io/getAddressInfo/0x1ce7ae555139c5ef5a57cc8d814a867ee6ee33d8?apiKey=' + key).done(function (data) {
+					loaded++;
+					if (data && data.tokens)
+						ethplorerStore = data;
+					done();
+				}).fail(function () {
+					loaded++;
+					done();
+				});
+
+				//ethfinex trustless admin
+				$.getJSON('https://api.ethplorer.io/getAddressInfo/0x61b9898c9b60a159fc91ae8026563cd226b7a0c1?apiKey=' + key).done(function (data) {
+					loaded++;
+					if (data && data.tokens)
+						ethplorerEthfinex = data;
+					done();
+				}).fail(function () {
+					loaded++;
+					done();
+				});
+
+				//ddex admin address (fee receiver)
+				$.getJSON('https://api.ethplorer.io/getAddressInfo/0x49497a4d914ae91d34ce80030fe620687bf333fd?apiKey=' + key).done(function (data) {
+					loaded++;
+					if (data && data.tokens)
+						ethplorerDdex = data;
+					done();
+				}).fail(function () {
+					loaded++;
+					done();
+				});
+
+				//switcheo contract
+				$.getJSON('https://api.ethplorer.io/getAddressInfo/0xba3ed686cc32ffa8664628b1e96d8022e40543de?apiKey=' + key).done(function (data) {
+					loaded++;
+					if (data && data.tokens)
+						ethplorerSwitcheo = data;
+					done();
+				}).fail(function () {
+					loaded++;
+					done();
+				});
+
 			}
 
 
-		/*	$.getJSON('https://rawgit.com/kvhnuke/etherwallet/mercury/app/scripts/tokens/ethTokens.json?' + Date.now()).done(function (data) {
-				loaded++;
-				mewTokens = data;
-				done();
-			}).fail(function () {
-				loaded++;
-				done();
-			});
+			function escapeHtml(text) {
+				var map = {
+					'&': '&amp;',
+					'<': '&lt;',
+					'>': '&gt;',
+					'"': '&quot;',
+					"'": '&#039;',
+					"{": '',
+					"}": '',
+				};
 
-			$.getJSON('https://rawgit.com/MyCryptoHQ/mycrypto.com/master/app/scripts/tokens/ethTokens.json?' + Date.now()).done(function (data) {
-				loaded++;
-				mcTokens = data;
-				done();
-			}).fail(function () {
-				loaded++;
-				done();
-			});
-            */
+				return text.replace(/[&<>"']/g, function (m) { return map[m]; }).trim();
+			}
 
-            let key = 'enrrf9840PPmQ31';
-            //etherdelta contract
-			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x8d12A197cB00D4747a1fe03395095ce2A5CC6819?apiKey='+key).done(function (data) {
-				loaded++;
-				if (data && data.tokens)
-					ethplorerED = data;
-				done();
-			}).fail(function () {
-				loaded++;
-				done();
-			});
-            
-            //idex contract
-			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208?apiKey='+key).done(function (data) {
-				loaded++;
-				if (data && data.tokens)
-					ethplorerIdex = data;
-				done();
-			}).fail(function () {
-				loaded++;
-				done();
-			});
-			
-			// idex ticker for active market filtering
-			$.getJSON('https://api.idex.market/returnTicker').done(function (data) {
-				loaded++;
-				if (data) {
-					idexTick = Object.keys(data).map( (x) => { return x.replace('ETH_', '')});
-				}
-				done();
-			}).fail(function () {
-				loaded++;
-				done();
-			});
-            
-			
-			
-			
-            //token store contract
-            $.getJSON('https://api.ethplorer.io/getAddressInfo/0x1ce7ae555139c5ef5a57cc8d814a867ee6ee33d8?apiKey='+key).done(function (data) {
-				loaded++;
-				if (data && data.tokens)
-					ethplorerStore = data;
-				done();
-			}).fail(function () {
-				loaded++;
-				done();
-			});
-			
-			//ethfinex trustless admin
-			$.getJSON('https://api.ethplorer.io/getAddressInfo/0x61b9898c9b60a159fc91ae8026563cd226b7a0c1?apiKey='+key).done(function (data) {
-				loaded++;
-				if (data && data.tokens)
-					ethplorerEthfinex = data;
-				done();
-			}).fail(function () {
-				loaded++;
-				done();
-			});
-            
-            //ddex admin address (fee receiver)
-            $.getJSON('https://api.ethplorer.io/getAddressInfo/0x49497a4d914ae91d34ce80030fe620687bf333fd?apiKey='+key).done(function (data) {
-				loaded++;
-				if (data && data.tokens)
-					ethplorerDdex = data;
-				done();
-			}).fail(function () {
-				loaded++;
-				done();
-			});
-			
-			//switcheo contract
-            $.getJSON('https://api.ethplorer.io/getAddressInfo/0xba3ed686cc32ffa8664628b1e96d8022e40543de?apiKey='+key).done(function (data) {
-				loaded++;
-				if (data && data.tokens)
-					ethplorerSwitcheo = data;
-				done();
-			}).fail(function () {
-				loaded++;
-				done();
-			});
-			
-		}
+		</script>
 
 
-		function escapeHtml(text) {
-			var map = {
-				'&': '&amp;',
-				'<': '&lt;',
-				'>': '&gt;',
-				'"': '&quot;',
-				"'": '&#039;',
-				"{": '',
-				"}": '',
-			};
+		<button id="getbutton" onclick="getCustomTokens()">Load tokens!</button>
 
-			return text.replace(/[&<>"']/g, function (m) { return map[m]; }).trim();
-		}
-
-	</script>
+		<div id="output">
 
 
-	<button id="getbutton" onclick="getCustomTokens()">Load tokens!</button>
-
-	<div id="output">
-
-
-	</div>
+		</div>
 
 </body>
 

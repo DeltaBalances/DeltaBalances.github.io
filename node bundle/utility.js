@@ -149,10 +149,20 @@ module.exports = (config) => {
     utility.relayName = function (address) {
         let name = '';
         if (address) {
+            address = address.toLowerCase();
             name = bundle.DeltaBalances.config.zrxRelayers[address];
+            if (!name) {
+                name = bundle.DeltaBalances.config.zrxTakers[address];
+            }
+            if (!name) {
+                name = bundle.DeltaBalances.config.admins[address];
+            }
             if (!name) {
                 name = 'Unknown 0x';
             }
+        }
+        if (name && name.indexOf(' Admin') !== -1) {
+            name = name.replace(' Admin', '');
         }
         return name;
     };

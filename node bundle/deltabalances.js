@@ -397,16 +397,48 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     }
 }
 
+//return a erc20 / erc721 token for a token address, even if we don't know that token
 DeltaBalances.prototype.setToken = function (address) {
     address = address.toLowerCase();
     if (address === '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee') //kyber uses eeeee for ETH
         address = this.config.ethAddr;
+    //do we know the token?    
     if (this.uniqueTokens[address]) {
         return this.uniqueTokens[address];
     } else {
-        //unknownToken = true;
-        //TODO get decimals get symbol
-        return { addr: address, name: '???', unknown: true, decimals: 18, unlisted: true };
+        //regular address without apended '-'?
+        if (address.indexOf('-') == -1) {
+            //return a placeholder erc20 token
+
+            //TODO get decimals get symbol
+            return { addr: address, name: '???', unknown: true, decimals: 18, unlisted: true };
+
+        } else {
+            //it is an erc721 token with appended id
+
+            let split = address.split('-');
+            address = split[0];
+            let id = split[1];
+            let idAddress = address + '-' + id;
+
+            if (this.uniqueTokens[idAddress]) {
+                return this.uniqueTokens[idAddress];
+            } else {
+                let baseToken = undefined;
+                if (this.uniqueTokens[address]) {
+                    baseToken = this.uniqueTokens[address];
+                    baseToken.unknown = false;
+                } else {
+                    baseToken = {
+                        unknown: true,
+                        unlisted: true,
+                        name: '[ERC721] ???',
+                    };
+                }
+                return { addr: address, name: baseToken.name, unknown: baseToken.unknown, decimals: 0, unlisted: baseToken.unlisted, erc721: true, erc721Id: id };
+            }
+
+        }
     }
 };
 
@@ -416,6 +448,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
     var badFromTo = false;
     if (tx.contractAddress)
         badFromTo = true;
+
+    var _delta = this;
 
     try {
         var txFrom = tx.from.toLowerCase();
@@ -807,8 +841,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             //0x v2 cancel input
             else if (!badFromTo && (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders')) {
 
-                var _delta = this;
-
                 //check if this is the 0x v2 variant with structs
                 let isV2 = unpacked.params[0].name == 'order' || unpacked.params[0].name == 'orders';
                 // Convert v2 orders to matching v1 orders to re-use the old trade parsing
@@ -972,6 +1004,18 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                                 rawBaseAmount = (chosenAmount.times(rawBaseAmount)).div(rawAmount);
                                 baseAmount = utility.weiToToken(rawBaseAmount, base);
                             }
+                        }
+
+                        // single units if erc721
+                        if (token.erc721) {
+                            amount = new BigNumber(1);
+                            baseAmount = amount.times(price);
+                        }
+                        if (base.erc721) {
+                            baseAmount = new BigNumber(1);
+                        }
+                        if (token.erc721 && base.erc721) {
+                            price = new BigNumber(1);
                         }
 
                         return {
@@ -1341,7 +1385,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             // exchange trade with args in arrays (ethen.market)
             else if (!badFromTo && unpacked.name === 'trade' && unpacked.params.length == 3) {
 
-                let _delta = this;
                 let numberOfTrades = unpacked.params[1].value.length - 1;
                 var objs = [];
                 for (let i = 0; i < numberOfTrades; i++) {
@@ -1524,7 +1567,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 //function matchOrders(OrderParam memory takerOrderParam,OrderParam[] memory makerOrderParams,OrderAddressSet memory orderAddressSet)
                 //struct OrderParam {address trader, uint256 baseTokenAmount, uint256 quoteTokenAmount, uint256 gasTokenAmount, bytes32 data, OrderSignature signature}
                 //struct OrderAddressSet { address baseToken, address quoteToken, address relayer }
-                let _delta = this;
 
                 let orderAddressStructArray = unpacked.params[2].value;
                 let takeOrder = unpackDdexOrderInput(unpacked.params[0].value);
@@ -1643,8 +1685,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         orderHash: getOrderHash(orderAddresses, orderValues)
                     });
                */
-
-                var _delta = this;
 
                 let isV2 = unpacked.params.find((x) => { return x.type && x.type.indexOf('tuple') !== -1; });
                 let oldName = '';
@@ -1888,6 +1928,19 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     }
 
+
+                    // single units if erc721
+                    if (objs[0].token.erc721) {
+                        amount = new BigNumber(1);
+                    }
+                    if (objs[0].base.erc721) {
+                        baseAmount = new BigNumber(1);
+                    }
+                    if (objs[0].token.erc721 && objs[0].base.erc721) {
+                        minPrice = new BigNumber(1);
+                        maxPrice = new BigNumber(1);
+                    }
+
                     let relayer3 = objs[0].relayer;
                     exchange = objs[0].exchange;
                     let taker3 = badFromTo ? '' : txFrom;
@@ -2031,6 +2084,18 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                                 rawBaseAmount = (chosenAmount.times(rawBaseAmount)).div(rawAmount);
                                 baseAmount = utility.weiToToken(rawBaseAmount, base);
                             }
+                        }
+
+                        // single units if erc721
+                        if (token.erc721) {
+                            amount = new BigNumber(1);
+                            baseAmount = amount.times(price);
+                        }
+                        if (base.erc721) {
+                            baseAmount = new BigNumber(1);
+                        }
+                        if (token.erc721 && base.erc721) {
+                            price = new BigNumber(1);
                         }
 
                         return {
@@ -2985,72 +3050,83 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
         console.log('unpacked input parsing exception ' + error);
         return undefined;
     }
-};
 
+    // convert 0x protocol v2 order (structs) to  0x protocol v1 order (arrays) to keep V2 compatible with existing V1 code
+    function convert0xV2Order(orderStructArray) {
+        let makerTokenData = orderStructArray[10].value;
+        let takerTokenData = orderStructArray[11].value;
 
+        let makerTokenAddr = _delta.addressFromAssetData(makerTokenData, true);
+        let takerTokenAddr = _delta.addressFromAssetData(takerTokenData, true);
 
-function assetIsERC20(data) {
-    const erc20ID = '0xf47261b'; //erc20 proxy tag
-    return (data && typeof data === 'string' && data.indexOf(erc20ID) != -1);
-}
+        if (makerTokenAddr && takerTokenAddr) {
 
-function assetIsERC721(data) {
-    const erc721ID = '0x02571792'; //erc 721 proxy tag
-    return (data && typeof data === 'string' && data.indexOf(erc721ID) != -1);
-}
-
-//get token from 0x (v2) assetdata bytes
-function addressFromAssetData(data) {
-
-    if (assetIsERC20(data)) {
-        //assetData bytes to erc20 token address
-        return ('0x' + data.slice(-40)).toLowerCase();
-    } else if (assetIsERC721(data)) {
-        return undefined;
-    } else {
-        return undefined;
-    }
-}
-
-// convert 0x protocol v2 order (structs) to  0x protocol v1 order (arrays) to keep V2 compatible with existing V1 code
-function convert0xV2Order(orderStructArray) {
-    let makerTokenData = orderStructArray[10].value;
-    let takerTokenData = orderStructArray[11].value;
-
-    // are both assets ERC20 tokens and not erc721?
-    if (assetIsERC20(makerTokenData) && assetIsERC20(takerTokenData)) {
-
-        let makerToken = addressFromAssetData(makerTokenData);
-        let takerToken = addressFromAssetData(takerTokenData);
-        return {
-            orderAddresses: [
-                orderStructArray[0].value.toLowerCase(), //maker
-                orderStructArray[1].value.toLowerCase(), //taker
-                makerToken,
-                takerToken,
-                orderStructArray[2].value.toLowerCase(), //feeRecipient
-                orderStructArray[3].value.toLowerCase(), //sender (extra compared to v1)
-            ],
-            orderValues: [
-                orderStructArray[4].value, //makerAmount
-                orderStructArray[5].value, //takerAmount
-                orderStructArray[6].value, //makerFee
-                orderStructArray[7].value, //takerFee
-                orderStructArray[8].value //expiry
-            ]
-        };
-    } else {
-        if (makerTokenData == '0x' || takerTokenData == '0x') {
-            console.log('empty asset data found');
+            return {
+                orderAddresses: [
+                    orderStructArray[0].value.toLowerCase(), //maker
+                    orderStructArray[1].value.toLowerCase(), //taker
+                    makerTokenAddr,
+                    takerTokenAddr,
+                    orderStructArray[2].value.toLowerCase(), //feeRecipient
+                    orderStructArray[3].value.toLowerCase(), //sender (extra compared to v1)
+                ],
+                orderValues: [
+                    orderStructArray[4].value, //makerAmount
+                    orderStructArray[5].value, //takerAmount
+                    orderStructArray[6].value, //makerFee
+                    orderStructArray[7].value, //takerFee
+                    orderStructArray[8].value //expiry
+                ]
+            };
         } else {
-            if (assetIsERC721(makerTokenData)) {
-                console.log('unsupported ERC721 maker token found in assetdata ' + unpacked.name + ' - ' + makerTokenData);
-            } else if (assetIsERC721(takerTokenData)) {
-                console.log('unsupported ERC721 taker token found in assetdata ' + unpacked.name + ' - ' + takerTokenData);
+            if (makerTokenData == '0x' || takerTokenData == '0x') {
+                console.log('empty asset data found');
             } else {
                 console.log('unsupported token found in assetdata ' + unpacked.name + ' - ' + makerTokenData + ' - ' + takerTokenData);
             }
+            return undefined;
         }
+    }
+};
+
+//get token address from 0x (v2) assetdata bytes
+DeltaBalances.prototype.addressFromAssetData = function addressFromAssetData(data, appendId = false) {
+
+    if (utility.assetIsERC20(data)) {
+        //assetData bytes to erc20 token address
+        return ('0x' + data.slice(-40)).toLowerCase();
+    } else if (utility.assetIsERC721(data)) {
+        //assetdata to erc721 address
+        let addr = '0x' + data.slice(34, 74).toLowerCase();
+        //assetdata to erc721 id
+        let id = data.slice(74);
+        id = utility.hexToDec(id, id.length);
+
+        //erc721 address with id appended
+        let idAddr = addr + '-' + id;
+
+        // add unique token to tokenset in memory
+        if (!this.uniqueTokens[idAddr]) {
+            let tok = this.setToken(idAddr);
+            this.uniqueTokens[idAddr] = tok;
+            if (!this.uniqueTokens[addr]) {
+                this.uniqueTokens[addr] = {
+                    addr: tok.addr,
+                    name: tok.name,
+                    decimals: tok.decimals,
+                    unlisted: tok.unlisted,
+                    unknown: tok.unknown,
+                    erc721: true,
+                }
+            }
+        }
+
+        if (appendId) {
+            return idAddr;
+        } else {
+            return addr;
+        }
+    } else {
         return undefined;
     }
 }
@@ -3159,6 +3235,13 @@ DeltaBalances.prototype.isBaseToken = function (probableBaseToken, otherToken) {
             //both a base pair, take number
             return utility.isNonEthBase(probableBaseToken.addr) > utility.isNonEthBase(otherToken.addr)
         }
+    } else if (probableBaseToken.erc721 && !otherToken.erc721) {
+        return false;
+    } else if (!probableBaseToken.erc721 && otherToken.erc721) {
+        return true;
+    }
+    else {
+        return true;
     }
 };
 
@@ -3961,19 +4044,21 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 }
                 //0x v2
                 else {
-                    // 'bytes' of erc20proxy identifier + token address
+                    // 'bytes' of proxy identifier + token address
                     let makerTokenData = unpacked.events[9].value;
                     let takerTokenData = unpacked.events[10].value;
 
-                    // are both assets ERC20 tokens and not erc721?
-                    if (assetIsERC20(makerTokenData) && assetIsERC20(takerTokenData)) {
+                    let makerTokenAddr = this.addressFromAssetData(makerTokenData, true);
+                    let takerTokenAddr = this.addressFromAssetData(takerTokenData, true);
+
+                    if (makerTokenAddr && takerTokenAddr) {
 
                         maker = unpacked.events[0].value.toLowerCase();
                         taker = unpacked.events[2].value.toLowerCase();
                         sender = unpacked.events[3].value.toLowerCase();
 
-                        makerToken = this.setToken(addressFromAssetData(makerTokenData));
-                        takerToken = this.setToken(addressFromAssetData(takerTokenData));
+                        makerToken = this.setToken(makerTokenAddr);
+                        takerToken = this.setToken(takerTokenAddr);
 
                         makerAmount = new BigNumber(unpacked.events[4].value);
                         takerAmount = new BigNumber(unpacked.events[5].value);
@@ -3983,14 +4068,14 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
 
                         relayer = unpacked.events[1].value.toLowerCase();
                     } else {
-                        return { 'error': 'unsupported ERC721 trade' };
+                        return { 'error': 'unsupported AssetData token in trade' };
                     }
                 }
 
                 //if relay is 0x0000000.. , assume the taker might be the relayer
                 if (taker && relayer === this.config.ethAddr) {
                     relayer = taker;
-                    if(sender && sender !== this.config.ethAddr) {
+                    if (sender && sender !== this.config.ethAddr) {
                         relayer = sender;
                     }
                 }
@@ -4045,6 +4130,18 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     var price = new BigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
+                    }
+
+                    // single units if erc721
+                    if (token.erc721) {
+                        amount = new BigNumber(1);
+                        baseAmount = amount.times(price);
+                    }
+                    if (base.erc721) {
+                        baseAmount = new BigNumber(1);
+                    }
+                    if (token.erc721 && base.erc721) {
+                        price = new BigNumber(1);
                     }
 
                     let fee = new BigNumber(0);
@@ -4462,18 +4559,21 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                             'unlisted': token.unlisted,
                         };
                     }
-                } else { //0x v2 Cancel event
+                } else { //0x v2 'Cancel' event
 
                     let makerTokenData = unpacked.events[4].value;
                     let takerTokenData = unpacked.events[5].value;
 
-                    if (assetIsERC20(makerTokenData) && assetIsERC20(takerTokenData)) {
+                    let makerTokenAddr = this.addressFromAssetData(makerTokenData, true);
+                    let takerTokenAddr = this.addressFromAssetData(takerTokenData, true);
+
+                    if (makerTokenAddr && takerTokenAddr) {
 
                         let maker = unpacked.events[0].value.toLowerCase();
                         let sender = unpacked.events[2].value.toLowerCase();
 
-                        let makerToken = this.setToken(addressFromAssetData(makerTokenData));
-                        let takerToken = this.setToken(addressFromAssetData(takerTokenData));
+                        let makerToken = this.setToken(makerTokenAddr);
+                        let takerToken = this.setToken(takerTokenAddr);
 
                         let base = makerToken;
                         let token = takerToken;
@@ -5147,11 +5247,23 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
         if (!token.unlisted)
             labelClass = 'label-primary';
 
+        if (token.erc721) {
+            labelClass = 'label-default';
+        }
+
         let contents = 'PlaceHolder';
         try {
             if (token && token.addr) {
                 if (!utility.isWrappedETH(token.addr)) {
-                    if (!this.uniqueTokens[token.addr]) {
+                    if (token.erc721) {
+                        if (token.erc721Id) {
+                            contents = 'ERC721 token placeholder <br> Non-fungible token <br> Unique Token ID: ' + token.erc721Id;
+                            contents += "<br>Contract: " + utility.tokenLink(token.addr, true, true, token.erc721Id);
+                        } else {
+                            contents = "ERC721 token placeholder <br> Non-fungible token <br> Contract: " + utility.addressLink(token.addr, true, true);
+                        }
+                    }
+                    else if (!this.uniqueTokens[token.addr]) {
                         contents = "Token unknown to DeltaBalances <br> Contract: " + utility.addressLink(token.addr, true, true);
                     } else {
                         contents = 'Contract: ' + utility.tokenLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals;
@@ -5162,18 +5274,18 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     if (token.locked || token.killed) {
                         contents += '<br> <i class="text-red fa fa-lock" aria-hidden="true"></i> Token Locked or Paused.';
                     }
-                    contents += '<br><br> Trade centralized: <br><table class="popoverTable"><tr><td>' + utility.binanceURL(token, true) + '</td></tr></table>';
+                    if (!token.erc721) {
+                        contents += '<br><br> Trade centralized: <br><table class="popoverTable"><tr><td>' + utility.binanceURL(token, true) + '</td></tr></table>';
 
-                    contents += 'Trade decentralized: <br><table class="popoverTable"><tr><td>' + utility.etherDeltaURL(token, true)
-                        + '</td><td>' + utility.idexURL(token, true)
-                        + '</td></tr><tr><td>' + utility.forkDeltaURL(token, true)
-                        + '</td><td>' + utility.ddexURL(token, true)
-                        + '</td></tr><tr><td>' + utility.tokenStoreURL(token, true)
-                        + '</td><td>' + utility.radarURL(token, true)
-                        + '</td></tr><tr><td>' + utility.kyberURL(token, true)
-                        + '</td><td></td></tr></table>';
-
-
+                        contents += 'Trade decentralized: <br><table class="popoverTable"><tr><td>' + utility.etherDeltaURL(token, true)
+                            + '</td><td>' + utility.idexURL(token, true)
+                            + '</td></tr><tr><td>' + utility.forkDeltaURL(token, true)
+                            + '</td><td>' + utility.ddexURL(token, true)
+                            + '</td></tr><tr><td>' + utility.tokenStoreURL(token, true)
+                            + '</td><td>' + utility.radarURL(token, true)
+                            + '</td></tr><tr><td>' + utility.kyberURL(token, true)
+                            + '</td><td></td></tr></table>';
+                    }
                 } else if (token.addr == this.config.ethAddr) {
                     contents = "Ether (not a token)<br> Decimals: 18";
                 } else {
@@ -5185,6 +5297,9 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
         }
 
         let name = token.name;
+        if (token.erc721Id) {
+            name += ' - ' + token.erc721Id;
+        }
         if (token.locked) {
             name += ' <i class="fa fa-lock" aria-hidden="true"></i>';
         } else if (token.old) {

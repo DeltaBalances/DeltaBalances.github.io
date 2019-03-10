@@ -145,6 +145,18 @@ module.exports = (config) => {
         return false;
     };
 
+    //Check if 0x v2 assetData contains an erc20 token
+    utility.assetIsERC20 = function assetIsERC20(data) {
+        const erc20ID = '0xf47261b'; //erc20 proxy tag
+        return (data && typeof data === 'string' && data.indexOf(erc20ID) != -1);
+    };
+
+    //Check if 0x v2 assetData contains an erc20 token
+    utility.assetIsERC721 = function assetIsERC721(data) {
+        const erc721ID = '0x02571792'; //erc 721 proxy tag
+        return (data && typeof data === 'string' && data.indexOf(erc721ID) != -1);
+    }
+
     //name for a 0x relayer based on feerecipient address
     utility.relayName = function (address) {
         let name = '';
@@ -551,8 +563,11 @@ module.exports = (config) => {
         return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
     };
 
-    utility.tokenLink = function (addr, html, short) {
+    utility.tokenLink = function (addr, html, short, erc721Id = undefined) {
         var url = 'https://etherscan.io/token/' + addr;
+        if (erc721Id) {
+            url += '?a=' + erc721Id;
+        }
         if (!html)
             return url
         var displayText = addr;

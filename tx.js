@@ -830,7 +830,8 @@ var isAddressPage = false;
 
 			for (var i = 0; i < transaction.output.length; i++) {
 				if (transaction.output[i].type == 'Taker Buy' || transaction.output[i].type == 'Taker Sell') {
-					if (transaction.output[i].token.decimals == 0 && !zeroDecWarning) {
+					//show warning on 0 decimals for erc20 tokens
+					if (transaction.output[i].token.decimals == 0 && !transaction.output[i].token.erc721 && !zeroDecWarning) {
 						zeroDecWarning = "<strong>Note: </strong> " + transaction.output[i].token.name + " has 0 decimals precision. Numbers might be lower than expected due to rounding. <br>";
 					}
 					tradeCount++;

@@ -456,15 +456,41 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
         var txTo = tx.to.toLowerCase();
 
         if (unpacked && unpacked.name) {
-            // erc20 token transfer
-            if (unpacked.name === 'transfer') {
-                var to = unpacked.params[0].value.toLowerCase();
-                var rawAmount = unpacked.params[1].value;
-                var amount = new BigNumber(0);
-                var token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
 
+
+            // erc20 token transfer
+            // erc721 token transfer, transferFrom
+            // erc721 transferFrom(from, to tokenId) safeTranferFrom
+            if (unpacked.name === 'transfer' || unpacked.name === 'transferFrom' || unpacked.name === 'safeTransferFrom') {
+                let to = undefined;
+                let from = undefined;
+                let rawAmount = undefined;
+                let amount = new BigNumber(0);
+                let token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+
+                if (unpacked.name === 'transfer') {
+                    to = unpacked.params[0].value.toLowerCase();
+                    rawAmount = unpacked.params[1].value;
+                    from = txFrom;
+                } else { // (safe)transferFrom
+                    to = unpacked.params[1].value.toLowerCase();
+                    rawAmount = unpacked.params[2].value;
+                    from = unpacked.params[0].value.toLowerCase();
+                }
                 if (token && token.addr) {
-                    amount = utility.weiToToken(rawAmount, token);
+                    //erc20 token transfer. valid erc721 has no 'transfer', but some like cryptokitties do
+                    // badFromTo comes from etherscan list of erc20 token transfers
+                    // transferFrom is not commonly used in erc20 directly from a wallet
+                    if ((unpacked.name === 'transferFrom' && !token.unknown && !token.erc721) ||
+                        (unpacked.name === 'transfer' && (!token.erc721 || badFromTo))) {
+                        amount = utility.weiToToken(rawAmount, token);
+                    }
+                    //erc721 token 
+                    else { // transfer erc721, safeTransferFrom, transferFrom unknown token
+                        amount = new BigNumber(1);
+                        // set token to unique erc721 token ID, id field matches amount in erc20
+                        token = this.setToken(token.addr + '-' + rawAmount);
+                    }
                 }
 
                 return {
@@ -472,12 +498,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'note': 'Give the token contract the order to transfer your tokens',
                     'token': token,
                     'amount': amount,
-                    'from': txFrom,
+                    'from': from,
                     'to': to,
                     'unlisted': token.unlisted,
                 };
             }
             // erc20 token approve
+            // erc721 token approve
             else if (!badFromTo && unpacked.name === 'approve') {
                 var sender = unpacked.params[0].value;
                 var rawAmount = unpacked.params[1].value;
@@ -485,7 +512,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 var token = this.setToken(tx.to);
 
                 if (token && token.addr) {
-                    amount = utility.weiToToken(rawAmount, token);
+                    if (!token.erc721) {
+                        amount = utility.weiToToken(rawAmount, token);
+                    } else {
+                        amount = new BigNumber(1);
+                        // set token to unique erc721 token ID, id field matches amount in erc20
+                        token = this.setToken(token.addr + '-' + rawAmount);
+                    }
                 }
 
                 var exchange = 'unknown ';
@@ -500,6 +533,35 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'note': 'Approve ' + exchange + 'to move tokens for you.',
                     'token': token,
                     'amount': amount,
+                    'from': txFrom,
+                    'to': sender,
+                    'unlisted': token.unlisted,
+                };
+            }
+            //ERC721 enable approve
+            else if (!badFromTo && unpacked.name === 'setApprovalForAll') {
+                var sender = unpacked.params[0].value;
+                var all = unpacked.params[1].value;
+                var token = this.setToken(tx.to);
+                if (!token.erc721) {
+                    token.erc721 = true;
+                    token.decimals = 0;
+                    token.name = '[ERC721] ' + token.name;
+                    this.uniqueTokens[token.addr] = token;
+                }
+
+                var exchange = 'unknown ';
+                let addrName = this.addressName(sender);
+                if (addrName !== sender.toLowerCase()) {
+                    exchange = addrName;
+                }
+
+                return {
+                    'type': 'Approve',
+                    'exchange': exchange,
+                    'note': 'Approve ' + exchange + 'to move any tokenIDs for you.',
+                    'token': token,
+                    'amount': all ? 'All' : 0,
                     'from': txFrom,
                     'to': sender,
                     'unlisted': token.unlisted,
@@ -4577,7 +4639,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
 
                         let base = makerToken;
                         let token = takerToken;
-                        if (this.isBaseToken(makerToken, takerToken)) {
+                        if (this.isBaseToken(takerToken, makerToken)) {
                             base = takerToken;
                             token = makerToken;
                         }
@@ -4844,7 +4906,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     };
                 }
             }
-            //erc 20 transfer
+            // erc 20 transfer event
+            // erc 721 transfer event
             else if (unpacked.name == 'Transfer') {
 
                 var from = unpacked.events[0].value.toLowerCase();
@@ -4852,7 +4915,14 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 var rawAmount = unpacked.events[2].value;
                 var token = this.setToken(unpacked.address);
 
-                var amount = utility.weiToToken(rawAmount, token);
+                var amount = undefined;
+                if (!token.erc721 && !(token.unknown && unpacked.events[2].name == 'tokenId')) { //tokenId renamed on erc721 based on abi overload
+                    amount = utility.weiToToken(rawAmount, token);
+                } else {
+                    amount = new BigNumber(1);
+                    // set token to unique erc721 token ID, id field matches amount in erc20
+                    token = this.setToken(token.addr + '-' + rawAmount);
+                }
                 var note = 'Transferred ' + amount.toString() + ' ' + token.name;
 
                 return {
@@ -4865,7 +4935,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     'unlisted': token.unlisted,
                 };
             }
-            // erc20 approve  (exlcude weird contract in ancient OasisDex trade)
+            // erc20 approval event  (exlcude weird contract in ancient OasisDex trade)
+            // erc721 approval event
             else if (unpacked.name == 'Approval' && unpacked.address !== '0x96477a1c968a0e64e53b7ed01d0d6e4a311945c2') {
 
                 var sender = unpacked.events[0].value.toLowerCase();
@@ -4873,7 +4944,14 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 var rawAmount = unpacked.events[2].value;
                 var token = this.setToken(unpacked.address);
 
-                var amount = utility.weiToToken(rawAmount, token);
+                var amount = undefined;
+                if (!token.erc721 && !(token.unknown && unpacked.events[2].name == 'tokenId')) { //tokenId renamed on erc721 based on abi overload
+                    amount = utility.weiToToken(rawAmount, token);
+                } else {
+                    amount = new BigNumber(1);
+                    // set token to unique erc721 token ID, id field matches amount in erc20
+                    token = this.setToken(token.addr + '-' + rawAmount);
+                }
 
                 var exchange = 'unknown ';
                 let addrName = this.addressName(to);
@@ -4893,6 +4971,42 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     'note': 'Now allows tokens to be transferred by ' + exchange,
                     'token': token,
                     'amount': amount,
+                    'from': sender,
+                    'to': to,
+                    'unlisted': token.unlisted,
+                };
+            }
+            // ERC721 enable approve
+            else if (unpacked.name == 'ApprovalForAll') {
+
+                var sender = unpacked.events[0].value.toLowerCase();
+                var to = unpacked.events[1].value.toLowerCase();
+                var all = unpacked.events[2].value;
+                var token = this.setToken(unpacked.address);
+                if (!token.erc721) {
+                    token.erc721 = true;
+                    token.decimals = 0;
+                    token.name = '[ERC721] ' + token.name;
+                    this.uniqueTokens[token.addr] = token;
+                }
+
+                var exchange = 'unknown ';
+                let addrName = this.addressName(to);
+                if (addrName !== to) {
+                    exchange = addrName;
+                } else {
+                    // bancor quick convert, sending out approves?
+                    addrName = this.addressName(sender);
+                    if (addrName !== sender) {
+                        exchange = addrName;
+                    }
+                }
+                return {
+                    'type': 'Approve',
+                    'exchange': exchange,
+                    'note': 'Approve all erc721 tokenIDs to be moved by ' + exchange,
+                    'token': token,
+                    'amount': all ? 'All' : 0,
                     'from': sender,
                     'to': to,
                     'unlisted': token.unlisted,

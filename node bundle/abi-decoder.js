@@ -198,17 +198,69 @@ function _decodeLogs(logs) {
       ///////////////////////////
 
       /* Quick code to handle event overloading (indexed vs non-indexed) 
-        EtherDelta & EnclavesDex have similar events with the same signature, but a difference in indexed variables.
+        (ERC20 vs ERC721)  and (EtherDelta vs EnclavesDex) have events with the same signature, but a difference in indexed variables.
         If both ABIs are loaded, one of the 2 will fail to decode.
       */
 
-      //check if we have indexd topics, but ABI doesn't have indexed
-      const isIndexed = logItem.topics && logItem.topics.length > 1 && !method.inputs.reduce((acc, inp) => { return (acc || inp.indexed); }, false);
-      if (isIndexed) {
+      //check if we have indexed topics, but ABI doesn't have indexed
+      const indexedTopicAmount = logItem.topics.length - 1; //topic[0] is standard, do - 1
+      const indexedMethodAmount = method.inputs.reduce((acc, inp) => { return (acc + (inp.indexed ? 1 : 0)); }, 0);
+      const changedIndexedArguments = [];
+      let tokenIdIndex = -1;
+
+      // more indexed values detected than known in ABI
+      if (indexedTopicAmount > indexedMethodAmount) {
+        let diff = indexedTopicAmount - indexedMethodAmount;
         for (let i = 0; i < method.inputs.length; i++) {
-          let name = method.inputs[i].name;
-          if (name == 'token' || name == 'user' || name == 'tokenGet' || name == 'tokenGive' || name == 'get' || name == 'give') {
-            method.inputs[i].indexed = true;
+          //find param that isn't indexed and temporarily make it indexed
+          if (!method.inputs[i].indexed) {
+            let name = method.inputs[i].name;
+            //filter on param names of known cases (EtherDelta vs EnclavesDex, Erc20 vs Erc721)
+            if (name == 'token' || name == 'user' || name == 'tokenGet' || name == 'tokenGive' || name == 'get' || name == 'give'
+              || name == 'src' || name == 'dst' || name == 'wad' || name == 'guy'
+            ) {
+              changedIndexedArguments.push(i);
+              method.inputs[i].indexed = true;
+              diff--;
+            }
+          }
+          // 3 times indexed on transfer/approval is erc721 standard, erc20 uses 2 times
+          if ((method.name == 'Transfer' || method.name == 'Approval') && method.inputs[i].name == 'wad' && indexedTopicAmount == 3 && indexedMethodAmount == 2) {
+            //rename variable to detect this case in event handling
+            method.inputs[i].name = 'tokenId';
+            tokenIdIndex = i;
+          }
+          // stop if we changed enough indexed vars
+          if (diff <= 0) {
+            break;
+          }
+        }
+      }
+      // less indexed values detected than known in ABI
+      else if (indexedMethodAmount > indexedTopicAmount) {
+        let diff = indexedMethodAmount - indexedTopicAmount;
+        for (let i = method.inputs.length - 1; i >= 0; i--) {
+          //find param that is indexed and temporarily make it not indexed
+          if (method.inputs[i].indexed) {
+            let name = method.inputs[i].name;
+            //filter on param names of known cases (EtherDelta vs EnclavesDex, Erc20 vs Erc721)
+            if (name == 'token' || name == 'user' || name == 'tokenGet' || name == 'tokenGive' || name == 'get' || name == 'give'
+              || name == 'src' || name == 'dst' || name == 'wad' || name == 'guy'
+            ) {
+              changedIndexedArguments.push(i);
+              method.inputs[i].indexed = false;
+              diff--;
+            }
+          }
+          // 0 times indexed on transfer/approval is pre-erc721 standard like cryptokitties, erc20 uses 2 times indexed
+          if ((method.name == 'Transfer' || method.name == 'Approval') && method.inputs[i].name == 'wad' && indexedTopicAmount == 0 && indexedMethodAmount == 2) {
+            //rename variable to detect this case in event handling
+            method.inputs[i].name = 'tokenId';
+            tokenIdIndex = i;
+          }
+          // stop if we changed enough indexed vars
+          if (diff <= 0) {
+            break;
           }
         }
       }
@@ -261,9 +313,17 @@ function _decodeLogs(logs) {
       ///////////////////////////
 
       /* Restore overloading indexed 'hack' */
-      if (isIndexed) {
-        for (let i = 0; i < method.inputs.length; i++) {
-          method.inputs[i].indexed = false;
+      if (changedIndexedArguments.length > 0) {
+        for (let i = 0; i < changedIndexedArguments.length; i++) {
+          let index = changedIndexedArguments[i];
+          //restore indexed boolean to the 'before' value
+          method.inputs[index].indexed = !method.inputs[index].indexed;
+        }
+      }
+      if (tokenIdIndex !== -1) {
+        //revert name change on abi itself
+        if (method.inputs[tokenIdIndex].name == 'tokenId') {
+          method.inputs[tokenIdIndex].name = 'wad';
         }
       }
 

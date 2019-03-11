@@ -1104,7 +1104,7 @@ var isAddressPage = false;
 							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, 6) + '</span>';
 					}
 					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'amount ' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'balance' || keys[i] == 'minimum' || keys[i] == 'minimum ' || keys[i] == 'maximum') {
-						if (cellValue !== "")
+						if (cellValue !== "" && cellValue !== 'All')
 							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, 3) + '</span>';
 					}
 					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'maker' || keys[i] == 'taker' || keys[i] == 'wallet' || keys[i] == 'signer') {

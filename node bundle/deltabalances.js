@@ -5404,7 +5404,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     if (token.erc721) {
                         contents = '';
                         if (!this.uniqueTokens[token.addr] || token.unknown) {
-                            content += "Token unknown to DeltaBalances. <br>"
+                            contents += "Token unknown to DeltaBalances. <br>"
                         }
                         if (token.erc721Id) {
                             contents += 'ERC721 Non-fungible token. <br> Unique Token ID: ' + token.erc721Id;

@@ -830,7 +830,8 @@ var isAddressPage = false;
 
 			for (var i = 0; i < transaction.output.length; i++) {
 				if (transaction.output[i].type == 'Taker Buy' || transaction.output[i].type == 'Taker Sell') {
-					if (transaction.output[i].token.decimals == 0 && !zeroDecWarning) {
+					//show warning on 0 decimals for erc20 tokens
+					if (transaction.output[i].token.decimals == 0 && !transaction.output[i].token.erc721 && !zeroDecWarning) {
 						zeroDecWarning = "<strong>Note: </strong> " + transaction.output[i].token.name + " has 0 decimals precision. Numbers might be lower than expected due to rounding. <br>";
 					}
 					tradeCount++;
@@ -1103,7 +1104,7 @@ var isAddressPage = false;
 							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, 6) + '</span>';
 					}
 					else if (keys[i] == 'order size' || keys[i] == 'amount' || keys[i] == 'amount ' || keys[i] == 'estAmount' || keys[i] == 'baseAmount' || keys[i] == 'estBaseAmount' || keys[i] == 'balance' || keys[i] == 'minimum' || keys[i] == 'minimum ' || keys[i] == 'maximum') {
-						if (cellValue !== "")
+						if (cellValue !== "" && cellValue !== 'All')
 							cellValue = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, 3) + '</span>';
 					}
 					else if (keys[i] == 'seller' || keys[i] == 'buyer' || keys[i] == 'to' || keys[i] == 'sender' || keys[i] == 'from' || keys[i] == 'maker' || keys[i] == 'taker' || keys[i] == 'wallet' || keys[i] == 'signer') {

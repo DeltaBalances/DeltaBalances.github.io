@@ -17,6 +17,7 @@ module.exports = {
     '0xProxy': { addr: '0x8da0d80f5007ef1e431dd2127178d224e32c2ef4', name: '0x Proxy', supportedDex: true },
     '0x2': { addr: '0x4f833a24e1f95d70f028921e27040ca56e09ab0b', name: '0x Exchange2', supportedDex: true },
     '0xProxy2': { addr: '0x2240dab907db71e64d3e0dba4800c83b5c502d4e', name: '0x ERC20 Proxy', supportedDex: true },
+    '0xProxy3': { addr: '0x208e41fb445f1bb1b6780d58356e81405f3e6127', name: '0x ERC721 Proxy', supportedDex: false },
     // ethfinex uses 0x clone?
     Ethfinex: { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex', supportedDex:true },
     EthfinexProxy: {addr: '0x7e03d2b8edc3585ecd8a5807661fff0830a0b603', name: 'Ethfinex Proxy', supportedDex:true },
@@ -90,9 +91,19 @@ module.exports = {
     DexTop: { addr: '0x7600977eb9effa627d6bd0da2e5be35e11566341', name: 'DEx.top', supportedDex: false },
     BitEye: { addr: '0x39fbd1140cd1fc298f00c3ea64b3591de94c67e7', name: 'BitEye', supportedDex: false },
     AXNET: { addr: '0xacf999bfa9347e8ebe6816ed30bf44b127233177', name: 'AXNET', supportedDex: false },
+	WeiDex: { addr: '0xccd7ce9ec004bfbd5711245f917d6109813a909c', name: 'WeiDex', supportedDex: false },
+	
     /* exchange aggregators (no input parsing yet) */
-    Totle: { addr: '0xd94c60e2793ad587400d86e4d6fd9c874f0f79ef', name: 'Totle', supportedDex: true },
-    Totle2: { addr: '0x98db9047e80260b407ffbc67543f9a010ef0fc6a', name: 'Totle-OLD', supportedDex: true },
+    // totle primary contracts
+    Totle: { addr: '0xd94c60e2793ad587400d86e4d6fd9c874f0f79ef', name: 'Totle', supportedDex: false },
+    Totle2: { addr: '0x99eca38b58ceeaf0fed5351df21d5b4c55995314', name: 'Totle', supportedDex: false },
+    Totle3: { addr: '0x476a0a98beaae3e7e451ccd46e50fb465ae540bb', name: 'Totle', supportedDex: false },
+    Totle4: { addr: '0xa674695d170b51e300624728fb920f3c01b0f5c3', name: 'Totle', supportedDex: false },
+    Totle5: { addr: '0x98db9047e80260b407ffbc67543f9a010ef0fc6a', name: 'Totle-OLD', supportedDex: false }, // unknown abi
+    TotleProxy: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
+    TotleProxy2: { addr: '0x74758acfce059f503a7e6b0fc2c8737600f9f2c4', name: 'Totle', supportedDex: false },
+    TotleProxy3: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
+
     /* small ED/FD clones, not in history pages yet, input/events should parse */
     Bitox: { addr: '0xb5adb233f28c86cef693451b67e1f2d41da97d21', name: 'BITOX', supportedDex: true },
     Coinchange: { addr: '0x2f23228b905ceb4734eb42d9b42805296667c93b', name: 'Coinchangex', supportedDex: true },
@@ -129,16 +140,21 @@ module.exports = {
     '0xa258b39954cef5cb142fd567a46cddb31a670124': "RadarRelay",
     '0xeb71bad396acaa128aeadbc7dbd59ca32263de01': "IDT",
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX',
-    '0x0000000000000000000000000000000000000000': 'Paradex',
     '0x6f7ae872e995f98fcd2a7d3ba17b7ddfb884305f': 'Tokenlon',
     '0x55890b06f0877a01bb5349d93b202961f8e27a9b': 'Shark Relay',
     '0x5e150a33ffa97a8d22f59c77ae5487b089ef62e9': 'TokenJar',
     '0x5dd835a893734b8d556eccf87800b76dda5aedc5': 'BambooRelay',
     '0xc22d5b2951db72b44cfb8089bb8cd374a3c354ea': 'OpenRelay',
+    '0x89db81c2dc4adaf10a93705b69289d479d576635': 'OpenRelay',
     '0x4524baa98f9a3b9dec57caae7633936ef96bd708': 'LedgerDex',
     '0x7219612be7036d1bfa933e16ca1246008f38c5fe': 'The Ocean',
     '0x0e8ba001a821f3ce0734763d008c9d7c957f5852': 'Amadeus',
-    '0xab8199eba802e7e6634d4389bf23999b7ae6b253': '3xchange', 
+    '0xab8199eba802e7e6634d4389bf23999b7ae6b253': '3xchange',
+    '0x66a836664adc7c525c0cc4527dee8619d4faf669': 'Boxswap',
+    '0x013ec57d1237e7727f818b1a35e3506f754304e4': 'GUDecks',
+    '0xb0d7398d779ee9ffc727d2d5b045a5b441da8233': 'Emoon',
+    '0x5620413261751d93978c6e752f6c351d10e75238': 'Lake Project',
+    '0xa9274fda6d91a063f6aa0cfb172d6eb3b61ecf89': 'MetaMorph',
 
     '0x8124071f810d533ff63de61d0c98db99eeb99d64': 'STAR BIT',
     '0x0681e844593a051e2882ec897ecd5444efe19ff2': 'STAR BIT',
@@ -150,25 +166,43 @@ module.exports = {
     "0x3b4ce2ea700ff327c3b4fe624f328c4106fd2885": 'Erc Dex',
     "0x3fa5f23d42847e49d242496ffe2a3c8fda66706c": 'Erc Dex',
     "0x173a2467cece1f752eb8416e337d0f0b58cad795": 'Erc Dex',
-    '0x173a2467cece1f752eb8416e337d0f0b58cad795': 'Erc Dex',
+    "0x58a5959a6c528c5d5e03f7b9e5102350e24005f1": 'Erc Dex',
+    "0x7df569a165bee41ca74374c76bd888ea02dcc4a8": 'Erc Dex',
+    "0x3d974ce554fec1acd8d034f13b6640b300689a37": 'Erc Dex',
+    "0xbd069e7ad0b7366ed1f0559dd8fe3e8efc0c4a72": 'Erc Dex',
+    "0x4411c446756f8ed22343e8fbe8d24607027daffd": 'Erc Dex',
+    "0xee2d43b8e4b57477acc2f4def265fe2887865ac0": 'Erc Dex',
+    "0x8bf0785306eb675e38b742f59a7fcf05fccdf2b7": 'Erc Dex',
+    "0x1956f5afa5d21000145e6cd2fa8ce3f52fa40875": 'Erc Dex',
+    "0xa5b8d094f8364a9771c7a2287ee13efa08f847a4": 'Erc Dex',
+    "0xc95bf3d3b4d6619119f3a8e29ec1d73ee801b9df": 'Erc Dex',
+    "0x28f5cf7044f509af67f473c18b1f5f4f97fb4ce9": 'Erc Dex',
+    "0xd592cfa56f4c443fb27008329d67ed7d4edb59c0": 'Erc Dex',
 
     // non zrx
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex', //0x clone contract
     '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX', // DDEX hydro
   },
-
+  zrxTakers: {
+    '0x4a821aa1affbf7ee89a245bf750d1d7374e77409': 'Tokenmom',
+    '0xdf1bc6498338135de5ffdbcb98817d81e2665912': 'Veil',
+    '0x4969358e80cdc3d74477d7447bffa3b2e2acbe92': 'Paradex',
+    '0xd2045edc40199019e221d71c0913343f7908d0d5': 'Paradex',
+    '0x853da5cecc1ea601ab978c2001565a0377a7dca6': 'ForDex',
+    '0xd3d0474124c1013ed6bfcfd9a49cfedb8c78fc44': 'Erc Dex', //indirect execution
+    '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX', //v1 
+  },
 
   admins: {
     '0xceceaa8edc0830c7cec497e33bb3a3c28dd55a32': 'IDEX Admin',
     '0xa7a7899d944fe658c4b0a1803bab2f490bd3849e': 'IDEX Admin',
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX Admin', //0x v1
     '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX Admin', // Hydro ex
-    '0x4969358e80cdc3d74477d7447bffa3b2e2acbe92': 'Paradex Admin',
-    '0xd2045edc40199019e221d71c0913343f7908d0d5': 'Paradex Admin',
-    '0xd3d0474124c1013ed6bfcfd9a49cfedb8c78fc44': 'Erc Dex Admin',
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex Admin',
     '0x1f8cdd31345faa00bbdf946fa257b7feb706b535': 'Switcheo Admin',
-    '0x457804851eaf090dad4871f9609010c6868d99d4': 'BithumbDex Admin', 
+    '0x457804851eaf090dad4871f9609010c6868d99d4': 'BithumbDex Admin',
+    '0xdb0a49ebed788cd412744a4f9f1ce8d16d019b2e': 'Totle Admin',
+    '0x583d03451406d179182efc742a1d811a9e34c36b': 'Totle Admin',
   },
   wrappedETH: {
     "0x0000000000000000000000000000000000000000": 1, // EtherDelta, IDEX, tokenStore, Decentrex  reserved for ETH
@@ -525,6 +559,8 @@ module.exports = {
     '0xForwarder2': [{constant:false,inputs:[{components:[{name:"makerAddress",type:"address"},{name:"takerAddress",type:"address"},{name:"feeRecipientAddress",type:"address"},{name:"senderAddress",type:"address"},{name:"makerAssetAmount",type:"uint256"},{name:"takerAssetAmount",type:"uint256"},{name:"makerFee",type:"uint256"},{name:"takerFee",type:"uint256"},{name:"expirationTimeSeconds",type:"uint256"},{name:"salt",type:"uint256"},{name:"makerAssetData",type:"bytes"},{name:"takerAssetData",type:"bytes"}],name:"orders",type:"tuple[]"},{name:"makerAssetFillAmount",type:"uint256"},{name:"signatures",type:"bytes[]"},{components:[{name:"makerAddress",type:"address"},{name:"takerAddress",type:"address"},{name:"feeRecipientAddress",type:"address"},{name:"senderAddress",type:"address"},{name:"makerAssetAmount",type:"uint256"},{name:"takerAssetAmount",type:"uint256"},{name:"makerFee",type:"uint256"},{name:"takerFee",type:"uint256"},{name:"expirationTimeSeconds",type:"uint256"},{name:"salt",type:"uint256"},{name:"makerAssetData",type:"bytes"},{name:"takerAssetData",type:"bytes"}],name:"feeOrders",type:"tuple[]"},{name:"feeSignatures",type:"bytes[]"},{name:"feePercentage",type:"uint256"},{name:"feeRecipient",type:"address"}],name:"marketBuyOrdersWithEth",outputs:[{components:[{name:"makerAssetFilledAmount",type:"uint256"},{name:"takerAssetFilledAmount",type:"uint256"},{name:"makerFeePaid",type:"uint256"},{name:"takerFeePaid",type:"uint256"}],name:"orderFillResults",type:"tuple"},{components:[{name:"makerAssetFilledAmount",type:"uint256"},{name:"takerAssetFilledAmount",type:"uint256"},{name:"makerFeePaid",type:"uint256"},{name:"takerFeePaid",type:"uint256"}],name:"feeOrderFillResults",type:"tuple"}],payable:true,stateMutability:"payable",type:"function"},{constant:false,inputs:[{name:"assetData",type:"bytes"},{name:"amount",type:"uint256"}],name:"withdrawAsset",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[{components:[{name:"makerAddress",type:"address"},{name:"takerAddress",type:"address"},{name:"feeRecipientAddress",type:"address"},{name:"senderAddress",type:"address"},{name:"makerAssetAmount",type:"uint256"},{name:"takerAssetAmount",type:"uint256"},{name:"makerFee",type:"uint256"},{name:"takerFee",type:"uint256"},{name:"expirationTimeSeconds",type:"uint256"},{name:"salt",type:"uint256"},{name:"makerAssetData",type:"bytes"},{name:"takerAssetData",type:"bytes"}],name:"orders",type:"tuple[]"},{name:"signatures",type:"bytes[]"},{components:[{name:"makerAddress",type:"address"},{name:"takerAddress",type:"address"},{name:"feeRecipientAddress",type:"address"},{name:"senderAddress",type:"address"},{name:"makerAssetAmount",type:"uint256"},{name:"takerAssetAmount",type:"uint256"},{name:"makerFee",type:"uint256"},{name:"takerFee",type:"uint256"},{name:"expirationTimeSeconds",type:"uint256"},{name:"salt",type:"uint256"},{name:"makerAssetData",type:"bytes"},{name:"takerAssetData",type:"bytes"}],name:"feeOrders",type:"tuple[]"},{name:"feeSignatures",type:"bytes[]"},{name:"feePercentage",type:"uint256"},{name:"feeRecipient",type:"address"}],name:"marketSellOrdersWithEth",outputs:[{components:[{name:"makerAssetFilledAmount",type:"uint256"},{name:"takerAssetFilledAmount",type:"uint256"},{name:"makerFeePaid",type:"uint256"},{name:"takerFeePaid",type:"uint256"}],name:"orderFillResults",type:"tuple"},{components:[{name:"makerAssetFilledAmount",type:"uint256"},{name:"takerAssetFilledAmount",type:"uint256"},{name:"makerFeePaid",type:"uint256"},{name:"takerFeePaid",type:"uint256"}],name:"feeOrderFillResults",type:"tuple"}],payable:true,stateMutability:"payable",type:"function"}],
     //DDEX post 0x protocol
     DDEX: [{constant:false,inputs:[{name:"delegate",type:"address"}],name:"approveDelegate",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[{name:"newConfig",type:"bytes32"}],name:"changeDiscountConfig",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[],name:"exitIncentiveSystem",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[],name:"renounceOwnership",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[{components:[{name:"trader",type:"address"},{name:"baseTokenAmount",type:"uint256"},{name:"quoteTokenAmount",type:"uint256"},{name:"gasTokenAmount",type:"uint256"},{name:"data",type:"bytes32"},{components:[{name:"config",type:"bytes32"},{name:"r",type:"bytes32"},{name:"s",type:"bytes32"}],name:"signature",type:"tuple"}],name:"takerOrderParam",type:"tuple"},{components:[{name:"trader",type:"address"},{name:"baseTokenAmount",type:"uint256"},{name:"quoteTokenAmount",type:"uint256"},{name:"gasTokenAmount",type:"uint256"},{name:"data",type:"bytes32"},{components:[{name:"config",type:"bytes32"},{name:"r",type:"bytes32"},{name:"s",type:"bytes32"}],name:"signature",type:"tuple"}],name:"makerOrderParams",type:"tuple[]"},{components:[{name:"baseToken",type:"address"},{name:"quoteToken",type:"address"},{name:"relayer",type:"address"}],name:"orderAddressSet",type:"tuple"}],name:"matchOrders",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[{components:[{name:"trader",type:"address"},{name:"relayer",type:"address"},{name:"baseToken",type:"address"},{name:"quoteToken",type:"address"},{name:"baseTokenAmount",type:"uint256"},{name:"quoteTokenAmount",type:"uint256"},{name:"gasTokenAmount",type:"uint256"},{name:"data",type:"bytes32"}],name:"order",type:"tuple"}],name:"cancelOrder",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[],name:"joinIncentiveSystem",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[{name:"newOwner",type:"address"}],name:"transferOwnership",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[{name:"delegate",type:"address"}],name:"revokeDelegate",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{anonymous:false,inputs:[{indexed:true,name:"orderHash",type:"bytes32"}],name:"Cancel",type:"event"},{anonymous:false,inputs:[{indexed:false,name:"baseToken",type:"address"},{indexed:false,name:"quoteToken",type:"address"},{indexed:false,name:"relayer",type:"address"},{indexed:false,name:"maker",type:"address"},{indexed:false,name:"taker",type:"address"},{indexed:false,name:"baseTokenAmount",type:"uint256"},{indexed:false,name:"quoteTokenAmount",type:"uint256"},{indexed:false,name:"makerFee",type:"uint256"},{indexed:false,name:"takerFee",type:"uint256"},{indexed:false,name:"makerGasFee",type:"uint256"},{indexed:false,name:"makerRebate",type:"uint256"},{indexed:false,name:"takerGasFee",type:"uint256"}],name:"Match",type:"event"},{anonymous:false,inputs:[{indexed:true,name:"previousOwner",type:"address"},{indexed:true,name:"newOwner",type:"address"}],name:"OwnershipTransferred",type:"event"},{anonymous:false,inputs:[{indexed:true,name:"relayer",type:"address"},{indexed:true,name:"delegate",type:"address"}],name:"RelayerApproveDelegate",type:"event"},{anonymous:false,inputs:[{indexed:true,name:"relayer",type:"address"},{indexed:true,name:"delegate",type:"address"}],name:"RelayerRevokeDelegate",type:"event"},{anonymous:false,inputs:[{indexed:true,name:"relayer",type:"address"}],name:"RelayerExit",type:"event"},{anonymous:false,inputs:[{indexed:true,name:"relayer",type:"address"}],name:"RelayerJoin",type:"event"}],
+    //erc721 before erc20 because they overlap definitions
+    Erc721:[{constant:true,inputs:[{name:"_tokenId",type:"uint256"}],name:"getApproved",outputs:[{name:"",type:"address"}],payable:false,stateMutability:"view",type:"function"},{constant:false,inputs:[{name:"_to",type:"address"},{name:"_tokenId",type:"uint256"}],name:"approve",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[{name:"_from",type:"address"},{name:"_to",type:"address"},{name:"_tokenId",type:"uint256"}],name:"transferFrom",outputs:[],payable:true,stateMutability:"payable",type:"function"},{constant:false,inputs:[{name:"_from",type:"address"},{name:"_to",type:"address"},{name:"_tokenId",type:"uint256"}],name:"safeTransferFrom",outputs:[],payable:true,stateMutability:"payable",type:"function"},{constant:true,inputs:[{name:"_tokenId",type:"uint256"}],name:"ownerOf",outputs:[{name:"_owner",type:"address"}],payable:false,stateMutability:"view",type:"function"},{constant:true,inputs:[{name:"_owner",type:"address"}],name:"balanceOf",outputs:[{name:"_balance",type:"uint256"}],payable:false,stateMutability:"view",type:"function"},{constant:false,inputs:[{name:"_operator",type:"address"},{name:"_approved",type:"bool"}],name:"setApprovalForAll",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[{name:"_to",type:"address"},{name:"_tokenId",type:"uint256"}],name:"transfer",outputs:[],payable:false,stateMutability:"nonpayable",type:"function"},{constant:false,inputs:[{name:"_from",type:"address"},{name:"_to",type:"address"},{name:"_tokenId",type:"uint256"},{name:"data",type:"bytes"}],name:"safeTransferFrom",outputs:[],payable:true,stateMutability:"payable",type:"function"},{constant:true,inputs:[{name:"_owner",type:"address"},{name:"_operator",type:"address"}],name:"isApprovedForAll",outputs:[{name:"",type:"bool"}],payable:false,stateMutability:"view",type:"function"},{anonymous:false,inputs:[{indexed:true,name:"_from",type:"address"},{indexed:true,name:"_to",type:"address"},{indexed:false,name:"_tokenId",type:"uint256"}],name:"Transfer",type:"event"},{anonymous:false,inputs:[{indexed:true,name:"_owner",type:"address"},{indexed:true,name:"_approved",type:"address"},{indexed:false,name:"_tokenId",type:"uint256"}],name:"Approval",type:"event"},{anonymous:false,inputs:[{indexed:true,name:"_owner",type:"address"},{indexed:true,name:"_operator",type:"address"},{indexed:false,name:"_approved",type:"bool"}],name:"ApprovalForAll",type:"event"}],
     // WETH token, to also capture wrapping/unwrapping 
     Erc20: [{ constant: false, inputs: [{ name: "guy", type: "address" }, { name: "wad", type: "uint256" }], name: "approve", outputs: [{ name: "", type: "bool" }], payable: false, stateMutability: "nonpayable", type: "function" }, { constant: false, inputs: [{ name: "src", type: "address" }, { name: "dst", type: "address" }, { name: "wad", type: "uint256" }], name: "transferFrom", outputs: [{ name: "", type: "bool" }], payable: false, stateMutability: "nonpayable", type: "function" }, { constant: false, inputs: [{ name: "wad", type: "uint256" }], name: "withdraw", outputs: [], payable: false, stateMutability: "nonpayable", type: "function" }, { constant: true, inputs: [], name: "decimals", outputs: [{ name: "", type: "uint8" }], payable: false, stateMutability: "view", type: "function" }, { constant: true, inputs: [{ name: "", type: "address" }], name: "balanceOf", outputs: [{ name: "", type: "uint256" }], payable: false, stateMutability: "view", type: "function" }, { constant: true, inputs: [], name: "symbol", outputs: [{ name: "", type: "string" }], payable: false, stateMutability: "view", type: "function" }, { constant: false, inputs: [{ name: "dst", type: "address" }, { name: "wad", type: "uint256" }], name: "transfer", outputs: [{ name: "", type: "bool" }], payable: false, stateMutability: "nonpayable", type: "function" }, { constant: false, inputs: [], name: "deposit", outputs: [], payable: true, stateMutability: "payable", type: "function" }, { constant: true, inputs: [{ name: "", type: "address" }, { name: "", type: "address" }], name: "allowance", outputs: [{ name: "", type: "uint256" }], payable: false, stateMutability: "view", type: "function" }, { anonymous: false, inputs: [{ indexed: true, name: "src", type: "address" }, { indexed: true, name: "guy", type: "address" }, { indexed: false, name: "wad", type: "uint256" }], name: "Approval", type: "event" }, { anonymous: false, inputs: [{ indexed: true, name: "src", type: "address" }, { indexed: true, name: "dst", type: "address" }, { indexed: false, name: "wad", type: "uint256" }], name: "Transfer", type: "event" }, { anonymous: false, inputs: [{ indexed: true, name: "dst", type: "address" }, { indexed: false, name: "wad", type: "uint256" }], name: "Deposit", type: "event" }, { anonymous: false, inputs: [{ indexed: true, name: "src", type: "address" }, { indexed: false, name: "wad", type: "uint256" }], name: "Withdrawal", type: "event" }],
     //bancor ETH token for Issuance, Destruction

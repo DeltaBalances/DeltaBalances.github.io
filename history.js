@@ -1007,7 +1007,7 @@ var isAddressPage = true;
 					var obj2 = undefined;
 					// trades only
 					if (unpacked.name.indexOf('Deposit') === -1 && unpacked.name.indexOf('Withdraw') === -1) {
-						if (_util.isWrappedETH(obj.base.addr) || _util.isNonEthBase(obj.base.addr)) {
+						if (obj.base && obj.token && !obj.base.unknown && !obj.token.unknown) {
 
 							let opp = '';
 							if (obj.tradeType == 'Buy') {
@@ -1538,7 +1538,14 @@ var isAddressPage = true;
 		if (lastResult && (typeMode == 0 || typeMode == 2)) {
 			let exportFormat = $('#downloadTrades').val();
 			if (exportFormat) {
-				let allTrades = lastResult.filter((x) => { return (x.Type == 'Maker' || x.Type == 'Taker'); });
+				let allTrades = lastResult.filter((x) => {
+					return (
+						(x.Type == 'Maker' || x.Type == 'Taker')
+						//exclude erc721 tokens from the export for now
+						&& (x.Token && !x.Token.erc721)
+						&& (x.Base && !x.Base.erc721)
+					);
+				});
 				if (allTrades && allTrades.length > 0) {
 					$('#downloadTradesBtn').html('');
 					generateTradesData(allTrades, exportFormat);

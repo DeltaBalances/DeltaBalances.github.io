@@ -3,7 +3,7 @@
 ###### ethToTokenSwap Input
 `https://etherscan.io/tx/0x96fc4940867077d3664b7ed85acee0625da825717e0bda1c5af19026b6137dd2`
 
-###### ethToTokenSwap Output
+###### ethToTokenSwap Output (+refund)
 `https://etherscan.io/tx/0xd6506c73637b452eddb756b7a6ff7801fac632aada35551b830e31b3a2fdb3b7`
 
 

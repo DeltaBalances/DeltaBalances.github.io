@@ -1036,7 +1036,8 @@ var isAddressPage = true;
 											trans = createOutputTransaction(obj.type, obj.token, amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, undefined, tx.isError === '0', exchange);
 										}
 									}
-									else if (unpacked.name === 'approve') {
+									//erc20 erc721 approvals
+									else if (unpacked.name === 'approve' || unpacked.name === 'setApprovalForAll') {
 										if (!exchange) {
 											if (_delta.isExchangeAddress(obj.to)) {
 												exchange = _delta.addressName(obj.to.toLowerCase(), false);
@@ -1044,7 +1045,7 @@ var isAddressPage = true;
 												exchange = '';
 											}
 										}
-										if (obj.amount.greaterThan(999999999999999))
+										if (unpacked.name === 'approve' && obj.amount.greaterThan(999999999999999))
 											obj.amount = '';
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
 									}
@@ -1729,7 +1730,7 @@ var isAddressPage = true;
 				var head = columns[colIndex].title;
 
 				if (head == 'Amount' || head == 'Price' || head == "Total") {
-					if (cellValue !== "" && cellValue !== undefined) {
+					if (cellValue !== "" && cellValue !== undefined && cellValue !== 'All') {
 						var dec = fixedDecimals;
 						if (head == 'Price')
 							dec += 2;
@@ -1737,7 +1738,9 @@ var isAddressPage = true;
 						row$.append($('<td/>').html(num));
 					}
 					else {
-						cellValue = "";
+						if (cellValue !== "All") {
+							cellValue = "";
+						}
 						row$.append($('<td/>').html(cellValue));
 					}
 				}

@@ -30,6 +30,7 @@ exchange names are listings (token.EtherDelta:"")
   .spam:true  (identify random worthless airdrops, separate category for balance/allowance)
 */  
 
+//Fungible tokens, mainly erc20 / 223
 let offlineCustomTokens = [
   {symbol:"??",address:"0x87581621cdd11f6d9b90960ca9cbaa67e9b4c2ae",decimal:18,name:"coinex reference spam",blocked:2},
   {symbol:"§",address:"0xb1b67ea35d8e807ddb798addad9e5a9928b8f21a",decimal:18,name:"SygeNiceCoin",blocked:1},
@@ -5721,6 +5722,52 @@ let offlineCustomTokens = [
   {symbol:"福慧币",address:"0xe743c9f1eb264bfe8784ee090fbe25a3c0ff5078",decimal:18,blocked:1},
   {symbol:"草泥马币",address:"0x81d26c79c2acca248ef240ac28e763f9a3e06a4f",decimal:2,spam:true},
 ]; // end OfflineCustomTokens
+
+
+//Non-fungible tokens like erc721
+// initial set, not updating live yet
+let offlineCollectibleTokens = [
+  {symbol:"ARDL",address:"0xdf5d68d54433661b1e5e90a547237ffb0adf6ec2",name:"Arcona Digital Land"},
+  {symbol:"AXIE",address:"0xf5b0a3efb8e8e4c201e2a935f110eaaf3ffecb8d",name:"Axie"},
+  {symbol:"AZP",address:"0x6ac07b7c4601b5ce11de8dfe6335b871c7c4dd4d",name:"Azimuth Points"},
+  {symbol:"BC",address:"0xd73be539d6b2076bab83ca6ba62dfe189abc6bbe",name:"BlockchainCuties"},
+  {symbol:"Bounty",address:"0xb9250c9581e4594b7c6914897823ad18d6b78e96",name:"Lordless:Bounty"},
+  {symbol:"CARD",address:"0xc70be5b7c19529ef642d16c10dfe91c58b5c3bf0",name:"Mythereum Card"},
+  {symbol:"CAU",address:"0x31af195db332bc9203d758c74df5a5c5e597cdb7",name:"CryptoAssaultUnit"},
+  {symbol:"CBF",address:"0x71c118b00759b0851785642541ceb0f4ceea0bd5",name:"Chibi Fighters"},
+  {symbol:"CF",address:"0x87d598064c736dd0c712d329afcfaa0ccc1921a1",name:"CryptoFighters"},
+  {symbol:"CF",address:"0x8bc67d00253fd60b1afcce88b78820413139f4c6",name:"CryptoFlowers"},
+  {symbol:"CK",address:"0x06012c8cf97bead5deae237070f9587f8e7a266d",name:"CryptoKitties"},
+  {symbol:"CR",address:"0x8853b05833029e3cf8d3cbb592f9784fa43d2a79",name:"Codex Record"},
+  {symbol:"CVPA",address:"0x79986af15539de2db9a5086382daeda917a9cf0c",name:"CryptoVoxels Parcel"},
+  {symbol:"Dozer",address:"0xbd13e53255ef917da7557db1b7d2d5c38a2efe24",name:"DozerDoll"},
+  {symbol:"DRAGON",address:"0x960f401aed58668ef476ef02b2a2d43b83c261d8",name:"Dragonereum Dragon"},
+  {symbol:"EMONA",address:"0x5d00d312e171be5342067c09bae883f9bcb2003b",name:"EtheremonMonster"},
+  {symbol:"EGG",address:"0xfcad2859f3e602d4cfb9aca35465a618f9009f7b",name:"Dragonereum Egg"},
+  {symbol:"EMOND",address:"0xbfde6246df72d3ca86419628cac46a9d2b60393c",name:"EtheremonAdventure"},
+  {symbol:"EST",address:"0x959e104e1a4db6317fa58f8295f586e1a978c297",name:"Estate"},
+  {symbol:"ETHBOT",address:"0xd2f81cd7a20d60c0d558496c7169a20968389b40",name:"Etherbots"},
+  {symbol:"EVO",address:"0x14a4123da9ad21b2215dc0ab6984ec1e89842c6d",name:"Evolution Land Objects"},
+  {symbol:"FISHB",address:"0xf15f61643eea73be40ad9b72c09ed381fac7a256",name:"Fishbank Boosters"},
+  {symbol:"FLOWER",address:"0x4f41d10f7e67fd16bde916b4a6dc3dd101c57394",name:"Flower"},
+  {symbol:"GODS",address:"0x6EbeAf8e8E946F0716E6533A6f2cefc83f60e8Ab",name:"Gods Unchained"},
+  {symbol:"GOLD",address:"0x150b0b96933b75ce27af8b92441f8fb683bf9739",name:"Dragonereum Gold"},
+  {symbol:"HERO",address:"0x4fece400c0d3db0937162ab44bab34445626ecfe",name:"ETH.Town Hero"},
+  {symbol:"KODA",address:"0xfbeef911dc5821886e1dda71586d90ed28174b7d",name:"KnownOriginDigitalAsset"},
+  {symbol:"KYDY",address:"0xd90f5ebc01914bbd357b754956aafb199f4d1624",name:"Dyverse"},
+  {symbol:"LAND",address:"0xf87e31492faf9a91b02ee0deaad50d51d56d5d4d",name:"Decentraland Land"},
+  {symbol:"MARBLE-NFT",address:"0x1d963688fe2209a98db35c67a041524822cf04ff",name:"Marble"},
+  {symbol:"MCHE",address:"0xdceaf1652a131F32a821468Dc03A92df0edd86Ea",name:"MyCryptoHeroes:Extension"},
+  {symbol:"MCHH",address:"0x273f7f8e6489682df756151f5525576e322d51a3",name:"MyCryptoHeroes:Hero"},
+  {symbol:"MCHL",address:"0x617913dd43dbdf4236b85ec7bdf9adfd7e35b340",name:"MyCryptoHeroes:Land"},
+  {symbol:"MIB",address:"0xc2d8db56c50f253d1279da6760345fe78f784ed9",name:"Marble"},
+  {symbol:"MLBCB",address:"0x8c9b261faef3b3c2e64ab5e58e04615f8c788099",name:"LucidSight-MLB-NFT"},
+  {symbol:"MXRTOW",address:"0x4e01124b127ae8d0573efc4a026d9d7505fcd5bb",name:"MXRT Tribes of War"},
+  {symbol:"SPACE",address:"0x7b00ae36c7485b678fe945c2dd9349eb5baf7b6b",name:"Spheroid SPACE"},
+  {symbol:"ToT",address:"0x6faf6db74d06d06e3f18c042ce5029c3be4c5d16",name:"TokenTape"},
+  {symbol:"WR",address:"0x5caebd3b32e210e85ce3e9d51638b9c445481567",name:"WarRiders"},
+  {symbol:"ZT",address:"0xff488fd296c38a24cccc60b43dd7254810dab64e",name:"Zed Token"},
+];
 
 let smartRelays = {
 /* BNT relay tokens,not useful for balances, but this way they are recognized in tx details */

@@ -327,9 +327,35 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         }
     }
 
+    //erc721 tokens
+    if (offlineCollectibleTokens) {
+        try {
+            offlineCollectibleTokens = offlineCollectibleTokens.map(t => {
+                let tok = {
+                    addr: t.address.toLowerCase(),
+                    name: utility.escapeHtml(t.symbol),
+                    decimals: 0,
+                    unlisted: true,
+                    erc721: true
+                };
+                if (t.name) {
+                    tok.name2 = utility.escapeHtml(t.name);
+                }
+                return tok;
+            });
+            for (let i = 0; i < offlineCollectibleTokens.length; i++) {
+                let token = offlineCollectibleTokens[i];
+                this.uniqueTokens[token.addr] = token;
+            }
+        } catch (e) {
+            console.log('error loading erc721 tokens: ' + e);
+        }
+    }
+
+
     let ethAddr = this.config.ethAddr;
-    this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return !tokenBlacklist[x.addr] && (!x.unlisted || !x.blocked) && !x.killed; });
-    let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !x.killed && !tokenBlacklist[x.addr] && x.addr !== ethAddr); });
+    this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!tokenBlacklist[x.addr] && (!x.unlisted || !x.blocked) && !x.killed && !x.erc721); });
+    let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !x.killed && !tokenBlacklist[x.addr] && x.addr !== ethAddr && !x.erc721); });
     this.config.tokens = [this.uniqueTokens[ethAddr]].concat(listedTokens);
 
     function loadCachedTokens(exchangeName) {
@@ -432,12 +458,20 @@ DeltaBalances.prototype.setToken = function (address) {
                     baseToken = {
                         unknown: true,
                         unlisted: true,
-                        name: '[ERC721] ???',
+                        name: '???',
                     };
                 }
-                return { addr: address, name: baseToken.name, unknown: baseToken.unknown, decimals: 0, unlisted: baseToken.unlisted, erc721: true, erc721Id: id };
+                return {
+                    addr: address,
+                    name: baseToken.name,
+                    name2: baseToken.name2 ? baseToken.name2 : undefined,
+                    unknown: baseToken.unknown,
+                    decimals: 0,
+                    unlisted: baseToken.unlisted,
+                    erc721: true,
+                    erc721Id: id
+                };
             }
-
         }
     }
 };
@@ -546,7 +580,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 if (!token.erc721) {
                     token.erc721 = true;
                     token.decimals = 0;
-                    token.name = '[ERC721] ' + token.name;
                     this.uniqueTokens[token.addr] = token;
                 }
 
@@ -4986,7 +5019,6 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 if (!token.erc721) {
                     token.erc721 = true;
                     token.decimals = 0;
-                    token.name = '[ERC721] ' + token.name;
                     this.uniqueTokens[token.addr] = token;
                 }
 
@@ -5370,11 +5402,15 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
             if (token && token.addr) {
                 if (!utility.isWrappedETH(token.addr)) {
                     if (token.erc721) {
+                        contents = '';
+                        if (!this.uniqueTokens[token.addr] || token.unknown) {
+                            content += "Token unknown to DeltaBalances. <br>"
+                        }
                         if (token.erc721Id) {
-                            contents = 'ERC721 token placeholder <br> Non-fungible token <br> Unique Token ID: ' + token.erc721Id;
+                            contents += 'ERC721 Non-fungible token. <br> Unique Token ID: ' + token.erc721Id;
                             contents += "<br>Contract: " + utility.tokenLink(token.addr, true, true, token.erc721Id);
                         } else {
-                            contents = "ERC721 token placeholder <br> Non-fungible token <br> Contract: " + utility.addressLink(token.addr, true, true);
+                            contents += "ERC721 Non-fungible token. <br> Contract: " + utility.addressLink(token.addr, true, true);
                         }
                     }
                     else if (!this.uniqueTokens[token.addr]) {
@@ -5413,7 +5449,10 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
         let name = token.name;
         if (token.erc721Id) {
             name += ' - ' + token.erc721Id;
+        } else if (token.erc721) {
+            name = '<span class="text75">[ERC721]</span> ' + name;
         }
+
         if (token.locked) {
             name += ' <i class="fa fa-lock" aria-hidden="true"></i>';
         } else if (token.old) {

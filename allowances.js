@@ -1315,7 +1315,7 @@ var isAddressPage = true;
 
             for (var colIndex = 0; colIndex < headers.length; colIndex++) {
                 var cellValue = myList[i][headers[colIndex].title];
-                if (cellValue == null) cellValue = "";
+                if (!cellValue && cellValue !== 0) cellValue = "";
                 var head = headers[colIndex].title;
 
 

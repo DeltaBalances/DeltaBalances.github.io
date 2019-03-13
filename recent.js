@@ -1726,7 +1726,7 @@ var isAddressPage = true;
 
 			for (var colIndex = 0; colIndex < columns.length; colIndex++) {
 				var cellValue = myList[i][columns[colIndex].title];
-				if (cellValue == null) cellValue = "";
+				if (!cellValue && cellValue !== 0) cellValue = "";
 				var head = columns[colIndex].title;
 
 				if (head == 'Amount' || head == 'Price' || head == "Total") {

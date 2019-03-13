@@ -1116,12 +1116,9 @@ var isAddressPage = false;
 						}
 					}
 
-					if (cellValue == null) cellValue = "";
-					//let head = columns[colIndex];
-
-					{
-						row$.append($('<td/>').html(cellValue.toString()));
-					}
+					if (!cellValue && cellValue !== 0)
+						cellValue = "";
+					row$.append($('<td/>').html(cellValue.toString()));
 				}
 			}
 

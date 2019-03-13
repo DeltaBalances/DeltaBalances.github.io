@@ -145,6 +145,7 @@ var isAddressPage = true;
     var balances = {};
     var etherPriceUSD = 0;
     var etherPriceEUR = 0;
+    var etherPriceUpdated = 0; //last updated
 
 
     initBalance({ "name": 'ETH', "addr": "0x0000000000000000000000000000000000000000", "unlisted": false });
@@ -174,7 +175,7 @@ var isAddressPage = true;
     // initialize on page ready
     function readyInit() {
 
-
+        getEtherPrice();
         checkCollapseSettings(true);
 
         //get metamask address as possbile input (if available)
@@ -414,6 +415,13 @@ var isAddressPage = true;
         let val = $('#fiatSelect').val();
         showFiat = Number(val);
 
+        if (showFiat == 1 && etherPriceUSD > 0) {
+            $('#fiatPrice').html("$" + etherPriceUSD + "/ETH");
+        } else if (showFiat == 2 && etherPriceEUR > 0) {
+            $('#fiatPrice').html("€" + etherPriceEUR + "/ETH");
+        } else {
+            $('#fiatPrice').html();
+        }
         clearOverviewHtml(true);
 
         if (lastResult) {
@@ -809,14 +817,26 @@ var isAddressPage = true;
     }
 
 
+    //get USD, EUR price for ETH
     function getEtherPrice() {
-        $.getJSON('https://api.coinmarketcap.com/v2/ticker/1027/?convert=EUR', result => {
+        // don't repeat update within 5 seconds
+        if (Date.now() - etherPriceUpdated > 5000) {
+            $.getJSON("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd%2Ceur&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false", result => {
+                if (result.ethereum && result.ethereum.usd && result.ethereum.eur) {
+                    etherPriceUpdated = Date.now();
+                    etherPriceUSD = result.ethereum.usd;
+                    etherPriceEUR = result.ethereum.eur;
 
-            if (result && result.data.quotes) {
-                etherPriceUSD = result.data.quotes.USD.price;
-                etherPriceEUR = result.data.quotes.EUR.price;
-            }
-        });
+                    if (showFiat == 1) {
+                        $('#fiatPrice').html("$" + etherPriceUSD + "/ETH");
+                    } else if (showFiat == 2) {
+                        $('#fiatPrice').html("€" + etherPriceEUR + "/ETH");
+                    }
+                }
+            }).fail(() => {
+                console.log('CoinGecko ETH price failed.');
+            });
+        }
     }
 
     function getPrices(rqid) {

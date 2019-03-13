@@ -123,10 +123,10 @@ var unknownTokenCache = [];
         }
     });
 
-    getTokens('https://tracker.kyber.network/api/tokens/supported', 'Kyber', function (jsonData) {
-        if (jsonData && jsonData.length > 0) {
-            jsonData = jsonData.filter((x) => { return x.contractAddress !== '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' });
-            return jsonData.map((x) => { return { symbol: x.symbol, address: x.contractAddress.toLowerCase(), decimals: x.decimals, name: x.name } });
+    getTokens('https://api.kyber.network/currencies', 'Kyber', function (jsonData) {
+        if (jsonData && !jsonData.error && jsonData.data && jsonData.data.length > 0) {
+            let tokens = jsonData.data.filter((x) => { return x.address !== '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee' });
+            return tokens.map((x) => { return { symbol: x.symbol, address: x.address.toLowerCase(), decimals: x.decimals, name: x.name } });
         } else {
             return [];
         }

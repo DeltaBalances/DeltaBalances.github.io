@@ -7945,13 +7945,12 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     if (!token.erc721) {
                         contents += '<br><br> Trade centralized: <br><table class="popoverTable"><tr><td>' + utility.binanceURL(token, true) + '</td></tr></table>';
 
-                        contents += 'Trade decentralized: <br><table class="popoverTable"><tr><td>' + utility.etherDeltaURL(token, true)
+                        contents += 'Trade decentralized: <br><table class="popoverTable"><tr><td>' + utility.forkDeltaURL(token, true)
                             + '</td><td>' + utility.idexURL(token, true)
-                            + '</td></tr><tr><td>' + utility.forkDeltaURL(token, true)
-                            + '</td><td>' + utility.ddexURL(token, true)
                             + '</td></tr><tr><td>' + utility.tokenStoreURL(token, true)
-                            + '</td><td>' + utility.radarURL(token, true)
-                            + '</td></tr><tr><td>' + utility.kyberURL(token, true)
+                            + '</td><td>' + utility.ddexURL(token, true)
+                            + '</td></tr><tr><td>' + utility.radarURL(token, true)
+                            + '</td><td>' + utility.kyberURL(token, true)
                             + '</td><td></td></tr></table>';
                     }
                 } else if (token.addr == this.config.ethAddr) {

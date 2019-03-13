@@ -1,6 +1,5 @@
 // Updated lists of tokens listed on exchanges, appends to tokens in backupTokens.js
 var exchangeTokens = {
-    etherdelta: [],  // not updated in a year
     forkdelta: [],  // new domain CORS protection
     idex: [],
     ddex: [],
@@ -16,7 +15,6 @@ var unknownTokenCache = [];
 {
     // last update time for exchange token lists, default to the past
     let exchangeUpdates = {
-        etherdelta: 0,
         forkdelta: 0,
         idex: 0,
         ddex: 0,
@@ -66,18 +64,6 @@ var unknownTokenCache = [];
             }
         }
     }
-
-    /* //not updated for a year
-    getTokens('https://etherdelta.github.io/site/config/main.json', 'EtherDelta', function(json) {
-        if(json && json.tokens) {
-            let tokens = json.tokens;
-			tokens.map(x => { x.address = x.addr});
-			return tokens;
-        } else {
-            return [];
-        }
-    });
-    */
 
     // CORS issue on new domain
     getTokens('https://cors.io/?https://forkdelta.app/config/main.json', 'ForkDelta', function (json) {

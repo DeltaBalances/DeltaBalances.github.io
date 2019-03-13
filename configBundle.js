@@ -133,7 +133,7 @@ module.exports = {
     // fake 0x? 0x5fb2f392772a6cb5ac423ceb587b62898c06c8cf
   },
   //token attributes for exchanges that makes tokens show up as listed
-  listedExchanges: ['EtherDelta', 'ForkDelta', 'IDEX', 'DDEX', 'Binance', 'Radar', 'Kyber', 'TokenStore'],
+  listedExchanges: ['ForkDelta', 'IDEX', 'DDEX', 'Binance', 'Radar', 'Kyber', 'TokenStore'],
 
   //https://github.com/0xProject/0x-relayer-registry/blob/master/relayers.json
   zrxRelayers: {

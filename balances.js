@@ -808,9 +808,11 @@ var isAddressPage = true;
             Total: 0,
             Bid: '',
             Ask: '',
-            'Est. ETH': '',
+            'Est. ETH': 0,
             Unlisted: tokenObj.unlisted,
             Address: tokenObj.addr,
+            EUR: 0,
+            USD: 0,
         };
 
         balances[tokenObj.addr] = Object.assign({}, obj, obj1);
@@ -1245,6 +1247,9 @@ var isAddressPage = true;
             let bal = balances[token.addr];
 
             if (bal) {
+                bal['Est. ETH'] = _delta.web3.toBigNumber(0);
+                bal['USD'] = '';
+                bal['EUR'] = '';
                 bal.Total = _delta.web3.toBigNumber(0);
                 for (let i = 0; i < keys.length; i++) {
                     if (exchanges[keys[i]].enabled && exchanges[keys[i]].loaded >= tokenCount) {
@@ -1253,14 +1258,8 @@ var isAddressPage = true;
                     }
                 }
 
-                bal['Est. ETH'] = '';
-                bal['USD'] = '';
-                bal['EUR'] = '';
-
                 // ETH and  wrapped eth fixed at value of 1 ETH
                 if (_util.isWrappedETH(token.addr)) {
-                    bal.Bid = '';
-                    bal.Ask = '';
                     bal['Est. ETH'] = bal.Total;
 
                     if (token.addr === "0x0000000000000000000000000000000000000000") {
@@ -1534,17 +1533,20 @@ var isAddressPage = true;
     // final callback to sort table
     function trigger(dataSet, tableHeaders) {
 
+
         let keys = Object.keys(exchanges);
-        let totalIndex = 4;
-        for (let i = 0; i < keys.length; i++) {
-            if (!exchanges[keys[i]].enabled) {
-                totalIndex++;
-            }
-        }
 
         if (!table1Loaded) {
+
+            let sortColumn = 'Est. ETH';
+            let sortIndex = Math.max(0, tableHeaders.findIndex((x) => x.title == sortColumn));
+
+            let hiddenList = tableHeaders.map(x => x.title).filter(x => !balanceHeaders[x]);
+            hiddenList = hiddenList.map(head => tableHeaders.findIndex((x) => x.title == head));
+
             balanceTable = $('#resultTable').DataTable({
                 "paging": false,
+                "order": [[sortIndex, "desc"]],
                 "ordering": true,
                 //"info": true,
                 "scrollY": "60vh",
@@ -1556,9 +1558,13 @@ var isAddressPage = true;
                     leftColumns: 1
                 },
                 aoColumnDefs: [
+                    //allow searching only on column 0 (token names)
                     { bSearchable: true, aTargets: [0] },
-                    { asSorting: ["asc", "desc"], aTargets: [0] },
                     { bSearchable: false, aTargets: ['_all'] },
+                    // hide these columns
+                    { bVisible: false, aTargets: hiddenList },
+                    // column 0 default sort (when selected) ascending, others default descending
+                    { asSorting: ["asc", "desc"], aTargets: [0] },
                     { asSorting: ["desc", "asc"], aTargets: ['_all'] },
                     //    { sClass: "dt-body-left", aTargets: [0]},
                     //    { sClass: "dt-body-right", aTargets: ['_all'] },
@@ -1574,7 +1580,6 @@ var isAddressPage = true;
                 },
                 "drawCallback": function (settings) {
                     hidePopovers(true);
-
 
                     // Token name popovers
                     $("[data-toggle=popover]").popover({
@@ -1636,6 +1641,12 @@ var isAddressPage = true;
             });
             updateToggleToolbar();
             table1Loaded = true;
+        } else {
+            // update which columns are hidden
+            for (let i = 0; i < tableHeaders.length; i++) {
+                let enabled = balanceHeaders[tableHeaders[i].title];
+                balanceTable.column(i).visible(enabled);
+            }
         }
 
         balanceTable.clear();
@@ -1644,12 +1655,6 @@ var isAddressPage = true;
                 balanceTable.rows.add(dataSet[i]);
             }
         }
-
-        for (let i = 0; i < tableHeaders.length; i++) {
-            let enabled = balanceHeaders[tableHeaders[i].title];
-            let column = balanceTable.column(i).visible(enabled);
-        }
-
         //    balanceTable.columns.adjust().fixedColumns().relayout().draw();
         balanceTable.draw();
 
@@ -1714,9 +1719,8 @@ var isAddressPage = true;
                 if (!cellValue && cellValue !== 0) cellValue = "";
                 var head = headers[colIndex].title;
 
-
                 if (head == 'Total' || exchanges[head] || head == 'Bid' || head == 'Ask' || head == 'Est. ETH') {
-                    if (cellValue !== "" && cellValue !== undefined) {
+                    if (cellValue || cellValue === 0) {
                         var dec = fixedDecimals;
                         if (head == 'Bid' || head == 'Ask') {
                             dec += 2;
@@ -1724,6 +1728,9 @@ var isAddressPage = true;
                         var num = '<span data-toggle="tooltip" title="' + _util.exportNotation(cellValue) + '">' + _util.displayNotation(cellValue, dec) + '</span>';
                         row$.append($('<td/>').html(num));
                     } else {
+                        if (cellValue === "" && (head == 'Bid' || head == 'Ask')) {
+                            cellValue = '-';
+                        }
                         row$.append($('<td/>').html(cellValue));
                     }
                 }

@@ -1170,14 +1170,11 @@ var isAddressPage = true;
     function trigger(dataSet, tableHeaders) {
 
         let keys = Object.keys(exchanges);
-        let totalIndex = 4;
-        for (let i = 0; i < keys.length; i++) {
-            if (!exchanges[keys[i]].enabled) {
-                totalIndex++;
-            }
-        }
 
         if (!table1Loaded) {
+            let hiddenList = tableHeaders.map(x => x.title).filter(x => !allowanceHeaders[x]);
+            hiddenList = hiddenList.map(head => tableHeaders.findIndex((x) => x.title == head));
+
             allowanceTable = $('#resultTable').DataTable({
                 "paging": false,
                 "ordering": true,
@@ -1191,9 +1188,13 @@ var isAddressPage = true;
                     leftColumns: 1
                 },
                 aoColumnDefs: [
+                    //allow searching only on column 0 (token names)
                     { bSearchable: true, aTargets: [0] },
-                    { asSorting: ["asc", "desc"], aTargets: [0] },
                     { bSearchable: false, aTargets: ['_all'] },
+                    // hide these columns
+                    { bVisible: false, aTargets: hiddenList },
+                    // column 0 default sort (when selected) ascending, others default descending
+                    { asSorting: ["asc", "desc"], aTargets: [0] },
                     { asSorting: ["desc", "asc"], aTargets: ['_all'] },
                     //	{ sClass: "dt-body-left", aTargets: [0]},
                     //	{ sClass: "dt-body-right", aTargets: ['_all'] },
@@ -1215,20 +1216,19 @@ var isAddressPage = true;
             });
             updateToggleToolbar();
             table1Loaded = true;
+        } else {
+            // update which columns are hidden
+            for (let i = 0; i < tableHeaders.length; i++) {
+                let enabled = allowanceHeaders[tableHeaders[i].title];
+                allowanceTable.column(i).visible(enabled);
+            }
         }
-
         allowanceTable.clear();
         if (dataSet.length > 0) {
             for (let i = 0; i < dataSet.length; i++) {
                 allowanceTable.rows.add(dataSet[i]);
             }
         }
-
-        for (let i = 0; i < tableHeaders.length; i++) {
-            let enabled = allowanceHeaders[tableHeaders[i].title];
-            let column = allowanceTable.column(i).visible(enabled);
-        }
-
         //	allowanceTable.columns.adjust().fixedColumns().relayout().draw();
         allowanceTable.draw();
 

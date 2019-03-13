@@ -2848,7 +2848,7 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     //erc721 tokens
     if (offlineCollectibleTokens) {
         try {
-            offlineCollectibleTokens = offlineCollectibleTokens.map(t => {
+            let erc721Tokens = offlineCollectibleTokens.map(t => {
                 let tok = {
                     addr: t.address.toLowerCase(),
                     name: utility.escapeHtml(t.symbol),
@@ -2861,8 +2861,8 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
                 }
                 return tok;
             });
-            for (let i = 0; i < offlineCollectibleTokens.length; i++) {
-                let token = offlineCollectibleTokens[i];
+            for (let i = 0; i < erc721Tokens.length; i++) {
+                let token = erc721Tokens[i];
                 this.uniqueTokens[token.addr] = token;
             }
         } catch (e) {

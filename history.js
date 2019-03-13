@@ -1816,43 +1816,43 @@ var isAddressPage = true;
 			// CryptoTax.io (CSV)
 
 			filePrefix = 'CryptoTax_CSV_';
-			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset', 'sell_asset', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee', 'fee_asset', 'transaction_type', 'clarification'];
+			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset_address', 'sell_asset_address', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee_amount', 'fee_asset_address',  'transaction_type'];
 			tableData = [headers];
 
 			for (var i = 0; i < allTrades.length; ++i) {
 				var row = [];
-
+				
 				const exchange = allTrades[i].Exchange;
 				const transactionDate = allTrades[i]['Date'].toISOString();
 				const transactionType = 'trade';
-				const clarificationType = '';
 				let buyAmount = 0;
-				let buyToken = '';
+				let buyTokenAddress = '';
 				let sellAmount = 0;
+				let sellTokenAddress = '';
 				let feeAmount = allTrades[i]['Fee'];
-				let feeToken = allTrades[i]['FeeToken'].name;
+				let feeTokenAddress = allTrades[i]['FeeToken'].addr;
 
 				if (allTrades[i]['Trade'] === 'Buy') {
 					buyAmount = allTrades[i]['Amount'];
-					buyToken = allTrades[i]['Token'].name;
+					buyTokenAddress = allTrades[i]['Token'].addr;
 					sellAmount = allTrades[i]['Total'];
-					sellToken = allTrades[i]['Base'].name;
+					sellTokenAddress = allTrades[i]['Base'].addr;
 				} else {
 					sellAmount = allTrades[i]['Amount'];
-					sellToken = allTrades[i]['Token'].name;
+					sellTokenAddress = allTrades[i]['Token'].addr;
 					buyAmount = allTrades[i]['Total'];
-					buyToken = allTrades[i]['Base'].name;
+					buyTokenAddress = allTrades[i]['Base'].addr;
 				}
 
 				row = [
 					exchange, exchange, transactionDate,
-					buyToken, sellToken, buyAmount, sellAmount, allTrades[i]['Hash'],
-					feeAmount, feeToken, transactionType, clarificationType
+					buyTokenAddress, sellTokenAddress, buyAmount, sellAmount, allTrades[i]['Hash'],
+					feeAmount, feeTokenAddress, transactionType
 				];
 
 				tableData.push(row);
 			}
-			tableData = fixDownloadNumberNotation(tableData, ['buy_amount', 'sell_amount', 'fee']);
+			tableData = fixDownloadNumberNotation(tableData, ['buy_amount', 'sell_amount', 'fee_amount']);
 			// add quotes around each cell data
 			tableData = tableData.map((row) => {
 				return row.map((cell) => {
@@ -1928,7 +1928,7 @@ var isAddressPage = true;
 			// CryptoTax.io funds export (CSV)
 
 			filePrefix = 'CryptoTax_CSV_';
-			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset', 'sell_asset', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee', 'fee_asset', 'transaction_type', 'clarification'];
+			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset_address', 'sell_asset_address', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee_amount', 'fee_asset_address',  'transaction_type'];
 			tableData = [headers];
 
 			for (var i = 0; i < allFunds.length; ++i) {
@@ -1937,33 +1937,32 @@ var isAddressPage = true;
 				const exchange = allFunds[i].Exchange;
 				const transactionDate = allFunds[i]['Date'].toISOString();
 				const feeAmount = '';
-				const feeToken = '';
-				const clarificationType = '';
+				const feeTokenAddress = '';
 				let buyAmount = '';
-				let buyToken = '';
+				let buyTokenAddress = '';
 				let sellAmount = '';
-				let sellToken = '';
+				let sellTokenAddress = '';
 				let transactionType = '';
 
 				if (allFunds[i]['Type'] === 'Deposit') {
 					buyAmount = allFunds[i]['Amount'];
-					buyToken = allFunds[i]['Token'].name;
+					buyTokenAddress = allFunds[i]['Token'].addr;
 					transactionType = 'deposit';
 				} else {
 					sellAmount = allFunds[i]['Amount'];
-					sellToken = allFunds[i]['Token'].name;
+					sellTokenAddress = allFunds[i]['Token'].addr;
 					transactionType = 'withdrawal';
 				}
 
 				row = [
 					exchange, exchange, transactionDate,
-					buyToken, sellToken, buyAmount, sellAmount, allFunds[i]['Hash'],
-					feeAmount, feeToken, transactionType, clarificationType
+					buyTokenAddress, sellTokenAddress, buyAmount, sellAmount, allFunds[i]['Hash'],
+					feeAmount, feeTokenAddress, transactionType
 				];
 
 				tableData.push(row);
 			}
-			tableData = fixDownloadNumberNotation(tableData, ['buy_amount', 'sell_amount', 'fee']);
+			tableData = fixDownloadNumberNotation(tableData, ['buy_amount', 'sell_amount', 'fee_amount']);
 			// add quotes around each cell data
 			tableData = tableData.map((row) => {
 				return row.map((cell) => {

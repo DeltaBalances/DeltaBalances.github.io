@@ -35,7 +35,7 @@ Decentralized exchanges supported by the DeltaBalances website
 | [Bancor](https://bancor.network)  | - | Yes| Yes | No|
 | [DDEX hydro](https://ddex.io/)| - | Yes| Yes| Not yet |
 | Decentrex †| Yes| Yes| Yes| Yes |
-| [Dexy](https://dexy.market) |Yes| No| No | No|
+| [Dexy †](https://dexy.market) |Yes| No| No | No|
 | [EasyTrade](https://easytrade.io) |-| Yes| Yes | Yes|
 | [Enclaves Dex](https://enclaves.io) | Yes | Yes| Yes | Yes|
 | [Etfinex trustless v1](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
@@ -67,18 +67,26 @@ Relayers not on the list will show up as `unknown 0x`
 |[3exchange](https://3xchange.io)|
 |~~[Amadeus](https://amadeusrelay.org/)~~|
 |[Bamboo Relay](https://bamboorelay.com)|
+|[BoxSwap](https://boxswap.io/)|
 |[DDEX](https://ddex.io/)|
+|[Emoon](https://www.emoon.io)|
 |[ERC dEX](https://ercdex.com/)|
+|[ForDex](https://www.fordex.co)|
+|[GUDecks](https://gudecks.com/)|
 |[IDT](https://idtexchange.com)|
 |[LedgerDex](https://www.ledgerdex.com/)|
+|[Lake Project](https://lakeproject.co/)|
+|[MetaMorph](https://metamorph.pro)|
 |[Paradex](https://paradex.io/)|
 |[The Ocean](https://theocean.trade)|
+|[Tokenmom](https://tokenmom.com/)|
 |[OpenRelay](https://openrelay.xyz/)|
 |[Radar Relay](https://radarrelay.com/)|
 |[Shark Relay](https://sharkrelay.com)|
 |[Star Bit](https://www.starbitex.com/)|
 |[Token Jar](https://tokenjar.io)|
 |[Tokenlon](https://tokenlon.token.im/tokenlon)|
+|[Veil](https://veil.market/)|
 
 
 

@@ -112,9 +112,15 @@ var isAddressPage = true;
         },
     };
 
-    var loadedBid = 0;
-    var failedBid = 0;
-    var displayedBid = 0;
+    var exchangePrices = {
+        complete: false,
+        successRequests: 0,
+        completeRequests: 0,
+        totalRequests: 0,
+        lastUpdated: 0,
+        prices: {},
+        displayedAll: false,
+    }
 
     var trigger_1 = false;
     var running = false;
@@ -743,9 +749,6 @@ var isAddressPage = true;
         trigger_1 = false;
         //disableInput(true);
 
-        loadedBid = 0;
-        failedBid = 0;
-
         showLoading(true);
 
         if (!appendExchange && !appendCustom)
@@ -760,7 +763,8 @@ var isAddressPage = true;
             logcount -= _delta.config.tokens.length;
         console.log('preparing to retrieve balances for ' + logcount + ' tokens');
 
-
+        getPrices(rqid);
+        getEtherPrice();
 
         setBalanceProgress();
         if (table1Loaded) {
@@ -788,9 +792,6 @@ var isAddressPage = true;
                 getAllBalances(rqid, key, appendCustom);
             }
         });
-
-        getPrices(rqid);
-        getEtherPrice();
     }
 
 
@@ -842,117 +843,245 @@ var isAddressPage = true;
     }
 
     function getPrices(rqid) {
-        var socketRetries = 0;
-        const numRetries = 2;
-        var url1Retries = 0;
-        var pricesLoaded = false;
 
-        retrySocket();
-        retryURL1();
+        // don't load prices if they all succeeded and are still recent (15sec)
+        if (exchangePrices.successRequests == exchangePrices.totalRequests && (Date.now() - exchangePrices.lastUpdated) < 15000) {
+            return;
+        }
+
+        let requestLog = {
+            ForkDelta: { attempts: 0, done: false, failed: false, prices: [] },
+            IDEX: { attempts: 0, done: false, failed: false, prices: [] },
+            Kyber: { attempts: 0, done: false, failed: false, prices: [] },
+            TokenStore: { attempts: 0, done: false, failed: false, prices: [] },
+        };
+
+        exchangePrices.complete = false;
+        exchangePrices.successRequests = 0;
+        exchangePrices.completeRequests = 0;
+        exchangePrices.lastUpdated = Date.now();
+        exchangePrices.totalRequests = Object.keys(requestLog).length;
+        exchangePrices.prices = {};
+
+        priceRequest('IDEX', 'https://api.idex.market/returnTicker', (result) => {
+            let keys = Object.keys(result);
+            keys.map((key) => {
+                if (key.indexOf('ETH_') == 0) {
+                    let name = key.replace('ETH_', '');
+                    const matchingTokens = _delta.config.customTokens.filter(
+                        x => x.IDEX && x.IDEX === name && !x.blockIDEX);
+                    if (matchingTokens.length > 0) {
+                        result[key].tokenAddr = matchingTokens[0].addr.toLowerCase();
+                    }
+                }
+            });
+            let prices = {};
+            Object.values(result).map((x) => {
+                if (x.tokenAddr) {
+                    let tok = {
+                        addr: x.tokenAddr,
+                        bid: undefined,
+                        ask: undefined,
+                        volumeETH: 0,
+                        //change24h: x.percentChange,
+                    };
+                    if (x.highestBid !== "N/A") {
+                        tok.bid = Number(x.highestBid);
+                    }
+                    if (x.lowestAsk !== "N/A") {
+                        tok.ask = Number(x.lowestAsk);
+                    }
+                    if (x.baseVolume !== "N/A") {
+                        tok.volumeETH = Number(x.baseVolume)
+                    }
+
+                    //2.5 is 2.5% not fractional like 0.025
+                    /* if (x.percentChange !== "N/A") {
+                         tok.change24h = Number(x.percentChange);
+                     }*/
+                    prices[tok.addr] = tok;
+                }
+            });
+            return prices;
+        });
+
+        priceRequest('Kyber', 'https://api.kyber.network/market', (result) => {
+            if (result.error || !result.data) {
+                return;
+            }
+            result = result.data;
+            result = result.map(x => {
+                if (x.base_symbol === 'ETH') {
+                    let name = x.quote_symbol;
+                    const matchingTokens = _delta.config.customTokens.filter(
+                        x => x.Kyber && x.Kyber === name);
+                    if (matchingTokens.length > 0) {
+                        x.tokenAddr = matchingTokens[0].addr.toLowerCase();
+                    }
+                }
+                return x;
+            });
+            result = result.filter(x => x.tokenAddr);
+            let prices = {};
+            result.map((tok) => {
+                if (tok.tokenAddr) {
+
+                    let tokenPrice = {
+                        addr: tok.tokenAddr,
+                        bid: tok.current_bid, // set bid & ask both to rate
+                        ask: tok.current_ask,
+                        volumeETH: tok.eth_24h_volume,
+                        //change24h: tok.change_eth_24h,
+                    };
+                    prices[tokenPrice.addr] = tokenPrice;
+                }
+            });
+            return prices;
+        });
+
+        priceRequest('TokenStore', 'https://v1-1.api.token.store/ticker', (result) => {
+            let keys = Object.keys(result);
+            let prices = {};
+            keys.map((key) => {
+                if (key.indexOf('ETH_') == 0) {
+                    let tok = result[key];
+                    let tokenPrice = {
+                        addr: tok.tokenAddr.toLowerCase(),
+                        bid: tok.bid,
+                        ask: tok.ask,
+                        volumeETH: Number(tok.baseVolume),
+                    };
+                    prices[tokenPrice.addr] = tokenPrice;
+                }
+            });
+            return prices;
+        });
+
+        socketRequest('ForkDelta', (result) => {
+            let keys = Object.keys(result);
+            let prices = {};
+            keys.map((key) => {
+                if (key.indexOf('ETH_') == 0) {
+                    let tok = result[key];
+                    let tokenPrice = {
+                        addr: tok.tokenAddr.toLowerCase(),
+                        bid: Number(tok.bid),
+                        ask: Number(tok.ask),
+                        volumeETH: Number(tok.baseVolume),
+                    };
+                    prices[tokenPrice.addr] = tokenPrice;
+                }
+            });
+            return prices;
+        });
 
         //prices from forkdelta socket
-        function retrySocket() {
+        function socketRequest(priceID, callback) {
+            if (!requestLog[priceID]) {
+                return;
+            }
+            requestLog[priceID].attempts = requestLog[priceID].attempts + 1;
+
             _delta.socketTicker((err, result, rid) => {
                 if (requestID <= rqid) {
                     if (!err && result) {
-                        parsePrices(result, 'FD');
-                    } else if (loadedBid < 2 && socketRetries < numRetries) {
-                        socketRetries++;
-                        retrySocket();
-                    } else if (socketRetries >= numRetries) {
-                        showError("Failed to retrieve ForkDelta Prices after 3 tries. Prices may be less accurate.");
-                        loadedBid++;
-                        failedBid++;
-                        finishedBalanceRequest();
+                        requestLog[priceID].prices = callback(result);
+                        requestLog[priceID].done = true;
+                        finishPrices(true);
+                    } else if (requestLog[priceID].attempts < 2) {
+                        socketRequest(priceID);
+                    } else {
+                        requestLog[priceID].done = true;
+                        requestLog[priceID].failed = true;
+                        finishPrices(false);
                     }
                 }
             }, rqid);
         }
 
-        //prices from IDEX https endpoint
-        function retryURL1() {
+        function priceRequest(priceID, url, callback) {
+            if (!requestLog[priceID]) {
+                return;
+            }
+            requestLog[priceID].attempts = requestLog[priceID].attempts + 1;
 
             $.ajax({
                 dataType: "json",
-                url: 'https://api.idex.market/returnTicker',
+                url: url,
                 data: "",
                 success: (result) => {
                     if (requestID <= rqid) {
-                        if (result) {
-                            parsePrices(result, 'ID');
-                        } else if (loadedBid < 2 && url1Retries < numRetries) {
-                            url1Retries++;
-                            retryURL1();
-                        } else if (url1Retries >= numRetries) {
-                            showError("Failed to retrieve IDEX Prices after 3 tries. Prices may be less accurate.");
-                            loadedBid++;
-                            finishedBalanceRequest();
+                        if (result && !result.error) {
+                            requestLog[priceID].prices = callback(result);
+                            requestLog[priceID].done = true;
+                            finishPrices(true);
+                        } else if (requestLog[priceID].attempts < 2) {
+                            priceRequest(priceID, url, callback);
+                        } else {
+                            requestLog[priceID].done = true;
+                            requestLog[priceID].failed = true;
+                            finishPrices(false);
                         }
                     }
                 },
-                timeout: 2500
+                timeout: 1500
             }).fail((result) => {
                 if (requestID <= rqid) {
-                    if (loadedBid < 2 && url1Retries < numRetries) {
-                        url1Retries++;
-                        retryURL1();
-                    }
-                    else if (url1Retries >= numRetries) {
-                        loadedBid++;
-                        failedBid++;
-                        finishedBalanceRequest();
+                    if (requestLog[priceID].attempts < 2) {
+                        priceRequest(priceID, url, callback);
+                    } else {
+                        requestLog[priceID].done = true;
+                        requestLog[priceID].failed = true;
+                        finishPrices(false);
                     }
                 }
             });
         }
 
-        function parsePrices(result, source) {
-            let results = Object.values(result);
-            let keys = Object.keys(result);
-            if (source == 'ID') {
-                //map idex token names to addresses
-                keys = keys.map((key) => {
-                    let name = key.replace('ETH_', '');
-                    const matchingTokens = _delta.config.customTokens.filter(
-                        x => x.IDEX && x.IDEX === name);
 
-                    if (matchingTokens.length > 0) {
-                        return matchingTokens[0].addr;
-                    } else {
-                        return key;
-                    }
-                })
-            }
-
-            for (let i = 0; i < results.length; i++) {
-
-                if (source == 'ED' || source == 'FD') {
-                    let token = _delta.uniqueTokens[results[i].tokenAddr];
-                    if (token && balances[token.addr]) {
-                        balances[token.addr][source + 'Bid'] = Number(results[i].bid);
-                        balances[token.addr][source + 'Ask'] = Number(results[i].ask);
-                    }
-                } else if (source == 'ID') {
-                    let token = _delta.uniqueTokens[keys[i]];
-                    if (token && balances[token.addr]) {
-                        balances[token.addr][source + 'Bid'] = Number(results[i].highestBid);
-                        balances[token.addr][source + 'Ask'] = Number(results[i].lowestAsk);
+        function finishPrices(dataChanged) {
+            let pricesDone = true;
+            let pricesSuccess = 0;
+            let pricesCompleted = 0;
+            let keys = Object.keys(requestLog);
+            for (let i = 0; i < keys.length; i++) {
+                let req = requestLog[keys[i]];
+                pricesDone = pricesDone && req.done;
+                if (req.done) {
+                    pricesCompleted++;
+                    if (!req.failed) {
+                        pricesSuccess++;
                     }
                 }
-                else if (source == 'BIN') {
-
-                    let priceAddr = _delta.binanceMap[results[i].symbol];
-                    if (priceAddr) {
-                        var token = _delta.uniqueTokens[priceAddr];
-                        if (token && balances[token.addr]) {
-                            balances[token.addr][source + 'Bid'] = Number(results[i].bidPrice);
-                            balances[token.addr][source + 'Ask'] = Number(results[i].askPrice);
+                if (req.prices) {
+                    let addrs = Object.keys(req.prices);
+                    for (let j = 0; j < addrs.length; j++) {
+                        let addr = addrs[j];
+                        let priceObj = req.prices[addr];
+                        if (priceObj && (priceObj.ask || priceObj.bid)) {
+                            if (!exchangePrices.prices[addr]) {
+                                exchangePrices.prices[addr] = {};
+                            }
+                            // prices[addr][exchange] = {bid: , ask:}
+                            exchangePrices.prices[addrs[j]][keys[i]] = priceObj;
                         }
                     }
                 }
             }
-            loadedBid++;
-            finishedBalanceRequest();
+
+
+            exchangePrices.complete = pricesDone;
+            exchangePrices.successRequests = pricesSuccess;
+            exchangePrices.completeRequests = pricesCompleted;
+            exchangePrices.totalRequests = keys.length;
+
+            if (running) {
+                if (dataChanged || pricesDone) {
+                    finishedBalanceRequest();
+                } else {
+                    setBalanceProgress();
+                }
+            }
             return;
         }
     }
@@ -1112,8 +1241,7 @@ var isAddressPage = true;
 
     function setBalanceProgress(changeHeaders) {
 
-        let loadingState = {
-        }
+        let loadingState = {};
 
         let keys = Object.keys(exchanges);
         for (let i = 0; i < keys.length; i++) {
@@ -1136,18 +1264,14 @@ var isAddressPage = true;
         //prices
         {
             let progressString2 = '<span style="white-space:normal">Prices <span style="white-space:nowrap"class="text-';
-            if (loadedBid < 2) {
+            if (!exchangePrices.complete) {
                 if (running) {
-                    progressString2 += 'red"> Loading..';
+                    progressString2 += 'red"> Loading ' + exchangePrices.completeRequests + "/" + exchangePrices.totalRequests;
                 } else {
                     progressString2 += 'green"> No';
                 }
-            } else if (failedBid == 0) {
-                progressString2 += 'green"> Yes';
-            } else if (failedBid == 1) {
-                progressString2 += 'green"> 1/2 Failed';
-            } else {
-                progressString2 += 'red"> Failed';
+            } else { 
+                progressString2 += 'green"> ' + exchangePrices.successRequests + "/" + exchangePrices.totalRequests + " sources";
             }
             progressString2 += '</span></span>';
             loadingState['Prices'] = progressString2;
@@ -1233,7 +1357,7 @@ var isAddressPage = true;
                 exchanges[keys[i]].displayed = exchanges[keys[i]].loaded >= tokenCount || exchanges[keys[i]].loaded == -1;
         }
 
-        displayedBid = loadedBid >= 2;
+        exchangePrices.displayedAll = exchangePrices.complete;
 
         let allTokens = _delta.config.customTokens.filter((t) => { return (showListed && !t.unlisted) || (showCustomTokens && t.unlisted) });
         if (allTokens.length == 0) {
@@ -1270,48 +1394,57 @@ var isAddressPage = true;
                         sumToken = sumToken.plus(bal.Total);
                     }
                 }
-                else if ((bal.EDBid || bal.EDAsk || bal.FDBid || bal.FDAsk || bal.IDBid || bal.IDAsk) && bal.Total) {
+                else {
+                    //get bid/ask prices for this token
 
-                    //cascade price sources in volume, Binance most accurate price
-                    if (bal.EDBid)
-                        bal.Bid = bal.EDBid;
-                    if (bal.FDBid && (!bal.EDBid || bal.FDBid > bal.EDBid))
-                        bal.Bid = bal.FDBid;
-                    if (bal.IDBid)
-                        bal.Bid = bal.IDBid;
-                    if (bal.BINBid)
-                        bal.Bid = bal.BINBid;
+                    // set prices in this order, later in the list is assumed to be more accurate 
+                    let keyOrder = ['TokenStore', 'ForkDelta', 'IDEX', 'Kyber'];
+                    //price obj for this token {forkdelta: {bid, ask}, idex:{bid,ask}}
+                    let tokenPrices = exchangePrices.prices[token.addr];
 
-                    if (bal.EDAsk)
-                        bal.Ask = bal.EDAsk;
-                    if (bal.FDAsk && (!bal.EDAsk || bal.FDAsk < bal.EDAsk))
-                        bal.Ask = bal.FDAsk;
-                    if (bal.IDAsk)
-                        bal.Ask = bal.IDAsk;
-                    if (bal.BINAsk)
-                        bal.Ask = bal.BINAsk;
-
-                    // calculate estimate if not (wrapped) ETH
-                    var val = _delta.web3.toBigNumber(0);
-
-                    if (useAsk) {
-                        if (bal.Ask) {
-                            val = bal.Total.times(bal.Ask);
-                        }
-                    } else {
-                        if (bal.Bid) {
-                            val = bal.Total.times(bal.Bid);
+                    if (tokenPrices) {
+                        let usedVolume = 0; //volume on the exchange that we used for the price
+                        for (let i = 0; i < keyOrder.length; i++) {
+                            //does exchange have this price pair
+                            if (tokenPrices[keyOrder[i]]) {
+                                let price = tokenPrices[keyOrder[i]];
+                                if (useAsk && price && price.ask) {
+                                    if (price.volumeETH >= usedVolume) {
+                                        bal.Ask = price.ask;
+                                        usedVolume = price.volumeETH;
+                                    }
+                                } else if (!useAsk && price && price.bid) {
+                                    if (price.volumeETH >= usedVolume) {
+                                        bal.Bid = price.bid;
+                                        usedVolume = price.volumeETH;
+                                    }
+                                }
+                            }
                         }
                     }
 
-                    bal['Est. ETH'] = val;
-                    sumToken = sumToken.plus(val);
-                }
-                if (!bal.Bid) {
-                    bal.Bid = '';
-                }
-                if (!bal.Ask) {
-                    bal.Ask = '';
+                    if (bal.Total) {
+                        // calculate estimate if not (wrapped) ETH
+                        var val = _delta.web3.toBigNumber(0);
+
+                        if (useAsk) {
+                            if (bal.Ask) {
+                                val = bal.Total.times(bal.Ask);
+                            }
+                        } else {
+                            if (bal.Bid) {
+                                val = bal.Total.times(bal.Bid);
+                            }
+                        }
+                        bal['Est. ETH'] = val;
+                        sumToken = sumToken.plus(val);
+                    }
+                    if (!bal.Bid) {
+                        bal.Bid = '';
+                    }
+                    if (!bal.Ask) {
+                        bal.Ask = '';
+                    }
                 }
                 balances[token.addr] = bal;
             }
@@ -1665,7 +1798,7 @@ var isAddressPage = true;
                 allDisplayed = false;
             }
         }
-        allDisplayed = allDisplayed && displayedBid;
+        allDisplayed = allDisplayed && exchangePrices.displayedAll;
         trigger_1 = allDisplayed;
 
         if (trigger_1) {

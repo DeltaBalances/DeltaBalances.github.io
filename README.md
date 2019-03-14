@@ -55,7 +55,7 @@ Decentralized exchanges supported by the DeltaBalances website
 | [Token Store](https://token.store)| Yes| Yes| Yes| Yes |
 | [Token store Instant-trade](https://token.store)| - | Yes| Yes | No|
 | [Uniswap](https://uniswap.exchange)| - | Partial (WIP)| Partial (WIP) | Not yet|
-
+(† = Exchange is no longer active)
 
 
 ##### 0x Protocol Relayers

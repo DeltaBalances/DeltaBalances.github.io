@@ -24,7 +24,7 @@ Contract iterations:
 `V1 0x3150954EAE1a8a5e5EE1F1B8E8444Fe16EA9F94C`  
 
 # Exchange support
-Decentralized exchanges supported by the DeltaBalances website
+Decentralized exchanges supported by the DeltaBalances website.
 
 | Exchange | Deposited Tokens | Recent tx (input)| Tx details (input + events) | History (events) |
 |----------|------------------|------------------|-----------------------------|------------------|
@@ -54,9 +54,9 @@ Decentralized exchanges supported by the DeltaBalances website
 | [Switcheo](https://switcheo.exchange)|Yes| Partial (WIP)| Partial (WIP) | Not yet|
 | [Token Store](https://token.store)| Yes| Yes| Yes| Yes |
 | [Token store Instant-trade](https://token.store)| - | Yes| Yes | No|
-| [Uniswap](https://uniswap.exchange)| - | Partial (WIP)| Partial (WIP) | Not yet|
-(† = Exchange is no longer active)
+| [Uniswap](https://uniswap.exchange)| - | Partial (WIP)| Partial (WIP) | Not yet|  
 
+(† = Exchange is no longer active)
 
 ##### 0x Protocol Relayers
 Exchanges using the same 0x Protocol smart contract.

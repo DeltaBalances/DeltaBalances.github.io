@@ -7951,6 +7951,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                             + '</td><td>' + utility.ddexURL(token, true)
                             + '</td></tr><tr><td>' + utility.radarURL(token, true)
                             + '</td><td>' + utility.kyberURL(token, true)
+                            + '</td></tr><tr><td>' + utility.etherDeltaURL(token, true)
                             + '</td><td></td></tr></table>';
                     }
                 } else if (token.addr == this.config.ethAddr) {

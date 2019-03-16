@@ -53,8 +53,8 @@ var isAddressPage = true;
 		Deposit: 1,
 		Withdraw: 1,
 		Cancel: 0,
-		'Wrap ETH': 1,
-		'Unwrap ETH': 1,
+		'Wrap Token': 1,
+		'Unwrap Token': 1,
 		Approve: 0,
 		Transfer: 1
 	}
@@ -281,11 +281,11 @@ var isAddressPage = true;
 			else if (transType.indexOf('Cancel') !== -1) {
 				return displayFilter.Cancel;
 			}
-			else if (transType.indexOf('Wrap ') !== -1) {
-				return displayFilter['Wrap ETH'];
+			else if (transType.indexOf('Wrap') !== -1) {
+				return displayFilter['Wrap Token'];
 			}
-			else if (transType.indexOf('Unwrap ') !== -1) {
-				return displayFilter['Unwrap ETH'];
+			else if (transType.indexOf('Unwrap') !== -1) {
+				return displayFilter['Unwrap Token'];
 			}
 			else if (transType === 'Approve') {
 				return displayFilter.Approve;
@@ -809,7 +809,7 @@ var isAddressPage = true;
 						var trans = undefined;
 
 						if (_util.isWrappedETH(from)) {
-							trans = createOutputTransaction('Unwrap ETH', _delta.setToken(tx.from), value, _delta.config.tokens[0], value, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+							trans = createOutputTransaction('Unwrap', _delta.setToken(tx.from), value, _delta.config.tokens[0], value, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
 							trans.Incomplete = true;
 						}
 						else if (_delta.isExchangeAddress(from)) {
@@ -875,16 +875,23 @@ var isAddressPage = true;
 									}
 
 									if (unpacked.name === 'deposit' || unpacked.name === 'depositEther') {
-										if (obj.type === 'Wrap ETH') {
-											trans = createOutputTransaction(obj.type, obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+										if (obj.type.indexOf('Wrap') >= 0) {
+											trans = createOutputTransaction('Wrap', obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+											if (!obj['token In'] && !contract) { //ethfinex wrapping, token in can be undefined (not in input data)
+												trans.Incomplete = true;
+											}
 										} else {
 											trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', exchange);
 										}
 									}
 									else if (unpacked.name === 'withdraw' && obj.type !== 'Token Withdraw') {
 
-										if (obj.type === 'Unwrap ETH') {
-											trans = createOutputTransaction(obj.type, obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+										if (obj.type.indexOf('Unwrap') >= 0) {
+											trans = createOutputTransaction('Unwrap', obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+
+											if (!obj['token Out'] && !contract) { //ethfinex wrapping, token in can be undefined (not in input data)
+												trans.Incomplete = true;
+											}
 										} else {
 											trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', exchange);
 										}
@@ -1279,7 +1286,7 @@ var isAddressPage = true;
 
 								// Ether token wrapping that uses fallback
 								if (_util.isWrappedETH(to)) {
-									trans2 = createOutputTransaction("Wrap ETH", _delta.config.tokens[0], amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+									trans2 = createOutputTransaction("Wrap", _delta.config.tokens[0], amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
 								} else {
 									//Ether transfer
 									if (tx.input !== '0x') {
@@ -1341,10 +1348,17 @@ var isAddressPage = true;
 
 						let oldTrans = outputHashes[mainHash];
 
-						// don't know it, or know it without knowing the token
-						if (!oldTrans || (transs.Type === oldTrans.Type && oldTrans.Token.unknown)) {
+						//cases where we instantly set the txHash to the current parsed data
+						if (!oldTrans //tx isn't known yet
+							|| (transs.Type === oldTrans.Type && //tx already known of the same type AND:
+								((oldTrans.Incomplete && !transs.Incomplete) // second source completed info
+									|| (!oldTrans.Token && transs.Token) || (!oldTrans.Base && transs.Base) // we added a missing token
+									|| (oldTrans.Token && oldTrans.Token.unknown && transs.Token && !transs.Token.unknown) // unknown token is now known
+								)
+							)) {
 							outputHashes[mainHash] = transs;
 						}
+						// else try to identify which of the 2 parsed transactions for thsi same hash should be displayed
 
 						// we parsed a different token the second time   (etherscan regular tx input vs erc20 event )
 						// see if we can refine details by combining info from 2 sources
@@ -1391,14 +1405,14 @@ var isAddressPage = true;
 								outputHashes[mainHash] = transs;
 							}
 							// bancor sell for ETH token & unwrap ETH token, make sell for ETH
-							else if (oldTrans.Type == 'Unwrap ETH' && transs.Type === 'Sell up to' && transs.Exchange.indexOf('Bancor') !== -1) {
+							else if (oldTrans.Type == 'Unwrap' && transs.Type === 'Sell up to' && transs.Exchange.indexOf('Bancor') !== -1) {
 								transs.Base = oldTrans.Base;
 								outputHashes[mainHash] = transs;
-							} else if (oldTrans.Type == 'Sell up to' && transs.Type === 'Unwrap ETH' && oldTrans.Exchange.indexOf('Bancor') !== -1) {
+							} else if (oldTrans.Type == 'Sell up to' && transs.Type === 'Unwrap' && oldTrans.Exchange.indexOf('Bancor') !== -1) {
 								outputHashes[mainHash].Base = transs.Base;
 							}
 							// (trade?) returning ETH, seen as unwrap ETH by internal transaction result (generic version of bancor above)
-							else if (oldTrans.Type == 'Unwrap ETH' && transs.Type !== 'Unwrap ETH' && transs.Exchange) {
+							else if (oldTrans.Type == 'Unwrap' && transs.Type !== 'Unwrap' && transs.Exchange) {
 								outputHashes[mainHash] = transs;
 							} else if (oldTrans.Exchange == 'OasisDirect ' && oldTrans.Type.indexOf('up to') !== -1) {
 								// don't add ETH refund
@@ -1425,7 +1439,7 @@ var isAddressPage = true;
 
 				if (status === undefined)
 					status = true;
-				if (token || type == 'Cancel All') {
+				if (token || (type == 'Cancel All' || type == 'Wrap')) {
 
 					return {
 						Status: status,
@@ -1759,10 +1773,10 @@ var isAddressPage = true;
 					}
 				}
 				else if (head == 'Type') {
-					if (cellValue == 'Deposit' || cellValue == 'Approve' || cellValue == 'Wrap ETH' || cellValue == 'In') {
+					if (cellValue == 'Deposit' || cellValue == 'Approve' || (cellValue && cellValue.indexOf('Wrap') >= 0) || cellValue == 'In') {
 						row$.append($('<td/>').html('<span class="label label-success" >' + cellValue + '</span>'));
 					}
-					else if (cellValue == 'Withdraw' || cellValue == 'Unwrap ETH' || cellValue == 'Out') {
+					else if (cellValue == 'Withdraw' || (cellValue && cellValue.indexOf('Unwrap') >= 0) || cellValue == 'Out') {
 						row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
 					}
 					else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy' || cellValue == 'Cancel offer' || cellValue == 'Sell offer' || cellValue == 'Buy offer' || cellValue == 'Cancel Sell' || cellValue == 'Cancel Buy' || cellValue == 'Cancel All') {

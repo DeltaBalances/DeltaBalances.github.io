@@ -600,36 +600,91 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'unlisted': token.unlisted,
                 };
             }
-            // exchange deposit/withdraw ETH (etherdelta, idex deposit, tokenstore, ethen, switcheo deopsit) and 0x WETH (un)wrapping
+            // exchange deposit/withdraw ETH (etherdelta, idex deposit, tokenstore, ethen, switcheo deopsit) 
+            // wrap  0x ETH->WETH, wrap ethfinex lockTokens. (un)wrapping
             else if (unpacked.name === 'deposit' || (unpacked.name === 'withdraw' && unpacked.address !== this.config.exchangeContracts.Idex.addr && unpacked.params.length < 9)
                 || unpacked.name === 'withdrawEther' || unpacked.name === 'depositEther') {
                 var type = '';
                 var note = '';
                 var rawVal = new BigNumber(0);
-                var token = this.setToken(this.config.ethAddr);
+                var token = undefined;
                 var base = undefined;
                 var exchange = '';
 
+                //deposit / wrapping
                 if (unpacked.name === 'deposit' || unpacked.name === 'depositEther') {
-                    rawVal = new BigNumber(tx.value);
-                    if (!utility.isWrappedETH(tx.to) && !badFromTo) {
-                        type = 'Deposit';
-                        let addrName = this.addressName(txTo);
-                        if (addrName.indexOf('0x') === -1) {
-                            exchange = addrName;
-                            note = 'Deposit ETH into the ' + exchange;
-                        } else {
-                            note = 'Deposit ETH into the exchange contract';
-                        }
-                    } else {
+
+                    // Wrap ETH to WETH or ETH-W
+                    if (utility.isWrappedETH(tx.to)) {
+                        rawVal = new BigNumber(tx.value);
                         type = 'Wrap ETH';
                         note = 'Wrap ETH to WETH';
                         token = this.setToken(this.config.ethAddr);
                         base = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
                     }
-                } else {
+                    // Wrap erc20 token into lockable ethfinex token
+                    else if (unpacked.params.length == 2 && unpacked.params[1].name == '_forTime') {
+                        rawVal = new BigNumber(unpacked.params[0].value);
+                        if (badFromTo) {
+                            base = this.setToken(txTo);
+                            token = this.setToken(tx.contractAddress);
+                        } else {
+                            base = this.setToken(tx.to);
+                        }
+
+                        let wrapName = base.name;
+                        if (wrapName.indexOf('-W') > 0) {
+                            wrapName = wrapName.slice(0, wrapName.length - 2);
+                        } else {
+                            wrapName = wrapName.slice(0, wrapName.length - 1);
+                        }
+                        type = 'Wrap ' + wrapName;
+                        note = 'Wrap a token to  lockable token for Ethfinex';
+                    }
+                    // ETH deposit into exchange (etherdelta, idex, tokenstore & more)
+                    else if (!badFromTo) {
+                        type = 'Deposit';
+                        token = this.setToken(this.config.ethAddr);
+                        let addrName = this.addressName(txTo);
+                        if (addrName.indexOf('0x') === -1) {
+                            exchange = addrName;
+                            note = 'Deposit ETH into ' + exchange;
+                        } else {
+                            note = 'Deposit ETH into the exchange contract';
+                        }
+                    }
+                }
+                //withdraw / unwrapping
+                else {
                     rawVal = unpacked.params[0].value;
-                    if (!utility.isWrappedETH(tx.to) && !badFromTo) {
+                    // unwrap WETH or ETHW
+                    if (utility.isWrappedETH(tx.to)) {
+                        type = 'Unwrap ETH';
+                        note = 'Unwrap WETH to ETH';
+                        token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+                        base = this.setToken(this.config.ethAddr);
+                    }
+                    //unwrap ethfinex wrapped token
+                    else if (unpacked.params.length == 5 && unpacked.params[4].name == "signatureValidUntilBlock") {
+                        rawVal = new BigNumber(unpacked.params[0].value);
+                        if (badFromTo) {
+                            base = this.setToken(tx.contractAddress);
+                            token = this.setToken(txFrom);
+                        } else {
+                            token = this.setToken(txTo);
+                        }
+
+                        let wrapName = token.name;
+                        if (wrapName.indexOf('-W') > 0) {
+                            wrapName = wrapName.slice(0, wrapName.length - 2);
+                        } else {
+                            wrapName = wrapName.slice(0, wrapName.length - 1);
+                        }
+                        type = 'Unwrap ' + wrapName;
+                        note = 'Unwrap a lockable Ethfinex token';
+                    }
+                    //withdraw from exchange
+                    else if (!badFromTo) {
                         type = 'Withdraw';
 
                         let addrName = this.addressName(txTo);
@@ -640,14 +695,16 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                             note = 'Request the exchange contract to withdraw ETH';
                         }
                     } else {
-                        type = 'Unwrap ETH';
-                        note = 'Unwrap WETH to ETH';
-                        token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
-                        base = this.setToken(this.config.ethAddr);
+
                     }
                 }
 
-                var amount = utility.weiToEth(rawVal);
+                var amount = undefined;
+                if (token) {
+                    amount = utility.weiToToken(rawVal, token);
+                } else if (base) {
+                    amount = utility.weiToToken(rawVal, base);
+                }
 
                 if (type.indexOf('rap') === -1) {
                     return {

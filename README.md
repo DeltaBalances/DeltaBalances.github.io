@@ -35,7 +35,7 @@ Decentralized exchanges supported by the DeltaBalances website.
 | [Bancor](https://bancor.network)  | - | Yes| Yes | No|
 | [DDEX hydro](https://ddex.io/)| - | Yes| Yes| Not yet |
 | Decentrex †| Yes| Yes| Yes| Yes |
-| [Dexy †](https://dexy.market) |Yes| No| No | No|
+| [Dexy †](https://app.dexy.exchange) |Yes| No| No | No|
 | [EasyTrade](https://easytrade.io) |-| Yes| Yes | Yes|
 | [Enclaves Dex](https://enclaves.io) | Yes | Yes| Yes | Yes|
 | [Etfinex trustless v1](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |

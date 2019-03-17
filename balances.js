@@ -854,6 +854,8 @@ var isAddressPage = true;
             IDEX: { attempts: 0, done: false, failed: false, prices: [] },
             Kyber: { attempts: 0, done: false, failed: false, prices: [] },
             TokenStore: { attempts: 0, done: false, failed: false, prices: [] },
+            Radar: { attempts: 0, done: false, failed: false, prices: [] },
+            DDEX: { attempts: 0, done: false, failed: false, prices: [] },
         };
 
         exchangePrices.complete = false;
@@ -905,6 +907,81 @@ var isAddressPage = true;
             return prices;
         });
 
+        priceRequest('Radar', 'https://api.radarrelay.com/v2/markets?include=base,ticker,stats', (result) => {
+            let prices = {};
+            result.map((pair) => {
+                if (pair && pair.ticker && pair.stats) {
+                    let tokenPrice = undefined;
+                    if (_util.isWrappedETH(pair.quoteTokenAddress)) { // zrx/WETH
+                        tokenPrice = {
+                            addr: pair.baseTokenAddress.toLowerCase(),
+                            bid: Number(pair.ticker.bestBid),
+                            ask: Number(pair.ticker.bestAsk),
+                            volumeETH: Number(pair.stats.volume24Hour),
+                        };
+                    } else if (_util.isWrappedETH(pair.baseTokenAddress)) { // WETH / DAI
+                        // not a standard ETH pair like DAI or WBTC
+                        tokenPrice = {
+                            addr: pair.quoteTokenAddress.toLowerCase(),
+                            bid: 1 / Number(pair.ticker.bestBid),
+                            ask: 1 / Number(pair.ticker.bestAsk),
+                            volumeETH: Number(pair.stats.volume24Hour) * (1 / Number(pair.ticker.bestBid)),
+                        };
+                    }
+                    if (tokenPrice) {
+                        prices[tokenPrice.addr] = tokenPrice;
+                    }
+                }
+            });
+            return prices;
+        });
+
+        priceRequest('DDEX', 'https://api.ddex.io/v3/markets/tickers', (result) => {
+            if (result.desc != "success" || !result.data) {
+                return;
+            }
+            result = result.data.tickers;
+            result = result.map(x => {
+                if (x.marketId.indexOf('-WETH') > 0) {
+                    let name = x.marketId.replace('-WETH', '');
+                    const matchingTokens = _delta.config.customTokens.filter(
+                        x => x.DDEX && x.DDEX === name);
+                    if (matchingTokens.length > 0) {
+                        x.tokenAddr = matchingTokens[0].addr.toLowerCase();
+                    }
+                }
+                return x;
+            });
+            result = result.filter(x => x.tokenAddr);
+            let prices = {};
+            result.map((tok) => {
+                if (tok.tokenAddr) {
+                    let tokenPrice = {
+                        addr: tok.tokenAddr,
+                        bid: undefined,
+                        ask: undefined,
+                        volumeETH: 0,
+                        //change24h: x.percentChange,
+                    };
+                    if (tok.bid) {
+                        tokenPrice.bid = Number(tok.bid);
+                    }
+                    if (tok.ask) {
+                        tokenPrice.ask = Number(tok.ask);
+                    }
+                    if (tok.volume && (tok.bid || tok.ask)) {
+                        if (tok.bid) {
+                            tokenPrice.volumeETH = Number(tok.volume) * Number(tok.bid);
+                        } else {
+                            tokenPrice.volumeETH = Number(tok.volume) * Number(tok.ask);
+                        }
+                    }
+                    prices[tokenPrice.addr] = tokenPrice;
+                }
+            });
+            return prices;
+        });
+
         priceRequest('Kyber', 'https://api.kyber.network/market', (result) => {
             if (result.error || !result.data) {
                 return;
@@ -928,7 +1005,7 @@ var isAddressPage = true;
 
                     let tokenPrice = {
                         addr: tok.tokenAddr,
-                        bid: tok.current_bid, // set bid & ask both to rate
+                        bid: tok.current_bid,
                         ask: tok.current_ask,
                         volumeETH: tok.eth_24h_volume,
                         //change24h: tok.change_eth_24h,
@@ -985,7 +1062,13 @@ var isAddressPage = true;
             _delta.socketTicker((err, result, rid) => {
                 if (requestID <= rqid) {
                     if (!err && result) {
-                        requestLog[priceID].prices = callback(result);
+                        try {
+                            requestLog[priceID].prices = callback(result);
+                        } catch (e) {
+                            console.log('failed to parse ' + priceID + ' ticker');
+                            requestLog[priceID].failed = true;
+                            requestLog[priceID].prices = {};
+                        }
                         requestLog[priceID].done = true;
                         finishPrices(true);
                     } else if (requestLog[priceID].attempts < 2) {
@@ -1012,7 +1095,13 @@ var isAddressPage = true;
                 success: (result) => {
                     if (requestID <= rqid) {
                         if (result && !result.error) {
-                            requestLog[priceID].prices = callback(result);
+                            try {
+                                requestLog[priceID].prices = callback(result);
+                            } catch (e) {
+                                console.log('failed to parse ' + priceID + ' ticker');
+                                requestLog[priceID].failed = true;
+                                requestLog[priceID].prices = {};
+                            }
                             requestLog[priceID].done = true;
                             finishPrices(true);
                         } else if (requestLog[priceID].attempts < 2) {
@@ -1270,7 +1359,7 @@ var isAddressPage = true;
                 } else {
                     progressString2 += 'green"> No';
                 }
-            } else { 
+            } else {
                 progressString2 += 'green"> ' + exchangePrices.successRequests + "/" + exchangePrices.totalRequests + " sources";
             }
             progressString2 += '</span></span>';
@@ -1398,7 +1487,7 @@ var isAddressPage = true;
                     //get bid/ask prices for this token
 
                     // set prices in this order, later in the list is assumed to be more accurate 
-                    let keyOrder = ['TokenStore', 'ForkDelta', 'IDEX', 'Kyber'];
+                    let keyOrder = ['TokenStore', 'DDEX', 'ForkDelta', 'Radar', 'IDEX', 'Kyber'];
                     //price obj for this token {forkdelta: {bid, ask}, idex:{bid,ask}}
                     let tokenPrices = exchangePrices.prices[token.addr];
 

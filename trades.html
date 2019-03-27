@@ -34,7 +34,7 @@
   <script src="configBundle.js"></script>
   <script src="bundle.min.js"></script>
   <script>
-    var exchanges = ['EtherDelta', '0x Protocol v1'];
+    var exchanges = ['EtherDelta', '0x Protocol v2'];
   </script>
   <script src="user.js"></script>
   <script src="history.js"></script>
@@ -308,14 +308,14 @@
                   <div class="form-group">
                     <select id="exchangeDropdown" data-actions-box="true" data-container="body" data-width="100%" data-none-selected-text="Click to select one or more exchange(s)" class="selectpicker" multiple>
                       <option data-icon="icon-etherdelta" data-subtext="ForkDelta">EtherDelta</option>
-                      <option data-icon="icon-zrx" data-subtext="(RadarRelay, DDEX 2018, Paradex, etc.)">0x Protocol v1</option>
-                      <option data-icon="icon-zrx" data-subtext="(From Sept 2018)">0x Protocol v2</option>
+                      <option data-icon="icon-zrx" data-subtext="(Any Relayer: RadarRelay, DDEX v1, Paradex, etc.)">0x Protocol v1</option>
+                      <option data-icon="icon-zrx" data-subtext="Starting Sept 2018">0x Protocol v2</option>
                       <option data-icon="icon-tokenstore">Token store</option>
                       <!--<option data-icon="icon-link" data-subtext="(Hydro - From Dec 2018)">DDEX</option>-->
                       <option data-icon="icon-oasis" data-subtext="Eth2Dai, <strike>OasisDirect</strike>">OasisDex</option>
                       <option data-icon="icon-kyber">Kyber</option>
                       <option data-icon="icon-airswap">AirSwap</option>
-                      <option data-icon="icon-enclaves" data-subtext="Trustless (v1)">Ethfinex</option>
+                      <option data-icon="icon-enclaves" data-subtext="Trustless (use 0x v2 from march 2019)">Ethfinex</option>
                       <option data-icon="icon-enclaves">Enclaves</option>
                       <option data-icon="icon-link">ETHEX</option>
                       <option data-icon="icon-link">EasyTrade</option>
@@ -382,7 +382,8 @@
                   <div class="col-md-7 noPad" style="overflow:hidden;">
                     <h4>Info</h4>
                     ERC20 and ERC721 trades on decentralized exchanges.<br>
-                    For a faster experience, select as few exchanges as possible. <br> 
+					Check exchange and 0x relayer support <a href="https://github.com/DeltaBalances/DeltaBalances.github.io/blob/master/README.md" target="_blank">here</a>.
+                    <br><br>  For a faster experience, select as few exchanges as possible. <br> 
                     <span class="visible-xs">
                       <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
                       <br>

@@ -13,15 +13,12 @@ Try the DeltaBalances [smart contract](https://etherscan.io/address/0xbf320b8336
 
 Batch hundreds of tokens into a single web3 request:
 + Get the token balance for multiple tokens 
-+ Get the exchange balance for multiple tokens 
-+ Get the token allowance for multiple tokens (BETA)
++ Get the deposited exchange balance for multiple tokens 
++ Get the token allowance for multiple tokens
 
 Contract iterations:  
-`V5 0xbf320b8336b131e0270295c15478d91741f9fc11`  
-`V4 0x40a38911e470fc088beeb1a9480c2d69c847bcec`  
-`V3 0x3E25F0BA291F202188Ae9Bda3004A7B3a803599a`  
-`V2 0xf5f563D3A99152c18cE8b133232Fe34317F60FEF`  
-`V1 0x3150954EAE1a8a5e5EE1F1B8E8444Fe16EA9F94C`  
+[V5](https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code), [V4](https://etherscan.io/address/0x40a38911e470fc088beeb1a9480c2d69c847bcec#code), [V3](https://etherscan.io/address/0x3E25F0BA291F202188Ae9Bda3004A7B3a803599a#code), [V2](https://etherscan.io/address/0xf5f563D3A99152c18cE8b133232Fe34317F60FEF#code), [V1](https://etherscan.io/address/0x3150954EAE1a8a5e5EE1F1B8E8444Fe16EA9F94C#code)
+
 
 # Exchange support
 Decentralized exchanges supported by the DeltaBalances website.
@@ -38,7 +35,7 @@ Decentralized exchanges supported by the DeltaBalances website.
 | [Dexy †](https://app.dexy.exchange) |Yes| No| No | No|
 | [EasyTrade](https://easytrade.io) |-| Yes| Yes | Yes|
 | [Enclaves Dex](https://enclaves.io) | Yes | Yes| Yes | Yes|
-| [Etfinex trustless v1](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
+| [Etfinex trustless v1 (v2<sup>*</sup>)](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
 | [Eth2Dai](https://eth2dai.com/) |-|Yes| Yes | Yes|
 | [ETHEN](https://ethen.market) |No|Yes|Yes|Yes|
 | [EtherC](https://etherc.io) |Yes|Yes|Yes|Yes|
@@ -57,6 +54,8 @@ Decentralized exchanges supported by the DeltaBalances website.
 | [Uniswap](https://uniswap.exchange)| - | Partial (WIP)| Partial (WIP) | Not yet|  
 
 († = Exchange is no longer active)
+<sup>*</sup> Ethfinex v2 uses 0x v2
+
 
 ##### 0x Protocol Relayers
 Exchanges using the same 0x Protocol smart contract.
@@ -68,9 +67,10 @@ Relayers not on the list will show up as `unknown 0x`
 |~~[Amadeus](https://amadeusrelay.org/)~~|
 |[Bamboo Relay](https://bamboorelay.com)|
 |[BoxSwap](https://boxswap.io/)|
-|[DDEX](https://ddex.io/)|
+|[DDEX (v1, 2018)](https://ddex.io/)|
 |[Emoon](https://www.emoon.io)|
 |[ERC dEX](https://ercdex.com/)|
+|[Ethfinex trustless v2](https://trustless.ethfinex.com) |
 |[ForDex](https://www.fordex.co)|
 |[GUDecks](https://gudecks.com/)|
 |[IDT](https://idtexchange.com)|

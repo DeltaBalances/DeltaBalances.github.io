@@ -645,6 +645,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     else if (!badFromTo) {
                         type = 'Deposit';
                         token = this.setToken(this.config.ethAddr);
+                        rawVal = new BigNumber(tx.value);
                         let addrName = this.addressName(txTo);
                         if (addrName.indexOf('0x') === -1) {
                             exchange = addrName;

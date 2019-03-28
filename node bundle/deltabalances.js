@@ -689,6 +689,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         type = 'Withdraw';
 
                         let addrName = this.addressName(txTo);
+                        token = this.setToken(this.config.ethAddr);
                         if (addrName.indexOf('0x') === -1) {
                             exchange = addrName;
                             note = 'Request the ' + exchange + ' to withdraw ETH';

@@ -974,7 +974,7 @@ var isAddressPage = true;
 
 				let unpacked = unpackedLogs[i];
 				// dont spend time processing event if it isn't correct
-				if (!unpacked || unpacked.events.length < 3 ||
+				if (!unpacked || unpacked.events.length < 2 ||
 					(
 						unpacked.name != 'Trade' &&
 						unpacked.name != 'LogFill' &&
@@ -994,8 +994,8 @@ var isAddressPage = true;
 						unpacked.name != 'Buy' &&
 						unpacked.name != 'Sell' &&
 						unpacked.name != 'FillBuyOrder' &&
-						unpacked.name != 'FillSellOrder' /*&&
-                        unpacked.name != 'Match' */
+						unpacked.name != 'FillSellOrder' &&
+                        unpacked.name != 'Match'
 					)
 				) {
 					continue;

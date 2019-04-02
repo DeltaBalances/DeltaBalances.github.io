@@ -925,7 +925,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     };
                 }
             }
-            //DDEX hydro cancel input
+            //DDEX hydro (1.0, 1.1) cancel input  (untested, no actual cancel tx found)
             else if (!badFromTo && unpacked.name === 'cancelOrder' && unpacked.params.length == 1 && unpacked.params[0].name == 'order' && unpacked.params[0].value.length == 8) {
                 //cancelOrder(Order memory order)
                 //Order(address trader, address relayer, address baseToken, address quoteToken, uint256 baseTokenAmount, uint256 quoteTokenAmount, uint256 gasTokenAmount, bytes32 data);
@@ -1716,17 +1716,32 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                 }
             }
-            // ddex hydro trade input
-            else if (unpacked.name == 'matchOrders' && unpacked.params.length == 3) {
-                //function matchOrders(OrderParam memory takerOrderParam,OrderParam[] memory makerOrderParams,OrderAddressSet memory orderAddressSet)
+            // ddex hydro trade input v1.0 & v1.1
+            else if (unpacked.name == 'matchOrders' && (unpacked.params.length > 0 && unpacked.params[0].name === 'takerOrderParam')) {
+                // 1.0: function matchOrders(OrderParam memory takerOrderParam,OrderParam[] memory makerOrderParams,OrderAddressSet memory orderAddressSet)
+                // 1.1: function matchOrders(OrderParam memory takerOrderParam,OrderParam[] memory makerOrderParams,uint256[] memory baseTokenFilledAmounts,OrderAddressSet memory orderAddressSet)
+
                 //struct OrderParam {address trader, uint256 baseTokenAmount, uint256 quoteTokenAmount, uint256 gasTokenAmount, bytes32 data, OrderSignature signature}
                 //struct OrderAddressSet { address baseToken, address quoteToken, address relayer }
 
-                let orderAddressStructArray = unpacked.params[2].value;
-                let takeOrder = unpackDdexOrderInput(unpacked.params[0].value);
+                let is1_0 = unpacked.params.length == 3;
+
+                let orderAddressStructArray = undefined;
+                //init undefined takeAmount for each maker order
+                let takerFillAmounts = Array(unpacked.params[1].length).fill(undefined);
+
+                if (is1_0) {
+                    orderAddressStructArray = unpacked.params[2].value;
+                } else {
+                    orderAddressStructArray = unpacked.params[3].value;
+                    takerFillAmounts = unpacked.params[2].value;
+                }
+
+
+                let takeOrder = unpackDdexOrderInput(unpacked.params[0].value, undefined);
                 takeOrder.type = takeOrder.type.replace('Maker ', '');
                 takeOrder.type += ' up to';
-                let makeOrders = unpacked.params[1].value.map(x => unpackDdexOrderInput(x));
+                let makeOrders = unpacked.params[1].value.map((x, i) => unpackDdexOrderInput(x, takerFillAmounts[i]));
                 /* makeOrders = makeOrders.map(x => {
                     if(x.type.indexOf('Sell') !== -1) {
                         x.type = x.type.replace('Sell', 'Buy');
@@ -1738,7 +1753,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                 return [takeOrder].concat(makeOrders);
 
-                function unpackDdexOrderInput(orderStructArray) {
+                function unpackDdexOrderInput(orderStructArray, fillTokenAmount) {
                     let maker = orderStructArray[0].value.toLowerCase();
                     let base = _delta.setToken(orderAddressStructArray[1].value);
                     let token = _delta.setToken(orderAddressStructArray[0].value);
@@ -1773,6 +1788,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
+                    //v1.1 get fill amount instead of order size
+                    if (fillTokenAmount) {
+                        amount = utility.weiToToken(fillTokenAmount, token);
+                        baseAmount = amount.times(price);
+                    }
 
                     return {
                         'type': 'Maker ' + tradeType,
@@ -1788,7 +1808,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'maker': maker,
                     };
                 }
-
 
             }
             // 0x v1 trade input
@@ -3846,10 +3865,105 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     'tradeType': tradeType,
                 };
             }
-            // DDEX hydro  trade event
+            // DDEX hydro  trade event 1.1 
+            else if (unpacked.name == 'Match' && unpacked.events.length === 2) {
+                /*  1.1: event Match(OrderAddressSet addressSet, MatchResult result);    
+                        struct OrderAddressSet {address baseToken, address quoteToken, address relayer}
+                        struct MatchResult {address maker;address taker;address buyer;uint256 makerFee;uint256 makerRebate;uint256 takerFee;uint256 makerGasFee;uint256 takerGasFee;uint256 baseTokenFilledAmount;uint256 quoteTokenFilledAmount;}
+                */
+                let tradeType = 'Sell';
+                let maker = unpacked.events[1].value[0].toLowerCase();
+                let taker = unpacked.events[1].value[1].toLowerCase();
+
+                let buyer = unpacked.events[1].value[2].toLowerCase();
+                let seller = undefined;
+                if (buyer === maker) {
+                    seller = taker;
+                } else {
+                    tradeType = 'Buy'; //taker buys
+                    seller = maker;
+                }
+
+                let relayer = unpacked.events[0].value[2].toLowerCase();
+
+                let base = this.setToken(unpacked.events[0].value[1]);
+                let token = this.setToken(unpacked.events[0].value[0]);
+
+                let rawBaseAmount = new BigNumber(unpacked.events[1].value[9]);
+                let rawTokenAmount = new BigNumber(unpacked.events[1].value[8]);
+
+                let transType = 'Taker';
+                if (isMyAddress(maker)) {
+                    transType = 'Maker';
+                    if (buyer === maker) {
+                        tradeType = 'Buy';
+                    } else {
+                        tradeType = 'Sell';
+                    }
+                }
+
+                let exchange = '';
+                let addrName = utility.relayName(relayer);
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                } else {
+                    addrName = this.addressName(relayer);
+                    if (addrName.indexOf('0x') !== -1) {
+                        exchange = 'Unknown DDEX';
+                    }
+                }
+
+                if (token && base && token.addr && base.addr) {
+                    let amount = utility.weiToToken(rawTokenAmount, token);
+                    let baseAmount = utility.weiToToken(rawBaseAmount, base);
+                    let price = new BigNumber(0);
+                    if (amount.greaterThan(0)) {
+                        price = baseAmount.div(amount);
+                    }
+
+                    let feeToken = base;
+                    let fee = new BigNumber(0);
+                    if (transType === 'Maker') {
+                        let makerFeeAmount = new BigNumber(unpacked.events[1].value[3]);
+                        let makerGasAmount = new BigNumber(unpacked.events[1].value[6]);
+                        let makerRebateAmount = new BigNumber(unpacked.events[1].value[4]);
+
+                        fee = utility.weiToToken(makerFeeAmount, base);
+                        fee = fee.plus(utility.weiToToken(makerGasAmount, base));
+                        fee = fee.minus(utility.weiToToken(makerRebateAmount, base));
+                    } else {
+                        let takerFeeAmount = new BigNumber(unpacked.events[1].value[5]);
+                        let takerGasAmount = new BigNumber(unpacked.events[1].value[7]);
+                        fee = utility.weiToToken(takerFeeAmount, base)
+                        fee = fee.plus(utility.weiToToken(takerGasAmount, base));
+                    }
+
+                    return {
+                        'type': transType + ' ' + tradeType,
+                        'exchange': exchange,
+                        'note': utility.addressLink(taker, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
+                        'token': token,
+                        'amount': amount,
+                        'price': price,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        'buyer': buyer,
+                        'seller': seller,
+                        'fee': fee,
+                        'feeCurrency': feeToken,
+                        'transType': transType,
+                        'tradeType': tradeType,
+                        'relayer': relayer
+                    };
+                }
+            }
+            // DDEX hydro  trade event 1.0 ,  TODO v1.0 does not define whether it is buy or sell in event
             else if (unpacked.name == 'Match') {
-                /* event Match( address baseToken, address quoteToken, address relayer, address maker, address taker, uint256 baseTokenAmount, uint256 quoteTokenAmount, 
-                uint256 makerFee, uint256 takerFee, uint256 makerGasFee, uint256 makerRebate, uint256 takerGasFee ); */
+                /* 1.0: event Match( address baseToken, address quoteToken, address relayer, address maker, address taker, uint256 baseTokenAmount, uint256 quoteTokenAmount, 
+                        uint256 makerFee, uint256 takerFee, uint256 makerGasFee, uint256 makerRebate, uint256 takerGasFee ); 
+                */
+
                 //  let tradeType = 'Sell';
                 let maker = unpacked.events[3].value.toLowerCase();
                 let taker = unpacked.events[4].value.toLowerCase();
@@ -4633,7 +4747,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     };
                 }
             }
-            // DDEX hydro cancel event  (TODO, get order from hash?)
+            // DDEX hydro (1.0, 1.1) cancel event  (TODO, get order from hash?)
             else if (unpacked.name == 'Cancel' && unpacked.events.length == 1 && unpacked.events[0].name == 'orderHash') {
                 var exchange = '';
                 let addrName = this.addressName(unpacked.address);

@@ -1056,8 +1056,8 @@ var isAddressPage = true;
 											obj.amount = '';
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
 									}
-									//ddex hydro trade input
-									else if (unpacked.name == 'matchOrders' && unpacked.params.length == 3) {
+									//ddex hydro trade input (v1.0 & v1.1)
+									else if (unpacked.name == 'matchOrders' && (unpacked.params.length > 0 && unpacked.params[0].name === 'takerOrderParam')) {
 										if (obj.maker == myAddr /*|| obj.taker == myAddr*/) {
 											// maker trade, verify amount filled with tokens received/sent based on buy/sell
 											if (contract && i > 0 && ((obj.type == 'Maker Buy' && to == myAddr) || (obj.type == 'Maker Sell' && from == myAddr))) { // etherscan token transfer api  

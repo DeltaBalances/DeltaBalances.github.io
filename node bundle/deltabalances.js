@@ -3215,6 +3215,82 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                   function removeLiquidity(uint256 amount, uint256 min_eth, uint256 min_tokens, uint256 deadline) external returns (uint256, uint256);
                 */
             }
+            // Veil ETH token wrapping
+            else if (unpacked.name === 'depositAndApprove') {
+                let results = [];
+                let base = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+                { //wrap veil ETH
+                    let rawVal = new BigNumber(tx.value);
+                    let token = this.setToken(this.config.ethAddr);
+                    let amount = utility.weiToEth(rawVal);
+                    results.push({
+                        'type': 'Wrap ETH',
+                        'token In': token,
+                        'token Out': base,
+                        'note': 'Wrap ETH to a token',
+                        'amount': amount,
+                    });
+                }
+                { //approve token
+                    let spender = unpacked.params[0].value;
+                    let allowance = unpacked.params[1].value;
+                    let exchange = 'unknown ';
+                    let addrName = this.addressName(spender);
+                    if (addrName !== spender) {
+                        exchange = addrName;
+                    }
+                    let amount = utility.weiToToken(allowance, base);
+
+                    let sender = txFrom;
+                    if (badFromTo) {
+                        sender = txTo;
+                    }
+
+                    results.push({
+                        'type': 'Approve',
+                        'exchange': exchange,
+                        'note': 'Now allows tokens to be transferred by ' + exchange,
+                        'token': base,
+                        'amount': amount,
+                        'from': sender,
+                        'to': spender,
+                        'unlisted': base.unlisted,
+                    });
+                }
+                return results;
+            }
+            // Veil ETH unwrapping
+            else if (unpacked.name == 'withdrawAndTransfer') {
+                //withdrawAndTransfer(uint256 _amount, address _target)
+                let results = [];
+                let token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+                let base = this.setToken(this.config.ethAddr);
+                let rawVal = new BigNumber(unpacked.params[0].value);
+                let amount = utility.weiToToken(rawVal, token);
+                { //unwrap veil ETH
+                    results.push({
+                        'type': 'Unwrap ETH',
+                        'token In': token,
+                        'token Out': base,
+                        'note': 'Unwrap a token back to ETH',
+                        'amount': amount,
+                    });
+                }
+                {  //transfer token
+                    let dest = unpacked.params[1].toLowerCase();
+                    let origin = badFromTo ? txTo : txFrom;
+                    results.push({
+                        'type': 'Transfer',
+                        'note': 'Transfer ETH',
+                        'token': base,
+                        'amount': amount,
+                        'from': origin,
+                        'to': dest,
+                        'unlisted': base.unlisted,
+                    });
+                }
+                return results;
+            }
         } else {
             return undefined;
         }
@@ -3255,7 +3331,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             if (makerTokenData == '0x' || takerTokenData == '0x') {
                 console.log('empty asset data found');
             } else {
-                console.log('unsupported token found in assetdata ' + unpacked.name + ' - ' + makerTokenData + ' - ' + takerTokenData);
+
+                if ((!makerTokenAddr && makerTokenData.indexOf('0x94cfcdd7') !== -1) ||
+                    (!takerTokenAddr && takerTokenData.indexOf('0x94cfcdd7') !== -1)) {
+                    console.log('Unsupported ZEIP23 token bundle in assetdata ' + unpacked.name);
+                } else {
+                    console.log('unsupported token found in assetdata ' + unpacked.name + ' - ' + makerTokenData + ' - ' + takerTokenData);
+                }
             }
             return undefined;
         }

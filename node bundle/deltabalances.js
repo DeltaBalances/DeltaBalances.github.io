@@ -5695,6 +5695,12 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     contents = "Ether (not a token)<br> Decimals: 18";
                 } else {
                     contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
+                    if (token.old) {
+                        contents += '<br> <i class="text-red fa fa-exclamation-triangle" aria-hidden="true"></i> Token contract is deprecated.';
+                    }
+                    if (token.locked || token.killed) {
+                        contents += '<br> <i class="text-red fa fa-lock" aria-hidden="true"></i> Token Locked or Paused.';
+                    }
                 }
             }
         } catch (e) {

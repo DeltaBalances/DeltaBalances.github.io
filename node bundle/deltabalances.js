@@ -5175,6 +5175,11 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         price = baseAmount.div(amount);
                     }
 
+                    if (isMyAddress(buyUser))
+                        tradeType = "Buy";
+                    else if (isMyAddress(sellUser))
+                        tradeType = "Sell";
+
                     return {
                         'type': transType + ' ' + tradeType,
                         'exchange': exchange,

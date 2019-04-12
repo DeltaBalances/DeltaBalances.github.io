@@ -625,6 +625,9 @@ var isAddressPage = false;
 									delete obj.relayer;
 									obj.feeToken = obj.feeCurrency;
 									delete obj.feeCurrency;
+									if (obj.fee && obj.makerFee) {
+										delete obj.fee;
+									}
 								} else if (unpacked.name === 'LogCancel') {
 									delete obj.relayer;
 								}

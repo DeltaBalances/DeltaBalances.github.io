@@ -1810,7 +1810,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
 
             }
-            // 0x v1 trade input
+            // 0x v1 trade input, ethfinex v1 input
             // 0x v2 trade input
             // 0x v2 Forwarder input
             else if (unpacked.name === 'fillOrder' // 0xv1 0xv2
@@ -4355,8 +4355,11 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     };
                 }
             }
-            // 0x v1 & v2 trade output event
+            // 0x v1 & v2 trade output event, (ethfinex)
             else if (unpacked.name == "LogFill" || unpacked.name == "Fill") {
+                //ethfinex uses a forked 0x v1 contract
+                const isEthfinex = (unpacked.address.toLowerCase() == '0xdcdb42c9a256690bd153a7b409751adfc8dd5851');
+
                 //0x v1: LogFill (index_topic_1 address maker, address taker, index_topic_2 address feeRecipient, address makerToken, address takerToken, uint256 filledMakerTokenAmount, uint256 filledTakerTokenAmount, uint256 paidMakerFee, uint256 paidTakerFee, index_topic_3 bytes32 tokens, bytes32 orderHash)
                 /* v2:  event Fill(
                             address indexed makerAddress,         // Address that created the order.      
@@ -4372,7 +4375,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                             bytes takerAssetData                  // Encoded data specific to takerAsset.
                         ); */
 
-                let maker, taker, makerToken, takerToken, makerAmount, takerAmount, makerFee, takerFee, relayer, sender;
+                let maker, taker, makerToken, takerToken, makerAmount, takerAmount, makerFee, takerFee, relayer, sender, ethfinexFee;
                 //zrx fee
                 let feeCurrency = this.setToken('0xe41d2489571d322189246dafa5ebde1f4699f498');
 
@@ -4391,6 +4394,12 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     takerFee = utility.weiToToken(unpacked.events[8].value, feeCurrency);
 
                     relayer = unpacked.events[2].value.toLowerCase();
+
+                    if (isEthfinex) {
+                        feeCurrency = takerToken;
+                        ethfinexFee = new BigNumber(unpacked.events[6].value).div(400);
+                        makerFee = utility.weiToToken(ethfinexFee, feeCurrency);
+                    }
                 }
                 //0x v2
                 else {
@@ -4443,7 +4452,6 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     transType = 'Maker';
                 }
 
-
                 if (this.isBaseToken(takerToken, makerToken)) // get eth  -> sell
                 {
                     tradeType = 'Buy';
@@ -4482,6 +4490,16 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         price = baseAmount.div(amount);
                     }
 
+                    if (isEthfinex) {
+                        if (tradeType === 'Sell') {
+                            rawAmount = takerAmount.minus(ethfinexFee);
+                            amount = utility.weiToToken(rawAmount, token);
+                        } else {
+                            rawBaseAmount = takerAmount.minus(ethfinexFee);
+                            baseAmount = utility.weiToToken(rawBaseAmount, base);
+                        }
+                    }
+
                     // single units if erc721
                     if (token.erc721) {
                         amount = new BigNumber(1);
@@ -4500,13 +4518,17 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     } else {
                         fee = takerFee;
                     }
+                    if (isEthfinex) {
+                        feeCurrency = takerToken;
+                    }
 
-                    if (isMyAddress(buyUser))
+                    if (isMyAddress(buyUser)) {
                         tradeType = "Buy";
-                    else if (isMyAddress(sellUser))
+                    } else if (isMyAddress(sellUser)) {
                         tradeType = "Sell";
+                    }
 
-                    return {
+                    let obj = {
                         'type': transType + ' ' + tradeType,
                         'exchange': exchange,
                         'note': utility.addressLink(taker, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
@@ -4519,11 +4541,17 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         'buyer': buyUser,
                         'seller': sellUser,
                         'fee': fee,
+                        'makerFee': makerFee, //ethfinex v1
                         'feeCurrency': feeCurrency,
                         'transType': transType,
                         'tradeType': tradeType,
                         'relayer': relayer
                     };
+
+                    if (!isEthfinex) {
+                        delete obj.makerFee;
+                    }
+                    return obj;
                 }
             }
             //Bancor trade

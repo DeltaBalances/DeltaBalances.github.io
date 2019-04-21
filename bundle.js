@@ -30673,7 +30673,9 @@ module.exports = (config) => {
         let range = {
             start: startblock,
             end: endblock,
-            count: (endblock - startblock) + 1
+            count: (endblock - startblock) + 1,
+            retries: 0,
+            error: false
         };
 
         makeRequest();
@@ -30691,10 +30693,15 @@ module.exports = (config) => {
                 dataType: 'json',
                 timeout: 55000, // 55 sec timeout (these requests can be slooooow)
             }).done((result) => {
-                if (result) {
+                if (result && result.jsonrpc) {
+                    // success {"jsonrpc":"2.0","id":7,"result":[]}
+                    // fail {"jsonrpc":"2.0","id":92,"error":{"code":-32005,"message":"query returned more than 1000 results"}}
 
                     if (result.result && Array.isArray(result.result)) {
                         callback(result.result, range);
+                    } else if (result.error && result.error.code) {
+                        console.log(result.error);
+                        returnError(result.error.code);
                     } else {
                         //response but not an array as expected?
                         returnError();
@@ -30708,9 +30715,16 @@ module.exports = (config) => {
             });
         }
 
-        function returnError() {
-            range.count = 0;
+        function returnError(code = undefined) {
             range.error = true;
+            range.splitRetry = false;
+            range.abort = false;
+
+            if (code == -32005) {  //error for more than 1000 results?
+                range.splitRetry = true;
+            } else if (code < -32600) { //standard jsonrpc error codes
+                range.abort = true;
+            }
             callback(undefined, range);
         }
     };

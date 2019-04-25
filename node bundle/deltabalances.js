@@ -606,7 +606,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
             // exchange deposit/withdraw ETH (etherdelta, idex deposit, tokenstore, ethen, switcheo deopsit) 
             // wrap  0x ETH->WETH, wrap ethfinex lockTokens. (un)wrapping
-            else if (unpacked.name === 'deposit' || (unpacked.name === 'withdraw' && unpacked.address !== this.config.exchangeContracts.Idex.addr && unpacked.params.length < 9)
+            else if (unpacked.name === 'deposit' || (unpacked.name === 'withdraw' && unpacked.params[0].name !== 'token' && unpacked.params.length < 9)
                 || unpacked.name === 'withdrawEther' || unpacked.name === 'depositEther') {
                 var type = '';
                 var note = '';
@@ -696,7 +696,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         token = this.setToken(this.config.ethAddr);
                         if (addrName.indexOf('0x') === -1) {
                             exchange = addrName;
-                            note = 'Request the ' + exchange + ' to withdraw ETH';
+                            note = 'Request ' + exchange + ' to withdraw ETH';
                         } else {
                             note = 'Request the exchange contract to withdraw ETH';
                         }
@@ -732,7 +732,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
             // exchange erc20 deposit / withdraw
             else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || /* enclaves */ unpacked.name === 'withdrawBoth' || unpacked.name === 'depositBoth'
-                || (unpacked.name === 'withdraw' && unpacked.address === this.config.exchangeContracts.Idex.addr)
+                || (unpacked.name === 'withdraw' && unpacked.params.length == 2 && unpacked.params[0].name === 'token')
             ) {
                 var token = this.setToken(unpacked.params[0].value);
                 if (token && token.addr) {
@@ -742,7 +742,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var exchange = '';
 
                     let addrName = this.addressName(txTo);
-                    if (badFromTo && unpacked.name === 'withdrawToken') {
+                    if (badFromTo && (unpacked.name === 'withdrawToken' || unpacked.name === 'withdraw')) {
                         addrName = this.addressName(txFrom);
                     }
 
@@ -750,10 +750,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         exchange = addrName;
                     }
 
-                    if (unpacked.name === 'withdrawToken' || unpacked.name === 'withdrawBoth') {
+                    if (unpacked.name === 'withdrawToken' || unpacked.name === 'withdrawBoth' || unpacked.name === 'withdraw') {
                         type = 'Withdraw';
                         if (exchange) {
-                            note = 'Request the ' + exchange + 'contracy to withdraw ' + token.name;
+                            note = 'Request ' + exchange + 'contract to withdraw ' + token.name;
                         } else {
                             note = 'Request the exchange to withdraw ' + token.name;
                         }
@@ -767,8 +767,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         }
                     }
 
+                    if (token.addr !== this.config.ethAddr) {
+                        type = 'Token ' + type;
+                    }
                     var obj = {
-                        'type': 'Token ' + type,
+                        'type': type,
                         'exchange': exchange,
                         'note': note,
                         'token': token,

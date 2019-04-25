@@ -129,7 +129,6 @@ module.exports = {
     BitEye2: { addr: '0x9e2f2dd1e3641f389673f89dc316bb00b01cd83a', name: 'BitEye', supportedDex: false },
     AXNET: { addr: '0xacf999bfa9347e8ebe6816ed30bf44b127233177', name: 'AXNET', supportedDex: false },
     WeiDex: { addr: '0xccd7ce9ec004bfbd5711245f917d6109813a909c', name: 'WeiDex', supportedDex: false },
-    DexBrokerage: { addr: '0x41a5b8aa081dcd69ace566061d5b6adcb92cae1c', name: 'DexBrokerage', supportedDex: false },
     DexBlue: { addr: '0x257586004f6828a01ba4a874d3cfd0757029f32a', name: 'dexBlue', supportedDex: false },
     AllBit: { addr: '0xdc1882f350b42ac9a23508996254b1915c78b204', name: 'AllBit', supportedDex: false },
     AllBit2: { addr: '0xff6b1cdfd2d3e37977d7938aa06b6d89d6675e27', name: 'AllBit', supportedDex: false },
@@ -141,7 +140,7 @@ module.exports = {
     Verify2: { addr: '0x1c307a39511c16f74783fcd0091a921ec29a0b51', name: '0xVerify', supportedDex: false },
     Orderbook: { addr: '0xb3ec0d352c7935dd2663eafab4c99be6508df9af', name: 'orderbook.io', supportedDex: false },
     DexFarm: { addr: '0xa78fa0825b46b38c8679c3ea7e493d90cd6bc834', name: 'Dex Farm', supportedDex: false },
-    DexBrokerage: { addr: '0x41a5b8aa081dcd69ace566061d5b6adcb92cae1c', name: 'DexBrokerage', supportedDex: false }, // everything beside trade parses (idex-like)
+    DexBrokerage: { addr: '0x41a5b8aa081dcd69ace566061d5b6adcb92cae1c', name: 'DexBrokerage', supportedDex: true }, // everything beside trade parses (idex-like)
     WandX: { addr: '0xf9570f0332776abc55e5fbdb35c82bb20b5ad00b', name: 'WandX', supportedDex: false },
     Blockonix: { addr: '0x80ea118992545f43a8592c812b1099e518097874', name: 'Blockonix', supportedDex: false },
     Blockonix2: { addr: '0x67b084e4654e1d62afa9694b6a626cec5c9ff2bd', name: 'Blockonix', supportedDex: false },

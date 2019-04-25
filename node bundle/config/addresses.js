@@ -1,6 +1,6 @@
 module.exports = {
   // List of addresses with a name or label attached
- 
+
   // feeRecipients for 0x relayers,  https://github.com/0xProject/0x-relayer-registry/blob/master/relayers.json
   zrxRelayers: {
     '0xa258b39954cef5cb142fd567a46cddb31a670124': "RadarRelay",
@@ -132,7 +132,7 @@ module.exports = {
     '0xb794f5ea0ba39494ce839613fffba74279579268': 'Poloniex',
     '0xab11204cfeaccffa63c2d23aef2ea9accdb0a0d5': 'Poloniex',
     '0x209c4784ab1e8183cf58ca33cb740efbf3fc18ef': 'Poloniex',
-    '0xb794f5ea0ba39494ce839613fffba74279579268': 'Poloniex', 
+    '0xb794f5ea0ba39494ce839613fffba74279579268': 'Poloniex',
     '0x027beefcbad782faf69fad12dee97ed894c68549': 'QuadrigaCX',
     '0xb6aac3b56ff818496b747ea57fcbe42a9aae6218': 'QuadrigaCX',
     '0x70faa28a6b8d6829a4b1e649d26ec9a2a39ba413': 'ShapeShift',
@@ -144,9 +144,9 @@ module.exports = {
     '0xeed16856d551569d134530ee3967ec79995e2051': 'ShapeShift',
     '0x390de26d772d2e2005c6d1d24afc902bae37a4bb': 'Upbit',
     '0xf5bec430576ff1b82e44ddb5a1c93f6f9d0884f3': 'Yobit',
-	  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': 'Centre',
-    
-    
+    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': 'Centre',
+
+
     // other service addresses that can be useful to be named.
     '0x13032deb2d37556cf49301f713e9d7e1d1a8b169': 'Kyber-Uniswap', //kyber uniswap reserve
 
@@ -161,6 +161,8 @@ module.exports = {
     '0x9b0ccf7c8994e19f39b2b4cf708e0a7df65fa8a3': 'Maker CDP',
     '0x059550a1ca3c46a2adb803e9e3ea4585a34f004a': 'dYdX',
     '0x36bf21c8e661b21e6166e4385f574941fdc6caff': 'dYdX',
+
+    '0x3baa64a4401bbe18865547e916a9be8e6dd89a5a': 'Request',
 
     // saturn network aidrop
     '0x25f17d6cb23cc85bfa6c5e9b8f1d5226f5927cbc': 'Airdrop',

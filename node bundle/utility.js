@@ -4,7 +4,7 @@ const Decoder = require('./abi-decoder.js');
 const BigNumber = require('bignumber.js');
 BigNumber.config({ ERRORS: false });
 
-module.exports = (config) => {
+module.exports = (db) => {
     const utility = {};
 
     //give readable value, given a divisor (or eth divisor=undefined)
@@ -23,7 +23,7 @@ module.exports = (config) => {
     }
 
     utility.isAddress = function (addr) {
-        return (addr && addr.length == 42 && _delta.web3.isAddress(addr));
+        return (addr && addr.length == 42 && db.web3.isAddress(addr));
     }
 
     // check if an input address or url (including address) is a valid address
@@ -129,7 +129,7 @@ module.exports = (config) => {
     utility.isWrappedETH = function (address) {
         if (address) {
             address = address.toLowerCase();
-            return bundle.DeltaBalances.config.wrappedETH[address] === 1;
+            return db.config.wrappedETH[address] === 1;
         }
         return false;
     };
@@ -138,8 +138,8 @@ module.exports = (config) => {
     utility.isNonEthBase = function (address) {
         if (address) {
             address = address.toLowerCase();
-            if (bundle.DeltaBalances.config.baseToken[address]) {
-                return bundle.DeltaBalances.config.baseToken[address];
+            if (db.config.baseToken[address]) {
+                return db.config.baseToken[address];
             }
         }
         return false;
@@ -162,12 +162,12 @@ module.exports = (config) => {
         let name = '';
         if (address) {
             address = address.toLowerCase();
-            name = bundle.DeltaBalances.config.zrxRelayers[address];
+            name = db.config.zrxRelayers[address];
             if (!name) {
-                name = bundle.DeltaBalances.config.zrxTakers[address];
+                name = db.config.zrxTakers[address];
             }
             if (!name) {
-                name = bundle.DeltaBalances.config.admins[address];
+                name = db.config.admins[address];
             }
             if (!name) {
                 name = 'Unknown 0x';
@@ -244,7 +244,7 @@ module.exports = (config) => {
     utility.readFile = function readFile(filename, callback) {
         if (callback) {
             try {
-                utility.getURL(`${config.homeURL}/${filename}`, (err, body) => {
+                utility.getURL(`${db.config.homeURL}/${filename}`, (err, body) => {
                     if (err) {
                         callback(err, undefined);
                     } else {
@@ -261,7 +261,7 @@ module.exports = (config) => {
 
     //decode tx receipt logs
     utility.processLogs = function (data) {
-        if (!bundle.DeltaBalances.config.methodIDS) {
+        if (!db.config.methodIDS) {
             this.initABIs();
         }
 
@@ -297,7 +297,7 @@ module.exports = (config) => {
                 let log = decodedLogs[i];
                 if (log) {
 
-                    if (log.address !== _delta.config.exchangeContracts.Ethen.addr) {
+                    if (log.address !== db.config.exchangeContracts.Ethen.addr) {
                         combinedLogs.push(log);
                     } else {
                         if (log.name === 'Order' && log.events.length == 8) {
@@ -306,7 +306,7 @@ module.exports = (config) => {
                             //given the 'order' event, look in the same tx for 'trade' events to match the data
                             while (j < decodedLogs.length && decodedLogs[j].hash === decodedLogs[i].hash) {
                                 let log2 = decodedLogs[j];
-                                if (log2 && log2.address === _delta.config.exchangeContracts.Ethen.addr && log2.name === 'Trade') {
+                                if (log2 && log2.address === db.config.exchangeContracts.Ethen.addr && log2.name === 'Trade') {
                                     log.combinedEvents = [log2.events[0], log2.events[2], log2.events[3]];
                                     break;
                                 } else {
@@ -328,7 +328,7 @@ module.exports = (config) => {
 
     //decode tx input data
     utility.processInput = function (data) {
-        if (!bundle.DeltaBalances.config.methodIDS) {
+        if (!db.config.methodIDS) {
             this.initABIs();
         }
 
@@ -347,14 +347,14 @@ module.exports = (config) => {
 
     // configure whiche ABIs are used to decode input
     utility.initABIs = function () {
-        let abis = Object.values(bundle.DeltaBalances.config.ABIs);
+        let abis = Object.values(db.config.ABIs);
 
         for (let i = 0; i < abis.length; i++) {
             Decoder.addABI(abis[i]);
         }
         // etherdelta last to fix overloading
-        Decoder.addABI(bundle.DeltaBalances.config.ABIs.EtherDelta);
-        bundle.DeltaBalances.config.methodIDS = true;
+        Decoder.addABI(db.config.ABIs.EtherDelta);
+        db.config.methodIDS = true;
     }
 
 
@@ -542,7 +542,7 @@ module.exports = (config) => {
         if (short)
             displayText = displayText.slice(0, 6) + '..';
         else {
-            displayText = bundle.DeltaBalances.addressName(addr, !short);
+            displayText = db.addressName(addr, !short);
 
             //show addres after name 'Contract A 0xab12cd34..' in a smaller size
             if (html && !short && displayText && displayText !== addr) {
@@ -574,7 +574,7 @@ module.exports = (config) => {
         if (short)
             displayText = displayText.slice(0, 6) + '..';
         else {
-            displayText = bundle.DeltaBalances.addressName(addr, !short);
+            displayText = db.addressName(addr, !short);
         }
         return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
     };
@@ -590,7 +590,7 @@ module.exports = (config) => {
                 to: address,
                 data: data,
             }
-            if (config.etherscanAPIKey) { postContents.apiKey = config.etherscanAPIKey };
+            if (db.config.etherscanAPIKey) { postContents.apiKey = db.config.etherscanAPIKey };
             utility.postURL(url, postContents, (err, body) => {
                 if (!err && body) {
                     try {
@@ -673,7 +673,7 @@ module.exports = (config) => {
                 },
                 type: "POST",
                 async: true,
-                url: bundle.DeltaBalances.config.infuraURL,
+                url: db.config.infuraURL,
                 data: '{"jsonrpc":"2.0","method":"eth_getLogs","params":' + filterObj + ' ,"id":' + rpcID + '}',
                 dataType: 'json',
                 timeout: 55000, // 55 sec timeout (these requests can be slooooow)
@@ -729,7 +729,7 @@ module.exports = (config) => {
 
         function proxy() {
             let url = `https://api.etherscan.io/api?module=proxy&action=eth_GetTransactionReceipt&txhash=${txHash}`;
-            if (config.etherscanAPIKey) url += `&apikey=${config.etherscanAPIKey}`;
+            if (db.config.etherscanAPIKey) url += `&apikey=${db.config.etherscanAPIKey}`;
             utility.getURL(url, (err, body) => {
                 if (!err && body) {
                     const result = body;//JSON.parse(body);
@@ -766,7 +766,7 @@ module.exports = (config) => {
         }
 
         function proxy() {
-            var url = 'https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + decBlocknr + '&apikey=' + _delta.config.etherscanAPIKey;
+            var url = 'https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + decBlocknr + '&apikey=' + db.config.etherscanAPIKey;
             utility.getURL(url, (err, res) => {
                 if (!err && res && res.status == "1" && res.result && res.result.timeStamp) {
                     callback(undefined, res.result.timeStamp, res.result.blockNumber);
@@ -792,7 +792,7 @@ module.exports = (config) => {
 
         function proxy() {
             let url = `https://api.etherscan.io/api?module=proxy&action=eth_BlockNumber`;
-            if (config.etherscanAPIKey) url += `&apikey=${config.etherscanAPIKey}`;
+            if (db.config.etherscanAPIKey) url += `&apikey=${db.config.etherscanAPIKey}`;
             utility.getURL(url, (err, body) => {
                 if (!err && body) {
                     const result = body;//JSON.parse(body);

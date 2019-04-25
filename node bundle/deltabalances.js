@@ -1,8 +1,12 @@
 let config = require('./config.js');
 const Web3 = require('web3');
-const utility = require('./utility.js')(config);
 const BigNumber = require('bignumber.js');
 BigNumber.config({ ERRORS: false });
+
+const deltaBalances = new DeltaBalances();
+const utility = require('./utility.js')(deltaBalances);
+
+
 
 function DeltaBalances() {
     this.uniqueTokens = {};
@@ -5762,5 +5766,4 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
     }
 };
 
-const deltaBalances = new DeltaBalances();
 module.exports = { DeltaBalances: deltaBalances, utility };

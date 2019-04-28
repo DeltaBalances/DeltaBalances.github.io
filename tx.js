@@ -625,6 +625,9 @@ var isAddressPage = false;
 									delete obj.relayer;
 									obj.feeToken = obj.feeCurrency;
 									delete obj.feeCurrency;
+									if (obj.fee && obj.makerFee) {
+										delete obj.fee;
+									}
 								} else if (unpacked.name === 'LogCancel') {
 									delete obj.relayer;
 								}
@@ -1116,12 +1119,9 @@ var isAddressPage = false;
 						}
 					}
 
-					if (cellValue == null) cellValue = "";
-					//let head = columns[colIndex];
-
-					{
-						row$.append($('<td/>').html(cellValue.toString()));
-					}
+					if (!cellValue && cellValue !== 0)
+						cellValue = "";
+					row$.append($('<td/>').html(cellValue.toString()));
 				}
 			}
 

@@ -2518,9 +2518,13 @@ module.exports = {
 },{"ethers-contracts/interface.js":44,"web3":54}],7:[function(require,module,exports){
 let config = require('./config.js');
 const Web3 = require('web3');
-const utility = require('./utility.js')(config);
 const BigNumber = require('bignumber.js');
 BigNumber.config({ ERRORS: false });
+
+const deltaBalances = new DeltaBalances();
+const utility = require('./utility.js')(deltaBalances);
+
+
 
 function DeltaBalances() {
     this.uniqueTokens = {};
@@ -2848,7 +2852,7 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     //erc721 tokens
     if (offlineCollectibleTokens) {
         try {
-            offlineCollectibleTokens = offlineCollectibleTokens.map(t => {
+            let erc721Tokens = offlineCollectibleTokens.map(t => {
                 let tok = {
                     addr: t.address.toLowerCase(),
                     name: utility.escapeHtml(t.symbol),
@@ -2861,8 +2865,8 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
                 }
                 return tok;
             });
-            for (let i = 0; i < offlineCollectibleTokens.length; i++) {
-                let token = offlineCollectibleTokens[i];
+            for (let i = 0; i < erc721Tokens.length; i++) {
+                let token = erc721Tokens[i];
                 this.uniqueTokens[token.addr] = token;
             }
         } catch (e) {
@@ -3118,54 +3122,113 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'unlisted': token.unlisted,
                 };
             }
-            // exchange deposit/withdraw ETH (etherdelta, idex deposit, tokenstore, ethen, switcheo deopsit) and 0x WETH (un)wrapping
-            else if (unpacked.name === 'deposit' || (unpacked.name === 'withdraw' && unpacked.address !== this.config.exchangeContracts.Idex.addr && unpacked.params.length < 9)
+            // exchange deposit/withdraw ETH (etherdelta, idex deposit, tokenstore, ethen, switcheo deopsit) 
+            // wrap  0x ETH->WETH, wrap ethfinex lockTokens. (un)wrapping
+            else if (unpacked.name === 'deposit' || (unpacked.name === 'withdraw' && unpacked.params[0].name !== 'token' && unpacked.params.length < 9)
                 || unpacked.name === 'withdrawEther' || unpacked.name === 'depositEther') {
                 var type = '';
                 var note = '';
                 var rawVal = new BigNumber(0);
-                var token = this.setToken(this.config.ethAddr);
+                var token = undefined;
                 var base = undefined;
                 var exchange = '';
 
+                //deposit / wrapping
                 if (unpacked.name === 'deposit' || unpacked.name === 'depositEther') {
-                    rawVal = new BigNumber(tx.value);
-                    if (!utility.isWrappedETH(tx.to) && !badFromTo) {
-                        type = 'Deposit';
-                        let addrName = this.addressName(txTo);
-                        if (addrName.indexOf('0x') === -1) {
-                            exchange = addrName;
-                            note = 'Deposit ETH into the ' + exchange;
-                        } else {
-                            note = 'Deposit ETH into the exchange contract';
-                        }
-                    } else {
+
+                    // Wrap ETH to WETH or ETH-W
+                    if (utility.isWrappedETH(tx.to)) {
+                        rawVal = new BigNumber(tx.value);
                         type = 'Wrap ETH';
                         note = 'Wrap ETH to WETH';
                         token = this.setToken(this.config.ethAddr);
                         base = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
                     }
-                } else {
-                    rawVal = unpacked.params[0].value;
-                    if (!utility.isWrappedETH(tx.to) && !badFromTo) {
-                        type = 'Withdraw';
+                    // Wrap erc20 token into lockable ethfinex token
+                    else if (unpacked.params.length == 2 && unpacked.params[1].name == '_forTime') {
+                        rawVal = new BigNumber(unpacked.params[0].value);
+                        if (badFromTo) {
+                            base = this.setToken(txTo);
+                            token = this.setToken(tx.contractAddress);
+                        } else {
+                            base = this.setToken(tx.to);
+                        }
 
+                        let wrapName = base.name;
+                        if (wrapName.indexOf('-W') > 0) {
+                            wrapName = wrapName.slice(0, wrapName.length - 2);
+                        } else {
+                            wrapName = wrapName.slice(0, wrapName.length - 1);
+                        }
+                        type = 'Wrap ' + wrapName;
+                        note = 'Wrap a token to  lockable token for Ethfinex';
+                    }
+                    // ETH deposit into exchange (etherdelta, idex, tokenstore & more)
+                    else if (!badFromTo) {
+                        type = 'Deposit';
+                        token = this.setToken(this.config.ethAddr);
+                        rawVal = new BigNumber(tx.value);
                         let addrName = this.addressName(txTo);
                         if (addrName.indexOf('0x') === -1) {
                             exchange = addrName;
-                            note = 'Request the ' + exchange + ' to withdraw ETH';
+                            note = 'Deposit ETH into ' + exchange;
                         } else {
-                            note = 'Request the exchange contract to withdraw ETH';
+                            note = 'Deposit ETH into the exchange contract';
                         }
-                    } else {
+                    }
+                }
+                //withdraw / unwrapping
+                else {
+                    rawVal = unpacked.params[0].value;
+                    // unwrap WETH or ETHW
+                    if (utility.isWrappedETH(tx.to)) {
                         type = 'Unwrap ETH';
                         note = 'Unwrap WETH to ETH';
                         token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
                         base = this.setToken(this.config.ethAddr);
                     }
+                    //unwrap ethfinex wrapped token
+                    else if (unpacked.params.length == 5 && unpacked.params[4].name == "signatureValidUntilBlock") {
+                        rawVal = new BigNumber(unpacked.params[0].value);
+                        if (badFromTo) {
+                            base = this.setToken(tx.contractAddress);
+                            token = this.setToken(txFrom);
+                        } else {
+                            token = this.setToken(txTo);
+                        }
+
+                        let wrapName = token.name;
+                        if (wrapName.indexOf('-W') > 0) {
+                            wrapName = wrapName.slice(0, wrapName.length - 2);
+                        } else {
+                            wrapName = wrapName.slice(0, wrapName.length - 1);
+                        }
+                        type = 'Unwrap ' + wrapName;
+                        note = 'Unwrap a lockable Ethfinex token';
+                    }
+                    //withdraw from exchange
+                    else if (!badFromTo) {
+                        type = 'Withdraw';
+
+                        let addrName = this.addressName(txTo);
+                        token = this.setToken(this.config.ethAddr);
+                        if (addrName.indexOf('0x') === -1) {
+                            exchange = addrName;
+                            note = 'Request ' + exchange + ' to withdraw ETH';
+                        } else {
+                            note = 'Request the exchange contract to withdraw ETH';
+                        }
+                    } else {
+
+                    }
                 }
 
-                var amount = utility.weiToEth(rawVal);
+                var amount = undefined;
+                if (token) {
+                    amount = utility.weiToToken(rawVal, token);
+                } else if (base) {
+                    amount = utility.weiToToken(rawVal, base);
+                }
 
                 if (type.indexOf('rap') === -1) {
                     return {
@@ -3187,7 +3250,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
             // exchange erc20 deposit / withdraw
             else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || /* enclaves */ unpacked.name === 'withdrawBoth' || unpacked.name === 'depositBoth'
-                || (unpacked.name === 'withdraw' && unpacked.address === this.config.exchangeContracts.Idex.addr)
+                || (unpacked.name === 'withdraw' && unpacked.params.length == 2 && unpacked.params[0].name === 'token')
             ) {
                 var token = this.setToken(unpacked.params[0].value);
                 if (token && token.addr) {
@@ -3197,7 +3260,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var exchange = '';
 
                     let addrName = this.addressName(txTo);
-                    if (badFromTo && unpacked.name === 'withdrawToken') {
+                    if (badFromTo && (unpacked.name === 'withdrawToken' || unpacked.name === 'withdraw')) {
                         addrName = this.addressName(txFrom);
                     }
 
@@ -3205,10 +3268,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         exchange = addrName;
                     }
 
-                    if (unpacked.name === 'withdrawToken' || unpacked.name === 'withdrawBoth') {
+                    if (unpacked.name === 'withdrawToken' || unpacked.name === 'withdrawBoth' || unpacked.name === 'withdraw') {
                         type = 'Withdraw';
                         if (exchange) {
-                            note = 'Request the ' + exchange + 'contracy to withdraw ' + token.name;
+                            note = 'Request ' + exchange + 'contract to withdraw ' + token.name;
                         } else {
                             note = 'Request the exchange to withdraw ' + token.name;
                         }
@@ -3222,8 +3285,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         }
                     }
 
+                    if (token.addr !== this.config.ethAddr) {
+                        type = 'Token ' + type;
+                    }
                     var obj = {
-                        'type': 'Token ' + type,
+                        'type': type,
                         'exchange': exchange,
                         'note': note,
                         'token': token,
@@ -3384,7 +3450,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     };
                 }
             }
-            //DDEX hydro cancel input
+            //DDEX hydro (1.0, 1.1) cancel input  (untested, no actual cancel tx found)
             else if (!badFromTo && unpacked.name === 'cancelOrder' && unpacked.params.length == 1 && unpacked.params[0].name == 'order' && unpacked.params[0].value.length == 8) {
                 //cancelOrder(Order memory order)
                 //Order(address trader, address relayer, address baseToken, address quoteToken, uint256 baseTokenAmount, uint256 quoteTokenAmount, uint256 gasTokenAmount, bytes32 data);
@@ -4175,17 +4241,32 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                 }
             }
-            // ddex hydro trade input
-            else if (unpacked.name == 'matchOrders' && unpacked.params.length == 3) {
-                //function matchOrders(OrderParam memory takerOrderParam,OrderParam[] memory makerOrderParams,OrderAddressSet memory orderAddressSet)
+            // ddex hydro trade input v1.0 & v1.1
+            else if (unpacked.name == 'matchOrders' && (unpacked.params.length > 0 && unpacked.params[0].name === 'takerOrderParam')) {
+                // 1.0: function matchOrders(OrderParam memory takerOrderParam,OrderParam[] memory makerOrderParams,OrderAddressSet memory orderAddressSet)
+                // 1.1: function matchOrders(OrderParam memory takerOrderParam,OrderParam[] memory makerOrderParams,uint256[] memory baseTokenFilledAmounts,OrderAddressSet memory orderAddressSet)
+
                 //struct OrderParam {address trader, uint256 baseTokenAmount, uint256 quoteTokenAmount, uint256 gasTokenAmount, bytes32 data, OrderSignature signature}
                 //struct OrderAddressSet { address baseToken, address quoteToken, address relayer }
 
-                let orderAddressStructArray = unpacked.params[2].value;
-                let takeOrder = unpackDdexOrderInput(unpacked.params[0].value);
+                let is1_0 = unpacked.params.length == 3;
+
+                let orderAddressStructArray = undefined;
+                //init undefined takeAmount for each maker order
+                let takerFillAmounts = Array(unpacked.params[1].length).fill(undefined);
+
+                if (is1_0) {
+                    orderAddressStructArray = unpacked.params[2].value;
+                } else {
+                    orderAddressStructArray = unpacked.params[3].value;
+                    takerFillAmounts = unpacked.params[2].value;
+                }
+
+
+                let takeOrder = unpackDdexOrderInput(unpacked.params[0].value, undefined);
                 takeOrder.type = takeOrder.type.replace('Maker ', '');
                 takeOrder.type += ' up to';
-                let makeOrders = unpacked.params[1].value.map(x => unpackDdexOrderInput(x));
+                let makeOrders = unpacked.params[1].value.map((x, i) => unpackDdexOrderInput(x, takerFillAmounts[i]));
                 /* makeOrders = makeOrders.map(x => {
                     if(x.type.indexOf('Sell') !== -1) {
                         x.type = x.type.replace('Sell', 'Buy');
@@ -4197,7 +4278,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                 return [takeOrder].concat(makeOrders);
 
-                function unpackDdexOrderInput(orderStructArray) {
+                function unpackDdexOrderInput(orderStructArray, fillTokenAmount) {
                     let maker = orderStructArray[0].value.toLowerCase();
                     let base = _delta.setToken(orderAddressStructArray[1].value);
                     let token = _delta.setToken(orderAddressStructArray[0].value);
@@ -4232,6 +4313,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
+                    //v1.1 get fill amount instead of order size
+                    if (fillTokenAmount) {
+                        amount = utility.weiToToken(fillTokenAmount, token);
+                        baseAmount = amount.times(price);
+                    }
 
                     return {
                         'type': 'Maker ' + tradeType,
@@ -4248,9 +4334,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     };
                 }
 
-
             }
-            // 0x v1 trade input
+            // 0x v1 trade input, ethfinex v1 input
             // 0x v2 trade input
             // 0x v2 Forwarder input
             else if (unpacked.name === 'fillOrder' // 0xv1 0xv2
@@ -5655,6 +5740,82 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                   function removeLiquidity(uint256 amount, uint256 min_eth, uint256 min_tokens, uint256 deadline) external returns (uint256, uint256);
                 */
             }
+            // Veil ETH token wrapping
+            else if (unpacked.name === 'depositAndApprove') {
+                let results = [];
+                let base = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+                { //wrap veil ETH
+                    let rawVal = new BigNumber(tx.value);
+                    let token = this.setToken(this.config.ethAddr);
+                    let amount = utility.weiToEth(rawVal);
+                    results.push({
+                        'type': 'Wrap ETH',
+                        'token In': token,
+                        'token Out': base,
+                        'note': 'Wrap ETH to a token',
+                        'amount': amount,
+                    });
+                }
+                { //approve token
+                    let spender = unpacked.params[0].value;
+                    let allowance = unpacked.params[1].value;
+                    let exchange = 'unknown ';
+                    let addrName = this.addressName(spender);
+                    if (addrName !== spender) {
+                        exchange = addrName;
+                    }
+                    let amount = utility.weiToToken(allowance, base);
+
+                    let sender = txFrom;
+                    if (badFromTo) {
+                        sender = txTo;
+                    }
+
+                    results.push({
+                        'type': 'Approve',
+                        'exchange': exchange,
+                        'note': 'Now allows tokens to be transferred by ' + exchange,
+                        'token': base,
+                        'amount': amount,
+                        'from': sender,
+                        'to': spender,
+                        'unlisted': base.unlisted,
+                    });
+                }
+                return results;
+            }
+            // Veil ETH unwrapping
+            else if (unpacked.name == 'withdrawAndTransfer') {
+                //withdrawAndTransfer(uint256 _amount, address _target)
+                let results = [];
+                let token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+                let base = this.setToken(this.config.ethAddr);
+                let rawVal = new BigNumber(unpacked.params[0].value);
+                let amount = utility.weiToToken(rawVal, token);
+                { //unwrap veil ETH
+                    results.push({
+                        'type': 'Unwrap ETH',
+                        'token In': token,
+                        'token Out': base,
+                        'note': 'Unwrap a token back to ETH',
+                        'amount': amount,
+                    });
+                }
+                {  //transfer token
+                    let dest = unpacked.params[1].toLowerCase();
+                    let origin = badFromTo ? txTo : txFrom;
+                    results.push({
+                        'type': 'Transfer',
+                        'note': 'Transfer ETH',
+                        'token': base,
+                        'amount': amount,
+                        'from': origin,
+                        'to': dest,
+                        'unlisted': base.unlisted,
+                    });
+                }
+                return results;
+            }
         } else {
             return undefined;
         }
@@ -5695,7 +5856,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             if (makerTokenData == '0x' || takerTokenData == '0x') {
                 console.log('empty asset data found');
             } else {
-                console.log('unsupported token found in assetdata ' + unpacked.name + ' - ' + makerTokenData + ' - ' + takerTokenData);
+
+                if ((!makerTokenAddr && makerTokenData.indexOf('0x94cfcdd7') !== -1) ||
+                    (!takerTokenAddr && takerTokenData.indexOf('0x94cfcdd7') !== -1)) {
+                    console.log('Unsupported ZEIP23 token bundle in assetdata ' + unpacked.name);
+                } else {
+                    console.log('unsupported token found in assetdata ' + unpacked.name + ' - ' + makerTokenData + ' - ' + takerTokenData);
+                }
             }
             return undefined;
         }
@@ -6305,10 +6472,105 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     'tradeType': tradeType,
                 };
             }
-            // DDEX hydro  trade event
+            // DDEX hydro  trade event 1.1 
+            else if (unpacked.name == 'Match' && unpacked.events.length === 2) {
+                /*  1.1: event Match(OrderAddressSet addressSet, MatchResult result);    
+                        struct OrderAddressSet {address baseToken, address quoteToken, address relayer}
+                        struct MatchResult {address maker;address taker;address buyer;uint256 makerFee;uint256 makerRebate;uint256 takerFee;uint256 makerGasFee;uint256 takerGasFee;uint256 baseTokenFilledAmount;uint256 quoteTokenFilledAmount;}
+                */
+                let tradeType = 'Sell';
+                let maker = unpacked.events[1].value[0].toLowerCase();
+                let taker = unpacked.events[1].value[1].toLowerCase();
+
+                let buyer = unpacked.events[1].value[2].toLowerCase();
+                let seller = undefined;
+                if (buyer === maker) {
+                    seller = taker;
+                } else {
+                    tradeType = 'Buy'; //taker buys
+                    seller = maker;
+                }
+
+                let relayer = unpacked.events[0].value[2].toLowerCase();
+
+                let base = this.setToken(unpacked.events[0].value[1]);
+                let token = this.setToken(unpacked.events[0].value[0]);
+
+                let rawBaseAmount = new BigNumber(unpacked.events[1].value[9]);
+                let rawTokenAmount = new BigNumber(unpacked.events[1].value[8]);
+
+                let transType = 'Taker';
+                if (isMyAddress(maker)) {
+                    transType = 'Maker';
+                    if (buyer === maker) {
+                        tradeType = 'Buy';
+                    } else {
+                        tradeType = 'Sell';
+                    }
+                }
+
+                let exchange = '';
+                let addrName = utility.relayName(relayer);
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                } else {
+                    addrName = this.addressName(relayer);
+                    if (addrName.indexOf('0x') !== -1) {
+                        exchange = 'Unknown DDEX';
+                    }
+                }
+
+                if (token && base && token.addr && base.addr) {
+                    let amount = utility.weiToToken(rawTokenAmount, token);
+                    let baseAmount = utility.weiToToken(rawBaseAmount, base);
+                    let price = new BigNumber(0);
+                    if (amount.greaterThan(0)) {
+                        price = baseAmount.div(amount);
+                    }
+
+                    let feeToken = base;
+                    let fee = new BigNumber(0);
+                    if (transType === 'Maker') {
+                        let makerFeeAmount = new BigNumber(unpacked.events[1].value[3]);
+                        let makerGasAmount = new BigNumber(unpacked.events[1].value[6]);
+                        let makerRebateAmount = new BigNumber(unpacked.events[1].value[4]);
+
+                        fee = utility.weiToToken(makerFeeAmount, base);
+                        fee = fee.plus(utility.weiToToken(makerGasAmount, base));
+                        fee = fee.minus(utility.weiToToken(makerRebateAmount, base));
+                    } else {
+                        let takerFeeAmount = new BigNumber(unpacked.events[1].value[5]);
+                        let takerGasAmount = new BigNumber(unpacked.events[1].value[7]);
+                        fee = utility.weiToToken(takerFeeAmount, base)
+                        fee = fee.plus(utility.weiToToken(takerGasAmount, base));
+                    }
+
+                    return {
+                        'type': transType + ' ' + tradeType,
+                        'exchange': exchange,
+                        'note': utility.addressLink(taker, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
+                        'token': token,
+                        'amount': amount,
+                        'price': price,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        'buyer': buyer,
+                        'seller': seller,
+                        'fee': fee,
+                        'feeCurrency': feeToken,
+                        'transType': transType,
+                        'tradeType': tradeType,
+                        'relayer': relayer
+                    };
+                }
+            }
+            // DDEX hydro  trade event 1.0 ,  TODO v1.0 does not define whether it is buy or sell in event
             else if (unpacked.name == 'Match') {
-                /* event Match( address baseToken, address quoteToken, address relayer, address maker, address taker, uint256 baseTokenAmount, uint256 quoteTokenAmount, 
-                uint256 makerFee, uint256 takerFee, uint256 makerGasFee, uint256 makerRebate, uint256 takerGasFee ); */
+                /* 1.0: event Match( address baseToken, address quoteToken, address relayer, address maker, address taker, uint256 baseTokenAmount, uint256 quoteTokenAmount, 
+                        uint256 makerFee, uint256 takerFee, uint256 makerGasFee, uint256 makerRebate, uint256 takerGasFee ); 
+                */
+
                 //  let tradeType = 'Sell';
                 let maker = unpacked.events[3].value.toLowerCase();
                 let taker = unpacked.events[4].value.toLowerCase();
@@ -6618,8 +6880,11 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     };
                 }
             }
-            // 0x v1 & v2 trade output event
+            // 0x v1 & v2 trade output event, (ethfinex)
             else if (unpacked.name == "LogFill" || unpacked.name == "Fill") {
+                //ethfinex uses a forked 0x v1 contract
+                const isEthfinex = (unpacked.address.toLowerCase() == '0xdcdb42c9a256690bd153a7b409751adfc8dd5851');
+
                 //0x v1: LogFill (index_topic_1 address maker, address taker, index_topic_2 address feeRecipient, address makerToken, address takerToken, uint256 filledMakerTokenAmount, uint256 filledTakerTokenAmount, uint256 paidMakerFee, uint256 paidTakerFee, index_topic_3 bytes32 tokens, bytes32 orderHash)
                 /* v2:  event Fill(
                             address indexed makerAddress,         // Address that created the order.      
@@ -6635,7 +6900,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                             bytes takerAssetData                  // Encoded data specific to takerAsset.
                         ); */
 
-                let maker, taker, makerToken, takerToken, makerAmount, takerAmount, makerFee, takerFee, relayer, sender;
+                let maker, taker, makerToken, takerToken, makerAmount, takerAmount, makerFee, takerFee, relayer, sender, ethfinexFee;
                 //zrx fee
                 let feeCurrency = this.setToken('0xe41d2489571d322189246dafa5ebde1f4699f498');
 
@@ -6654,6 +6919,12 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     takerFee = utility.weiToToken(unpacked.events[8].value, feeCurrency);
 
                     relayer = unpacked.events[2].value.toLowerCase();
+
+                    if (isEthfinex) {
+                        feeCurrency = takerToken;
+                        ethfinexFee = new BigNumber(unpacked.events[6].value).div(400);
+                        makerFee = utility.weiToToken(ethfinexFee, feeCurrency);
+                    }
                 }
                 //0x v2
                 else {
@@ -6706,7 +6977,6 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     transType = 'Maker';
                 }
 
-
                 if (this.isBaseToken(takerToken, makerToken)) // get eth  -> sell
                 {
                     tradeType = 'Buy';
@@ -6745,6 +7015,16 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         price = baseAmount.div(amount);
                     }
 
+                    if (isEthfinex) {
+                        if (tradeType === 'Sell') {
+                            rawAmount = takerAmount.minus(ethfinexFee);
+                            amount = utility.weiToToken(rawAmount, token);
+                        } else {
+                            rawBaseAmount = takerAmount.minus(ethfinexFee);
+                            baseAmount = utility.weiToToken(rawBaseAmount, base);
+                        }
+                    }
+
                     // single units if erc721
                     if (token.erc721) {
                         amount = new BigNumber(1);
@@ -6763,13 +7043,17 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     } else {
                         fee = takerFee;
                     }
+                    if (isEthfinex) {
+                        feeCurrency = takerToken;
+                    }
 
-                    if (isMyAddress(buyUser))
+                    if (isMyAddress(buyUser)) {
                         tradeType = "Buy";
-                    else if (isMyAddress(sellUser))
+                    } else if (isMyAddress(sellUser)) {
                         tradeType = "Sell";
+                    }
 
-                    return {
+                    let obj = {
                         'type': transType + ' ' + tradeType,
                         'exchange': exchange,
                         'note': utility.addressLink(taker, true, true) + ' selected ' + utility.addressLink(maker, true, true) + '\'s order in the orderbook to trade.',
@@ -6782,11 +7066,17 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         'buyer': buyUser,
                         'seller': sellUser,
                         'fee': fee,
+                        'makerFee': makerFee, //ethfinex v1
                         'feeCurrency': feeCurrency,
                         'transType': transType,
                         'tradeType': tradeType,
                         'relayer': relayer
                     };
+
+                    if (!isEthfinex) {
+                        delete obj.makerFee;
+                    }
+                    return obj;
                 }
             }
             //Bancor trade
@@ -7092,7 +7382,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     };
                 }
             }
-            // DDEX hydro cancel event  (TODO, get order from hash?)
+            // DDEX hydro (1.0, 1.1) cancel event  (TODO, get order from hash?)
             else if (unpacked.name == 'Cancel' && unpacked.events.length == 1 && unpacked.events[0].name == 'orderHash') {
                 var exchange = '';
                 let addrName = this.addressName(unpacked.address);
@@ -7437,6 +7727,11 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
+
+                    if (isMyAddress(buyUser))
+                        tradeType = "Buy";
+                    else if (isMyAddress(sellUser))
+                        tradeType = "Sell";
 
                     return {
                         'type': transType + ' ' + tradeType,
@@ -7945,19 +8240,25 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     if (!token.erc721) {
                         contents += '<br><br> Trade centralized: <br><table class="popoverTable"><tr><td>' + utility.binanceURL(token, true) + '</td></tr></table>';
 
-                        contents += 'Trade decentralized: <br><table class="popoverTable"><tr><td>' + utility.etherDeltaURL(token, true)
+                        contents += 'Trade decentralized: <br><table class="popoverTable"><tr><td>' + utility.forkDeltaURL(token, true)
                             + '</td><td>' + utility.idexURL(token, true)
-                            + '</td></tr><tr><td>' + utility.forkDeltaURL(token, true)
-                            + '</td><td>' + utility.ddexURL(token, true)
                             + '</td></tr><tr><td>' + utility.tokenStoreURL(token, true)
-                            + '</td><td>' + utility.radarURL(token, true)
-                            + '</td></tr><tr><td>' + utility.kyberURL(token, true)
+                            + '</td><td>' + utility.ddexURL(token, true)
+                            + '</td></tr><tr><td>' + utility.radarURL(token, true)
+                            + '</td><td>' + utility.kyberURL(token, true)
+                            + '</td></tr><tr><td>' + utility.etherDeltaURL(token, true)
                             + '</td><td></td></tr></table>';
                     }
                 } else if (token.addr == this.config.ethAddr) {
                     contents = "Ether (not a token)<br> Decimals: 18";
                 } else {
                     contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
+                    if (token.old) {
+                        contents += '<br> <i class="text-red fa fa-exclamation-triangle" aria-hidden="true"></i> Token contract is deprecated.';
+                    }
+                    if (token.locked || token.killed) {
+                        contents += '<br> <i class="text-red fa fa-lock" aria-hidden="true"></i> Token Locked or Paused.';
+                    }
                 }
             }
         } catch (e) {
@@ -7986,7 +8287,6 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
     }
 };
 
-const deltaBalances = new DeltaBalances();
 module.exports = { DeltaBalances: deltaBalances, utility };
 
 },{"./config.js":"/config.js","./utility.js":105,"bignumber.js":8,"web3":54}],8:[function(require,module,exports){
@@ -29725,7 +30025,7 @@ const Decoder = require('./abi-decoder.js');
 const BigNumber = require('bignumber.js');
 BigNumber.config({ ERRORS: false });
 
-module.exports = (config) => {
+module.exports = (db) => {
     const utility = {};
 
     //give readable value, given a divisor (or eth divisor=undefined)
@@ -29744,7 +30044,7 @@ module.exports = (config) => {
     }
 
     utility.isAddress = function (addr) {
-        return (addr && addr.length == 42 && _delta.web3.isAddress(addr));
+        return (addr && addr.length == 42 && db.web3.isAddress(addr));
     }
 
     // check if an input address or url (including address) is a valid address
@@ -29850,7 +30150,7 @@ module.exports = (config) => {
     utility.isWrappedETH = function (address) {
         if (address) {
             address = address.toLowerCase();
-            return bundle.DeltaBalances.config.wrappedETH[address] === 1;
+            return db.config.wrappedETH[address] === 1;
         }
         return false;
     };
@@ -29859,8 +30159,8 @@ module.exports = (config) => {
     utility.isNonEthBase = function (address) {
         if (address) {
             address = address.toLowerCase();
-            if (bundle.DeltaBalances.config.baseToken[address]) {
-                return bundle.DeltaBalances.config.baseToken[address];
+            if (db.config.baseToken[address]) {
+                return db.config.baseToken[address];
             }
         }
         return false;
@@ -29883,12 +30183,12 @@ module.exports = (config) => {
         let name = '';
         if (address) {
             address = address.toLowerCase();
-            name = bundle.DeltaBalances.config.zrxRelayers[address];
+            name = db.config.zrxRelayers[address];
             if (!name) {
-                name = bundle.DeltaBalances.config.zrxTakers[address];
+                name = db.config.zrxTakers[address];
             }
             if (!name) {
-                name = bundle.DeltaBalances.config.admins[address];
+                name = db.config.admins[address];
             }
             if (!name) {
                 name = 'Unknown 0x';
@@ -29965,7 +30265,7 @@ module.exports = (config) => {
     utility.readFile = function readFile(filename, callback) {
         if (callback) {
             try {
-                utility.getURL(`${config.homeURL}/${filename}`, (err, body) => {
+                utility.getURL(`${db.config.homeURL}/${filename}`, (err, body) => {
                     if (err) {
                         callback(err, undefined);
                     } else {
@@ -29982,7 +30282,7 @@ module.exports = (config) => {
 
     //decode tx receipt logs
     utility.processLogs = function (data) {
-        if (!bundle.DeltaBalances.config.methodIDS) {
+        if (!db.config.methodIDS) {
             this.initABIs();
         }
 
@@ -30018,7 +30318,7 @@ module.exports = (config) => {
                 let log = decodedLogs[i];
                 if (log) {
 
-                    if (log.address !== _delta.config.exchangeContracts.Ethen.addr) {
+                    if (log.address !== db.config.exchangeContracts.Ethen.addr) {
                         combinedLogs.push(log);
                     } else {
                         if (log.name === 'Order' && log.events.length == 8) {
@@ -30027,7 +30327,7 @@ module.exports = (config) => {
                             //given the 'order' event, look in the same tx for 'trade' events to match the data
                             while (j < decodedLogs.length && decodedLogs[j].hash === decodedLogs[i].hash) {
                                 let log2 = decodedLogs[j];
-                                if (log2 && log2.address === _delta.config.exchangeContracts.Ethen.addr && log2.name === 'Trade') {
+                                if (log2 && log2.address === db.config.exchangeContracts.Ethen.addr && log2.name === 'Trade') {
                                     log.combinedEvents = [log2.events[0], log2.events[2], log2.events[3]];
                                     break;
                                 } else {
@@ -30049,7 +30349,7 @@ module.exports = (config) => {
 
     //decode tx input data
     utility.processInput = function (data) {
-        if (!bundle.DeltaBalances.config.methodIDS) {
+        if (!db.config.methodIDS) {
             this.initABIs();
         }
 
@@ -30068,14 +30368,14 @@ module.exports = (config) => {
 
     // configure whiche ABIs are used to decode input
     utility.initABIs = function () {
-        let abis = Object.values(bundle.DeltaBalances.config.ABIs);
+        let abis = Object.values(db.config.ABIs);
 
         for (let i = 0; i < abis.length; i++) {
             Decoder.addABI(abis[i]);
         }
         // etherdelta last to fix overloading
-        Decoder.addABI(bundle.DeltaBalances.config.ABIs.EtherDelta);
-        bundle.DeltaBalances.config.methodIDS = true;
+        Decoder.addABI(db.config.ABIs.EtherDelta);
+        db.config.methodIDS = true;
     }
 
 
@@ -30263,7 +30563,7 @@ module.exports = (config) => {
         if (short)
             displayText = displayText.slice(0, 6) + '..';
         else {
-            displayText = bundle.DeltaBalances.addressName(addr, !short);
+            displayText = db.addressName(addr, !short);
 
             //show addres after name 'Contract A 0xab12cd34..' in a smaller size
             if (html && !short && displayText && displayText !== addr) {
@@ -30295,7 +30595,7 @@ module.exports = (config) => {
         if (short)
             displayText = displayText.slice(0, 6) + '..';
         else {
-            displayText = bundle.DeltaBalances.addressName(addr, !short);
+            displayText = db.addressName(addr, !short);
         }
         return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
     };
@@ -30311,7 +30611,7 @@ module.exports = (config) => {
                 to: address,
                 data: data,
             }
-            if (config.etherscanAPIKey) { postContents.apiKey = config.etherscanAPIKey };
+            if (db.config.etherscanAPIKey) { postContents.apiKey = db.config.etherscanAPIKey };
             utility.postURL(url, postContents, (err, body) => {
                 if (!err && body) {
                     try {
@@ -30379,7 +30679,9 @@ module.exports = (config) => {
         let range = {
             start: startblock,
             end: endblock,
-            count: (endblock - startblock) + 1
+            count: (endblock - startblock) + 1,
+            retries: 0,
+            error: false
         };
 
         makeRequest();
@@ -30392,15 +30694,20 @@ module.exports = (config) => {
                 },
                 type: "POST",
                 async: true,
-                url: bundle.DeltaBalances.config.infuraURL,
+                url: db.config.infuraURL,
                 data: '{"jsonrpc":"2.0","method":"eth_getLogs","params":' + filterObj + ' ,"id":' + rpcID + '}',
                 dataType: 'json',
                 timeout: 55000, // 55 sec timeout (these requests can be slooooow)
             }).done((result) => {
-                if (result) {
+                if (result && result.jsonrpc) {
+                    // success {"jsonrpc":"2.0","id":7,"result":[]}
+                    // fail {"jsonrpc":"2.0","id":92,"error":{"code":-32005,"message":"query returned more than 1000 results"}}
 
                     if (result.result && Array.isArray(result.result)) {
                         callback(result.result, range);
+                    } else if (result.error && result.error.code) {
+                        console.log(result.error);
+                        returnError(result.error.code);
                     } else {
                         //response but not an array as expected?
                         returnError();
@@ -30414,9 +30721,16 @@ module.exports = (config) => {
             });
         }
 
-        function returnError() {
-            range.count = 0;
+        function returnError(code = undefined) {
             range.error = true;
+            range.splitRetry = false;
+            range.abort = false;
+
+            if (code == -32005) {  //error for more than 1000 results?
+                range.splitRetry = true;
+            } else if (code < -32600) { //standard jsonrpc error codes
+                range.abort = true;
+            }
             callback(undefined, range);
         }
     };
@@ -30436,7 +30750,7 @@ module.exports = (config) => {
 
         function proxy() {
             let url = `https://api.etherscan.io/api?module=proxy&action=eth_GetTransactionReceipt&txhash=${txHash}`;
-            if (config.etherscanAPIKey) url += `&apikey=${config.etherscanAPIKey}`;
+            if (db.config.etherscanAPIKey) url += `&apikey=${db.config.etherscanAPIKey}`;
             utility.getURL(url, (err, body) => {
                 if (!err && body) {
                     const result = body;//JSON.parse(body);
@@ -30473,7 +30787,7 @@ module.exports = (config) => {
         }
 
         function proxy() {
-            var url = 'https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + decBlocknr + '&apikey=' + _delta.config.etherscanAPIKey;
+            var url = 'https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + decBlocknr + '&apikey=' + db.config.etherscanAPIKey;
             utility.getURL(url, (err, res) => {
                 if (!err && res && res.status == "1" && res.result && res.result.timeStamp) {
                     callback(undefined, res.result.timeStamp, res.result.blockNumber);
@@ -30499,7 +30813,7 @@ module.exports = (config) => {
 
         function proxy() {
             let url = `https://api.etherscan.io/api?module=proxy&action=eth_BlockNumber`;
-            if (config.etherscanAPIKey) url += `&apikey=${config.etherscanAPIKey}`;
+            if (db.config.etherscanAPIKey) url += `&apikey=${db.config.etherscanAPIKey}`;
             utility.getURL(url, (err, body) => {
                 if (!err && body) {
                     const result = body;//JSON.parse(body);

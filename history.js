@@ -162,7 +162,7 @@ var isAddressPage = true;
 
 
 
-		setBlockProgress(0, 0, 0, 0, 0);
+		setBlockProgress();
 		changeTypes();
 
 		// detect enter & keypresses in input
@@ -626,8 +626,11 @@ var isAddressPage = true;
 		$('#days').val(days);
 	}
 
-	function setBlockProgress(loaded, max, trades, start, end) {
-		let progressString = 'Loaded ' + loaded + '/' + max + ' blocks';
+	function setBlockProgress(loaded = 0, max = 0, aborted = 0) {
+		let progressString = 'Loaded ' + (loaded + aborted) + '/' + max + ' blocks';
+		if (aborted && aborted > 0) {
+			progressString += ', <span style="color:red">' + aborted + ' blocks failed </span>';
+		}
 		$('#blockProgress').html(progressString);
 	}
 
@@ -672,13 +675,14 @@ var isAddressPage = true;
 
 		var start = startblock;
 		var end = endblock;
-		const max = 5000; // max number of blocks in the range of 1 request
+		const max = 2500; // max number of blocks in the range of 1 request
 
 		let totalBlocks = end - start + 1; //block 5-10 (inclusive) gives you 6 blocks
 
 		loadedLogs = 0;
 		let downloadedBlocks = 0;
-		setBlockProgress(downloadedBlocks, totalBlocks, 0);
+		let abortedBlocks = 0;
+		setBlockProgress(downloadedBlocks, totalBlocks, abortedBlocks);
 
 		var tradeLogResult = [];
 		var contractAddr = '';
@@ -700,7 +704,7 @@ var isAddressPage = true;
 		var activeRequests = 0;
 		const maxRequests = 10; //max number of concurrent get_logs request
 		var activeStart = start;
-		var failedRanges = [];
+		var failedRanges = []; //failed, planning to retry
 
 		// repeat func until it returns false
 		for (var i = 0; i < maxRequests; i++) {
@@ -711,15 +715,8 @@ var isAddressPage = true;
 			if (activeRequests < maxRequests) {
 				// first loop through the entire block range
 
-				if (activeStart <= end) {
-					activeRequests++;
-					let tempStart = activeStart;
-					activeStart = tempStart + max + 1;
-					getLogsInRange(tempStart, Math.min(tempStart + max, end), rpcId);
-					rpcId++;
-					return true;
-				}
-				else if (failedRanges.length > 0) {
+				// see if we can retry any failed requests
+				if (failedRanges.length > 0) {
 					let rangeObj = failedRanges[0];
 					failedRanges.splice(0, 1);
 
@@ -729,7 +726,15 @@ var isAddressPage = true;
 					rpcId++;
 					return true;
 				}
-
+				//use remaining blocks to make new request
+				else if (activeStart <= end) {
+					activeRequests++;
+					let tempStart = activeStart;
+					activeStart = tempStart + max + 1;
+					getLogsInRange(tempStart, Math.min(tempStart + max, end), rpcId);
+					rpcId++;
+					return true;
+				}
 			} else {
 				return false;
 			}
@@ -742,20 +747,51 @@ var isAddressPage = true;
 		function receiveLogs(logs, rangeObj) {
 
 			activeRequests--;
+			let abortRetries = false;
 
+			//check if the request failed to return logs
 			if (rangeObj && (!logs || rangeObj.error)) {
-				console.log('range ' + rangeObj.start + ' ' + rangeObj.end + ' failed');
-				failedRanges.push(rangeObj);
+				if (rangeObj.retries >= 3) {
+					abortRetries = true;
+					console.log('range (' + rangeObj.count + ') ' + rangeObj.start + ' ' + rangeObj.end + ' failed, abort retries');
+				}
+				// add block range to the list of failed requests to retry
+				else if (!rangeObj.abort && !rangeObj.splitRetry) {
+					console.log('range (' + rangeObj.count + ') ' + rangeObj.start + ' ' + rangeObj.end + ' failed, prepare to retry');
+					rangeObj.retries = rangeObj.retries + 1;
+					failedRanges.push(rangeObj);
+				}
+				//split range in half to avoid error of too many results
+				else if (rangeObj.splitRetry) {
+					console.log('range (' + rangeObj.count + ') ' + rangeObj.start + ' ' + rangeObj.end + ' failed, split range');
+					if (rangeObj.count > 3) {
+						let r1 = { start: rangeObj.start, end: rangeObj.start + Math.floor(rangeObj.count / 2), retries: rangeObj.retries + 1 };
+						let r2 = { start: r1.end + 1, end: rangeObj.end, retries: rangeObj.retries + 1 };
+						r1.count = r1.end - r1.start + 1;
+						r2.count = r2.end - r2.start + 1;
+
+						reqAmount++; // expect 1 more request
+						failedRanges.push(r1);
+						failedRanges.push(r2);
+					} else {
+						failedRanges.push(rangeObj);
+					}
+				} else if (rangeObj.abort) {
+					abortRetries = true;
+					console.log('range (' + rangeObj.count + ') ' + rangeObj.start + ' ' + rangeObj.end + ' failed, aborted');
+				} else {
+					abortRetries = true;
+					console.log('range (' + rangeObj.count + ') ' + rangeObj.start + ' ' + rangeObj.end + ' failed, unknown');
+				}
 			}
 
 			// start the next request now that one has returned
 			getBatchedLogs();
 
+			if (rqid <= requestID && rangeObj) { //valid request
 
-			if (rqid <= requestID && rangeObj && !rangeObj.error) {
-				downloadedBlocks += rangeObj.count;
-				if (logs) {
-
+				if (!rangeObj.error && logs) { //success
+					downloadedBlocks += rangeObj.count;
 					loadedLogs++;
 					if (logs.length > 0) {
 						var tradesInResult = parseOutput(logs);
@@ -774,12 +810,19 @@ var isAddressPage = true;
 						tradeLogResult = tradeLogResult.concat(tradesInResult);
 					}
 					done();
+
+				} else if ((rangeObj.error && rangeObj.abort) || abortRetries) { // aborted, not retying
+					loadedLogs++;
+					abortedBlocks += rangeObj.count;
+					done();
+				} else {
+					//retrying?
 				}
 			}
 		}
 
 		function done() {
-			setBlockProgress(downloadedBlocks, totalBlocks, tradeLogResult.length);
+			setBlockProgress(downloadedBlocks, totalBlocks, abortedBlocks);
 			if (loadedLogs < reqAmount) {
 				makeTable(tradeLogResult);
 				return;
@@ -974,7 +1017,7 @@ var isAddressPage = true;
 
 				let unpacked = unpackedLogs[i];
 				// dont spend time processing event if it isn't correct
-				if (!unpacked || unpacked.events.length < 3 ||
+				if (!unpacked || unpacked.events.length < 2 ||
 					(
 						unpacked.name != 'Trade' &&
 						unpacked.name != 'LogFill' &&
@@ -994,8 +1037,8 @@ var isAddressPage = true;
 						unpacked.name != 'Buy' &&
 						unpacked.name != 'Sell' &&
 						unpacked.name != 'FillBuyOrder' &&
-						unpacked.name != 'FillSellOrder' /*&&
-                        unpacked.name != 'Match' */
+						unpacked.name != 'FillSellOrder' &&
+                        unpacked.name != 'Match'
 					)
 				) {
 					continue;
@@ -1349,7 +1392,7 @@ var isAddressPage = true;
 
 			for (var colIndex = 0; colIndex < headers.length; colIndex++) {
 				var cellValue = myList[i][headers[colIndex].title];
-				if (cellValue == null) cellValue = "";
+				if (!cellValue && cellValue !== 0) cellValue = "";
 				var head = headers[colIndex].title;
 
 
@@ -1816,43 +1859,43 @@ var isAddressPage = true;
 			// CryptoTax.io (CSV)
 
 			filePrefix = 'CryptoTax_CSV_';
-			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset', 'sell_asset', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee', 'fee_asset', 'transaction_type', 'clarification'];
+			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset_address', 'sell_asset_address', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee_amount', 'fee_asset_address',  'transaction_type'];
 			tableData = [headers];
 
 			for (var i = 0; i < allTrades.length; ++i) {
 				var row = [];
-
+				
 				const exchange = allTrades[i].Exchange;
 				const transactionDate = allTrades[i]['Date'].toISOString();
 				const transactionType = 'trade';
-				const clarificationType = '';
 				let buyAmount = 0;
-				let buyToken = '';
+				let buyTokenAddress = '';
 				let sellAmount = 0;
+				let sellTokenAddress = '';
 				let feeAmount = allTrades[i]['Fee'];
-				let feeToken = allTrades[i]['FeeToken'].name;
+				let feeTokenAddress = allTrades[i]['FeeToken'].addr;
 
 				if (allTrades[i]['Trade'] === 'Buy') {
 					buyAmount = allTrades[i]['Amount'];
-					buyToken = allTrades[i]['Token'].name;
+					buyTokenAddress = allTrades[i]['Token'].addr;
 					sellAmount = allTrades[i]['Total'];
-					sellToken = allTrades[i]['Base'].name;
+					sellTokenAddress = allTrades[i]['Base'].addr;
 				} else {
 					sellAmount = allTrades[i]['Amount'];
-					sellToken = allTrades[i]['Token'].name;
+					sellTokenAddress = allTrades[i]['Token'].addr;
 					buyAmount = allTrades[i]['Total'];
-					buyToken = allTrades[i]['Base'].name;
+					buyTokenAddress = allTrades[i]['Base'].addr;
 				}
 
 				row = [
 					exchange, exchange, transactionDate,
-					buyToken, sellToken, buyAmount, sellAmount, allTrades[i]['Hash'],
-					feeAmount, feeToken, transactionType, clarificationType
+					buyTokenAddress, sellTokenAddress, buyAmount, sellAmount, allTrades[i]['Hash'],
+					feeAmount, feeTokenAddress, transactionType
 				];
 
 				tableData.push(row);
 			}
-			tableData = fixDownloadNumberNotation(tableData, ['buy_amount', 'sell_amount', 'fee']);
+			tableData = fixDownloadNumberNotation(tableData, ['buy_amount', 'sell_amount', 'fee_amount']);
 			// add quotes around each cell data
 			tableData = tableData.map((row) => {
 				return row.map((cell) => {
@@ -1928,7 +1971,7 @@ var isAddressPage = true;
 			// CryptoTax.io funds export (CSV)
 
 			filePrefix = 'CryptoTax_CSV_';
-			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset', 'sell_asset', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee', 'fee_asset', 'transaction_type', 'clarification'];
+			const headers = ['exchange_name', 'account_name', 'trade_date', 'buy_asset_address', 'sell_asset_address', 'buy_amount', 'sell_amount', 'exchange_order_id', 'fee_amount', 'fee_asset_address',  'transaction_type'];
 			tableData = [headers];
 
 			for (var i = 0; i < allFunds.length; ++i) {
@@ -1937,33 +1980,32 @@ var isAddressPage = true;
 				const exchange = allFunds[i].Exchange;
 				const transactionDate = allFunds[i]['Date'].toISOString();
 				const feeAmount = '';
-				const feeToken = '';
-				const clarificationType = '';
+				const feeTokenAddress = '';
 				let buyAmount = '';
-				let buyToken = '';
+				let buyTokenAddress = '';
 				let sellAmount = '';
-				let sellToken = '';
+				let sellTokenAddress = '';
 				let transactionType = '';
 
 				if (allFunds[i]['Type'] === 'Deposit') {
 					buyAmount = allFunds[i]['Amount'];
-					buyToken = allFunds[i]['Token'].name;
+					buyTokenAddress = allFunds[i]['Token'].addr;
 					transactionType = 'deposit';
 				} else {
 					sellAmount = allFunds[i]['Amount'];
-					sellToken = allFunds[i]['Token'].name;
+					sellTokenAddress = allFunds[i]['Token'].addr;
 					transactionType = 'withdrawal';
 				}
 
 				row = [
 					exchange, exchange, transactionDate,
-					buyToken, sellToken, buyAmount, sellAmount, allFunds[i]['Hash'],
-					feeAmount, feeToken, transactionType, clarificationType
+					buyTokenAddress, sellTokenAddress, buyAmount, sellAmount, allFunds[i]['Hash'],
+					feeAmount, feeTokenAddress, transactionType
 				];
 
 				tableData.push(row);
 			}
-			tableData = fixDownloadNumberNotation(tableData, ['buy_amount', 'sell_amount', 'fee']);
+			tableData = fixDownloadNumberNotation(tableData, ['buy_amount', 'sell_amount', 'fee_amount']);
 			// add quotes around each cell data
 			tableData = tableData.map((row) => {
 				return row.map((cell) => {

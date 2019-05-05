@@ -1,0 +1,16 @@
+{
+  "name": "db-tokengenerator",
+  "version": "0.0.1",
+  "main": "",
+  "description": "gets a list of ethereum tokens",
+  "private": true,
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "request": "^2.88.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "deltabalances",
+  "license": ""
+}

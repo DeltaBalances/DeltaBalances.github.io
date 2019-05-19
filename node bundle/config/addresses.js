@@ -144,7 +144,7 @@ module.exports = {
     '0xeed16856d551569d134530ee3967ec79995e2051': 'ShapeShift',
     '0x390de26d772d2e2005c6d1d24afc902bae37a4bb': 'Upbit',
     '0xf5bec430576ff1b82e44ddb5a1c93f6f9d0884f3': 'Yobit',
-    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': 'Centre',
+    '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': 'Centre USDC',
 
 
     // other service addresses that can be useful to be named.

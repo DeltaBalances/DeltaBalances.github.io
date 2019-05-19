@@ -52,7 +52,7 @@ Decentralized exchanges supported by the DeltaBalances website.
 | [Switcheo](https://switcheo.exchange)|Yes| Partial (WIP)| Partial (WIP) | Not yet|
 | [Token Store](https://token.store)| Yes| Yes| Yes| Yes |
 | [Token store Instant-trade](https://token.store)| - | Yes| Yes | No|
-| [Uniswap](https://uniswap.exchange)| - | Partial (WIP)| Partial (WIP) | Not yet|  
+| [Uniswap](https://uniswap.exchange)| - | Yes| Yes| Not yet|  
 
 († = Exchange is no longer active)
 <sup>*</sup> Ethfinex v2 uses 0x v2

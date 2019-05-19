@@ -163,6 +163,10 @@ module.exports = {
     Bilink1: { addr: '0x611ce695290729805e138c9c14dbddf132e76de3', name: 'Bilink', supportedDex: false }, // data
     Bilink1: { addr: '0xc75fa06f6002b458468d9e484d13bf522030d4ae', name: 'Bilink', supportedDex: false }, // balance
 
+
+    // kernel? 0x740f8b58f5562c8379f2a8c2230c9be5c03ac3fc
+    // nuo network https://github.com/NuoNetwork/contracts-v2
+    
     //slowtrade 0x851b7f3ab81bd8df354f0d7640efcd7288553419 ??
     //slowtrade 0x039fb002d21c1c5eeb400612aef3d64d49eb0d94 ??
 

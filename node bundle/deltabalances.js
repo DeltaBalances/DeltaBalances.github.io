@@ -3028,7 +3028,9 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             else if (
                 (
                     (unpacked.name.indexOf('ethToToken') !== -1) ||
-                    (unpacked.name.indexOf('tokenToEth') !== -1)
+                    (unpacked.name.indexOf('tokenToEth') !== -1) ||
+                    (unpacked.name.indexOf('tokenToToken') !== -1) ||
+                    (unpacked.name.indexOf('tokenToExchange') !== -1)
                 ) &&
                 (
                     (unpacked.name.indexOf('Transfer') !== -1) ||
@@ -3049,13 +3051,15 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 function tokenToTokenSwapInput(uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address token_addr)
                 function tokenToTokenTransferInput(uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address token_addr)
                 function tokenToTokenSwapOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address token_addr)
-                function tokenToTokenSwapOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address token_addr)
+                function tokenToTokenTransferOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address token_addr)
                 
                 function tokenToExchangeSwapInput(uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address exchange_addr)
                 function tokenToExchangeTransferInput(uint256 tokens_sold, uint256 min_tokens_bought, uint256 min_eth_bought, uint256 deadline, address recipient, address exchange_addr)
                 function tokenToExchangeSwapOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address exchange_addr)
                 function tokenToExchangeTransferOutput(uint256 tokens_bought, uint256 max_tokens_sold, uint256 max_eth_sold, uint256 deadline, address recipient, address exchange_addr)
                 */
+
+                let swapContract = txTo;
 
                 /* 
                 uniswap is taker trading only, we don't usually want to get info from etherscan token transfers (badFromTo), regular outgoing tx are sufficient
@@ -3073,10 +3077,18 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     // we send eth && receive tokens
                     if (unpacked.name.indexOf('ethToToken') !== -1 && !this.config.uniswapContracts[txFrom]) {
                         this.config.uniswapContracts[txFrom] = token.addr;
-                    } else if (unpacked.name.indexOf('tokenToEth') !== -1 && !this.config.uniswapContracts[txTo]) {
+                        swapContract = txFrom;
+                    } // send token, receive eth 
+                    else if (unpacked.name.indexOf('tokenToEth') !== -1 && !this.config.uniswapContracts[txTo]) {
                         this.config.uniswapContracts[txTo] = token.addr;
                     } else {
                         return undefined;
+                    }
+                } else {
+                    if (!this.config.uniswapContracts[txTo]) {
+                        console.log('input for unknown uniswap contract ' + swapContract);
+                        return undefined;
+                        // TODO fetch this contract?
                     }
                 }
 
@@ -3090,8 +3102,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let recipientIndex = -1;
 
                 if (unpacked.name.indexOf('ethToToken') !== -1) {
-                    token = this.uniqueTokens[this.config.uniswapContracts[txTo]];
-                    base = this.uniqueTokens[this.config.ethAddr];
+                    token = this.setToken(this.config.uniswapContracts[swapContract]);
+                    base = this.setToken(this.config.ethAddr);
                     deadline = Number(unpacked.params[1].value);
                     rawTokenAmount = new BigNumber(unpacked.params[0].value);
                     rawBaseAmount = new BigNumber(tx.value);
@@ -3101,8 +3113,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                     recipientIndex = 2;
                 } else if (unpacked.name.indexOf('tokenToEth') !== -1) {
-                    token = this.uniqueTokens[this.config.uniswapContracts[txTo]];
-                    base = this.uniqueTokens[this.config.ethAddr];
+                    token = this.setToken(this.config.uniswapContracts[swapContract]);
+                    base = this.setToken(this.config.ethAddr);
                     deadline = Number(unpacked.params[2].value);
                     if (unpacked.name.indexOf('Output') == -1) {
                         rawTokenAmount = new BigNumber(unpacked.params[0].value);
@@ -3114,6 +3126,32 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                     tradeType = 'Sell';
                     recipientIndex = 3;
+                } else if (unpacked.name.indexOf('tokenToToken') !== -1 || unpacked.name.indexOf('tokenToExchange') !== -1) {
+                    let tokenIndex = 4;
+                    if (unpacked.name.indexOf('Swap') == -1) {
+                        tokenIndex = 5;
+                    }
+                    tradeType = 'Sell';
+                    token = this.setToken(this.config.uniswapContracts[swapContract]);
+
+                    if (unpacked.name.indexOf('tokenToToken') !== -1) {
+                        base = this.setToken(unpacked.params[tokenIndex].value);
+                    } else {
+                        let uniContract = unpacked.params[tokenIndex].value.toLowerCase();
+                        base = this.setToken(this.config.uniswapContracts[uniContract]);
+                    }
+
+                    deadline = Number(unpacked.params[3].value);
+                    if (unpacked.name.indexOf('Output') == -1) {
+                        rawTokenAmount = new BigNumber(unpacked.params[0].value);
+                        rawBaseAmount = new BigNumber(unpacked.params[1].value);
+                    } else {
+                        rawTokenAmount = new BigNumber(unpacked.params[1].value);
+                        rawBaseAmount = new BigNumber(unpacked.params[0].value);
+                        fixedBaseAmount = true;
+                    }
+
+                    recipientIndex = 4;
                 } else {
                     return undefined;
                 }
@@ -3124,12 +3162,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let baseAmount = utility.weiToToken(rawBaseAmount, base);
 
                     let taker = txFrom;
-                    if (unpacked.name.indexOf == 'Transfer') {
-                        let recipient = unpacked.params[recipientIndex].value.toLowerCase();
-                        taker = recipient;
+                    let recipient = undefined;
+                    if (recipientIndex >= 0 && unpacked.name.indexOf('Transfer') !== -1) {
+                        recipient = unpacked.params[recipientIndex].value.toLowerCase();
                     }
-
-
 
                     let price = new BigNumber(0);
                     if (tokenAmount.greaterThan(0)) {
@@ -3140,7 +3176,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let result = {
                         'type': tradeType + ' up to',
                         'exchange': exchange,
-                        'note': utility.addressLink(taker, true, true) + ' bought tokens from Uniswap',
+                        'note': utility.addressLink(taker, true, true) + ' traded with Uniswap',
                         'token': token,
                         'amount': tokenAmount,
                         'estAmount': tokenAmount,
@@ -3153,6 +3189,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'taker': taker,
                         // 'maker': maker,
                     };
+                    if (recipient && recipient !== taker) {
+                        result.to = recipient;
+                        result.note += " and transferred the funds to " + utility.addressLink(recipient, true, true);
+                    }
                     if (fixedBaseAmount) { //min tokens amount)
                         delete result.estBaseAmount;
                         delete result.amount;
@@ -5628,6 +5668,9 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         'transType': 'Taker',
                         'tradeType': tradeType,
                     };
+                } else {
+                    //todo, fetch unknown contract?
+                    console.log('trade event for unknown uniswap contract');
                 }
             }
             //uniswap liquidity
@@ -5655,6 +5698,9 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         'token ': token,
                         'wallet': wallet,
                     };
+                } else {
+                    //todo, fetch unknown contract?
+                    console.log('liquidity event for unknown uniswap contract');
                 }
             }
 

@@ -913,6 +913,13 @@ var isAddressPage = true;
 										obj.type = obj.type.replace('Token ', '');
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
 									}
+									else if (unpacked.name === 'depositAndApprove') {
+										if (i == 0) { //wrap eth to veil ETH
+											trans = createOutputTransaction('Wrap', obj['token In'], obj.amount, obj['token Out'], obj.amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+										} else { // approve veil ETH
+											trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);
+										}
+									}
 									else if ((unpacked.name == 'kill' || unpacked.name == 'cancel') && unpacked.params.length == 1) {
 										trans = createOutputTransaction(obj.type, undefined, undefined, undefined, undefined, tx.hash, tx.timeStamp, undefined, undefined, tx.isError === '0', exchange);
 									} else if (unpacked.name == 'buy' && unpacked.params.length == 2) {
@@ -1238,11 +1245,13 @@ var isAddressPage = true;
 
 										trans = createOutputTransaction(newType, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exch);
 									}
-									// uniswap taker trade (partial support)
+									// uniswap taker trade
 									else if (
 										(
 											(unpacked.name.indexOf('ethToToken') !== -1) ||
-											(unpacked.name.indexOf('tokenToEth') !== -1)
+											(unpacked.name.indexOf('tokenToEth') !== -1) ||
+											(unpacked.name.indexOf('tokenToToken') !== -1) ||
+											(unpacked.name.indexOf('tokenToExchange') !== -1)
 										) &&
 										(
 											(unpacked.name.indexOf('Transfer') !== -1) ||

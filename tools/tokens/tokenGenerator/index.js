@@ -286,7 +286,7 @@ async function loadListedTokens() {
 
                     let ignoreListing = false;
                     if (exchange) {
-                        if ((ignoreKey && allTokens[token.address][ignoreKey])) {
+                        if ((ignoreKey && allTokens[token.address] && allTokens[token.address][ignoreKey])) {
                             ignoreListing = true;
                         } else {
                             token[exchange] = token.symbol;
@@ -345,11 +345,14 @@ function writeJsonToFile(filename, json) {
     str = str.replace(/"Radar"/g, 'Radar');
     str = str.replace(/"Kyber"/g, 'Kyber');
     str = str.replace(/"TokenStore"/g, 'TokenStore');
-    str = str.replace(/name:Kyber/g, 'name:"Kyber"');
     str = str.replace(/{ /g, '{');
     str = str.replace(/ }/g, '}');
     str = str.replace(/, /g, ',');
     str = str.replace(/: /g, ':');
+
+    str = str.replace(/name:Kyber/g, 'name:"Kyber"');
+    str = str.replace(/name:IDEX/g, 'name:"IDEX"');
+    str = str.replace(/symbol:IDEX/g, 'symbol:"IDEX"');
 
     fs.writeFile(filename, str, function (err) {
         if (err) {
@@ -414,7 +417,9 @@ async function addEthplorerTokensInternal(response) {
                     alerts[addr] = tok.alert;
                 }
                 // any real token has balance > 10 and less than totalsupply in 1 contract
-                if (tok.symbol && tokenResponse.balance > 10 && tokenResponse.balance < (Number(tok.totalSupply) / 2)) {
+                if (tok.symbol && (!tokenResponse.tokenInfo ||
+                    (tokenResponse.balance > 10 && tokenResponse.balance < (Number(tok.totalSupply) / 2))
+                )) {
 
                     // tokens with known holders count are interesting
                     if (tok.holdersCount) {
@@ -423,6 +428,8 @@ async function addEthplorerTokensInternal(response) {
                                 tokenObj.blocked = 1; // block for balance loading below 'requiredHolders' users
                             }
                             addToken(tokenObj, allTokens);
+                        } else {
+                            addToken(tokenObj, badTokens);
                         }
                     } else if (tok.price) {
                         //tokens with a known price trade somewhere, add those too

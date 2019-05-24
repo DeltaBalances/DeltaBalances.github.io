@@ -55,8 +55,8 @@ function getAddress(paramAddr) {
     }
 
     //address either vald or ''
-  //  if (!publicAddr || publicAddr !== address || secondaryAddresses.length > 0 || secondaryAddresses.length < extraAddresses.length) {
-        setAddressUI(address, secondaryAddresses);
+    //  if (!publicAddr || publicAddr !== address || secondaryAddresses.length > 0 || secondaryAddresses.length < extraAddresses.length) {
+    setAddressUI(address, secondaryAddresses);
     //}
     extraAddresses = secondaryAddresses;
 
@@ -126,8 +126,10 @@ function setAddressUI(address, secondaryAddresses) {
             $('#web3button').removeClass('hidden');
         }
     } else {
-        $('#metamaskSection').removeClass('hidden');
-        $('.metamask-import').removeClass('hidden');
+        if (window.ethereum || window.web3) {
+            $('#metamaskSection').removeClass('hidden');
+            $('.metamask-import').removeClass('hidden');
+        }
         $('#metamask-inactive').addClass('hidden');
     }
 
@@ -230,6 +232,13 @@ function loadSaved() {
 }
 
 function requestMetamask(popup = false) {
+    if (!(window.ethereum || window.web3)) {
+        $('#metamaskSection').addClass('hidden');
+        $('.metamask-import').addClass('hidden');
+        $('#web3button').addClass('hidden');
+        $('.mini-metamask').addClass('hidden');
+    }
+
     _util.getWeb3Address(popup, (response, changed) => {
         if (response) {
             metamaskAddr = response;
@@ -262,9 +271,11 @@ function loadMetamask() {
             myClick();
         }
     } else {
-        $('#metamaskSection').removeClass('hidden');
-        $('.metamask-import').removeClass('hidden');
-        $('#web3button').removeClass('hidden');
+        if (window.ethereum || window.web3) {
+            $('#metamaskSection').removeClass('hidden');
+            $('.metamask-import').removeClass('hidden');
+            $('#web3button').removeClass('hidden');
+        }
         $('#metamask-inactive').addClass('hidden');
     }
     return false;

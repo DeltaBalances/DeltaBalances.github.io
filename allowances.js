@@ -1,6 +1,7 @@
 // made by butchering balances.js, TODO remove duplicate code
 
 var isAddressPage = true;
+var pageType = 'allowance';
 {
     // shorthands
     var _delta = bundle.DeltaBalances;
@@ -181,11 +182,7 @@ var isAddressPage = true;
     function readyInit() {
 
         //get metamask address as possbile input (if available)
-        metamaskAddr = _util.getMetamaskAddress();
-        if (metamaskAddr) {
-            setMetamaskImage(metamaskAddr);
-            $('#metamaskAddress').html(metamaskAddr.slice(0, 16));
-        }
+        requestMetamask(false);
         getStorage();
 
         $('#decimals').prop('checked', decimals);

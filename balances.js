@@ -1,5 +1,6 @@
 
 var isAddressPage = true;
+var pageType = 'balance';
 {
     // shorthands
     var _delta = bundle.DeltaBalances;
@@ -185,11 +186,8 @@ var isAddressPage = true;
         checkCollapseSettings(true);
 
         //get metamask address as possbile input (if available)
-        metamaskAddr = _util.getMetamaskAddress();
-        if (metamaskAddr) {
-            setMetamaskImage(metamaskAddr);
-            $('#metamaskAddress').html(metamaskAddr.slice(0, 16));
-        }
+        requestMetamask(false);
+        
         getStorage();
 
         $('#zero').prop('checked', hideZero);

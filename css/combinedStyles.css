@@ -62,7 +62,8 @@ table.DTFC_Cloned thead,table.DTFC_Cloned tfoot{background-color:white}div.DTFC_
     background-color: #fff;
     border-color: #ccc;
  }
- 
+
+
  .dropdown-menu {
     -webkit-background-clip: padding-box;
     background-clip: padding-box;
@@ -979,4 +980,40 @@ th, td {
 
 .DTFC_RightBodyLiner {
   overflow-x: hidden;
+}
+
+
+#web3button {
+  /*text-align:left;*/
+  /*height:30px;*/
+  /*background: url('images/metamask.png') 45px 0px no-repeat;*/
+  background: inherit url('images/metamask.png') 0px 0px no-repeat;
+  background-size: 60%;
+  padding-left: 0px;
+  padding-right: 0px;
+ /* float:right; */
+}
+
+#metamask-logo-sidebar {
+  width:32px; 
+  height:32px;
+  background: url('images/metamask.png') 0px 0px no-repeat;
+  background-size: contain;
+  border-radius:0%;
+}
+
+.control-sidebar-heading {
+  padding:0px;
+  margin-top:5px;
+  margin-bottom:0px;
+}
+
+.input-group-btn {
+  background-color:transparent;
+}
+
+.mini-metamask {
+  margin:17px 17px; 
+  height:50%; 
+  width:50%;
 }

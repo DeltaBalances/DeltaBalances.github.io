@@ -997,17 +997,60 @@ module.exports = (db) => {
         }
     };
 
-    utility.getMetamaskAddress = function () {
-        // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-        if (typeof web3 !== 'undefined') {
-            // Use the browser's ethereum provider
-            var provider = web3.currentProvider;
-            var localWeb3 = new Web3(web3.currentProvider);
+    // Check for an address from a web3 browser/addon like Metamask
+    utility.getWeb3Address = function (allowPopup, callback) {
+
+        if (window && (typeof window.ethereum !== 'undefined'
+            || typeof window.web3 !== 'undefined')
+        ) {
+
+            // Web3 browser user detected.
+            const provider = window['ethereum'] || window.web3.currentProvider
+            var localWeb3 = new Web3(provider);
+
+            // already detected an account, listen for changes
+            if (window.ethereum && localWeb3.eth.accounts.length > 0) {
+                window.ethereum.on('accountsChanged', onAccountChange);
+            }
+
+            //legacy & privacy mode disabled, will expose account in web3
             if (localWeb3.eth.accounts.length > 0) {
-                return localWeb3.eth.accounts[0].toLowerCase();
+                callback(localWeb3.eth.accounts[0].toLowerCase());
+                return;
+            }
+            // privacy mode: need to ask to enable access
+            else if (allowPopup && window.ethereum) {
+                ethereum.enable()
+                    .then(function (accounts) {
+                        window.ethereum.on('accountsChanged', onAccountChange);
+                        if (accounts.length > 0) {
+                            callback(accounts[0].toLowerCase());
+                            return;
+                        } else {
+                            callback('');
+                            return;
+                        }
+                    })
+                    .catch(function (reason) {
+                        console.log('injected web3 enable failed');
+                        callback('');
+                        return;
+                    });
+            } else {
+                callback('');
+                return;
             }
         }
-        return '';
+
+        function onAccountChange(accounts) {
+            let addr = '';
+            if (accounts.length > 0) {
+                addr = accounts[0].toLowerCase();
+            }
+            if (addr !== metamaskAddr) { // metamaskaddr defined in html
+                callback(accounts[0].toLowerCase(), true);
+            }
+        }
     };
     return utility;
 };

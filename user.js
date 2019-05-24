@@ -55,9 +55,9 @@ function getAddress(paramAddr) {
     }
 
     //address either vald or ''
-    if (!publicAddr || publicAddr !== address || secondaryAddresses.length > 0 || secondaryAddresses.length < extraAddresses.length) {
+  //  if (!publicAddr || publicAddr !== address || secondaryAddresses.length > 0 || secondaryAddresses.length < extraAddresses.length) {
         setAddressUI(address, secondaryAddresses);
-    }
+    //}
     extraAddresses = secondaryAddresses;
 
     if (!address)
@@ -75,6 +75,7 @@ function setAddressUI(address, secondaryAddresses) {
 
     //image icons
     setAddrImage(address);
+    $('.mini-metamask').addClass('hidden');
     if (isAddressPage) {
         //big address link at the top
         document.getElementById('addr').innerHTML = address ? _util.addressLink(address, true, false) : '';
@@ -86,6 +87,7 @@ function setAddressUI(address, secondaryAddresses) {
     if (!savedAddr || address && (address.toLowerCase() !== savedAddr.toLowerCase())) { // valid address, nothing saved
         $('#save').removeClass('hidden');
         $('#forget').addClass('hidden');
+        document.getElementById('currentAddrDescr').innerHTML = 'Input address';
         if (savedAddr) {
             $('#savedSection').removeClass('hidden');
         }
@@ -96,7 +98,7 @@ function setAddressUI(address, secondaryAddresses) {
             $('#forget').removeClass('hidden');
             $('#savedSection').addClass('hidden');
             if (savedAddr === metamaskAddr) {
-                document.getElementById('currentAddrDescr').innerHTML = 'Metamask address (Saved)';
+                document.getElementById('currentAddrDescr').innerHTML = 'Web3 address (Saved)';
             } else {
                 document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
             }
@@ -107,12 +109,26 @@ function setAddressUI(address, secondaryAddresses) {
     //detected address section of sidebar
     if (metamaskAddr) {
         if (address.toLowerCase() === metamaskAddr.toLowerCase()) {
-            if (metamaskAddr !== savedAddr)
-                document.getElementById('currentAddrDescr').innerHTML = 'Metamask address';
+            if (metamaskAddr !== savedAddr) {
+                document.getElementById('currentAddrDescr').innerHTML = 'Web3 address';
+            } else {
+                document.getElementById('currentAddrDescr').innerHTML = 'Web3 address (Saved)';
+            }
             $('#metamaskSection').addClass('hidden');
+            $('.metamask-import').addClass('hidden');
+            $('#web3button').addClass('hidden');
+
+            $('.mini-metamask').removeClass('hidden');
         } else {
             $('#metamaskSection').removeClass('hidden');
+            $('#metamask-inactive').removeClass('hidden');
+            $('.metamask-import').addClass('hidden');
+            $('#web3button').removeClass('hidden');
         }
+    } else {
+        $('#metamaskSection').removeClass('hidden');
+        $('.metamask-import').removeClass('hidden');
+        $('#metamask-inactive').addClass('hidden');
     }
 
     if (address) {
@@ -161,6 +177,7 @@ function forget() {
     if (publicAddr) {
         if (publicAddr.toLowerCase() === savedAddr.toLowerCase()) {
             savedAddr = '';
+            setAddressUI(publicAddr, extraAddresses);
             $('#savedSection').addClass('hidden');
             $('#save').removeClass('hidden');
             $('#forget').addClass('hidden');
@@ -201,7 +218,6 @@ function save() {
 //use address saved in cache as input
 function loadSaved() {
     if (savedAddr) {
-
         //publicAddr = savedAddr;
         publicAddr = getAddress(savedAddr);
         $('#forget').removeClass('hidden');
@@ -209,9 +225,27 @@ function loadSaved() {
         if (isAddressPage) {
             myClick();
         }
-
     }
     return false;
+}
+
+function requestMetamask(popup = false) {
+    _util.getWeb3Address(popup, (response, changed) => {
+        if (response) {
+            metamaskAddr = response;
+            setMetamaskImage(metamaskAddr);
+            $('#metamaskAddress').html(metamaskAddr.slice(0, 16));
+            if (popup || changed) {
+                loadMetamask();
+            } else {
+                let addr = publicAddr;
+                if (!addr) {
+                    addr = metamaskAddr;
+                }
+                setAddressUI(addr, extraAddresses);
+            }
+        }
+    });
 }
 
 //use address detected from Metamask as input
@@ -221,10 +255,17 @@ function loadMetamask() {
         publicAddr = getAddress(metamaskAddr);
 
         $('#metamaskSection').addClass('hidden');
+        $('.metamask-import').addClass('hidden');
+        $('#web3button').addClass('hidden');
         setStorage();
-        if (isAddressPage) {
+        if (isAddressPage && pageType !== 'history') {
             myClick();
         }
+    } else {
+        $('#metamaskSection').removeClass('hidden');
+        $('.metamask-import').removeClass('hidden');
+        $('#web3button').removeClass('hidden');
+        $('#metamask-inactive').addClass('hidden');
     }
     return false;
 }

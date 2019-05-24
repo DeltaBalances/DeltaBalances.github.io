@@ -1,5 +1,6 @@
 
 var isAddressPage = true;
+var pageType = 'history';
 {
 	//set var exchanges in html
 
@@ -141,15 +142,6 @@ var isAddressPage = true;
 
 	function readyInit() {
 
-		//get metamask address as possbile input (if available)
-		metamaskAddr = _util.getMetamaskAddress();
-		if (metamaskAddr) {
-			setMetamaskImage(metamaskAddr);
-			$('#metamaskAddress').html(metamaskAddr.slice(0, 16));
-		}
-
-
-
 		$('#exchangeDropdown').on('changed.bs.select', function (e) {
 			var selected = []
 			selected = $('#exchangeDropdown').val();
@@ -159,8 +151,6 @@ var isAddressPage = true;
 		});
 
 		setExchanges(exchanges, true);
-
-
 
 		setBlockProgress();
 		changeTypes();
@@ -175,8 +165,6 @@ var isAddressPage = true;
 				return true;
 			}
 		});
-
-
 
 		$(window).resize(function () {
 			hidePopovers();
@@ -213,6 +201,10 @@ var isAddressPage = true;
 		}
 
 		getStorage();
+		//get metamask address as possbile input (if available)
+		requestMetamask(false);
+
+		setAddressUI(publicAddr, extraAddresses);
 
 		if (publicAddr) {
 			//autoStart = true;

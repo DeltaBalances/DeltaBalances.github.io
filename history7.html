@@ -6,9 +6,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="View and export OasisDex trade history.">
   <meta content="width=device-width, initial-scale=1" name="viewport">
+  <link rel="icon" type="image/png" sizes="64x64" href="./favicon-64x64.png?1">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
-  <link rel="icon" type="image/png" sizes="64x64" href="./favicon-64x64.png?1">
 
   <title>Delta Balances - OasisDex</title>
 
@@ -82,6 +82,7 @@
           <div class="input-group" style="width:100%;">
             <input type="text" id="address" class="form-control custom" placeholder="Ethereum address, transaction hash">
             <span class="input-group-btn">
+			<input type="image" title="Import from web3" id="web3button" class="btn" onClick="requestMetamask(true)" src="css/images/metamask.png"/>
               <button id="refreshButton" onClick="myClick()" class="btn btn-flat">
                 <i id="refreshButtonSearch" class="fa fa-search" aria-hidden="true"></i>
                 <i id="refreshButtonLoading" style="display:none" class="fa fa-refresh fa-spin" aria-hidden="true"></i>
@@ -96,7 +97,7 @@
           <!-- Menu Toggle Button -->
           <a href="#" id="userToggle" class="hidden dropdown-toggle" data-toggle="control-sidebar">
             <!-- The user image in the navbar-->
-            <i id="userImage" class="user-image bg-red" style="width:32px; height:32px;"></i>
+            <i id="userImage" class="user-image bg-red" style="width:32px; height:32px;"><img class="mini-metamask" src="css/images/metamask.png" alt="metamask logo"></i>
             <!-- hidden-xs hides the username on small devices so only the image appears. -->
             <span id="currentAddr2" class="hidden-xs">0x......</span>
           </a>
@@ -534,15 +535,24 @@
               </li>
             </ul>
           </div>
-          <div id="metamaskSection" class="hidden">
-            <h3 class="control-sidebar-heading">Detected Address</h3>
+          <div id="metamaskSection">
+            <h3 class="control-sidebar-heading">Web3 browser</h3>
             <ul class="control-sidebar-menu">
-              <li>
+              <li id="metamask-inactive" class="hidden">
                 <a onclick="loadMetamask()" href="#">
                   <i id="metamaskImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
                   <div class="menu-info">
                     <h4 id="metamaskAddress" class="control-sidebar-subheading">0x12345678</h4>
-                    <p>Metamask</p>
+                    <p>Web3 import</p>
+                  </div>
+                </a>
+              </li>
+			  <li class="metamask-import">
+                <a onclick="requestMetamask(true)" href="#">
+                  <i id="metamask-logo-sidebar" class="menu-icon" ></i>
+                  <div class="menu-info">
+                    <h4 class="control-sidebar-subheading">Import account</h4>
+					<p> Injected Web3</p>
                   </div>
                 </a>
               </li>

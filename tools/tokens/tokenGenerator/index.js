@@ -14,10 +14,15 @@ let allTokens = {};
 let badTokens = {};
 let alerts = {};
 
+let unknownTokens = [];
+
 const key = /*'freeKey'*/ 'enrrf9840PPmQ31';
 
-const minHolders = 10; // ignore tokens with less holders
+const minHolders = 10; // ignore tokens with fewer holders
 const requiredHolders = 150; // mark tokens with less than this with '.blocked:1'
+
+const currentTimeStamp = Math.floor(Date.now() / 1000);
+const yearInSeconds = 31557600;
 
 // (exchange) addresses that hold a high variety of tokens
 const addresses = [
@@ -80,7 +85,7 @@ async function init() {
         } else {
             let count = Object.keys(allTokens).length;
             if (count > lastCount) {
-                console.log('Added ' + (count - initCount) + ' tokens by ' + addresses[i]);
+                console.log('Added ' + (count - lastCount) + ' tokens by ' + addresses[i]);
             } else {
                 console.log('Added 0 tokens by ' + addresses[i]);
             }
@@ -94,10 +99,30 @@ async function init() {
 
     console.log('loading DEX listed tokens');
     await loadListedTokens();
+    await loadEthfinexTrustless();
     addFixedListedTokens();
 
     endCount = Object.keys(allTokens).length;
     console.log('finished DEX tokens, ' + endCount);
+
+    let mewTokens = await getMewTokens();
+    unknownTokens = unknownTokens.concat(mewTokens);
+
+    if (unknownTokens.length > 0) {
+        unknownTokens = unknownTokens.map(x => x.toLowerCase());
+        unknownTokens = unknownTokens.filter(x => {
+            return !badTokens[x] && !allTokens[x];
+        });
+        console.log('checking ' + unknownTokens.length + ' unknown tokens');
+
+        for (let i = 0; i < unknownTokens.length; i++) {
+            let addr = unknownTokens[i];
+            await addTokenByAddress(addr);
+            console.log('checked unknown token ' + (i + 1));
+            await wait(250);
+        }
+    }
+
 
     let badCount = Object.keys(badTokens).length;
 
@@ -161,6 +186,9 @@ function parseKnownToken(tok) {
     if (tok.blocked) {
         token.blocked = Number(tok.blocked);
     }
+    if (tok.inactive) {
+        token.inactive = true;
+    }
     if (tok.spam) {
         token.spam = true;
     }
@@ -191,6 +219,62 @@ function addFixedListedTokens() {
             }
         }
     }
+}
+
+//get token list from myetherwallet. Only use addresses as there can be invalid tokens on the list
+async function getMewTokens() {
+    let response = await getJson('https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/dist/tokens/eth/tokens-eth.json');
+    if (response && response.length > 0) {
+        let tokenData = response.filter(tokenInfo => tokenInfo.type && tokenInfo.type === 'ERC20');
+        tokenData = tokenData.map(x => x.address.toLowerCase());
+        return tokenData;
+    }
+    return [];
+}
+
+async function addTokenByAddress(address) {
+    if (address) {
+        let response = await getJson('http://api.ethplorer.io/getTokenInfo/' + address + '?apiKey=' + key);
+        if (response && response.symbol) {
+            handleTokenInfo(response);
+        }
+    }
+}
+
+async function loadEthfinexTrustless() {
+    let response = await getJson('https://api.ethfinex.com/trustless/v1/r/get/conf', true);
+    if (response && response['0x']) {
+        let tokenData = response['0x'].tokenRegistry;
+        let symbols = Object.keys(tokenData);
+        let tokens = Object.values(tokenData);
+
+        for (let i = 0; i < symbols.length; ++i) {
+            if (symbols[i] === 'ETH') {
+                continue;
+            }
+            let tok = tokens[i];
+
+            let token = {
+                symbol: symbols[i],
+                address: tok.tokenAddress.toLowerCase(),
+                decimal: Number(tok.decimals)
+            };
+            let wrapperToken = {
+                symbol: token.symbol + '-W',
+                address: tok.wrapperAddress.toLowerCase(),
+                decimal: token.decimal,
+                name: token.symbol + ' wrapper (ethfinex)',
+                blocked: 1,
+            };
+
+            addToken(token, allTokens);
+            addToken(wrapperToken, allTokens);
+        }
+        console.log('loaded ethfinex trustless tokens');
+    } else {
+        console.log('failed to load ethfinex trustless tokens');
+    }
+
 }
 
 async function loadListedTokens() {
@@ -332,6 +416,7 @@ function writeJsonToFile(filename, json) {
     str = str.replace(/"name"/g, 'name');
     str = str.replace(/"locked"/g, 'locked');
     str = str.replace(/"blocked"/g, 'blocked');
+    str = str.replace(/"inactive"/g, 'inactive');
     str = str.replace(/"killed"/g, 'killed');
     str = str.replace(/"old"/g, 'old');
     str = str.replace(/"spam"/g, 'spam');
@@ -353,6 +438,7 @@ function writeJsonToFile(filename, json) {
     str = str.replace(/name:Kyber/g, 'name:"Kyber"');
     str = str.replace(/name:IDEX/g, 'name:"IDEX"');
     str = str.replace(/symbol:IDEX/g, 'symbol:"IDEX"');
+    str = str.replace(/IDEX:IDEX/g, 'IDEX:"IDEX"');
 
     fs.writeFile(filename, str, function (err) {
         if (err) {
@@ -402,102 +488,150 @@ async function addEthplorerTokensInternal(response) {
                 break;
             }
 
-            let addr = tok.address.toLowerCase();
-            if (addr == zeroAddr) {
-                continue;
-            }
-
-            let tokenObj = { symbol: escapeHtml(tok.symbol), address: addr, decimal: Number(tok.decimals) };
-            if (tok.name) {
-                tokenObj.name = escapeHtml(tok.name);
-            }
-            // do we know this token?
-            if (!allTokens[addr]) {
-                if (tok.alert) {
-                    alerts[addr] = tok.alert;
-                }
-                // any real token has balance > 10 and less than totalsupply in 1 contract
-                if (tok.symbol && (!tokenResponse.tokenInfo ||
-                    (tokenResponse.balance > 10 && tokenResponse.balance < (Number(tok.totalSupply) / 2))
-                )) {
-
-                    // tokens with known holders count are interesting
-                    if (tok.holdersCount) {
-                        if (tok.holdersCount > minHolders) {
-                            if (tok.holdersCount <= requiredHolders) {
-                                tokenObj.blocked = 1; // block for balance loading below 'requiredHolders' users
-                            }
-                            addToken(tokenObj, allTokens);
-                        } else {
-                            addToken(tokenObj, badTokens);
-                        }
-                    } else if (tok.price) {
-                        //tokens with a known price trade somewhere, add those too
-                        addToken(tokenObj, allTokens);
-                    } else if (!badTokens[addr]) { // no price or holders, mark as bad
-                        addToken(tokenObj, badTokens);
-                    }
-                } else {
-                    addToken(tokenObj, badTokens);
-                }
-            } else {
-                //alert that isn't known yet
-                if (tok.alert && !allTokens[addr].old && !allTokens[addr].locked) {
-                    alerts[addr] = tok.alert;
-                }
-                if (tok && tok.holdersCount) {
-                    if (Number(tok.holdersCount) < requiredHolders) {
-                        tokenObj.blocked = 1;
-                        addToken(tokenObj, allTokens); // update blocked status
-                    }
-                }
-            }
-            return true;
+            handleTokenInfo(tok);
         }
+        return true;
     } else {
         return false;
     }
+}
 
-    function addToken(tokenObj, collection) {
-        if (tokenObj && collection) {
-            let addr = tokenObj.address;
-            if (!collection[addr]) {
-                collection[addr] = tokenObj;
-            } else {
-                // we already know the token, see if we can update any data
-                let knownToken = collection[addr];
-                //bad symbol
-                if (knownToken.symbol !== tokenObj.symbol) {
-                    knownToken.symbol = tokenObj.symbol;
-                }
-                // add name
-                if (!knownToken.name && tokenObj.name && tokenObj.symbol !== tok.name) {
-                    knownToken.name = tokenObj.name;
-                }
-                //fix incorrect decimals
-                if (knownToken.decimal !== tokenObj.decimal) {
-                    if (addr !== "0xecf8f87f810ecf450940c9f60066b4a7a501d6a7") // old MKR WETH reports bad decimals
-                        knownToken.decimal = tokenObj.decimal;
-                }
-                if (knownToken.blocked === 1 && !tokenObj.blocked) {
-                    delete knownToken.blocked;
-                } else if (tokenObj.blocked && !knownToken.blocked) {
-                    knownToken.blocked = tokenObj.blocked;
-                }
+function handleTokenInfo(response) {
+    if (!response.address) {
+        return;
+    }
+    let addr = response.address.toLowerCase();
+    if (addr == zeroAddr) {
+        return;
+    }
 
-                collection[addr] = knownToken;
+    let tokenObj = {
+        symbol: escapeHtml(response.symbol),
+        address: addr,
+        decimal: Number(response.decimals)
+    };
+
+    if (response.name) {
+        tokenObj.name = escapeHtml(response.name);
+    }
+
+    if (response.estimatedDecimals) {
+        alerts[tokenObj.address] = "bad estimated decimals";
+        return;
+    }
+
+    if (response.lastUpdated && (currentTimeStamp - response.lastUpdated) > yearInSeconds) {
+        tokenObj.inactive = true;
+    }
+
+    //invalid token data?
+    if (tokenObj.symbol == "") {
+        if (!allTokens[tokenObj.address]) {
+            if (response.holdersCount) {
+                if (response.holdersCount < minHolders)
+                    tokenObj.blocked = 3;
+                else if (response.holdersCount < requiredHolders)
+                    tokenObj.blocked = 1;
+            } else if (!response.price) {
+                tokenObj.blocked = 3;
             }
+            addToken(tokenObj, badTokens);
+        } else {
+            if (allTokens[tokenObj.address].symbol === tokenObj.symbol) {
+                alerts[addr] = 'bad symbol';
+            }
+        }
+        return;
+    }
+
+    if (response.alert) {
+        if (allTokens[addr]) {
+            if (!allTokens[addr].old && !allTokens[addr].locked) {
+                alerts[addr] = response.alert;
+            }
+        } else {
+            alerts[addr] = response.alert;
+        }
+    }
+
+    if (response.holdersCount) {
+        if (response.holdersCount > minHolders) {
+            if (response.holdersCount <= requiredHolders && !tokenObj.blocked) {
+                tokenObj.blocked = 1; // block for balance loading below 'requiredHolders' users
+            }
+            addToken(tokenObj, allTokens);
+        } else {
+            if (!tokenObj.blocked) {
+                tokenObj.blocked = 3;
+            }
+            if (!allTokens[tokenObj.address]) {
+                addToken(tokenObj, badTokens);
+            } else {
+                addToken(tokenObj, allTokens);
+            }
+        }
+    } else if (response.price) {
+        //tokens with a known price trade somewhere, add those too
+        addToken(tokenObj, allTokens);
+    } else { // no price or holders, mark as bad
+        if (!tokenObj.blocked) {
+            tokenObj.blocked = 3;
+        }
+        if (!allTokens[tokenObj.address]) {
+            addToken(tokenObj, badTokens);
+        } else {
+            addToken(tokenObj, allTokens);
         }
     }
 }
 
-async function getJson(url) {
+function addToken(tokenObj, collection) {
+    if (tokenObj && collection) {
+        let addr = tokenObj.address;
+        if (!collection[addr]) {
+            collection[addr] = tokenObj;
+        } else {
+            // we already know the token, see if we can update any data
+            let knownToken = collection[addr];
+            //bad symbol
+            /* if (knownToken.symbol !== tokenObj.symbol) {
+                 knownToken.symbol = tokenObj.symbol;
+             } */
+            // add name
+            if (!knownToken.name && tokenObj.name && tokenObj.symbol !== tokenObj.name) {
+                knownToken.name = tokenObj.name;
+            }
+            //fix incorrect decimals
+            if (knownToken.decimal !== tokenObj.decimal) {
+                if (addr !== "0xecf8f87f810ecf450940c9f60066b4a7a501d6a7") // old MKR WETH reports bad decimals
+                    knownToken.decimal = tokenObj.decimal;
+            }
+            if (knownToken.blocked && knownToken.blocked !== 2 && !tokenObj.blocked) {
+                delete knownToken.blocked;
+            } else if (tokenObj.blocked && !knownToken.blocked) {
+                knownToken.blocked = tokenObj.blocked;
+            } else if (tokenObj.blocked && knownToken.blocked && tokenObj.blocked > knownToken.blocked) {
+                knownToken.blocked = tokenObj.blocked;
+            }
+
+            if (tokenObj.inactive && !knownToken.inactive) {
+                knownToken.inactive = true;
+            } else if (knownToken.inactive && !tokenObj.inactive) {
+                delete knownToken.inactive;
+            }
+
+            collection[addr] = knownToken;
+        }
+    }
+}
+
+async function getJson(url, usePOST = false) {
     let options = {
         headers: {
             'Content-Type': 'application/json'
         },
         uri: url,
-        method: 'GET',
+        method: usePOST ? 'POST' : 'GET',
         json: true,
     };
 
@@ -532,5 +666,7 @@ function escapeHtml(text) {
 
     return text.replace(/[&<>"']/g, function (m) { return map[m]; }).trim();
 }
+
+//switcheo tokens https://api.switcheo.network//v2/exchange/tokens  .type:"ERC-20" symbol, name decimals, hash
 
 //parse html codes .replace(/&#(\d{0,4});/g, function(fullStr, str) { return String.fromCharCode(str); });

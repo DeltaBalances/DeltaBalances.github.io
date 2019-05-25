@@ -2731,32 +2731,35 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     //format list of all tokens like ED tokens
     offlineCustomTokens = offlineCustomTokens.map((x) => {
         let unlisted = true;
-        if (x.address && x.symbol) {
-            let addr = x.address.toLowerCase();
+        if (x.a && x.s) {
+            let addr = x.a.toLowerCase();
             //make sure WETH appears listed 
             if (utility.isWrappedETH(addr) /*|| utility.isNonEthBase(addr)*/) {
                 unlisted = false;
             }
             var token = {
-                "name": utility.escapeHtml(x.symbol),
+                "name": utility.escapeHtml(x.s), /*x.symbol */
                 "addr": addr,
                 "unlisted": unlisted,
-                "decimals": x.decimal,
+                "decimals": x.d,
             };
-            if (x.name) {
-                token.name2 = utility.escapeHtml(x.name);
+            if (x.n) {
+                token.name2 = utility.escapeHtml(x.n);
             }
-            if (x.locked) {
+            if (x.lock) {
                 token.locked = true;
             }
-            if (x.blocked) {
-                token.blocked = x.blocked;
+            if (x.block) {
+                token.blocked = x.block;
             }
             if (x.old) {
                 token.old = true;
             }
-            if (x.killed) {
+            if (x.kill) {
                 token.killed = true;
+            }
+            if (x.inactive) {
+                token.inactive = true;
             }
             if (x.spam) {
                 token.spam = true;
@@ -2764,12 +2767,15 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             if (x.blockIDEX) {
                 token.blockIDEX = true;
             }
+            if (x.blockFork) {
+                token.blockFork = true;
+            }
 
             for (let i = 0; i < _delta.config.listedExchanges.length; i++) {
                 let exchange = _delta.config.listedExchanges[i];
                 if (x[exchange]) {
                     token[exchange] = x[exchange];
-                    if (!(x.blockIDEX && exchange == 'IDEX')) {
+                    if (!(x.blockIDEX && exchange == 'IDEX') || !(x.blockFork && exchange == 'ForkDelta')) {
                         token.unlisted = false;
                     }
                 }
@@ -2854,14 +2860,14 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         try {
             let erc721Tokens = offlineCollectibleTokens.map(t => {
                 let tok = {
-                    addr: t.address.toLowerCase(),
-                    name: utility.escapeHtml(t.symbol),
+                    addr: t.a.toLowerCase(),
+                    name: utility.escapeHtml(t.s),
                     decimals: 0,
                     unlisted: true,
                     erc721: true
                 };
-                if (t.name) {
-                    tok.name2 = utility.escapeHtml(t.name);
+                if (t.n) {
+                    tok.name2 = utility.escapeHtml(t.n);
                 }
                 return tok;
             });
@@ -2913,8 +2919,9 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
                             //do we already know this token?
                             if (_delta.uniqueTokens[token.addr]) {
                                 _delta.uniqueTokens[token.addr][exchangeName] = token.name;
-                                // mae the token listed, except for a special case for idex
-                                if (!(_delta.uniqueTokens[token.addr].blockIDEX && exchangeName == 'IDEX')) {
+                                // make the token listed, except for a special case for idex
+                                if (!(_delta.uniqueTokens[token.addr].blockIDEX && exchangeName == 'IDEX')
+                                    && !(_delta.uniqueTokens[token.addr].blockFork && exchangeName == 'ForkDelta')) {
                                     _delta.uniqueTokens[token.addr].unlisted = false;
                                 }
 

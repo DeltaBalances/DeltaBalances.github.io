@@ -30,7 +30,7 @@ var unknownTokenCache = [];
     if (offlineCustomTokens && !logTokens) { //hardcoded list of known tokens from backuptokens.js
         try {
             for (let i = 0; i < offlineCustomTokens.length; i++) {
-                backupTokens[offlineCustomTokens[i].address.toLowerCase()] = offlineCustomTokens[i];
+                backupTokens[offlineCustomTokens[i].a.toLowerCase()] = offlineCustomTokens[i];
             }
         } catch (e) { }
     }

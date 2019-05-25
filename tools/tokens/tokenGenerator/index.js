@@ -7,6 +7,7 @@ const exchangeTokens = require('./exchangeTokens.js');
 
 
 const loadTopTokens = true;
+const loadMewTokens = true;
 const zeroAddr = "0x0000000000000000000000000000000000000000";
 
 //object that will contain all tokens { address : {address, symbol,decimals,name}}
@@ -105,8 +106,10 @@ async function init() {
     endCount = Object.keys(allTokens).length;
     console.log('finished DEX tokens, ' + endCount);
 
-    let mewTokens = await getMewTokens();
-    unknownTokens = unknownTokens.concat(mewTokens);
+    if (loadMewTokens) {
+        let mewTokens = await getMewTokens();
+        unknownTokens = unknownTokens.concat(mewTokens);
+    }
 
     if (unknownTokens.length > 0) {
         unknownTokens = unknownTokens.map(x => x.toLowerCase());
@@ -164,27 +167,27 @@ function addDbTokens() {
 // parse tokens already in the correct format
 function parseKnownToken(tok) {
     let token = {
-        symbol: escapeHtml(tok.symbol),
-        address: tok.address.toLowerCase(),
-        decimal: Number(tok.decimal),
+        symbol: escapeHtml(tok.s),
+        address: tok.a.toLowerCase(),
+        decimal: Number(tok.d),
         name: undefined,
     };
-    if (tok.name) {
-        token.name = tok.name;//escapeHtml(tok.name);
+    if (tok.n) {
+        token.name = tok.n;//escapeHtml(tok.name);
     } else {
         delete token.name;
     }
-    if (tok.locked) {
+    if (tok.lock) {
         token.locked = true;
     }
     if (tok.old) {
         token.old = true;
     }
-    if (tok.killed) {
+    if (tok.kill) {
         token.killed = true;
     }
-    if (tok.blocked) {
-        token.blocked = Number(tok.blocked);
+    if (tok.block) {
+        token.blocked = Number(tok.block);
     }
     if (tok.inactive) {
         token.inactive = true;
@@ -405,40 +408,36 @@ async function loadListedTokens() {
 function writeJsonToFile(filename, json) {
     let str = JSON.stringify(json);
     //fix formatting in file
-    str = str.replace(/},/g, '},\n  ');
-    str = str.replace('[{', '[\n  {');
+    str = str.replace(/},/g, '},\n ');
+    str = str.replace('[{', '[\n {');
     str = str.replace('}]', '},\n]');
 
+    str = str.replace(/:true/g, ':1');
     // remove some "
-    str = str.replace(/"address"/g, 'address');
-    str = str.replace(/"symbol"/g, 'symbol');
-    str = str.replace(/"decimal"/g, 'decimal');
-    str = str.replace(/"name"/g, 'name');
-    str = str.replace(/"locked"/g, 'locked');
-    str = str.replace(/"blocked"/g, 'blocked');
-    str = str.replace(/"inactive"/g, 'inactive');
-    str = str.replace(/"killed"/g, 'killed');
-    str = str.replace(/"old"/g, 'old');
-    str = str.replace(/"spam"/g, 'spam');
-    str = str.replace(/"blockIDEX"/g, 'blockIDEX');
-    str = str.replace(/"blockFork"/g, 'blockFork');
-    str = str.replace(/"Binance"/g, 'Binance');
-    str = str.replace(/"EtherDelta"/g, 'EtherDelta');
-    str = str.replace(/"ForkDelta"/g, 'ForkDelta');
-    str = str.replace(/"IDEX"/g, 'IDEX');
-    str = str.replace(/"DDEX"/g, 'DDEX');
-    str = str.replace(/"Radar"/g, 'Radar');
-    str = str.replace(/"Kyber"/g, 'Kyber');
-    str = str.replace(/"TokenStore"/g, 'TokenStore');
+    str = str.replace(/"address":/g, 'a:');
+    str = str.replace(/"symbol":/g, 's:');
+    str = str.replace(/"decimal":/g, 'd:');
+    str = str.replace(/"name":/g, 'n:');
+    str = str.replace(/"locked":/g, 'lock:');
+    str = str.replace(/"blocked":/g, 'block:');
+    str = str.replace(/"inactive":/g, 'inactive:');
+    str = str.replace(/"killed":/g, 'kill:');
+    str = str.replace(/"old":/g, 'old:');
+    str = str.replace(/"spam":/g, 'spam:');
+    str = str.replace(/"blockIDEX":/g, 'blockIDEX:');
+    str = str.replace(/"blockFork":/g, 'blockFork:');
+    str = str.replace(/"Binance":/g, 'Binance:');
+    str = str.replace(/"EtherDelta":/g, 'EtherDelta:');
+    str = str.replace(/"ForkDelta":/g, 'ForkDelta:');
+    str = str.replace(/"IDEX":/g, 'IDEX:');
+    str = str.replace(/"DDEX":/g, 'DDEX:');
+    str = str.replace(/"Radar":/g, 'Radar:');
+    str = str.replace(/"Kyber":/g, 'Kyber:');
+    str = str.replace(/"TokenStore":/g, 'TokenStore:');
     str = str.replace(/{ /g, '{');
     str = str.replace(/ }/g, '}');
     str = str.replace(/, /g, ',');
     str = str.replace(/: /g, ':');
-
-    str = str.replace(/name:Kyber/g, 'name:"Kyber"');
-    str = str.replace(/name:IDEX/g, 'name:"IDEX"');
-    str = str.replace(/symbol:IDEX/g, 'symbol:"IDEX"');
-    str = str.replace(/IDEX:IDEX/g, 'IDEX:"IDEX"');
 
     fs.writeFile(filename, str, function (err) {
         if (err) {
@@ -598,7 +597,7 @@ function addToken(tokenObj, collection) {
                  knownToken.symbol = tokenObj.symbol;
              } */
             // add name
-            if (!knownToken.name && tokenObj.name && tokenObj.symbol !== tokenObj.name) {
+            if (!knownToken.name && tokenObj.name && tokenObj.symbol !== tokenObj.name && (!knownToken.blocked || knownToken.blocked != 2)) {
                 knownToken.name = tokenObj.name;
             }
             //fix incorrect decimals

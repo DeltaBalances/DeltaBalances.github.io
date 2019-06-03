@@ -991,6 +991,7 @@ module.exports = {
     { m: "Feb 2019", blockFrom: 7156137, blockTo: 7280860 },
     { m: "Mar 2019", blockFrom: 7280860, blockTo: 7479257 },
     { m: "Apr 2019", blockFrom: 7479257, blockTo: 7671850 },
+    { m: "May 2019", blockFrom: 7671850, blockTo: 7870425 },
   ],
   // history settings per exchange
   history: {

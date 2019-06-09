@@ -690,6 +690,23 @@ table.dataTable thead th {
     }
 }
 
+@media (max-width: 1200px) {
+  .padM-side {
+    padding-top:0;
+    padding-bottom:0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .padM-side {
+      padding:0;
+  }
+} 
+@media (min-width: 992px) {
+    .padM-side {
+        padding-left:0;
+    }
+}
 
 .tiny {
     display:none;
@@ -756,6 +773,11 @@ select:disabled{
 
 input[type=number] {
   -moz-appearance: textfield;
+}
+
+.accordionBtn {
+  padding-left:10px;
+  padding-right:10px;
 }
 
 .exchange-box {

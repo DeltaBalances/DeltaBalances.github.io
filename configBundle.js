@@ -23,9 +23,11 @@ module.exports = {
 
   /* token related variables, see backuptokens.js for a full token list */
 
-  // 2 token lists, used and expanded at run-time
-  tokens: [{ addr: '0x0000000000000000000000000000000000000000', name: 'ETH', decimals: 18 }],
-  customTokens: [{ addr: '0x0000000000000000000000000000000000000000', name: 'ETH', decimals: 18 }],
+  balanceTokens: [], //list of tokens used during balance loading, (appended at run-time)
+  // 2 legacy token lists, still used in allowances.js
+  tokens: [],
+  customTokens: [],
+  
   ethAddr: '0x0000000000000000000000000000000000000000', //address commonly used to indicate ETH as a token
   wrappedETH: {
     "0x0000000000000000000000000000000000000000": 1, // EtherDelta, IDEX, tokenStore, Decentrex  reserved for ETH

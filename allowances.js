@@ -763,7 +763,7 @@ var pageType = 'allowance';
         } else if (!showCustomTokens && showListed) {
             tokens2 = tokens2.filter((x) => { return !x.unlisted; }); // only listed tokens
         } else if (!showCustomTokens && !showListed) {
-            tokens2 = [_delta.config.tokens[0]]; // only ETH
+            tokens2 = [_delta.uniqueTokens[_delta.config.ethAddr]]; // only ETH
         }
 
         tokens2 = tokens2.map((x) => { return x.addr; });
@@ -987,7 +987,7 @@ var pageType = 'allowance';
 
         let allTokens = _delta.config.customTokens.filter((t) => { return (showListed && !t.unlisted) || (showCustomTokens && t.unlisted) });
         if (allTokens.length == 0) {
-            allTokens = [_delta.config.tokens[0]];
+            allTokens = [_delta.uniqueTokens[_delta.config.ethAddr]];
         }
         let allCount = allTokens.length;
 

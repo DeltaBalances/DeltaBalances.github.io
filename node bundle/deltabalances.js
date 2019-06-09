@@ -202,9 +202,8 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     let smartrelays = Object.values(smartRelays);
 
     for (var i = 0; i < smartrelays.length; i++) {
-        tokenBlacklist[smartKeys[i]] = smartrelays[i];
         if (!this.uniqueTokens[smartKeys[i]]) {
-            let token = { addr: smartKeys[i], name: smartrelays[i], decimals: 18, unlisted: true };
+            let token = { addr: smartKeys[i], name: smartrelays[i], decimals: 18, unlisted: true, blocked: 2 };
             this.uniqueTokens[token.addr] = token;
         }
     }
@@ -364,9 +363,14 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
 
 
     let ethAddr = this.config.ethAddr;
-    this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!tokenBlacklist[x.addr] && (!x.unlisted || !x.blocked) && !x.killed && !x.erc721); });
-    let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !x.killed && !tokenBlacklist[x.addr] && x.addr !== ethAddr && !x.erc721); });
+
+    //legacy token lists, still used in allowances.js, TODO get rid of them
+    this.config.customTokens = Object.values(_delta.uniqueTokens).filter((x) => { return ((!x.unlisted || !x.blocked) && !x.killed && !x.erc721); });
+    let listedTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.unlisted && !x.killed && x.addr !== ethAddr && !x.erc721); });
     this.config.tokens = [this.uniqueTokens[ethAddr]].concat(listedTokens);
+
+    // token list used in balances.js
+    this.config.balanceTokens = Object.values(_delta.uniqueTokens).filter((x) => { return (!x.killed && !x.erc721 && (!x.blocked || x.blocked < 2)) });
 
     function loadCachedTokens(exchangeName) {
         if (exchangeTokens && exchangeName) {

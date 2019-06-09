@@ -152,7 +152,7 @@ var pageType = 'balance';
     function readyInit() {
 
         getEtherPrice();
-        //checkCollapseSettings(true);
+        checkCollapseSettings(true);
 
         //get metamask address as possbile input (if available)
         requestMetamask(false);
@@ -203,7 +203,7 @@ var pageType = 'balance';
 
         $(window).resize(function () {
             hidePopovers();
-            //checkCollapseSettings();
+            checkCollapseSettings();
         });
 
 
@@ -300,7 +300,7 @@ var pageType = 'balance';
         } catch (e) { }
     }
 
-    /*
+
     function checkCollapseSettings(init) {
         //check bootstrap classes for visibility
         var envs = ['xs', 'sm', 'md', 'lg'];
@@ -319,21 +319,17 @@ var pageType = 'balance';
         }
 
         if (env == 'xs' || env == 'sm') {
-            if ($('#setting-body').is(":visible")) {
+           /* if ($('#tokensetting-body').is(":visible")) {
+                $('#collapseTokenSettings').click();
+            } else if ($('#setting-body').is(":visible")) {
                 $('#collapseSettings').click();
-            }
-            if (init) {
-                $('#settingbox').addClass('collapsed-box');
-                $('#settingToggleIcon').removeClass('fa-minus');
-                $('#settingToggleIcon').addClass('fa-plus');
-            }
+            } */
         } else {
-            if (!$('#setting-body').is(":visible")) {
-                $('#collapseSettings').click();
+            if (!$('#tokensetting-body').is(":visible")) {
+                $('#collapseTokenSettings').click();
             }
         }
     }
-    */
 
     function checkExchange(selected) {
         let changed = false;

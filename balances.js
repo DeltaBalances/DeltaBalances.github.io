@@ -472,6 +472,7 @@ var pageType = 'balance';
 
         if (!running) {
             updateActiveTokens();
+            setBalanceProgress();
         }
 
         setStorage();

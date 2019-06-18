@@ -1039,3 +1039,8 @@ th, td {
   height:50%; 
   width:50%;
 }
+
+/* fix mobile bug, white space on the right */
+.wrapper, .main-header, .main-footer, .main-sidebar, .alert {
+  overflow-x: hidden;
+}

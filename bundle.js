@@ -2754,6 +2754,9 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
             if (x.old) {
                 token.old = true;
             }
+            if (x.warn) {
+                token.warning = true;
+            }
             if (x.kill) {
                 token.killed = true;
             }
@@ -8290,6 +8293,8 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     }
                     if (token.old) {
                         contents += '<br> <i class="text-red fa fa-exclamation-triangle" aria-hidden="true"></i> Token contract is deprecated.';
+                    } else if (token.warning) {
+                        contents += '<br> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Token contract will soon be deprecated.';
                     }
                     if (token.locked || token.killed) {
                         contents += '<br> <i class="text-red fa fa-lock" aria-hidden="true"></i> Token Locked or Paused.';
@@ -8312,6 +8317,8 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     contents = 'Contract: ' + utility.addressLink(token.addr, true, true) + '<br> Decimals: ' + token.decimals + "<br>Wrapped Ether";
                     if (token.old) {
                         contents += '<br> <i class="text-red fa fa-exclamation-triangle" aria-hidden="true"></i> Token contract is deprecated.';
+                    } else if (token.warning) {
+                        contents += '<br> <i class="text-red fa fa-exclamation-triangle" aria-hidden="true"></i> Token contract will soon be deprecated.';
                     }
                     if (token.locked || token.killed) {
                         contents += '<br> <i class="text-red fa fa-lock" aria-hidden="true"></i> Token Locked or Paused.';
@@ -8332,6 +8339,8 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
         if (token.locked) {
             name += ' <i class="fa fa-lock" aria-hidden="true"></i>';
         } else if (token.old) {
+            name += ' <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
+        } else if(token.warning) {
             name += ' <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
         }
 

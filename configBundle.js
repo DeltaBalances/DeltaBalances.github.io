@@ -315,9 +315,7 @@ module.exports = {
         /* work in progress
         uniswap exchange contracts  exchange_addr :token_addr
         Official token list:
-          https://github.com/Uniswap/uniswap-frontend/blob/master/src/ducks/addresses.js
-        Alternative with custom tokens
-          https://github.com/Uniswap/uniswap-info/blob/master/tools/exchanges.json
+          https://github.com/Uniswap/uniswap-frontend/blob/production/src/contexts/Tokens.js
        */
         "0x701564aa6e26816147d4fa211a0779f1b774bb9b":"0xb6ed7644c69416d67b522e20bc294a9a9b405b31",
         "0xb800445dd982c1311523fd465ac44f55093b2b5b":"0x4470bb87d77b963a013db939be332f927f2b992e",
@@ -558,6 +556,12 @@ module.exports = {
         "0x39b0f27c771ad4236422af5ddc600711eefd93a3":"0xd9e5a009ec07de76616d7361ed713ef434d71325",
         "0xa1ecdcca26150cf69090280ee2ee32347c238c7b":"0x0cbe2df57ca9191b64a7af3baa3f946fa7df2f25",
         "0xaf294be0577dc703bd7f5b96d34bc9cb110f1e2b":"0xe05d803fa0c5832fa2262465290abb25d6c2bfa3",
+        "0x45a2fdfed7f7a2c791fb1bdf6075b83fad821dde":"0xf5dce57282a584d2746faf1593d3121fcac444dc",
+        "0xa539baaa3aca455c986bb1e25301cef936ce1b65":"0xbbbbca6a901c926f240b89eacb641d8aec7aeafd",
+        "0x9a7a75e66b325a3bd46973b2b57c9b8d9d26a621":"0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0",
+        "0xdd80ca8062c7ef90fca2547e6a2a126c596e611f":"0x80f222a749a2e18eb7f676d371f19ad7efeee3b7",
+        "0xccb98654cd486216fff273dd025246588e77cfc1":"0x957c30ab0426e0c93cd8241e2c60392d08c6ac8e",
+        "0x8da198a049426bfcf1522b0dc52f84beda6e38ff":"0x5a4ade4f3e934a0885f42884f7077261c3f4f66f",
     },
     //some of the many bancor converter contracts, address not necessary to find trades, but makes reading things easier
     bancorConverters:[ 

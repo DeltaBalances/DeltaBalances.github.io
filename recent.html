@@ -69,7 +69,8 @@
       </a>
 
       <!-- mobile only logo -->
-      <ul class="visible-xs nav navbar-nav pull-left navbar-logo" style="margin-left:0px; margin-top:5px;font-size:20px; height:30px; line-height:30px;">
+      <ul class="visible-xs nav navbar-nav pull-left navbar-logo"
+        style="margin-left:0px; margin-top:5px;font-size:20px; height:30px; line-height:30px;">
         <li class="">
           <a href="index.html" class="dropdown">
             <span class="homeLink1">Delta</span>
@@ -82,9 +83,11 @@
       <ul class="nav  navbar-nav pull-left customWidth1" style=" border: none;">
         <li class="navbar-form" style="width:100%; padding:0px;  ">
           <div class="input-group" style="width:100%;">
-            <input type="text" id="address" class="form-control custom" placeholder="Ethereum address, transaction hash">
+            <input type="text" id="address" class="form-control custom"
+              placeholder="Ethereum address, transaction hash">
             <span class="input-group-btn">
-			<input type="image" title="Import from web3" id="web3button" class="btn" onClick="requestMetamask(true)" src="css/images/metamask.png"/>
+              <input type="image" title="Import from web3" id="web3button" class="btn" onClick="requestMetamask(true)"
+                src="css/images/metamask.png" />
               <button id="refreshButton" onClick="myClick()" class="btn btn-flat">
                 <i id="refreshButtonSearch" class="fa fa-search" aria-hidden="true"></i>
                 <i id="refreshButtonLoading" style="display:none" class="fa fa-refresh fa-spin" aria-hidden="true"></i>
@@ -99,7 +102,8 @@
           <!-- Menu Toggle Button -->
           <a href="#" id="userToggle" class="hidden dropdown-toggle" data-toggle="control-sidebar">
             <!-- The user image in the navbar-->
-            <i id="userImage" class="user-image bg-red" style="width:32px; height:32px;"><img class="mini-metamask" src="css/images/metamask.png" alt="metamask logo"></i>
+            <i id="userImage" class="user-image bg-red" style="width:32px; height:32px;"><img class="mini-metamask"
+                src="css/images/metamask.png" alt="metamask logo"></i>
             <!-- hidden-xs hides the username on small devices so only the image appears. -->
             <span id="currentAddr2" class="hidden-xs">0x......</span>
           </a>
@@ -116,7 +120,8 @@
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
-  <div class="alert alert-warning alert-top alert-dismissible" onclick="hideHint()" style="display:none;" role="alert" id='hint'>
+  <div class="alert alert-warning alert-top alert-dismissible" onclick="hideHint()" style="display:none;" role="alert"
+    id='hint'>
     <strong>Hint</strong>
     <span id="hinttext"></span>
     <button type="button" class="close" aria-label="Close">
@@ -316,14 +321,14 @@
           </div>
 
 
-
           <div class="col-md-12 col-lg-10 s-fullwidth">
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body noPadTop">
                 <div class="col-md-9 noPadM" style="overflow:hidden;">
                   <h2>Recent Transactions
-                    <button id='loadingTransactions2' onclick="getTrans()" class="fa fa-refresh" style="display:none;"></button>
+                    <button id='loadingTransactions2' onclick="getTrans()" class="fa fa-refresh"
+                      style="display:none;"></button>
                   </h2>
                   <p>Recent transactions from etherscan, filtered to show decentralized exchanges.</p>
                 </div>
@@ -331,7 +336,8 @@
 
                   Show transaction types:
                   <div class="form-group">
-                    <select id="typesDropdown" data-width="100%" data-none-selected-text="Select transaction types" class="selectpicker" multiple>
+                    <select id="typesDropdown" data-width="100%" data-none-selected-text="Select transaction types"
+                      class="selectpicker" multiple>
                       <optgroup>
                         <option data-subtext=" ">Taker trade</option>
                         <option data-subtext="(no deposit DEX like EtherDelta, Token Store)">Maker trade</option>
@@ -382,6 +388,9 @@
               <!-- /.box-header -->
               <div class="box-body">
                 <div class="col-md-12 noPadM">
+				Maker trades
+                  <strong>do not</strong> show for most deposit style exchanges, see the <b>Trade History</b> instead.
+				  <br><br>
                   Recent Transactions supports:
                   <br>
                   <ul>
@@ -394,7 +403,8 @@
                       <a href="https://www.ethen.market" target="_blank">ETHEN</a>,
                       <a href="https://www.singularx.com" target="_blank">SingularX</a>,
                       <a href="https://www.etherc.io" target="_blank">EtherC</a> and
-                      <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>.
+                      <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md"
+                        target="_blank">Decentrex</a>.
                     </li>
                     <li> 0x (V1 & V2) relayers:
                       <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>,
@@ -420,8 +430,6 @@
                       <a href="https://www.easytrade.io" target="_blank">EasyTrade</a>.
                     </li>
                   </ul>
-                  Maker trades
-                  <strong>do not</strong> show for most deposit style exchanges, see the trade history instead.
                   <br> IDEX trades are retrieved from the IDEX API instead of etherscan.
                 </div>
               </div>
@@ -441,15 +449,26 @@
       <div class="pull-right hidden-xs">
       </div>
       <!-- Default to the left -->
-      <p> Powered by
-        <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
-        <a target="_blank" href="https://infura.io/">Infura</a>
-        <br> Contact:
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
-        <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
-        <br> Buy me a beer:
-        <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
-      </p>
+      <div class="col-sm-12 col-md-6">
+        <p> Powered by
+          <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
+          <a target="_blank" href="https://infura.io/">Infura</a>
+          <br> Contact:
+          <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
+          <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+          <br>
+          <br> Buy me a beer:
+          <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B"
+            target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
+        </p>
+      </div>
+      <div class="col-sm-12 col-md-6">
+        Use a referral:
+        <ul style="list-style-type:none">
+          <li><a target="_blank" href="https://brave.com/del333">Get Brave Browser</a> </li>
+          <li><a target="_blank" href="https://www.binance.com/ref=10985752">Trade on Binance</a></li>
+        </ul>
+      </div>
     </footer>
 
     <!-- Control Sidebar -->
@@ -524,12 +543,12 @@
                   </div>
                 </a>
               </li>
-			  <li class="metamask-import">
+              <li class="metamask-import">
                 <a onclick="requestMetamask(true)" href="#">
-                  <i id="metamask-logo-sidebar" class="menu-icon" ></i>
+                  <i id="metamask-logo-sidebar" class="menu-icon"></i>
                   <div class="menu-info">
                     <h4 class="control-sidebar-subheading">Import account</h4>
-					<p> Injected Web3</p>
+                    <p> Injected Web3</p>
                   </div>
                 </a>
               </li>

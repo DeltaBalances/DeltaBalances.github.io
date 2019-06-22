@@ -284,36 +284,58 @@
 
         <div class="row">
 
-          <div class="col-md-12 col-lg-10 s-fullwidth">
+          <div class="col-md-9 col-lg-7 s-fullwidth">
 
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body">
-                <div class="col-md-9 noPadM" style="overflow:hidden;">
+                <div class="col-md-12 noPadM" style="overflow:hidden;">
                   <div style="white-space:nowrap; overflow:hidden; padding-top:10px; ">
-                    <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
+                    <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;">
+                    </div>
                     <div class="hidden-xs" style="padding-left: 3%; float:left;">
                       <p style="line-height:50px;display: inline-block;"> </p>
                     </div>
                     <div style="float:left; white-space:nowrap;">
-                      <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;" id="addr">Enter your public address </p>
+                      <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;"
+                        id="addr">Enter your public address </p>
                     </div>
                   </div>
                 </div>
 
-                <div class="col-md-3 noPadM">
-                  <ul class="list-unstyled" style="padding-top:5px">
+
+
+              </div>
+              <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+          </div>
+
+          <div class="col-md-3 col-lg-3 s-fullwidth padM-side">
+
+            <div class="box box-default">
+              <!-- /.box-header -->
+              <div class="box-body">
+                <h4 class="hidden-md hidden-lg"> Date Range </h4>
+                <form id="blockSelector" style="padding: 5px 5px;">
+                  <ul class="list-unstyled">
                     <li>
-                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
-                      <label for="decimals">Show more decimals</label>
+                      <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" checked>
+                      <label for="r0"> <span class="hidden-md hidden-lg">The last </span>
+                        <input class="form-control" style="width:75px; height:25px;" type="number" id="days"
+                          style="text-align: center;height:85%;" onchange="validateDays()" value="5" min="1" max="999"
+                          step="1"> days</label>
                     </li>
                     <li>
-                      <label>Transactions from last
-                        <input type="number" id="days" onchange="validateDays(this.value)" value="5" min="1" max="999" step="1"> days</label>
+                      <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()">
+                      <label style="display:inline-block;" for="r1"> <span class="hidden-md hidden-lg">Month: </span>
+                        <select style="display:inline-block; width:auto;height:25px; padding-top:2px;"
+                          class="form-control" id="monthSelect" onChange="checkMonthInput()" disabled></select>
+                      </label>
                     </li>
                   </ul>
-                </div>
 
+                </form>
               </div>
               <!-- /.box-body -->
             </div>
@@ -362,6 +384,12 @@
                     <thead></thead>
                     <tbody></tbody>
                   </table>
+                </div>
+                <br>
+                <br>
+                <div class="col-md-12 noPad">
+                  <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
+                  <label for="decimals" style="font-weight:normal;">Show more decimals</label>
                 </div>
                 <!--
                 <div class="col-md-4 noPadM">

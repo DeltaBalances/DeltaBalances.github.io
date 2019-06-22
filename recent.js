@@ -46,7 +46,7 @@ var pageType = 'recent';
 	var startblock = 0;
 	var endblock = 'latest';
 	var transactionDays = 5;
-
+	var useDaySelector = true;
 
 	var displayFilter = {
 		'Maker trade': 1,
@@ -92,13 +92,13 @@ var pageType = 'recent';
 		_delta.startDeltaBalances(false, () => {
 			if (!autoStart) {
 				if (blocknum > -1) {
-					startblock = getStartBlock(blocknum, transactionDays);
+					startblock = getStartBlock();
 				}
 				else {
 					_util.blockNumber(_delta.web3, (err, num) => {
 						if (!err && num) {
 							blocknum = num;
-							startblock = getStartBlock(blocknum, transactionDays);
+							startblock = getStartBlock();
 						}
 					});
 				}
@@ -133,6 +133,12 @@ var pageType = 'recent';
 			}
 		});
 
+		fillMonthSelect();
+		let daysDisabled = $('#days').prop('disabled');
+		if (!daysDisabled)
+			setDaySelector();
+		else
+			setMonthSelector();
 
 		$(window).resize(function () {
 			hidePopovers();
@@ -419,7 +425,7 @@ var pageType = 'recent';
 			if (blocknum > 0) // blocknum also retrieved on page load, reuse it
 			{
 				console.log('blocknum re-used');
-				startblock = getStartBlock(blocknum, transactionDays);
+				startblock = getStartBlock();
 				getTransactions(rqid);
 			}
 			else {
@@ -427,7 +433,7 @@ var pageType = 'recent';
 				_util.blockNumber(_delta.web3, (err, num) => {
 					if (num) {
 						blocknum = num;
-						startblock = getStartBlock(blocknum, transactionDays);
+						startblock = getStartBlock();
 					}
 					getTransactions(rqid);
 				});
@@ -435,25 +441,61 @@ var pageType = 'recent';
 		}
 	}
 
-	function getStartBlock(blcknm, days) {
-		startblock = Math.floor(blcknm - ((days * 24 * 60 * 60) / blocktime));
-		return startblock;
-	}
+	function validateDays(input = undefined) {
+		if (!input) {
+			input = $('#days').val();
+		} else {
+			input = parseFloat(input);
+		}
 
-	function validateDays(input) {
-		input = parseInt(input);
 		var days = 1;
-		if (input < 1)
-			days = 1;
-		else if (input > 999)
-			days = 999;
+		if (input < 0.25)
+			days = 0.25;
+		else if (input > 100)
+			days = 100;
 		else
 			days = input;
 
 		transactionDays = days;
-		if (blocknum > 0) {
-			getStartBlock(blocknum, transactionDays);
+		getStartBlock();
+		$('#days').val(days);
+	}
+
+	function setDaySelector() {
+		useDaySelector = true;
+		endblock = 'latest';
+		validateDays();
+		$('#days').prop('disabled', false);
+		$('#monthSelect').prop('disabled', true);
+	}
+
+	function setMonthSelector() {
+		useDaySelector = false;
+		checkMonthInput();
+		$('#monthSelect').prop('disabled', false);
+		$('#days').prop('disabled', true);
+	}
+
+	function checkMonthInput() {
+		let val = Number($('#monthSelect').val());
+
+		if (val < 0) val = 0;
+		if (val > _delta.config.blockMonths.length - 1) val = _delta.blockMonths.length - 1;
+
+		startblock = _delta.config.blockMonths[val].blockFrom;
+		endblock = _delta.config.blockMonths[val].blockTo;
+
+		getStartBlock();
+	}
+
+	function getStartBlock() {
+		if (useDaySelector) {
+			if (blocknum != -1) {
+				startblock = Math.floor(blocknum - ((transactionDays * 24 * 60 * 60) / blocktime));
+			}
+			endblock = 'latest';
 		}
+		return startblock;
 	}
 
 	function getTransactions(rqid) {
@@ -1909,5 +1951,22 @@ var pageType = 'recent';
 				}
 			}
 		}
+	}
+
+	function fillMonthSelect() {
+		$('#monthSelect').empty();
+		var select = document.getElementById("monthSelect");
+
+		//Create array of options to be added
+		var array = _delta.config.blockMonths;
+
+		//Create and append the options
+		for (var i = array.length - 1; i >= 0; i--) {
+			var option = document.createElement("option");
+			option.value = i;
+			option.text = array[i].m;
+			select.appendChild(option);
+		}
+		select.selectedIndex = 0;
 	}
 }

@@ -61,6 +61,7 @@ var pageType = 'balance';
     addExchange('Enclaves', _delta.config.exchangeContracts.Enclaves.addr);
     addExchange('SingularX', _delta.config.exchangeContracts.Singularx.addr);
     addExchange('EtherC', _delta.config.exchangeContracts.EtherC.addr);
+    addExchange('SwitchDex', _delta.config.exchangeContracts.SwitchDex.addr);
     addExchange('Decentrex', _delta.config.exchangeContracts.Decentrex.addr);
     addExchange('Ethen', _delta.config.exchangeContracts.Ethen.addr);
     addExchange('DEXY', _delta.config.exchangeContracts.Dexy.addr);

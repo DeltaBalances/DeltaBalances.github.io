@@ -49,6 +49,7 @@ Decentralized exchanges supported by the DeltaBalances website.
 | [OasisDex](https://oasisdex.com) [OasisCommunity](https://oasiscommunity.github.io/dex/) |-|Yes| Yes | Yes|
 | [OasisDirect](https://oasis.direct) |-|Yes| Yes | No|
 | [SingularX](https://singularx.com)|Yes| Yes| Yes | Yes|
+| [SwitchDex](https://switchdex.ag)|Yes| Yes| Yes | Not yet|
 | [Switcheo](https://switcheo.exchange)|Yes| Partial (WIP)| Partial (WIP) | Not yet|
 | [Token Store](https://token.store)| Yes| Yes| Yes| Yes |
 | [Token store Instant-trade](https://token.store)| - | Yes| Yes | No|

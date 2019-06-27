@@ -21,9 +21,9 @@ Contract iterations:
 
 
 # Exchange support
-Decentralized exchanges supported by the DeltaBalances website.
+Supported Decentralized exchanges for each website feature.  
 
-| Exchange | Deposited Tokens | Recent tx (input)| Tx details (input + events) | History (events) |
+| Exchange | Deposited Tokens | Recent Tx| Tx Info| Trade History|
 |----------|------------------|------------------|-----------------------------|------------------|
 | 0x Instant (0x v2) | - | Yes| Yes| No |
 | 0x Protocol v1 | - | Yes| Yes| Yes |
@@ -55,40 +55,25 @@ Decentralized exchanges supported by the DeltaBalances website.
 | [Token store Instant-trade](https://token.store)| - | Yes| Yes | No|
 | [Uniswap](https://uniswap.exchange)| - | Yes| Yes| Not yet|  
 
-(† = Exchange is no longer active)
-<sup>*</sup> Ethfinex v2 uses 0x v2
+(† = Exchange is no longer active)  
+<sup>*</sup> Ethfinex v2 uses 0x v2  
+
+##### Requirements for support
+Exchange contract features required per page.
++ **Token Balances**: Needs a contract with a public balance function with 1 or 2 parameters, like `balanceOf(.. , ..)`.
++ **Recent transactions**: Parses function input for transactions, needs published smart contract code.
++ **Trade history**: Parses trade events for transactions, needs published smart contract code.
++ **Transaction info**: Parses function input and emitted events for 1 transaction, needs published smart contract code.
 
 
 ##### 0x Protocol Relayers
-Exchanges using the same 0x Protocol smart contract.
-Relayers not on the list will show up as `unknown 0x`
+Multiple exchanges that all use the same 0x Protocol smart contract (V1 or V2).
+Popular relayers will be displayed by name, others will show up as `unknown 0x`.
 
-| Relayers |
-|-------------------|
-|[3exchange](https://3xchange.io)|
-|~~[Amadeus](https://amadeusrelay.org/)~~|
-|[Bamboo Relay](https://bamboorelay.com)|
-|[BoxSwap](https://boxswap.io/)|
-|[DDEX (v1, 2018)](https://ddex.io/)|
-|[Emoon](https://www.emoon.io)|
-|[ERC dEX](https://ercdex.com/)|
-|[Ethfinex trustless v2](https://trustless.ethfinex.com) |
-|[ForDex](https://www.fordex.co)|
-|[GUDecks](https://gudecks.com/)|
-|[IDT](https://idtexchange.com)|
-|[LedgerDex](https://www.ledgerdex.com/)|
-|[Lake Project](https://lakeproject.co/)|
-|[MetaMorph](https://metamorph.pro)|
-|[Paradex](https://paradex.io/)|
-|[The Ocean](https://theocean.trade)|
-|[Tokenmom](https://tokenmom.com/)|
-|[OpenRelay](https://openrelay.xyz/)|
-|[Radar Relay](https://radarrelay.com/)|
-|[Shark Relay](https://sharkrelay.com)|
-|[Star Bit](https://www.starbitex.com/)|
-|[Token Jar](https://tokenjar.io)|
-|[Tokenlon](https://tokenlon.token.im/tokenlon)|
-|[Veil](https://veil.market/)|
+Some of the many named relayers:  
+[Radar Relay](https://radarrelay.com/), [DDEX (v1, 2018)](https://ddex.io/), [Paradex](https://paradex.io/),  [Ethfinex trustless v2](https://trustless.ethfinex.com), [OpenRelay](https://openrelay.xyz/), [Tokenlon](https://tokenlon.token.im/tokenlon)  
+See `config/addresses.js` for the full list of named relayers.
+
 
 
 

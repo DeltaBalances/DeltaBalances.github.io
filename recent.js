@@ -66,10 +66,10 @@ var pageType = 'recent';
 			Status: true,
 			Type: 'Deposit',
 			Exchange: 'Placeholder',
-			Token: _delta.config.tokens[0],
+			Token: getEther(),
 			Amount: 0,
 			Price: '',
-			Base: _delta.config.tokens[0],
+			Base: getEther(),
 			Total: 0,
 			Hash: '0xH4SH',
 			Date: _util.toDateTimeNow(),
@@ -77,6 +77,11 @@ var pageType = 'recent';
 		}
 	];
 
+
+	// return token boject for ETH
+	function getEther() {
+		return _delta.uniqueTokens[_delta.config.ethAddr];
+	}
 
 	init();
 
@@ -848,18 +853,27 @@ var pageType = 'recent';
 						var trans = undefined;
 
 						if (_util.isWrappedETH(from)) {
-							trans = createOutputTransaction('Unwrap', _delta.setToken(tx.from), value, _delta.config.tokens[0], value, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
+							trans = createOutputTransaction('Unwrap', _delta.setToken(tx.from), value, getEther(), value, tx.hash, tx.timeStamp, true, '', tx.isError === '0', '');
 							trans.Incomplete = true;
 						}
+						//Usually ignore internal ETH from an exchange, because we already get a withdraw transaction
+						// check for special cases like admin withdrawals & refunds.
 						else if (_delta.isExchangeAddress(from)) {
 							// IDEX, Switcheo withdraw, only found in internal tx
 							if (_delta.config.exchangeContracts.Idex.addr == from || _delta.config.exchangeContracts.Switcheo.addr == from) {
-								trans = createOutputTransaction('Withdraw', _delta.config.tokens[0], value, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
+								trans = createOutputTransaction('Withdraw', getEther(), value, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
 							}
 							// used to detect airswap fails that send back the same ETH amount
-							else if (_delta.config.exchangeContracts.AirSwap.addr == from && value.greaterThan(0)) {
-								trans = createOutputTransaction('In', _delta.config.tokens[0], value, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', _delta.config.exchangeContracts.AirSwap.name);
-								trans.Incomplete = true; //should be a tx with acutal input
+							else {
+								trans = createOutputTransaction('In', getEther(), value, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', fromName);
+								if (_delta.config.exchangeContracts.AirSwap.addr == from && value.greaterThan(0)) {
+									trans.Incomplete = true; //should be a tx with actual input, this is a refund
+								} else if (_delta.config.uniswapContracts[from]) {
+									trans.Incomplete = true;
+								} else {
+									// most likely a redundant internal tx, mark it expendable to overwrite it with any other source
+									trans.Expendable = true;
+								}
 							}
 						} else if (value.greaterThan(0)) {
 							let amount = value;
@@ -877,10 +891,10 @@ var pageType = 'recent';
 							}
 
 							if (to === myAddr) {
-								trans = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+								trans = createOutputTransaction('In', getEther(), amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
 								trans.Incomplete = true;
 							} else if (from === myAddr) {
-								trans = createOutputTransaction('Out', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+								trans = createOutputTransaction('Out', getEther(), amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
 								trans.Incomplete = true;
 							}
 						}
@@ -888,7 +902,7 @@ var pageType = 'recent';
 							addTransaction(trans, 0);
 						}
 					}
-					// token deposit/withdraw, trades, cancels
+					// A standard, non-internal transaction.  token deposit/withdraw, trades, cancels, etc.
 					else {
 						var unpacked = _util.processInput(tx.input);
 						if (unpacked && unpacked.name) {
@@ -1320,9 +1334,18 @@ var pageType = 'recent';
 									}
 								}
 							}
+							// we can decode the transaction input into a function, but we can't parse the function into an object
+							else {
+								addUnknownTransfer();
+							}
 						}
 						// not a recognized function call, but ETH or tokens still moved
 						else {
+							addUnknownTransfer();
+						}
+
+						// make a transaciton a transfer if we can't determine anything else
+						function addUnknownTransfer() {
 							let trans2 = undefined;
 							let exchange = '';
 
@@ -1334,7 +1357,7 @@ var pageType = 'recent';
 
 								// Ether token wrapping that uses fallback
 								if (_util.isWrappedETH(to)) {
-									trans2 = createOutputTransaction("Wrap", _delta.config.tokens[0], amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+									trans2 = createOutputTransaction("Wrap", getEther(), amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
 								} else {
 									//Ether transfer
 									if (tx.input !== '0x') {
@@ -1349,10 +1372,10 @@ var pageType = 'recent';
 									}
 
 									if (to === myAddr) {
-										trans2 = createOutputTransaction('In', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+										trans2 = createOutputTransaction('In', getEther(), amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
 										trans2.Incomplete = true;
 									} else if (from === myAddr) {
-										trans2 = createOutputTransaction('Out', _delta.config.tokens[0], amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+										trans2 = createOutputTransaction('Out', getEther(), amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
 										trans2.Incomplete = true;
 									}
 
@@ -1384,10 +1407,15 @@ var pageType = 'recent';
 								}
 							}
 
-							addTransaction(trans2, 0);
+							if (trans2) {
+								addTransaction(trans2, 0);
+							}
 						}
 					}
-				}
+
+				} // end for-loop
+
+
 
 				function addTransaction(transs, index = 0) {
 					if (transs && transs.Hash) {
@@ -1396,8 +1424,13 @@ var pageType = 'recent';
 
 						let oldTrans = outputHashes[mainHash];
 
+						//don't replace an exisiting record with an expendable one
+						if (oldTrans && transs.Expendable) {
+							return;
+						}
 						//cases where we instantly set the txHash to the current parsed data
 						if (!oldTrans //tx isn't known yet
+							|| oldTrans.Expendable // old one can be replaced
 							|| (transs.Type === oldTrans.Type && //tx already known of the same type AND:
 								((oldTrans.Incomplete && !transs.Incomplete) // second source completed info
 									|| (!oldTrans.Token && transs.Token) || (!oldTrans.Base && transs.Base) // we added a missing token
@@ -1698,7 +1731,7 @@ var pageType = 'recent';
 				"scrollY": "80vh",
 				"scrollX": true,
 				"scrollCollapse": true,
-				"order": [[9, "desc"]],
+				"order": [[9, "desc"], [8, "asc"]],
 				"dom": '<"toolbar">frtip',
 				"orderClasses": false,
 				fixedColumns: {

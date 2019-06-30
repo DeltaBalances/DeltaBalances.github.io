@@ -100,9 +100,10 @@ module.exports = {
     FakeED: { addr: '0x60394f71266901a5930bb4e90db5dd26b77f8dad', name: 'Fake EtherDelta', supportedDex: true },
     Marketplace: { addr: '0x2f13fa06c0efd2a5c4cf2175a0467084672e648b', name: 'Marketplace', supportedDex: true },
     Bloxxor: { addr: '0xb92c5f4f3a13bb14467fe0c25a4c569aa20e1df8', name: 'Bloxxor', supportedDex: true },
+    Bitcratic: { addr: '0x3c020e014069df790d4f4e63fd297ba4e1c8e51f', name: 'Bitcratic', supportedDex: true },
+    Swatx: { addr: '0x513c07e83237124e08672be4c8d481246d6f03f2', name: 'SWATX', supportedDex: true },
+    CryptloDex: { addr: '0xcf5d889e2336d0f35f6121718f6c25e0650d4b25', name: 'CryptloDex', supportedDex: true},
     UnknownED: { addr: '0x4d55f76ce2dbbae7b48661bef9bd144ce0c9091b', name: 'Unknown', supportedDex: true },
-
-
 
     /* exchanges with no parsing support yet */
     DDEX: { addr: '0x2cb4b49c0d6e9db2164d94ce48853bf77c4d883e', name: 'DDEX Hydro', supportedDex: false },
@@ -145,6 +146,16 @@ module.exports = {
     Blockonix: { addr: '0x80ea118992545f43a8592c812b1099e518097874', name: 'Blockonix', supportedDex: false },
     Blockonix2: { addr: '0x67b084e4654e1d62afa9694b6a626cec5c9ff2bd', name: 'Blockonix', supportedDex: false },
     CryptoKitty: { addr: '0xb1690c08e213a35ed9bab7b318de14420fb57d8c', name: 'CryptoKitties', supportedDex: false }, //auction
+    Dinngo: { addr: '0xd494938d0524edadfc239adc2c233e50550fa152', name: 'Dinngo', supportedDex: false },
+    DappDex: { addr: '0xec3d7968b0d3fff0a074668e08eb56c5e6d38b21', name: 'DappDex', supportedDex: false},
+
+    // hb dex 0xf5f310b4bc81917c39a73cfec2c1b36325437fea, 0x5907aecf617c5019d9b3b43a5d65e583ce0f48bf
+    // cryptozodiac 0xf238f55ede5120915b36715b0fffe20ff57f8134
+    // dex.io 0xababb61a9f837aad53ed4320221737fc6e9dc84b
+
+    // counter.market 0x12345678979f29ebc99e00bdc5693ddea564ca80, 0xc0deee11aa091189fff0713353c43c7c8cae7881, 0x12345678982cb986dd291b50239295e3cb10cdf6
+    // 0xverify 0x48bf5e13a1ee8bd4385c182904b3abf73e042675
+
 
     //leverj
     Leverj1: { addr: '0x67b084e4654e1d62afa9694b6a626cec5c9ff2bd', name: 'LeverJ', supportedDex: false },//registry
@@ -186,6 +197,8 @@ module.exports = {
     // 0x4d55f76ce2dbbae7b48661bef9bd144ce0c9091b
     // 0xc86366cb075426223bca74059ae9dd3d68b5210a
     // 0xec65d776a9624e1186fabe988280b2f8e13bbf80
+    // 0xccdabeaa4c1c54efab58484c791428b22083b432
+    // 0xdb212bb6dd0c9cbc9fc0c5ffe88be35b81cbeb92
 
     // fake 0x? 0x5fb2f392772a6cb5ac423ceb587b62898c06c8cf
     // 0x v2 ?? 0xec200345f7e2991bcead2d299902e1380f902dca

@@ -161,6 +161,12 @@ module.exports = {
     '0x9b0ccf7c8994e19f39b2b4cf708e0a7df65fa8a3': 'Maker CDP',
     '0x059550a1ca3c46a2adb803e9e3ea4585a34f004a': 'dYdX',
     '0x36bf21c8e661b21e6166e4385f574941fdc6caff': 'dYdX',
+    '0x1e0447b19bb6ecfdae1e4ae1694b0c3659614e4e': 'dYdX',
+    '0xa8b39829ce2246f89b31c013b8cde15506fb9a76': 'dYdX',
+
+    '0x3a306a399085f3460bbcb5b77015ab33806a10d5': 'InstaDapp',
+
+    '0x5a4ade4f3e934a0885f42884f7077261c3f4f66f': 'Synthetix',
 
     '0x3baa64a4401bbe18865547e916a9be8e6dd89a5a': 'Request',
 

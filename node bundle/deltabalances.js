@@ -3228,10 +3228,14 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             else if (!badFromTo && unpacked.name == 'addLiquidity') {
                 let liquidityToken = this.uniqueTokens[txTo];
                 let token = this.uniqueTokens[this.config.uniswapContracts[txTo]];
+                let ethToken = this.uniqueTokens[_delta.config.ethAddr];
                 if (liquidityToken && token) {
                     let minLiq = utility.weiToToken(unpacked.params[0].value, liquidityToken);
                     let maxTokens = utility.weiToToken(unpacked.params[1].value, token);
+                    let value = utility.weiToEth(tx.value);
+
                     let deadline = Number(unpacked.params[2].value);
+
                     deadline = utility.formatDate(utility.toDateTime(deadline), false, false);
 
                     return {
@@ -3239,8 +3243,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'exchange': 'Uniswap',
                         'minimum': minLiq,
                         'liqToken': liquidityToken,
+                        'amount': value,
+                        'token': ethToken,
                         'maximum': maxTokens,
-                        'token': token,
+                        'token ': token,
                         'deadline': deadline,
                     };
                 }
@@ -3570,7 +3576,12 @@ DeltaBalances.prototype.addressName = function (addr, showAddr) {
         name = this.uniqueTokens[lcAddr].name + " Contract";
         //override tokens, as uniswap contracts are themself tokens
         if (this.config.uniswapContracts[lcAddr]) {
-            name = 'Uniswap (' + this.uniqueTokens[this.config.uniswapContracts[lcAddr]].name + ')';
+            let tokenAddr = this.config.uniswapContracts[lcAddr];
+            if (this.uniqueTokens[tokenAddr]) {
+                name = 'Uniswap (' + this.uniqueTokens[tokenAddr].name + ')';
+            } else {
+                name = 'Uniswap (???)';
+            }
         }
     }
     else if (this.config.zrxRelayers[lcAddr]) {
@@ -5822,7 +5833,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
             name += ' <i class="fa fa-lock" aria-hidden="true"></i>';
         } else if (token.old) {
             name += ' <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
-        } else if(token.warning) {
+        } else if (token.warning) {
             name += ' <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
         }
 

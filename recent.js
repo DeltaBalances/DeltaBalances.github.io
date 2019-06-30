@@ -280,10 +280,10 @@ var pageType = 'recent';
 			} else if (transType.indexOf('Taker') !== -1 || transType.indexOf('up to') !== -1 || transType == 'Trade') {
 				return displayFilter['Taker trade'];
 			}
-			else if (transType === 'Deposit') {
+			else if (transType === 'Deposit' || transType === 'Add Liquidity') {
 				return displayFilter.Deposit;
 			}
-			else if (transType === 'Withdraw') {
+			else if (transType === 'Withdraw' || transType === 'Remove Liquidity') {
 				return displayFilter.Withdraw;
 			}
 			else if (transType.indexOf('Cancel') !== -1) {
@@ -1348,6 +1348,30 @@ var pageType = 'recent';
 											trans.refundEth = true;
 										}
 									}
+									// uniswap Liquidity
+									else if (unpacked.name == 'addLiquidity' || unpacked.name == 'removeLiquidity') {
+
+
+										let token1 = obj.token;
+										let amount1 = undefined;
+										let token2 = undefined;
+										let amount2 = undefined;
+										if (unpacked.name == 'removeLiquidity') {
+											amount1 = obj.minimum;
+											token2 = obj['token '];
+											amount2 = obj['minimum '];
+										} else {
+											amount1 = obj.amount;
+											token2 = obj['token '];
+											amount2 = obj.maximum;
+										}
+
+										trans = createOutputTransaction(obj.type, token1, amount1, token2, amount2, tx.hash, tx.timeStamp, obj.unlisted, undefined, tx.isError === '0', obj.exchange);
+										if (!contract) {
+											trans.Incomplete = true;
+										}
+
+									}
 
 									if (trans) {
 										addTransaction(trans, i);
@@ -1418,7 +1442,15 @@ var pageType = 'recent';
 									exchange = _delta.addressName(from);
 								}
 
+
+
 								let token = _delta.setToken(contract);
+								//uniswap liquidity token minting/destruction
+								if (token && exchange == 'unknown ' && (_delta.config.uniswapContracts[contract] || token.name.indexOf('UNI') >= 0)
+									&& (from == _delta.config.ethAddr || to == _delta.config.ethAddr)) {
+									exchange = 'Uniswap';
+								};
+
 								if (token) {
 									let dvsr = _delta.divisorFromDecimals(token.decimals);
 									let amount = _util.weiToEth(tx.value, dvsr);
@@ -1495,8 +1527,36 @@ var pageType = 'recent';
 								outputHashes[mainHash] = oldTrans;
 							}
 
-
-
+							// uniswap liquidity (1 tx input, with slippage amounts, 2 token trasnfer with actual amount, 3 internal eth with actual amount)
+							else if (oldTrans.Type == 'Remove Liquidity' && transs.Type == 'In') {
+								if (oldTrans.Token.addr == transs.Token.addr) {
+									oldTrans.Amount = transs.Amount;
+								} else if (oldTrans.Base.addr == transs.Token.addr) {
+									oldTrans.Total = transs.Amount;
+								}
+								outputHashes[mainHash] = oldTrans;
+							} else if (transs.Type == 'Remove Liquidity' && oldTrans.Type == 'In') {
+								if (transs.Token.addr == oldTrans.Token.addr) {
+									transs.Amount = oldTrans.Amount;
+								} else if (trans.Base.addr == oldTrans.Token.addr) {
+									transs.Total = oldTrans.Amount;
+								}
+								outputHashes[mainHash] = transs;
+							} else if (oldTrans.Type == 'Add Liquidity' && transs.Type == 'Out') {
+								if (oldTrans.Token.addr == transs.Token.addr) {
+									oldTrans.Amount = transs.Amount;
+								} else if (oldTrans.Base.addr == transs.Token.addr) {
+									oldTrans.Total = transs.Amount;
+								}
+								outputHashes[mainHash] = oldTrans;
+							} else if (transs.Type == 'Add Liquidity' && oldTrans.Type == 'Out') {
+								if (transs.Token.addr == oldTrans.Token.addr) {
+									transs.Amount = oldTrans.Amount;
+								} else if (trans.Base.addr == oldTrans.Token.addr) {
+									transs.Total = oldTrans.Amount;
+								}
+								outputHashes[mainHash] = transs;
+							}
 
 							// detect AirSwap sending back the same amount
 							else if (oldTrans.Exchange == _delta.config.exchangeContracts.AirSwap.name && transs.Type == 'In' && oldTrans.Type == 'Taker Buy' && String(transs.Amount) == String(oldTrans.Total)) {
@@ -1874,10 +1934,10 @@ var pageType = 'recent';
 					}
 				}
 				else if (head == 'Type') {
-					if (cellValue == 'Deposit' || cellValue == 'Approve' || (cellValue && cellValue.indexOf('Wrap') >= 0) || cellValue == 'In') {
+					if (cellValue == 'Deposit' || cellValue == 'Approve' || (cellValue && (cellValue.indexOf('Wrap') >= 0 || cellValue.indexOf('Add') >= 0)) || cellValue == 'In') {
 						row$.append($('<td/>').html('<span class="label label-success" >' + cellValue + '</span>'));
 					}
-					else if (cellValue == 'Withdraw' || (cellValue && cellValue.indexOf('Unwrap') >= 0) || cellValue == 'Out') {
+					else if (cellValue == 'Withdraw' || (cellValue && (cellValue.indexOf('Unwrap') >= 0 || cellValue.indexOf('Remove') >= 0)) || cellValue == 'Out') {
 						row$.append($('<td/>').html('<span class="label label-danger" >' + cellValue + '</span>'));
 					}
 					else if (cellValue == 'Cancel sell' || cellValue == 'Cancel buy' || cellValue == 'Cancel offer' || cellValue == 'Sell offer' || cellValue == 'Buy offer' || cellValue == 'Cancel Sell' || cellValue == 'Cancel Buy' || cellValue == 'Cancel All') {

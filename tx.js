@@ -67,84 +67,6 @@ var pageType = 'tx';
 
 		checkStorage();
 
-		if (!publicAddr && !savedAddr && !metamaskAddr) {
-			document.getElementById('currentAddr').innerHTML = '0x......'; // side menu
-			document.getElementById('currentAddr2').innerHTML = '0x......'; //top bar
-			document.getElementById('currentAddrDescr').innerHTML = 'Input address';
-			setAddrImage('');
-			$('#userToggle').addClass('hidden');
-		} else if (publicAddr) {
-			document.getElementById('currentAddr').innerHTML = publicAddr.slice(0, 16); // side menu
-			document.getElementById('currentAddr2').innerHTML = publicAddr.slice(0, 8); //top bar
-			if (publicAddr !== metamaskAddr && publicAddr !== savedAddr) {
-				document.getElementById('currentAddrDescr').innerHTML = 'Input address';
-			} else if (publicAddr === savedAddr) {
-
-				if (savedAddr === metamaskAddr)
-					document.getElementById('currentAddrDescr').innerHTML = 'Metamask address (Saved)';
-				else
-					document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
-
-			} else {
-				document.getElementById('currentAddrDescr').innerHTML = 'Metamask address';
-			}
-			setAddrImage(publicAddr);
-			$('#etherscan').attr("href", _util.addressLink(publicAddr, false, false));
-			$('#walletInfo').removeClass('hidden');
-
-			if (savedAddr === publicAddr) {
-				$('#save').addClass('hidden');
-				$('#forget').removeClass('hidden');
-				$('#savedSection').addClass('hidden');
-			} else {
-				$('#forget').addClass('hidden');
-				$('#save').removeClass('hidden');
-				if (savedAddr)
-					$('#savedSection').removeClass('hidden');
-			}
-
-			if (metamaskAddr && metamaskAddr !== publicAddr) {
-				$('#metamaskSection').removeClass('hidden');
-			} else {
-				$('#metamaskSection').addClass('hidden');
-			}
-			$('#userToggle').removeClass('hidden');
-		} else if (savedAddr) {
-			document.getElementById('currentAddr').innerHTML = savedAddr.slice(0, 16); // side menu
-			document.getElementById('currentAddr2').innerHTML = savedAddr.slice(0, 8); //top bar
-
-			$('#walletInfo').removeClass('hidden');
-			$('#save').addClass('hidden');
-			$('#savedSection').addClass('hidden');
-			if (savedAddr === metamaskAddr) {
-				document.getElementById('currentAddrDescr').innerHTML = 'Metamask address (Saved)';
-			} else {
-				document.getElementById('currentAddrDescr').innerHTML = 'Saved address';
-			}
-
-			$('#etherscan').attr("href", _util.addressLink(savedAddr, false, false));
-			setAddrImage(savedAddr);
-			if (metamaskAddr) {
-				$('#metamaskSection').removeClass('hidden');
-			}
-			$('#userToggle').removeClass('hidden');
-		} else if (metamaskAddr) {
-			document.getElementById('currentAddr').innerHTML = metamaskAddr.slice(0, 16); // side menu
-			document.getElementById('currentAddr2').innerHTML = metamaskAddr.slice(0, 8); //top bar
-
-			$('#walletInfo').removeClass('hidden');
-			$('#metamaskSection').addClass('hidden');
-			document.getElementById('currentAddrDescr').innerHTML = 'Metamask address';
-
-			$('#etherscan').attr("href", _util.addressLink(metamaskAddr, false, false));
-			setAddrImage(metamaskAddr);
-			$('#userToggle').removeClass('hidden');
-		}
-
-
-
-
-
 		// detect enter & keypresses in input
 		$('#address').keypress(function (e) {
 			if (e.keyCode == 13) {
@@ -1191,23 +1113,34 @@ var pageType = 'tx';
 
 	function checkStorage() {
 		if (typeof (Storage) !== "undefined") {
+
+			// check for saved address
 			if (localStorage.getItem("address") !== null) {
 				var addr = localStorage.getItem("address");
 				if (addr && addr.length == 42) {
 					savedAddr = addr;
-					setSavedImage(savedAddr);
-					$('#savedAddress').html(addr.slice(0, 16));
+					addr = getAddress(addr);
+					if (addr) {
+						savedAddr = addr;
+						setSavedImage(savedAddr);
+						$('#savedAddress').html(addr.slice(0, 16));
+					}
 				} else {
 					localStorage.removeItem("address");
 				}
 			}
-		}
-		if (sessionStorage.getItem("address") !== null) {
-			var addr = sessionStorage.getItem("address");
-			if (addr && addr.length == 42) {
-				publicAddr = addr;
-			} else {
-				sessionStorage.removeItem("address");
+
+			// check for session address between pages
+			if (sessionStorage.getItem("address") !== null) {
+				var addr = sessionStorage.getItem("address");
+				if (addr && addr.length == 42) {
+					addr = getAddress(addr);
+					if (addr) {
+						publicAddr = addr;
+					}
+				} else {
+					sessionStorage.removeItem("address");
+				}
 			}
 		}
 	}

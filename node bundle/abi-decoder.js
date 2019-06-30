@@ -131,19 +131,27 @@ function _decodeMethod(data) {
           parsedParam = parseTuple(parsedParam, depth);
         }
 
-        function parseTuple(param2, arrayDepth) {
+        function parseTuple(param2, arrayDepth, parent = undefined) {
           if (arrayDepth > 0) {
             return param2.map((x) => {
               return parseTuple(x, arrayDepth - 1);
             });
           } else {
-            return param2.map((val, index2) => {
-              let type = abiItem.inputs[index].components[index2].type;
+
+            return param2.map(function (val, index2) {
+              let currentContext = undefined;
+              if (!parent) {
+                currentContext = abiItem.inputs[index].components[index2];
+              } else {
+                currentContext = parent.components[index2];
+              }
+
+              let type = currentContext.type;
               if (type.indexOf("uint") == 0 || type.indexOf("int") == 0) {
                 val = parseArrayNumber(val);
-              } else if (type.indexOf('tuple') !== -1) {
+              } else if (type.indexOf('tuple') == 0) {
                 //recursive on nested tuples
-                val = parseTuple(val, ((type.match(/]/g) || []).length));
+                val = parseTuple(val, ((type.match(/]/g) || []).length), currentContext);
               }
               return {
                 name: abiItem.inputs[index].components[index2].name,
@@ -190,7 +198,7 @@ function padZeros(address) {
 };
 
 function _decodeLogs(logs) {
-  return logs.map(function (logItem) {
+  return logs.filter(log => log.topics.length > 0).map((logItem) => {
     const methodID = logItem.topics[0].slice(2);
     let method = state.methodIDs[methodID];
     if (method) {

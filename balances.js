@@ -166,6 +166,9 @@ var pageType = 'balance';
         $('#showUnlisted').bootstrapToggle(tokenSelection.unlisted.show ? 'on' : 'off');
         $('#showListed').bootstrapToggle(tokenSelection.listed.show ? 'on' : 'off');
         $('#showSpam').bootstrapToggle(tokenSelection.spam.show ? 'on' : 'off');
+        $('#showOld').bootstrapToggle(tokenSelection.old.show ? 'on' : 'off');
+        $('#showInactive').bootstrapToggle(tokenSelection.inactive.show ? 'on' : 'off');
+        $('#showBlocked').bootstrapToggle(tokenSelection.blocked.show ? 'on' : 'off');
 
         $('#showListed').change(checkListing);
         $('#showUnlisted').change(checkListing);

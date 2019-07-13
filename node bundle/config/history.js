@@ -94,7 +94,7 @@ module.exports = {
         hideOpponent: false,
       },
     '0x Protocol v2': {
-      contract: '0x2',
+      contract: ['0x2','0x2.1'],
       minBlock: 6271590,
       tradeTopic: '0x0bcc4c97732e47d9946f229edb95f5b6323f601300e4690de719993f3c371129',
       withdrawTopic: undefined,

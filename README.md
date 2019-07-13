@@ -27,7 +27,7 @@ Supported Decentralized exchanges for each website feature.
 |----------|------------------|------------------|-----------------------------|------------------|
 | 0x Instant (0x v2) | - | Yes| Yes| No |
 | 0x Protocol v1 | - | Yes| Yes| Yes |
-| 0x Protocol v2 | - | Yes| Yes| Yes |
+| 0x Protocol v2(.1) | - | Yes| Yes| Yes |
 | [AirSwap](https://airswap.io)| - | Yes |Yes |Yes|
 | [Bancor](https://bancor.network)  | - | Yes| Yes | No|
 | [DDEX hydro 1.0](https://ddex.io/)| - | Yes| Yes| Not yet |

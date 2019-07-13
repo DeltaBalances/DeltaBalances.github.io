@@ -821,12 +821,19 @@ module.exports = {
     '0x2': { addr: '0x4f833a24e1f95d70f028921e27040ca56e09ab0b', name: '0x Exchange2', supportedDex: true },
     '0xProxy2': { addr: '0x2240dab907db71e64d3e0dba4800c83b5c502d4e', name: '0x ERC20 Proxy', supportedDex: true },
     '0xProxy3': { addr: '0x208e41fb445f1bb1b6780d58356e81405f3e6127', name: '0x ERC721 Proxy', supportedDex: false },
+    '0xForwarder': { addr: '0x7afc2d5107af94c462a194d2c21b5bdd238709d6', name: '0x Instant', supportedDex: false },
+    '0xForwarder2': { addr: '0x5468a1dc173652ee28d249c271fa9933144746b1', name: '0x Instant', supportedDex: false },
+    //0x v2.1 bugfix release
+    '0x2.1': { addr: '0x080bf510fcbf18b91105470639e9561022937712', name: '0x Exchange 2.1', supportedDex: true },
+    '0xProxy4': { addr: '0x95e6f48254609a6ee006f7d493c8e5fb97094cef', name: '0x ERC20 Proxy', supportedDex: true },
+    '0xProxy5': { addr: '0xefc70a1b18c432bdc64b596838b4d138f6bc6cad', name: '0x ERC721 Proxy', supportedDex: false },
+    '0xProxy6': { addr: '0xef701d5389ae74503d633396c4d654eabedc9d78', name: '0x MAP Proxy', supportedDex: false },
+    '0xForwarder3': { addr: '0xdc4587cb17d2a1829512e2cfec621f8066290e6a', name: '0x Instant', supportedDex: false },
+
     // ethfinex v1, 0x v1 clone
     Ethfinex: { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex', supportedDex: true },
     EthfinexProxy: { addr: '0x7e03d2b8edc3585ecd8a5807661fff0830a0b603', name: 'Ethfinex Proxy', supportedDex: true },
 
-    '0xForwarder': { addr: '0x7afc2d5107af94c462a194d2c21b5bdd238709d6', name: '0x Instant', supportedDex: false },
-    '0xForwarder2': { addr: '0x5468a1dc173652ee28d249c271fa9933144746b1', name: '0x Instant', supportedDex: false },
     OasisDex: { addr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425', name: 'OasisDex', supportedDex: true },
     OasisDex2: { addr: '0xb7ac09c2c0217b07d7c103029b4918a2c401eecb', name: 'OasisDex', supportedDex: true },
     OasisDex3: { addr: '0x39755357759ce0d7f32dc8dc45414cca409ae24e', name: 'Eth2Dai (Oasis)', supportedDex: true },
@@ -1110,7 +1117,7 @@ module.exports = {
         hideOpponent: false,
       },
     '0x Protocol v2': {
-      contract: '0x2',
+      contract: ['0x2','0x2.1'],
       minBlock: 6271590,
       tradeTopic: '0x0bcc4c97732e47d9946f229edb95f5b6323f601300e4690de719993f3c371129',
       withdrawTopic: undefined,

@@ -7,6 +7,7 @@ module.exports = {
     '0xeb71bad396acaa128aeadbc7dbd59ca32263de01': "IDT",
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX',
     '0x6f7ae872e995f98fcd2a7d3ba17b7ddfb884305f': 'Tokenlon',
+    '0xb9e29984fe50602e7a619662ebed4f90d93824c7': 'Tokenlon',
     '0x55890b06f0877a01bb5349d93b202961f8e27a9b': 'Shark Relay',
     '0x5e150a33ffa97a8d22f59c77ae5487b089ef62e9': 'TokenJar',
     '0x5dd835a893734b8d556eccf87800b76dda5aedc5': 'BambooRelay',
@@ -16,14 +17,19 @@ module.exports = {
     '0x7219612be7036d1bfa933e16ca1246008f38c5fe': 'The Ocean',
     '0x0e8ba001a821f3ce0734763d008c9d7c957f5852': 'Amadeus',
     '0xab8199eba802e7e6634d4389bf23999b7ae6b253': '3xchange',
-    '0x66a836664adc7c525c0cc4527dee8619d4faf669': 'Boxswap',
+    '0x66a836664adc7c525c0cc4527dee8619d4faf669': 'BoxSwap',
     '0x013ec57d1237e7727f818b1a35e3506f754304e4': 'GUDecks',
     '0xb0d7398d779ee9ffc727d2d5b045a5b441da8233': 'Emoon',
     '0x5620413261751d93978c6e752f6c351d10e75238': 'Lake Project',
     '0xa9274fda6d91a063f6aa0cfb172d6eb3b61ecf89': 'MetaMorph',
+    '0x4a821aa1affbf7ee89a245bf750d1d7374e77409': 'Tokenmom',
+    '0x853da5cecc1ea601ab978c2001565a0377a7dca6': 'Fordex',
+    '0x2a5f5f36c20d7e56358db78bbfac0bace25c1198': 'EtherBlockchain',
+    '0x8752d14a086cee9b8c108611ba9aefe04042c9f9': 'MARKET protocol',
 
     '0x8124071f810d533ff63de61d0c98db99eeb99d64': 'STAR BIT',
     '0x0681e844593a051e2882ec897ecd5444efe19ff2': 'STAR BIT',
+    '0xc370d2a5920344aa6b7d8d11250e3e861434cbdd': 'STAR BIT',
 
     "0x58a5959a6c528c5d5e03f7b9e5102350e24005f1": 'Erc Dex',
     "0xa71deef328b2c40d0e6525cd248ae749e9208dbb": 'Erc Dex',
@@ -51,6 +57,7 @@ module.exports = {
   },
   // admin taker addresses for 0x relayers
   zrxTakers: {
+    '0x6af9ec649821c2213dc488c36e3e3e999c3d7934': 'Tokenlon', 
     '0x4a821aa1affbf7ee89a245bf750d1d7374e77409': 'Tokenmom',
     '0xdf1bc6498338135de5ffdbcb98817d81e2665912': 'Veil',
     '0x4969358e80cdc3d74477d7447bffa3b2e2acbe92': 'Paradex',

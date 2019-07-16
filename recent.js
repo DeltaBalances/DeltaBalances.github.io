@@ -1037,6 +1037,17 @@ var pageType = 'recent';
 										}
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.price, tx.isError === '0', exchange);
 									}
+									//kyber alternative functions
+									else if (unpacked.name === 'swapTokenToToken' || unpacked.name === 'swapTokenToEther' || unpacked.name === 'swapEtherToToken') {
+										//kyber only
+										if (obj.type == 'Buy up to') {
+											trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
+										} else {
+											trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, undefined, tx.hash, tx.timeStamp, obj.unlisted, obj.minPrice, tx.isError === '0', exchange);
+										}
+										trans.Incomplete = true; // interntal tx or token transfer might add info
+
+									}
 									// easytrade
 									else if (unpacked.name === 'buy' || unpacked.name == 'sell' || unpacked.name == 'createSellOrder' || unpacked.name == 'createBuyOrder') {
 										trans = createOutputTransaction(obj.type, obj.token, obj.amount, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);

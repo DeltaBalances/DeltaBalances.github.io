@@ -4171,9 +4171,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let makerToken = this.setToken(unpacked.params[2].value);
 
                 let takerAmount = new BigNumber(unpacked.params[1].value);
-                let makerAmount = new BigNumber(unpacked.params[4].value);
+                let makerAmount = new BigNumber(unpacked.params[4].value); //max amount
 
-                let maxAmount = new BigNumber(unpacked.params[4].value);
                 let rate = new BigNumber(unpacked.params[5].value);
 
                 let minPrice = new BigNumber(0);
@@ -4182,8 +4181,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 var tradeType = 'Sell';
                 var token = undefined;
                 var base = undefined;
-
-                var nonETH = false;
 
                 var exchange = '';
                 let addrName = this.addressName(txTo);
@@ -4263,6 +4260,111 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                 }
             }
+            //kyber proxy trade input
+            else if (unpacked.name === 'swapTokenToToken' || unpacked.name === 'swapTokenToEther' || unpacked.name == 'swapEtherToToken') {
+                //swapTokenToToken(address src,uint256 srcAmount,address dest,uint256 minConversionRate )
+                //swapTokenToEther(address token,uint256 srcAmount,uint256 minConversionRate )
+                //swapEtherToToken(address token,uint256 minConversionRate )
+
+                let rate = undefined;
+                let takerToken = undefined;
+                let makerToken = undefined;
+                let takerAmount = undefined;
+                if (unpacked.name == 'swapTokenToEther') {
+                    takerToken = this.setToken(unpacked.params[0].value);
+                    makerToken = this.setToken(this.config.ethAddr);
+                    takerAmount = new BigNumber(unpacked.params[1].value);
+                    rate = new BigNumber(unpacked.params[2].value);
+                } else if (unpacked.name == 'swapEtherToToken') {
+                    takerToken = this.setToken(this.config.ethAddr);
+                    makerToken = this.setToken(unpacked.params[0].value);
+                    takerAmount = new BigNumber(tx.value);
+                    rate = new BigNumber(unpacked.params[1].value);
+                } else {
+                    takerToken = this.setToken(unpacked.params[0].value);
+                    makerToken = this.setToken(unpacked.params[2].value);
+                    takerAmount = new BigNumber(unpacked.params[1].value);
+                    rate = new BigNumber(unpacked.params[3].value);
+                }
+
+                let taker = txFrom;
+
+                let minPrice = new BigNumber(0);
+                let maxPrice = new BigNumber(0);
+
+                var tradeType = 'Sell';
+                var token = undefined;
+                var base = undefined;
+
+                var exchange = '';
+                let addrName = this.addressName(txTo);
+
+                if (badFromTo && addrName === txTo) {
+                    addrName = this.addressName(txFrom);
+                }
+                if (addrName.indexOf('0x') === -1) {
+                    exchange = addrName;
+                }
+
+                let amount = new BigNumber(0);
+                let baseAmount = new BigNumber(0);
+
+                if (this.isBaseToken(takerToken, makerToken)) {
+                    tradeType = 'Buy';
+                    token = makerToken;
+                    base = takerToken;
+
+                    baseAmount = utility.weiToToken(takerAmount, base)
+                    inverseMax = utility.weiToToken(rate, base);
+                    maxPrice = new BigNumber(1).div(inverseMax);
+                    amount = baseAmount.div(maxPrice);
+                }
+                else {
+                    token = takerToken;
+                    base = makerToken;
+
+                    amount = utility.weiToToken(takerAmount, token);
+                    if (base.decimals > token.decimals) {
+                        minPrice = utility.weiToToken(rate, base);
+                    } else {
+                        minPrice = utility.weiToToken(rate, token);
+                    }
+                    baseAmount = amount.times(minPrice);//takerAmount.times(utility.weiToToken(rate, token));
+                }
+
+
+                if (tradeType === 'Sell') {
+                    return {
+                        'type': tradeType + ' up to',
+                        'exchange': exchange,
+                        'note': utility.addressLink(taker, true, true) + 'made a trade.',
+                        'token': token,
+                        'amount': amount,
+                        'minPrice': minPrice,
+                        'base': base,
+                        'estBaseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        'taker': taker,
+                        // 'maker': maker,
+                    };
+                } else {
+
+                    return {
+                        'type': tradeType + ' up to',
+                        'exchange': exchange,
+                        'note': utility.addressLink(taker, true, true) + 'made a trade.',
+                        'token': token,
+                        'estAmount': amount,
+                        'maxPrice': maxPrice,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        'taker': taker,
+                        // 'maker': maker,
+                    };
+                }
+            }
+
             // ddex hydro trade input v1.0 & v1.1
             else if (unpacked.name == 'matchOrders' && (unpacked.params.length > 0 && unpacked.params[0].name === 'takerOrderParam')) {
                 // 1.0: function matchOrders(OrderParam memory takerOrderParam,OrderParam[] memory makerOrderParams,OrderAddressSet memory orderAddressSet)
@@ -6083,6 +6185,8 @@ DeltaBalances.prototype.isBaseToken = function (probableBaseToken, otherToken) {
             //both a base pair, take number
             return utility.isNonEthBase(probableBaseToken.addr) > utility.isNonEthBase(otherToken.addr)
         }
+    } else if (utility.isNonEthBase(otherToken.addr)) {
+        return false;
     } else if (probableBaseToken.erc721 && !otherToken.erc721) {
         return false;
     } else if (!probableBaseToken.erc721 && otherToken.erc721) {

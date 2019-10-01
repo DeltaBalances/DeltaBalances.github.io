@@ -8,7 +8,7 @@ module.exports = {
     { m: "Jun 2017", blockFrom: 3800776, blockTo: 3955159 },
     { m: "Jul 2017", blockFrom: 3955159, blockTo: 4101695 },
     { m: "Aug 2017", blockFrom: 4101695, blockTo: 4225038 },
-    { m: "Sept 2017", blockFrom: 4225038, blockTo: 4326061 },
+    { m: "Sep 2017", blockFrom: 4225038, blockTo: 4326061 },
     { m: "Oct 2017", blockFrom: 4326061, blockTo: 4467005 },
     { m: "Nov 2017", blockFrom: 4467005, blockTo: 4652926 },
     { m: "Dec 2017", blockFrom: 4652926, blockTo: 4832686 },
@@ -20,7 +20,7 @@ module.exports = {
     { m: "Jun 2018", blockFrom: 5710964, blockTo: 5883490 },
     { m: "Jul 2018", blockFrom: 5883490, blockTo: 6065980 },
     { m: "Aug 2018", blockFrom: 6065980, blockTo: 6249399 },
-    { m: "Sept 2018", blockFrom: 6249399, blockTo: 6430273 },
+    { m: "Sep 2018", blockFrom: 6249399, blockTo: 6430273 },
     { m: "Oct 2018", blockFrom: 6430273, blockTo: 6620476 },
     { m: "Nov 2018", blockFrom: 6620476, blockTo: 6803256 },
     { m: "Dec 2018", blockFrom: 6803256, blockTo: 6988615 },
@@ -31,6 +31,8 @@ module.exports = {
     { m: "May 2019", blockFrom: 7671850, blockTo: 7870425 },
     { m: "Jun 2019", blockFrom: 7870425, blockTo: 8062293 },
     { m: "Jul 2019", blockFrom: 8062293, blockTo: 8261512 },
+    { m: "Aug 2019", blockFrom: 8261512, blockTo: 8461047 },
+    { m: "Sep 2019", blockFrom: 8461047, blockTo: 8653171 },
   ],
   // history settings per exchange
   history: {

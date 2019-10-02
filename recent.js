@@ -919,7 +919,7 @@ var pageType = 'recent';
 								trans = createOutputTransaction('In', token, amount, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', _delta.addressName(tx.from, false));
 							}
 						} else {
-							addUnknownTransfer();
+							addUnknownTransfer(contract);
 						}
 					}
 					// A standard, non-internal transaction.  token deposit/withdraw, trades, cancels, etc.
@@ -1400,13 +1400,20 @@ var pageType = 'recent';
 						}
 
 						// make a transaciton a transfer if we can't determine anything else
-						function addUnknownTransfer() {
+						function addUnknownTransfer(tok) {
 							let trans2 = undefined;
 							let exchange = '';
 
+							let ercToken = undefined;
+							if (contract) {
+								ercToken = contract;
+							} 
+							if (tok) {
+								ercToken = tok;
+							}
 
 							//Ether transferred or unknown func accepting ETH
-							if (!contract && value.greaterThan(0)) {
+							if (!ercToken && value.greaterThan(0)) {
 
 								let amount = value;
 
@@ -1437,7 +1444,7 @@ var pageType = 'recent';
 								}
 							}
 							//unknown source of token transfer
-							else if (contract) {
+							else if (ercToken) {
 								let newType = '';
 								if (from == myAddr) {
 									newType = 'Out';
@@ -1453,9 +1460,7 @@ var pageType = 'recent';
 									exchange = _delta.addressName(from);
 								}
 
-
-
-								let token = _delta.setToken(contract);
+								let token = _delta.setToken(ercToken);
 								//uniswap liquidity token minting/destruction
 								if (token && exchange == 'unknown ' && (_delta.config.uniswapContracts[contract] || token.name.indexOf('UNI') >= 0)
 									&& (from == _delta.config.ethAddr || to == _delta.config.ethAddr)) {
@@ -1510,7 +1515,9 @@ var pageType = 'recent';
 
 							//get exchange or wallet name
 							let exchange = 'unknown ';
-							if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
+							if (oldTrans.Exchange && oldTrans.Exchange !== exchange) {
+								exchange = oldTrans.Exchange;
+							} else if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
 								exchange = _delta.addressName(to);
 							} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
 								exchange = _delta.addressName(from);

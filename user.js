@@ -288,11 +288,22 @@ function setAddrImage(addr) {
 
     if (addr) {
         if (isAddressPage) {
-            icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 16 }).toDataURL() + ')';
+            try {
+                icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 16 }).toDataURL() + ')';
+            } catch (e) {
+                console.log(e);
+                icon.style.backgroundImage = '';
+            }
         }
-        var smallImg = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-        icon2.style.backgroundImage = smallImg;
-        icon3.style.backgroundImage = smallImg;
+        try {
+            var smallImg = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
+            icon2.style.backgroundImage = smallImg;
+            icon3.style.backgroundImage = smallImg;
+        } catch (e) {
+            console.log(e);
+            icon2.style.backgroundImage = '';
+            icon3.style.backgroundImage = '';
+        }
     } else {
         if (isAddressPage) {
             icon.style.backgroundImage = '';
@@ -305,7 +316,12 @@ function setAddrImage(addr) {
 function setSavedImage(addr) {
     var icon = document.getElementById('savedImage');
     if (addr)
-        icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
+        try {
+            icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
+        } catch (e) {
+            console.log(e);
+            icon.style.backgroundImage = '';
+        }
     else
         icon.style.backgroundImage = '';
 }
@@ -313,7 +329,12 @@ function setSavedImage(addr) {
 function setMetamaskImage(addr) {
     var icon = document.getElementById('metamaskImage');
     if (addr)
-        icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
+        try {
+            icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
+        } catch (e) {
+            console.log(e);
+            icon.style.backgroundImage = '';
+        }
     else
         icon.style.backgroundImage = '';
 }

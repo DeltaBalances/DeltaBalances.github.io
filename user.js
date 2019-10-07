@@ -78,7 +78,7 @@ function setAddressUI(address, secondaryAddresses) {
     $('.mini-metamask').addClass('hidden');
     if (isAddressPage) {
         //big address link at the top
-        document.getElementById('addr').innerHTML = address ? _util.addressLink(address, true, false) : '';
+        document.getElementById('addr').innerHTML = address ? _util.addressLink(address, true, false) : 'Enter or import your address';
     }
     // sidebar etherscan link
     $('#etherscan').attr("href", address ? _util.addressLink(address, false, false) : '');
@@ -282,59 +282,36 @@ function loadMetamask() {
 }
 
 function setAddrImage(addr) {
-    var icon = document.getElementById('addrIcon');
-    var icon2 = document.getElementById('currentAddrImg');
-    var icon3 = document.getElementById('userImage');
+    let icon = document.getElementById('addrIcon');
+    let icon2 = document.getElementById('currentAddrImg');
+    let icon3 = document.getElementById('userImage');
 
-    if (addr) {
-        if (isAddressPage) {
-            try {
-                icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 16 }).toDataURL() + ')';
-            } catch (e) {
-                console.log(e);
-                icon.style.backgroundImage = '';
-            }
-        }
-        try {
-            var smallImg = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-            icon2.style.backgroundImage = smallImg;
-            icon3.style.backgroundImage = smallImg;
-        } catch (e) {
-            console.log(e);
-            icon2.style.backgroundImage = '';
-            icon3.style.backgroundImage = '';
-        }
-    } else {
-        if (isAddressPage) {
-            icon.style.backgroundImage = '';
-        }
-        icon2.style.backgroundImage = '';
-        icon3.style.backgroundImage = '';
+    let imageUrl = getBlockieUrl(addr);
+    if (isAddressPage) {
+        icon.style.backgroundImage = imageUrl;
     }
+    icon2.style.backgroundImage = imageUrl;
+    icon3.style.backgroundImage = imageUrl;
 }
 
 function setSavedImage(addr) {
-    var icon = document.getElementById('savedImage');
-    if (addr)
-        try {
-            icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
-        } catch (e) {
-            console.log(e);
-            icon.style.backgroundImage = '';
-        }
-    else
-        icon.style.backgroundImage = '';
+    let icon = document.getElementById('savedImage');
+    icon.style.backgroundImage = getBlockieUrl(addr);
 }
 
 function setMetamaskImage(addr) {
-    var icon = document.getElementById('metamaskImage');
-    if (addr)
+    let icon = document.getElementById('metamaskImage');
+    icon.style.backgroundImage = getBlockieUrl(addr);
+}
+
+function getBlockieUrl(addr) {
+    if(addr) {
         try {
-            icon.style.backgroundImage = 'url(' + blockies.create({ seed: addr.toLowerCase(), size: 8, scale: 4 }).toDataURL() + ')';
+            return 'url(' + blockies.makeBlockie(addr.toLowerCase()) + ')';
         } catch (e) {
-            console.log(e);
-            icon.style.backgroundImage = '';
+            return 'url(css/images/ether.png)';
         }
-    else
-        icon.style.backgroundImage = '';
+    } else {
+        return 'url(css/images/ether.png)';
+    }
 }

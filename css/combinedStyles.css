@@ -255,6 +255,10 @@ table.DTFC_Cloned thead,table.DTFC_Cloned tfoot{background-color:white}div.DTFC_
     float:left;
     margin-top:-5px;
   }
+
+  #userImage, #savedImage, #metamaskImage, #currentAddrImg {
+    background-size:cover;
+  }
   
   @media (min-width: 767px){
 	.navbar-nav {
@@ -315,12 +319,12 @@ table.DTFC_Cloned thead,table.DTFC_Cloned tfoot{background-color:white}div.DTFC_
  
 /* address icon */
 #addrIcon {
+    background-image: url("images/ether.png");
     width: 64px;
     height: 64px;
     background-size: cover;
-    background-repeat: no-repeat;
+    /*background-repeat: no-repeat; */
     border-radius: 50%;
-    box-shadow: inset rgba(255, 255, 255, 0.6) 0 2px 2px, inset rgba(0, 0, 0, 0.3) 0 -2px 6px;
 }
 
 #overviewTable {

@@ -1,4 +1,8 @@
-// Updated lists of tokens listed on exchanges, appends to tokens in backupTokens.js
+/* Load lists of (erc20) tokens from exchanges and cache, to update and append the list of known tokens in backupTokens.js 
+   Globalsare used in deltabalances.js initTokens()
+*/
+
+// List of tokens per exchange
 var exchangeTokens = {
     forkdelta: [],  // new domain CORS protection
     idex: [],
@@ -13,6 +17,21 @@ var unknownTokenCache = [];
 
 //limit scope
 {
+
+    // set unknownTokenCache from localStorage, ensures we load cached tokens from old sessions.
+    try {
+        let tokenData = localStorage.getItem('unknownTokens1');
+        if (tokenData !== null && tokenData) {
+            let parsed = JSON.parse(tokenData);
+            if (parsed && parsed.length > 0) {
+                unknownTokenCache = parsed;
+            }
+        }
+    } catch (err) {
+        console.log('unknown tokens loading error ' + err);
+    }
+
+
     // last update time for exchange token lists, default to the past
     let exchangeUpdates = {
         forkdelta: 0,
@@ -23,11 +42,10 @@ var unknownTokenCache = [];
         tokenstore: 0,
     };
 
-    //output retrieved tokens in the console
-    let logTokens = false;
 
+    // load known tokens for filtering exchange tokens below
     let backupTokens = {};
-    if (offlineCustomTokens && !logTokens) { //hardcoded list of known tokens from backuptokens.js
+    if (offlineCustomTokens) { //hardcoded list of known tokens from backuptokens.js
         try {
             for (let i = 0; i < offlineCustomTokens.length; i++) {
                 backupTokens[offlineCustomTokens[i].a.toLowerCase()] = offlineCustomTokens[i];
@@ -35,35 +53,15 @@ var unknownTokenCache = [];
         } catch (e) { }
     }
 
+    loadExchangeCache();
 
-    loadCache();
 
-    //load saved tokens from local storage
-    function loadCache() {
-        let cached = localStorage.getItem('exchangeTokens');
-        if (cached && cached.length > 0) {
-            try {
-                let temp = JSON.parse(cached);
-                if (temp && temp.idex) {
-                    exchangeTokens = temp;
-                }
-            } catch (e) {
-                console.log('could not load tokens from localstorage');
-            }
-        }
-        //load last update times from localstorage
-        let dates = localStorage.getItem('exchangeUpdates');
-        if (dates && dates.length > 0) {
-            try {
-                let temp = JSON.parse(dates);
-                if (temp && temp.idex) {
-                    exchangeUpdates = temp;
-                }
-            } catch (e) {
-                console.log('could not load update times from localstorage');
-            }
-        }
-    }
+
+
+    /* async API calls from here, the site won't stall with loading for these (slow requests) to finish.
+       Tokens loaded too late are added to the cache and used on a next page load.
+    */
+
 
     // CORS issue on new domain
     getTokens('https://cors.io/?https://forkdelta.app/config/main.json', 'ForkDelta', function (json) {
@@ -127,12 +125,43 @@ var unknownTokenCache = [];
         }
     });
 
+
+
+
+    //load saved exchange tokens from local storage
+    function loadExchangeCache() {
+        let cached = localStorage.getItem('exchangeTokens');
+        if (cached && cached.length > 0) {
+            try {
+                let temp = JSON.parse(cached);
+                if (temp && temp.idex) {
+                    exchangeTokens = temp;
+                }
+            } catch (e) {
+                console.log('could not load tokens from localstorage');
+            }
+        }
+        //load last update times from localstorage
+        let dates = localStorage.getItem('exchangeUpdates');
+        if (dates && dates.length > 0) {
+            try {
+                let temp = JSON.parse(dates);
+                if (temp && temp.idex) {
+                    exchangeUpdates = temp;
+                }
+            } catch (e) {
+                console.log('could not load update times from localstorage');
+            }
+        }
+    }
+
+    // function to handle loading lists of tokens from various exchange APIs
     function getTokens(url, name, parseResponseFunc) {
         try {
 
             let lcName = name.toLowerCase();
             // if we updated this list in the last 6 hours, skip the check
-            if (!logTokens && exchangeUpdates[lcName] && (Number(exchangeUpdates[lcName]) > Date.now() - 21600000)) { // 6*60*60*1000 milliseconds
+            if (exchangeUpdates[lcName] && (Number(exchangeUpdates[lcName]) > Date.now() - 21600000)) { // 6*60*60*1000 milliseconds
                 // don't load new tokens
             } else {
 
@@ -152,13 +181,6 @@ var unknownTokenCache = [];
                         exchangeTokens[lcName] = jsonData;
                         let string = JSON.stringify(exchangeTokens);
                         localStorage.setItem('exchangeTokens', string);
-
-                        //output to console
-                        if (logTokens) {
-                            console.log(name);
-                            let string2 = JSON.stringify(exchangeTokens[lcName]);
-                            console.log(string2);
-                        }
                         console.log('updated ' + name + ' token listings.');
                     }
                 });
@@ -166,39 +188,6 @@ var unknownTokenCache = [];
         } catch (err) {
             console.log(name + ' loading error ' + err);
         }
-    }
-
-    //get unknown token cache from previous session
-    try {
-        let tokenData = localStorage.getItem('unknownTokens1');
-        if (tokenData !== null && tokenData) {
-            let parsed = JSON.parse(tokenData);
-            if (parsed && parsed.length > 0) {
-                unknownTokenCache = parsed;
-                if (logTokens) {
-                    let string = JSON.stringify(unknownTokenCache);
-                    console.log('unknown cache');
-                    console.log(string);
-                }
-            }
-        }
-    } catch (err) {
-        console.log('unknown tokens loading error ' + err);
-    }
-
-    //delete data from old cache format
-    deleteLegacy('forkTokens');
-    deleteLegacy('idexTokens');
-    deleteLegacy('ddexTokens');
-    deleteLegacy('radarTokens');
-    deleteLegacy('kyberTokens');
-
-    //remove old format of token cache
-    function deleteLegacy(name) {
-        try {
-            localStorage.removeItem(name + '2');
-            sessionStorage.removeItem(name + '1');
-        } catch (e) { }
     }
 
 }

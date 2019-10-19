@@ -258,22 +258,38 @@ var pageType = 'tx';
 		var internalResult = undefined;
 
 		var gotBlockNum = false;
+		let isPending = false;
 
 		var transLoaded = 0;
 		const transNumber = 5;
+		let web3Index = 0;
 
+		//spread web3 requests over available providers
+		function getWeb3() {
+			if (web3Index >= _delta.web3s.length) {
+				web3Index = 0;
+			}
+			let web3Provider = _delta.web3s[web3Index];
+			web3Index++;
+			return web3Provider;
+		}
+
+		getInternal();
 		getTransactionData();
+		getTransactionReceipt();
+
 
 		function getTransactionData() {
-			var finished = false;
+			let finished = false;
 
+			web3GetTransaction();
 			// get tx data & input from etherscan
 			_util.getURL('https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (err, result) => {
-
+				if (finished) {
+					return;
+				}
 				if (!err && result) {
-					if (finished)
-						return;
-					if (result && result.result) {
+					if (result.result) {
 						finished = true;
 						handleTransData(result.result);
 					} else {
@@ -287,7 +303,8 @@ var pageType = 'tx';
 			function web3GetTransaction() {
 				//etherscan failed, try web3
 				if (!finished) {
-					_delta.web3s[0].eth.getTransaction(transactionHash, (err, result) => {
+					let web3Provider = getWeb3();
+					web3Provider.eth.getTransaction(transactionHash, (err, result) => {
 						if (!err && result) {
 							finished = true;
 							handleTransData(result);
@@ -298,50 +315,52 @@ var pageType = 'tx';
 				}
 			}
 
-			// if etherscan takes >3 sec, try web3
-			setTimeout(function () {
-				web3GetTransaction();
-			}, 3000);
-
 			function handleTransData(res) {
-				if (res) {
-					transResult = res;
-					transLoaded++;
+				if (!transResult) {
+					if (res) {
+						transResult = res;
+						transLoaded++;
 
-					if (res.blockNumber) {
-						getBlockTime(Number(res.blockNumber));
-						getTransactionReceipt();
-						getInternal();
+						if (res.blockNumber) {
+							getBlockTime(Number(res.blockNumber));
+							return;
+						} else {
+							isPending = true;
+							// tx is pending, no need to wait for tx status or logs
+							transLoaded = transNumber;
+							processTransactions(transResult, undefined, undefined, undefined);
+							return;
+						}
 					} else {
-						// tx is pending, no need to wait for tx status or logs
-						transLoaded = transNumber;
-						processTransactions(transResult, undefined, undefined, undefined);
+						processTransactions(undefined, undefined, undefined, undefined);
 						return;
 					}
-				} else {
-					processTransactions(undefined, undefined, undefined, undefined);
-					return;
 				}
 			}
 		}
 
 		//get tx output logs from etherscan
 		function getTransactionReceipt() {
-
-			_util.txReceipt(_delta.web3s[0], transactionHash, (err, result, _) => {
-				if (!err && result) {
-					logResult = result;
-					if (result.blockNumber) {
-						if (Number(logResult.status) !== 1) {
-							getTxStatus(); // get error msg
+			let web3Provider = getWeb3();
+			_util.txReceipt(web3Provider, transactionHash, (err, result, _) => {
+				if (!isPending) {
+					if (!err && result) {
+						logResult = result;
+						if (result.blockNumber) {
+							getBlockTime(result.blockNumber);
+							if (Number(logResult.status) !== 1) {
+								getTxStatus(); // get error msg
+							} else {
+								transLoaded++;
+							}
 						} else {
-							transLoaded++;
+							isPending = true;
 						}
 					}
+					transLoaded++;
+					if (transLoaded >= transNumber)
+						processTransactions(transResult, statusResult, logResult, internalResult);
 				}
-				transLoaded++;
-				if (transLoaded >= transNumber)
-					processTransactions(transResult, statusResult, logResult, internalResult);
 			});
 		}
 
@@ -353,7 +372,7 @@ var pageType = 'tx';
 				gotBlockNum = true;
 
 			if (!blockDates[num]) {
-				_util.getBlockDate(_delta.web3s[0], num, (err, res, _) => {
+				_util.getBlockDate(getWeb3(), num, (err, res, _) => {
 					if (!err && res) {
 
 						var unixtime = res;
@@ -391,16 +410,16 @@ var pageType = 'tx';
 
 		function getInternal() {
 			_util.getURL('https://api.etherscan.io/api?module=account&action=txlistinternal&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (err, result) => {
-
-				if (!err && result) {
-					if (result && result.status === '1')
-						internalResult = result.result;
+				if (!isPending) {
+					if (!err && result) {
+						if (result && result.status === '1')
+							internalResult = result.result;
+					}
+					transLoaded++;
+					if (transLoaded >= transNumber)
+						processTransactions(transResult, statusResult, logResult, internalResult);
 				}
-				transLoaded++;
-				if (transLoaded >= transNumber)
-					processTransactions(transResult, statusResult, logResult, internalResult);
 			});
-
 		}
 
 		function processTransactions(tx, txStatus, txLog, txInternal) {

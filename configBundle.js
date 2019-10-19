@@ -240,6 +240,8 @@ module.exports = {
     '0xe94b04a0fed112f3664e45adb2b8915693dd5ff3': 'Bittrex',
     '0x96fc4553a00c117c5b0bed950dd625d1c16dc894': 'Changelly',
     '0x9539e0b14021a43cde41d9d45dc34969be9c7cb0': 'CoinBene',
+    '0x0d6b5a54f940bf3d52e438cab785981aaefdf40c':'COSS',
+    '0xd1560b3984b7481cd9a8f40435a53c860187174d':'COSS',
     '0x5baeac0a0417a05733884852aa068b706967e790': 'Cryptopia',
     '0x0d0707963952f2fba59dd06f2b425ace40b492fe': 'Gate.io',
     '0x7793cd85c11a924478d358d49b05b37e91b5810f': 'Gate.io',

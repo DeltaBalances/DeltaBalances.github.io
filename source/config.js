@@ -36,6 +36,7 @@ module.exports = {
     "0xecf8f87f810ecf450940c9f60066b4a7a501d6a7": 1, // WETH MKR 
     "0xc0829421c1d260bd3cb3e0f06cfe2d52db2ce315": 1, // Bancor ether token
     "0xaa7427d8f17d87a28f5e1ba3adbb270badbe1011": 1, // ethfinex ETHW
+    "0x50cb61afa3f023d17276dcfb35abf85c710d1cff": 1, // ethfinex ETHW
     "0x53b04999c1ff2d77fcdde98935bb936a67209e4c": 1, // Veil ETH
   },
   // currencies that take precedence to be the base pair in a trade found on the blockchain

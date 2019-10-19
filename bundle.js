@@ -5188,8 +5188,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
             //Bancor token conversions 
             else if (unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized' || (unpacked.name === 'convert' && unpacked.params.length == 4)
-                || unpacked.name == 'convertFor' || unpacked.name == 'convertForPrioritized2' || unpacked.name == 'convertForPrioritized2'
+                || unpacked.name == 'convertFor' || unpacked.name == 'convertForPrioritized' || unpacked.name == 'convertForPrioritized2' || unpacked.name == 'convertForPrioritized3'
                 || unpacked.name == 'claimAndConvert' || unpacked.name == 'claimAndConvertFor'
+                // BancorX crosschain (eos)
+                || unpacked.name === 'xConvert' || unpacked.name === 'xConvertPrioritized'
             ) {
                 /* basic bancor converter
                     function quickConvert(IERC20Token[] _path, uint256 _amount, uint256 _minReturn)
@@ -5210,18 +5212,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         bytes32 _r,
                         bytes32 _s)
                         public payable returns (uint256);
-
-                    function convertForPrioritized(
-                        IERC20Token[] _path,
-                        uint256 _amount,
-                        uint256 _minReturn,
-                        address _for,
-                        uint256 _block,
-                        uint256 _nonce,
-                        uint8 _v,
-                        bytes32 _r,
-                        bytes32 _s)
-                        public payable returns (uint256);
                 */
 
                 // everything else has (path[], amount, minRate), so convert this one to that format
@@ -5233,31 +5223,28 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     unpacked.params = params2;
                 }
 
-                var tradeType = 'Sell';
-                var token = undefined;
-                var base = undefined;
+                let tradeType = 'Sell';
+                let token = undefined;
+                let base = undefined;
                 let tokenPath = unpacked.params[0].value;
                 let tokenGive = this.setToken(tokenPath[tokenPath.length - 1]);
                 let tokenGet = this.setToken(tokenPath[0]);
 
-                var exchange = 'Bancor';
+                let exchange = 'Bancor';
 
-                if (this.isBaseToken(tokenGet, tokenGive) /* || (!utility.isWrappedETH(tokenGive.addr) && tokenGet.name == "BNT")*/) // get eth  -> sell
-                {
+                if (this.isBaseToken(tokenGet, tokenGive)) {
                     tradeType = 'Buy';
                     token = tokenGive;
                     base = tokenGet;
-                }
-                else //if (this.isBaseToken(tokenGive, tokenGet)/* || (!utility.isWrappedETH(tokenGet.addr) && tokenGive.name == "BNT")*/) // buy
-                {
+                } else {
                     tradeType = 'Sell';
                     token = tokenGet;
                     base = tokenGive;
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    let rawAmount = new BigNumber(0);
+                    let rawBaseAmount = new BigNumber(0);
                     if (tradeType === 'Sell') {
                         rawAmount = new BigNumber(unpacked.params[1].value);
                         rawBaseAmount = new BigNumber(unpacked.params[2].value);
@@ -5267,19 +5254,18 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
 
 
-                    var amount = utility.weiToToken(rawAmount, token);
-                    var baseAmount = utility.weiToToken(rawBaseAmount, base);
+                    let amount = utility.weiToToken(rawAmount, token);
+                    let baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                    var orderSize = new BigNumber(0);
-                    var price = new BigNumber(0);
+                    let price = new BigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
 
-                    // let makerAddr = tx.from.toLowerCase();
+                    let obj = undefined;
 
                     if (tradeType === 'Sell') {
-                        return {
+                        obj = {
                             'type': tradeType + ' up to',
                             'exchange': exchange,
                             'note': 'bancor token conversion',
@@ -5291,7 +5277,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                             'unlisted': token.unlisted,
                         };
                     } else {
-                        return {
+                        obj = {
                             'type': tradeType + ' up to',
                             'exchange': exchange,
                             'note': 'bancor token conversion',
@@ -5303,7 +5289,46 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                             'unlisted': token.unlisted,
                         };
                     }
+                    //crosschain
+                    if (unpacked.name.indexOf('x') === 0) {
+                        let chain = this.web3.toUtf8(unpacked.params[3].value);
+                        let obj2 = {
+                            'type': 'Trade (cross-chain)',
+                            'exchange': 'BancorX',
+                            'note': 'A cross-chain trade to the ' + chain + ' blockchain',
+                            'token': tokenGet,
+                            'amount': token === tokenGet ? amount : baseAmount,
+                            'blockchain': chain,
+                            'chainDestination': this.web3.toUtf8(unpacked.params[4].value),
+                            'unlisted': tokenGive.unlisted,
+                        }
+                        return [obj2, obj];
+                    } else {
+                        return obj;
+                    }
                 }
+            }
+            // BancorX incoming cross-chain transfer
+            else if (unpacked.name === 'reportTx') {
+                //reportTx(bytes32 _fromBlockchain, uint256 _txId, address _to, uint256 _amount, uint256 _xTransferId)
+                let to = unpacked.params[2].value.toLowerCase();
+                let rawAmount = unpacked.params[3].value;
+                let token = this.setToken('0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c'); // BNT hardcoded
+                let chain = this.web3.toUtf8(unpacked.params[0].value);
+                let amount = utility.weiToToken(rawAmount, token);
+
+                let note = 'Cross-chain token transfer of BNT from ' + chain;
+
+                return {
+                    'type': 'Transfer (cross-chain)',
+                    'exchange': 'BancorX',
+                    'note': note,
+                    'token': token,
+                    'amount': amount,
+                    'blockchain': chain,
+                    'to': to,
+                    'unlisted': token.unlisted,
+                };
             }
             //idex adminWithdraw(address token, uint256 amount, address user, uint256 nonce, uint8 v, bytes32 r, bytes32 s, uint256 feeWithdrawal)
             else if (unpacked.name === 'adminWithdraw') {
@@ -7122,6 +7147,52 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         'tradeType': tradeType,
                     };
                 }
+            }
+            // bancor cross-chain transfer (out to other blockchain)
+            else if (unpacked.name == 'XTransfer') {
+                //XTransfer (index_topic_1 address _from, bytes32 _toBlockchain, index_topic_2 bytes32 _to, uint256 _amount, uint256 _id)
+                let from = unpacked.events[0].value.toLowerCase();
+                let rawAmount = unpacked.events[3].value;
+                let token = this.setToken('0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c'); // BNT hardcoded
+                let chain = this.web3.toUtf8(unpacked.events[1].value);
+                let chainAddr = this.web3.toUtf8(unpacked.events[2].value);
+                let amount = utility.weiToToken(rawAmount, token);
+
+                let note = 'Cross-chain token transfer of BNT to ' + chain;
+
+                return {
+                    'type': 'Transfer (cross-chain)',
+                    'exchange': 'BancorX',
+                    'note': note,
+                    'token': token,
+                    'amount': amount,
+                    'from': from,
+                    'blockchain': chain,
+                    'chainDestination': chainAddr,
+                    'unlisted': token.unlisted,
+                };
+            }
+            // bancorX cross chain transfer (in from other blockchain)
+            else if (unpacked.name == 'TxReport') {
+                //TxReport (index_topic_1 address _reporter, bytes32 _fromBlockchain, uint256 _txId, address _to, uint256 _amount, uint256 _xTransferId)
+                let to = unpacked.events[3].value.toLowerCase();
+                let rawAmount = unpacked.events[4].value;
+                let token = this.setToken('0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c'); // BNT hardcoded
+                let chain = this.web3.toUtf8(unpacked.events[1].value);
+                let amount = utility.weiToToken(rawAmount, token);
+
+                let note = 'Cross-chain token transfer of BNT from ' + chain;
+
+                return {
+                    'type': 'Transfer (cross-chain)',
+                    'exchange': 'BancorX',
+                    'note': note,
+                    'token': token,
+                    'amount': amount,
+                    'blockchain': chain,
+                    'to': to,
+                    'unlisted': token.unlisted,
+                };
             }
             //ETH deposit/withdraw  etherdelta/decentrex, idex, enclaves 
             else if (unpacked.events.length >= 4 && (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw')) {
@@ -30458,15 +30529,22 @@ module.exports = (db) => {
     };
 
     // Make an etherscan link for an address (address, output as html anchor, shorten the address with ...)
-    utility.addressLink = function (addr, html, short) {
-        var url = 'https://etherscan.io/address/' + addr;
+    utility.addressLink = function (addr, html, short, name = undefined) {
+        let url = 'https://etherscan.io/address/' + addr;
         if (!html)
             return url
-        var displayText = addr;
+        let displayText = addr;
         if (short)
             displayText = displayText.slice(0, 6) + '..';
         else {
-            displayText = db.addressName(addr, !short);
+            if (!name) {
+                displayText = db.addressName(addr, !short);
+            } else {
+                displayText = name;
+                if (!short && addr) {
+                    displayText = displayText + ' ' + addr.toLowerCase();
+                }
+            }
 
             //show addres after name 'Contract A 0xab12cd34..' in a smaller size
             if (html && !short && displayText && displayText !== addr) {

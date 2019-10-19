@@ -534,15 +534,22 @@ module.exports = (db) => {
     };
 
     // Make an etherscan link for an address (address, output as html anchor, shorten the address with ...)
-    utility.addressLink = function (addr, html, short) {
-        var url = 'https://etherscan.io/address/' + addr;
+    utility.addressLink = function (addr, html, short, name = undefined) {
+        let url = 'https://etherscan.io/address/' + addr;
         if (!html)
             return url
-        var displayText = addr;
+        let displayText = addr;
         if (short)
             displayText = displayText.slice(0, 6) + '..';
         else {
-            displayText = db.addressName(addr, !short);
+            if (!name) {
+                displayText = db.addressName(addr, !short);
+            } else {
+                displayText = name;
+                if (!short && addr) {
+                    displayText = displayText + ' ' + addr.toLowerCase();
+                }
+            }
 
             //show addres after name 'Contract A 0xab12cd34..' in a smaller size
             if (html && !short && displayText && displayText !== addr) {

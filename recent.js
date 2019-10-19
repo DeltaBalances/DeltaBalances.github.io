@@ -1058,7 +1058,7 @@ var pageType = 'recent';
 									}
 									//bancor
 									else if (unpacked.name === 'convert' || unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized'
-										|| unpacked.name === 'convertFor' || unpacked.name == 'convertForPrioritized' || unpacked.name === 'convertForPrioritized2') {
+										|| unpacked.name === 'convertFor' || unpacked.name == 'convertForPrioritized' || unpacked.name === 'convertForPrioritized2' || unpacked.name === 'convertForPrioritized3') {
 
 										if (obj.type == 'Buy up to') {
 											// did send ETH along with tx and base is wrapped ether
@@ -1074,7 +1074,15 @@ var pageType = 'recent';
 											//internal tx to unwrap eth token
 											trans.Incomplete = true;
 										}
-									} //OasisDex proxies like OasisDirect
+									}
+									// bancorX cross-chain trades
+									else if (unpacked.name === 'xConvert' || unpacked.name === 'xConvertPrioritized') {
+
+										if (obj.type == 'Trade (cross-chain)') {
+											trans = createOutputTransaction('Trade', obj.token, obj.amount, obj.blockchain, undefined, tx.hash, tx.timeStamp, obj.unlisted, undefined, tx.isError === '0', exchange);
+										}
+									}
+									//OasisDex proxies like OasisDirect
 									else if ((unpacked.name == 'execute' && obj && obj.type !== "Indirect execution") // indirect delegatecall of functions below
 										|| (
 											(unpacked.name == 'buyAllAmount'
@@ -1941,7 +1949,10 @@ var pageType = 'recent';
 				else if (head == 'Token' || head == 'Base') {
 
 					let token = cellValue;
-					if (token) {
+					if(typeof token === 'string') {
+						row$.append($('<td data-sort="' + token + '" data-search="' + token + '"/>').html(token));
+					}
+					else if (token) {
 						let popover = _delta.makeTokenPopover(token);
 						let search = token.name;
 						if (token.name2) {

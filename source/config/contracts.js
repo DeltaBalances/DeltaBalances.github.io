@@ -56,6 +56,7 @@ module.exports = {
     BancorQuick2: { addr: '0xf87a7ec94884f44d9de33d36b73f42c7c0dd38b1', name: 'Bancor', supportedDex: false },
     // network is quick v3?
     BancorNetwork: { addr: '0xf20b9e713a33f61fa38792d2afaf1cd30339126a', name: 'Bancor', supportedDex: false },
+    BancorX: { addr: '0xda96eb2fa67642c171650c428f93abdfb8a63a2d', name: 'BancorX', supportedDex: false },
     // bancor quick3? 0x111913ca1c1a8d4e3283213ba115bf6dcde07d6f
     Enclaves: { addr: '0xbf45f4280cfbe7c2d2515a7d984b8c71c15e82b7', name: 'EnclavesDex', supportedDex: true },
     Enclaves2: { addr: '0xed06d46ffb309128c4458a270c99c824dc127f5d', name: 'EnclavesDex', supportedDex: false },

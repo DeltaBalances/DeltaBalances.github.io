@@ -30,13 +30,14 @@ Supported Decentralized exchanges for each website feature.
 | 0x Protocol v2(.1) | - | Yes| Yes| Yes |
 | [AirSwap](https://airswap.io)| - | Yes |Yes |Yes|
 | [Bancor](https://bancor.network)  | - | Yes| Yes | No|
+| [BancorX](https://bancor.network) cross-chain  | - | Yes| Yes | No|
 | [DDEX hydro 1.0](https://ddex.io/)| - | Yes| Yes| Not yet |
 | [DDEX hydro 1.1](https://ddex.io/)| - | Yes| Yes| Yes |
 | Decentrex †| Yes| Yes| Yes| Yes |
 | [Dexy †](https://app.dexy.exchange) |Yes| No| No | No|
 | [EasyTrade](https://easytrade.io) |-| Yes| Yes | Yes|
 | [Enclaves Dex](https://enclaves.io) | Yes | Yes| Yes | Yes|
-| [Etfinex trustless v1 (v2<sup>*</sup>)](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
+| DiversiFi [Ethfinex trustless v1 (v2<sup>*</sup>)](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
 | [Eth2Dai](https://eth2dai.com/) |-|Yes| Yes | Yes|
 | [ETHEN](https://ethen.market) |No|Yes|Yes|Yes|
 | [EtherC](https://etherc.io) |Yes|Yes|Yes|Yes|
@@ -46,7 +47,7 @@ Supported Decentralized exchanges for each website feature.
 | [IDEX](https://idex.market)| Yes |Yes |Yes| No |
 | [Joyso](https://joyso.io)|Yes| Not yet| Not yet | No|
 | [Kyber Network](https://kyber.network) |-|Yes|Yes| Yes | Yes|
-| [OasisDex](https://oasisdex.com) [OasisCommunity](https://oasiscommunity.github.io/dex/) |-|Yes| Yes | Yes|
+| [Oasis](https://oasis.app/trade/) [OasisDex †](https://oasisdex.com)|-|Yes| Yes | Yes|
 | [OasisDirect](https://oasis.direct) |-|Yes| Yes | No|
 | [SingularX](https://singularx.com)|Yes| Yes| Yes | Yes|
 | [SwitchDex](https://switchdex.ag)|Yes| Yes| Yes | Not yet|

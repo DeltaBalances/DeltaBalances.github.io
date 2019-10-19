@@ -794,9 +794,17 @@ var pageType = 'tx';
 
 		// handle generic tx data
 
+		// If we don't know the name for the 'to' address, check if tx input can add context
+		let toName = undefined;
+		if (transaction.input && _delta.addressName(transaction.to, true) === transaction.to.toLowerCase()) {
+			if (transaction.input.length > 0 && transaction.input[0].exchange) {
+				toName = transaction.input[0].exchange;
+			}
+		}
+		$('#to').html(_util.addressLink(transaction.to, true, false, toName));
+
 		$('#hash').html(_util.hashLink(transaction.hash, true));
 		$('#from').html(_util.addressLink(transaction.from, true, false));
-		$('#to').html(_util.addressLink(transaction.to, true, false));
 		$('#cost').html('??');
 		$('#gasgwei').html(transaction.gasGwei + ' Gwei (' + '<span data-toggle="tooltip" title="' + _util.exportNotation(transaction.gasPrice) + '">' + transaction.gasPrice.toFixed(10) + ' ETH)</span>');
 		if (!transaction.gasUsed)
@@ -915,6 +923,9 @@ var pageType = 'tx';
 				wideOutput = true;
 			}
 			else if (uniqueType.indexOf('liquidity') !== -1) {
+				wideOutput = true;
+			}
+			else if (uniqueType.indexOf('cross-chain') !== -1) {
 				wideOutput = true;
 			}
 			if (!types[uniqueType])

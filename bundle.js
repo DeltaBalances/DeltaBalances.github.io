@@ -3022,10 +3022,18 @@ DeltaBalances.prototype.setToken = function (address) {
 
 DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
-    // if contractAddress, input from etherscan token transfer log. To & from aren't original but for token transfer itself
-    var badFromTo = false;
-    if (tx.contractAddress)
-        badFromTo = true;
+    if (!tx || !tx.input) {
+        return undefined;
+    }
+
+    if (tx.input && tx.input === 'depracated') {
+        //etherscan token transfer, no input available
+        return undefined;
+    }
+    if (tx.contractAddress) {
+        console.log('unexpected tx input from transfer logs.')
+        return undefined;
+    }
 
     var _delta = this;
 
@@ -3044,7 +3052,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let from = undefined;
                 let rawAmount = undefined;
                 let amount = new BigNumber(0);
-                let token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+                let token = this.setToken(tx.to);
 
                 if (unpacked.name === 'transfer') {
                     to = unpacked.params[0].value.toLowerCase();
@@ -3057,10 +3065,9 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
                 if (token && token.addr) {
                     //erc20 token transfer. valid erc721 has no 'transfer', but some like cryptokitties do
-                    // badFromTo comes from etherscan list of erc20 token transfers
                     // transferFrom is not commonly used in erc20 directly from a wallet
                     if ((unpacked.name === 'transferFrom' && !token.unknown && !token.erc721) ||
-                        (unpacked.name === 'transfer' && (!token.erc721 || badFromTo))) {
+                        (unpacked.name === 'transfer' && !token.erc721)) {
                         amount = utility.weiToToken(rawAmount, token);
                     }
                     //erc721 token 
@@ -3083,7 +3090,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
             // erc20 token approve
             // erc721 token approve
-            else if (!badFromTo && unpacked.name === 'approve') {
+            else if (unpacked.name === 'approve') {
                 var sender = unpacked.params[0].value;
                 var rawAmount = unpacked.params[1].value;
                 var amount = new BigNumber(0);
@@ -3099,11 +3106,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                 }
 
-                var exchange = 'unknown ';
-                let addrName = this.addressName(sender);
-                if (addrName !== sender.toLowerCase()) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(sender, 'unknown ');
 
                 return {
                     'type': 'Approve',
@@ -3117,7 +3120,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 };
             }
             //ERC721 enable approve
-            else if (!badFromTo && unpacked.name === 'setApprovalForAll') {
+            else if (unpacked.name === 'setApprovalForAll') {
                 var sender = unpacked.params[0].value;
                 var all = unpacked.params[1].value;
                 var token = this.setToken(tx.to);
@@ -3127,11 +3130,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     this.uniqueTokens[token.addr] = token;
                 }
 
-                var exchange = 'unknown ';
-                let addrName = this.addressName(sender);
-                if (addrName !== sender.toLowerCase()) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(sender, 'unknown ');
 
                 return {
                     'type': 'Approve',
@@ -3164,17 +3163,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         type = 'Wrap ETH';
                         note = 'Wrap ETH to WETH';
                         token = this.setToken(this.config.ethAddr);
-                        base = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+                        base = this.setToken(tx.to);
                     }
                     // Wrap erc20 token into lockable ethfinex token
                     else if (unpacked.params.length == 2 && unpacked.params[1].name == '_forTime') {
                         rawVal = new BigNumber(unpacked.params[0].value);
-                        if (badFromTo) {
-                            base = this.setToken(txTo);
-                            token = this.setToken(tx.contractAddress);
-                        } else {
-                            base = this.setToken(tx.to);
-                        }
+                        base = this.setToken(tx.to);
+                        // TODO find token in recent tx?
 
                         let wrapName = base.name;
                         if (wrapName.indexOf('-W') > 0) {
@@ -3186,13 +3181,12 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         note = 'Wrap a token to  lockable token for Ethfinex';
                     }
                     // ETH deposit into exchange (etherdelta, idex, tokenstore & more)
-                    else if (!badFromTo) {
+                    else {
                         type = 'Deposit';
                         token = this.setToken(this.config.ethAddr);
                         rawVal = new BigNumber(tx.value);
-                        let addrName = this.addressName(txTo);
-                        if (addrName.indexOf('0x') === -1) {
-                            exchange = addrName;
+                        exchange = this.getExchangeName(txTo, 'unknown');
+                        if (exchange === 'unknown') {
                             note = 'Deposit ETH into ' + exchange;
                         } else {
                             note = 'Deposit ETH into the exchange contract';
@@ -3206,18 +3200,14 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     if (utility.isWrappedETH(tx.to)) {
                         type = 'Unwrap ETH';
                         note = 'Unwrap WETH to ETH';
-                        token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+                        token = this.setToken(tx.to);
                         base = this.setToken(this.config.ethAddr);
                     }
                     //unwrap ethfinex wrapped token
                     else if (unpacked.params.length == 5 && unpacked.params[4].name == "signatureValidUntilBlock") {
                         rawVal = new BigNumber(unpacked.params[0].value);
-                        if (badFromTo) {
-                            base = this.setToken(tx.contractAddress);
-                            token = this.setToken(txFrom);
-                        } else {
-                            token = this.setToken(txTo);
-                        }
+                        token = this.setToken(txTo);
+                        // TODO find base token?
 
                         let wrapName = token.name;
                         if (wrapName.indexOf('-W') > 0) {
@@ -3229,19 +3219,15 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         note = 'Unwrap a lockable Ethfinex token';
                     }
                     //withdraw from exchange
-                    else if (!badFromTo) {
+                    else {
                         type = 'Withdraw';
-
-                        let addrName = this.addressName(txTo);
                         token = this.setToken(this.config.ethAddr);
-                        if (addrName.indexOf('0x') === -1) {
-                            exchange = addrName;
+                        exchange = this.getExchangeName(txTo, 'unknown');
+                        if (exchange === 'unknown') {
                             note = 'Request ' + exchange + ' to withdraw ETH';
                         } else {
                             note = 'Request the exchange contract to withdraw ETH';
                         }
-                    } else {
-
                     }
                 }
 
@@ -3279,16 +3265,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var amount = utility.weiToToken(unpacked.params[1].value, token);
                     var type = '';
                     var note = '';
-                    var exchange = '';
-
-                    let addrName = this.addressName(txTo);
-                    if (badFromTo && (unpacked.name === 'withdrawToken' || unpacked.name === 'withdraw')) {
-                        addrName = this.addressName(txFrom);
-                    }
-
-                    if (addrName.indexOf('0x') === -1) {
-                        exchange = addrName;
-                    }
+                    let exchange = this.getExchangeName(txTo, '');
 
                     if (unpacked.name === 'withdrawToken' || unpacked.name === 'withdrawBoth' || unpacked.name === 'withdraw') {
                         type = 'Withdraw';
@@ -3352,15 +3329,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     var feeVal = utility.weiToToken(rawFee, feeToken);
 
-                    var exchange = '';
-                    let addrName = this.addressName(txTo);
-                    // etherscan token transfer log (to, from are bad)
-                    if (badFromTo) {
-                        addrName = this.addressName(txFrom);
-                    }
-                    if (addrName.indexOf('0x') === -1) {
-                        exchange = addrName;
-                    }
+                    let exchange = this.getExchangeName(txTo, '');
 
                     if (token.addr !== this.config.ethAddr) {
                         type = 'Token Withdraw';
@@ -3390,12 +3359,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var amount = utility.weiToToken(unpacked.params[2].value, token);
                     var type = 'Deposit';
 
-                    var exchange = '';
-
-                    let addrName = this.addressName(txTo);
-                    if (addrName.indexOf('0x') === -1) {
-                        exchange = addrName;
-                    }
+                    let exchange = this.getExchangeName(txTo, '');
                     var note = '';
                     if (exchange) {
                         note = 'Request the ' + exchange + 'contract to deposit ' + token.name;
@@ -3415,7 +3379,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
             }
             // cancel EtherDelta, decentrex, tokenstore
-            else if (!badFromTo && unpacked.name === 'cancelOrder' && unpacked.params.length > 3) {
+            else if (unpacked.name === 'cancelOrder' && unpacked.params.length > 3) {
                 var cancelType = 'sell';
                 var token = undefined;
                 var base = undefined;
@@ -3423,11 +3387,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let tokenGet = this.setToken(unpacked.params[0].value);
                 let tokenGive = this.setToken(unpacked.params[2].value);
 
-                var exchange = '';
-                let addrName = this.addressName(txTo);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(txTo, '');
 
                 if (this.isBaseToken(tokenGet, tokenGive)) {
                     cancelType = 'buy';
@@ -3473,7 +3433,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
             }
             //DDEX hydro (1.0, 1.1) cancel input  (untested, no actual cancel tx found)
-            else if (!badFromTo && unpacked.name === 'cancelOrder' && unpacked.params.length == 1 && unpacked.params[0].name == 'order' && unpacked.params[0].value.length == 8) {
+            else if (unpacked.name === 'cancelOrder' && unpacked.params.length == 1 && unpacked.params[0].name == 'order' && unpacked.params[0].value.length == 8) {
                 //cancelOrder(Order memory order)
                 //Order(address trader, address relayer, address baseToken, address quoteToken, uint256 baseTokenAmount, uint256 quoteTokenAmount, uint256 gasTokenAmount, bytes32 data);
                 /**
@@ -3509,13 +3469,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     cancelType = 'sell';
                 }
 
-                var exchange = '';
-                let addrName = this.addressName(relayer);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                } else {
-                    exchange = 'Unknown DDEX';
-                }
+                let exchange = this.getExchangeName(relayer, 'Unknown DDEX');
 
                 let amount = utility.weiToToken(rawTokenAmount, token);
                 let baseAmount = utility.weiToToken(rawBaseAmount, base);
@@ -3540,7 +3494,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
             // 0x v1 cancel input
             //0x v2 cancel input
-            else if (!badFromTo && (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders')) {
+            else if (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders') {
 
                 //check if this is the 0x v2 variant with structs
                 let isV2 = unpacked.params[0].name == 'order' || unpacked.params[0].name == 'orders';
@@ -3738,16 +3692,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
             //0x v2, function called with signed data, from sender != signer
             else if (unpacked.name == 'executeTransaction') {
-                let exchange = '0x Exchange V2';
-                if (this.config.admins[txFrom]) {
-                    name = this.config.admins[txFrom];
-                    name = name.replace(' Admin', '');
-                } else {
-                    name = utility.relayName(txFrom);
-                }
-                if (name !== txFrom) {
-                    exchange = name;
-                }
+                let exchange = utility.relayName(txFrom, '0x Exchange V2');
                 let returns = [
                     //signed execution
                     {
@@ -3812,15 +3757,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let makerAmount = new BigNumber(unpacked.params[1].value);
                 let takerAmount = new BigNumber(unpacked.params[4].value);
 
-                var exchange = '';
-                let addrName = this.addressName(txTo);
-                if (badFromTo) {
-                    addrName = this.config.exchangeContracts.AirSwap.name;
-                }
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
-
+                let exchange = this.getExchangeName(txTo, '');
 
                 var tradeType = 'Sell';
                 var token = undefined;
@@ -3892,14 +3829,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             //oasisdex cancel/kill
             else if ((unpacked.name === 'cancel' || unpacked.name == 'kill') && unpacked.params.length == 1) {
 
-                var exchange = '';
-                let addrName = this.addressName(txTo);
-                if (badFromTo && addrName.indexOf('0x') >= 0) {
-                    addrName = this.addressName(txFrom);
-                }
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(txTo, '');
 
                 return {
                     'type': 'Cancel offer',
@@ -3910,12 +3840,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
             // default 'trade' function for EtherDelta style exchanges (EtherDelta, IDEX, Token store, Enclaves, etc..)
             // modified to accept the 'order' function as well (on-chain order creation)
-            else if (!badFromTo &&
-                (  // etherdelta/decentrex/tokenstore use 11 params, idex has 4, enclaves has 12
-                    unpacked.name === 'trade' && (unpacked.params.length == 11 || unpacked.params.length == 12 || unpacked.params.length == 4)
-                    || unpacked.name === 'tradeEtherDelta' || unpacked.name === 'instantTrade'
-                    || unpacked.name === 'order' //on-chain order
-                )
+            else if ( // etherdelta/decentrex/tokenstore use 11 params, idex has 4, enclaves has 12
+                unpacked.name === 'trade' && (unpacked.params.length == 11 || unpacked.params.length == 12 || unpacked.params.length == 4)
+                || unpacked.name === 'tradeEtherDelta' || unpacked.name === 'instantTrade'
+                || unpacked.name === 'order' //on-chain order
             ) {
 
                 let idex = false;
@@ -3946,11 +3874,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let tokenGet = this.setToken(unpacked.params[0].value);
                 let tokenGive = this.setToken(unpacked.params[2].value);
 
-                var exchange = '';
-                let addrName = this.addressName(txTo);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(txTo, '');
 
                 if (this.isBaseToken(tokenGet, tokenGive)) // get eth  -> sell
                 {
@@ -4084,7 +4008,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
             }
             // exchange trade with args in arrays (ethen.market)
-            else if (!badFromTo && unpacked.name === 'trade' && unpacked.params.length == 3) {
+            else if (unpacked.name === 'trade' && unpacked.params.length == 3) {
 
                 let numberOfTrades = unpacked.params[1].value.length - 1;
                 var objs = [];
@@ -4117,11 +4041,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var token = _delta.setToken(inputToken);
                     var base = _delta.setToken(_delta.config.ethAddr);
 
-                    var exchange = '';
-                    let addrName = _delta.addressName(txTo);
-                    if (addrName.indexOf('0x') === -1) {
-                        exchange = addrName;
-                    }
+                    let exchange = this.getExchangeName(txTo, '');
 
                     if (token && base && token.addr && base.addr) {
 
@@ -4182,15 +4102,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 var token = undefined;
                 var base = undefined;
 
-                var exchange = '';
-                let addrName = this.addressName(txTo);
-
-                if (badFromTo && addrName === txTo) {
-                    addrName = this.addressName(txFrom);
-                }
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(txTo, '');
 
                 if (this.isBaseToken(takerToken, makerToken)) // get eth  -> sell
                 {
@@ -4296,15 +4208,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 var token = undefined;
                 var base = undefined;
 
-                var exchange = '';
-                let addrName = this.addressName(txTo);
-
-                if (badFromTo && addrName === txTo) {
-                    addrName = this.addressName(txFrom);
-                }
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(txTo, '');
 
                 let amount = new BigNumber(0);
                 let baseAmount = new BigNumber(0);
@@ -4419,16 +4323,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         tradeType = 'Sell';
                     }
 
-                    let exchange = '';
-                    let addrName = utility.relayName(relayer);
-                    if (addrName.indexOf('0x') === -1) {
-                        exchange = addrName;
-                    } else {
-                        addrName = this.addressName(relayer);
-                        if (addrName.indexOf('0x') !== -1) {
-                            exchange = 'Unknown DDEX';
-                        }
-                    }
+                    let exchange = utility.relayName(relayer, 'DDEX');
 
                     let amount = utility.weiToToken(rawTokenAmount, token);
                     let baseAmount = utility.weiToToken(rawBaseAmount, base);
@@ -4750,7 +4645,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     }
 
-
                     // single units if erc721
                     if (objs[0].token.erc721) {
                         amount = new BigNumber(1);
@@ -4765,7 +4659,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     let relayer3 = objs[0].relayer;
                     exchange = objs[0].exchange;
-                    let taker3 = badFromTo ? '' : txFrom;
+                    let taker3 = txFrom;
 
                     let initObj = {
                         'type': objs[0].type.slice(6) + ' up to', //remove maker/taker
@@ -4786,7 +4680,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         unpacked.name = oldName;
                     }
 
-                    if (!badFromTo && oldName.indexOf('WithEth') !== -1) {
+                    if (oldName.indexOf('WithEth') !== -1) {
                         initObj.exchange = '0x Instant ';
                         if (utility.isWrappedETH(initObj.base.addr)) {
                             initObj.baseAmount = utility.weiToEth(tx.value);
@@ -4825,7 +4719,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 function unpack0xOrderInput(orderAddresses, orderValues, fillTakerTokenAmount) {
 
                     let maker = orderAddresses[0].toLowerCase();
-                    let taker = badFromTo ? '' : txFrom;//if tx has contractAddress field, is etherscan token transfer event, from/to incorrect for trade tx
+                    let taker = txFrom;
                     let orderTaker = orderAddresses[1].toLowerCase(); // taker defined in order
                     let makerToken = _delta.setToken(orderAddresses[2]);
                     let takerToken = _delta.setToken(orderAddresses[3]);
@@ -4961,23 +4855,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let tokenGet = this.setToken(unpacked.params[1].value);
                 let tokenGive = this.setToken(unpacked.params[3].value);
 
-                var exchange = '';
-                let addrName = this.addressName(txTo);
-                if (badFromTo && addrName.indexOf('0x') >= 0) {
-                    addrName = this.addressName(txFrom);
-                }
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(txTo, '');
 
-                if (this.isBaseToken(tokenGet, tokenGive)) // get eth  -> sell
-                {
+                if (this.isBaseToken(tokenGet, tokenGive)) { // get eth  -> sell
                     tradeType = 'Buy';
                     token = tokenGive;
                     base = tokenGet;
-                }
-                else //if (this.isBaseToken(tokenGive, tokenGet)) // buy
-                {
+                } else { // buy
                     token = tokenGet;
                     base = tokenGive;
                 }
@@ -5020,14 +4904,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 //take(bytes32 id, uint128 maxTakeAmount)
                 //buy(uint id, uint amount)
 
-                var exchange = '';
-                let addrName = this.addressName(txTo);
-                if (badFromTo && addrName.indexOf('0x') >= 0) {
-                    addrName = this.addressName(txFrom);
-                }
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(txTo, '');
 
                 // Function: buy(uint256 id, uint256 amount)
                 return {
@@ -5039,11 +4916,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
 
             // OasisDex buy all, OasisDirect  (Oasis proxy, oasisProxy factory)
-            else if (!badFromTo && (unpacked.name == 'buyAllAmount'
-                || (unpacked.name == 'buyAllAmountPayEth' && !badFromTo)
+            else if ((unpacked.name == 'buyAllAmount'
+                || unpacked.name == 'buyAllAmountPayEth'
                 || unpacked.name == 'buyAllAmountBuyEth'
                 || unpacked.name == 'createAndBuyAllAmount'
-                || (unpacked.name == 'createAndBuyAllAmountPayEth' && !badFromTo)
+                || unpacked.name == 'createAndBuyAllAmountPayEth'
                 || unpacked.name == 'createAndBuyAllAmountBuyEth')
                 && (unpacked.params[0].name == 'otc' || unpacked.params[0].name == 'factory')
             ) {
@@ -5093,16 +4970,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     tokenGiveAmount = new BigNumber(unpacked.params[2].value);
                 }
 
-                var exchange = '';
-                let addrName = this.addressName(txTo);
-                if (badFromTo && addrName.indexOf('0x') >= 0) {
-                    addrName = this.addressName(txFrom);
-                }
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                } else {
-                    exchange = 'OasisDirect ';
-                }
+                let exchange = this.getExchangeName(txTo, 'OasisDirect');
 
                 let rawAmount;
                 let rawBaseAmount;
@@ -5163,10 +5031,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
             // OasisDex sell all, OasisDirect  (Oasis proxy, oasisProxy factory)
             else if ((unpacked.name == 'sellAllAmount'
-                || (unpacked.name == 'sellAllAmountPayEth' && !badFromTo)
+                || unpacked.name == 'sellAllAmountPayEth'
                 || unpacked.name == 'sellAllAmountBuyEth'
                 || unpacked.name == 'createAndSellAllAmount'
-                || (unpacked.name == 'createAndSellAllAmountPayEth' && !badFromTo)
+                || unpacked.name == 'createAndSellAllAmountPayEth'
                 || unpacked.name == 'createAndSellAllAmountBuyEth')
                 && (unpacked.params[0].name == 'otc' || unpacked.params[0].name == 'factory')
             ) {
@@ -5215,16 +5083,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     tokenGiveAmount = new BigNumber(unpacked.params[3].value);
                 }
 
-                var exchange = '';
-                let addrName = this.addressName(txTo);
-                if (badFromTo && addrName.indexOf('0x') >= 0) {
-                    addrName = this.addressName(txFrom);
-                }
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                } else {
-                    exchange = 'OasisDirect ';
-                }
+                let exchange = this.getExchangeName(txTo, 'OasisDirect');
 
                 let rawAmount;
                 let rawBaseAmount;
@@ -5469,15 +5328,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         note = utility.addressLink(unpacked.params[2].value, true, true) + ' requested IDEX to withdraw ETH';
                     }
 
-                    var exchange = '';
-                    let addrName = this.addressName(txTo);
-                    // etherscan token transfer log (to, from are bad)
-                    if (badFromTo) {
-                        addrName = this.addressName(txFrom);
-                    }
-                    if (addrName.indexOf('0x') === -1) {
-                        exchange = addrName;
-                    }
+                    let exchange = this.getExchangeName(txTo, '');
 
                     return {
                         'type': type,
@@ -5495,12 +5346,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             //ethex.market taker trade
             else if (unpacked.name == 'takeBuyOrder' || unpacked.name == 'takeSellOrder') {
                 let maker = unpacked.params[unpacked.params.length - 1].value.toLowerCase();
-                let taker = ''
-                if (badFromTo && unpacked.name == 'takeSellOrder') {
-                    taker = txTo;
-                } else {
-                    taker = txFrom;
-                }
+                let taker = txFrom;
 
                 let base = this.setToken(this.config.ethAddr);
                 let token = this.setToken(unpacked.params[0].value);
@@ -5511,11 +5357,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     tradeType = 'Sell';
                 }
 
-                let exchange = '';
-                let addrName = !badFromTo ? this.addressName(txTo) : this.config.exchangeContracts.Ethex.name; //assume ethex, no address in etherscan token event
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(txTo, '');
 
                 if (token && base) {
                     let tokenAmount = utility.weiToToken(unpacked.params[1].value, token);
@@ -5575,11 +5417,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     tradeType = 'Buy';
                 }
 
-                let exchange = '';
-                let addrName = this.addressName(txTo);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(txTo, '');
 
                 if (base && token) {
 
@@ -5641,11 +5479,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     tradeType = 'Buy';
                 }
 
-                let exchange = '';
-                let addrName = this.addressName(txTo);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(txTo, '');
 
                 if (base && token) {
 
@@ -5703,35 +5537,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                 let swapContract = txTo;
 
-                /* 
-                uniswap is taker trading only, we don't usually want to get info from etherscan token transfers (badFromTo), regular outgoing tx are sufficient
-                but we might find a uniswap contract that is yet unknown by a token transfer
-                */
-                if (badFromTo) {
-                    let token = undefined;
-                    let addr = tx.contractAddress.toLowerCase();
-                    if (this.uniqueTokens[addr]) {
-                        token = this.uniqueTokens[addr];
-                    } else if (tx.decimals && tx.symbol) {
-                        token = { addr: addr, name: tx.symbol, unknown: true, decimals: Number(tx.decimals), unlisted: true };
-                    }
-
-                    // we send eth && receive tokens
-                    if (unpacked.name.indexOf('ethToToken') !== -1 && !this.config.uniswapContracts[txFrom]) {
-                        this.config.uniswapContracts[txFrom] = token.addr;
-                        swapContract = txFrom;
-                    } // send token, receive eth 
-                    else if (unpacked.name.indexOf('tokenToEth') !== -1 && !this.config.uniswapContracts[txTo]) {
-                        this.config.uniswapContracts[txTo] = token.addr;
-                    } else {
-                        return undefined;
-                    }
-                } else {
-                    if (!this.config.uniswapContracts[txTo]) {
-                        console.log('input for unknown uniswap contract ' + swapContract);
-                        return undefined;
-                        // TODO fetch this contract?
-                    }
+                if (!this.config.uniswapContracts[txTo]) {
+                    console.log('input for unknown uniswap contract ' + swapContract);
+                    return undefined;
+                    // TODO fetch this contract?
                 }
 
                 let token = undefined;
@@ -5853,7 +5662,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
             }
             //uniswap liquidity
-            else if (!badFromTo && unpacked.name == 'addLiquidity') {
+            else if (unpacked.name == 'addLiquidity') {
                 let liquidityToken = this.uniqueTokens[txTo];
                 let token = this.uniqueTokens[this.config.uniswapContracts[txTo]];
                 let ethToken = this.uniqueTokens[_delta.config.ethAddr];
@@ -5883,7 +5692,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 */
             }
             //uniswap liquidity
-            else if (!badFromTo && unpacked.name == 'removeLiquidity') {
+            else if (unpacked.name == 'removeLiquidity') {
                 let liquidityToken = this.uniqueTokens[txTo];
                 let token = this.uniqueTokens[this.config.uniswapContracts[txTo]];
                 let ethToken = this.uniqueTokens[this.config.ethAddr];
@@ -5913,7 +5722,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             // Veil ETH token wrapping
             else if (unpacked.name === 'depositAndApprove') {
                 let results = [];
-                let base = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+                let base = this.setToken(tx.to);
                 { //wrap veil ETH
                     let rawVal = new BigNumber(tx.value);
                     let token = this.setToken(this.config.ethAddr);
@@ -5937,9 +5746,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let amount = utility.weiToToken(allowance, base);
 
                     let sender = txFrom;
-                    if (badFromTo) {
-                        sender = txTo;
-                    }
 
                     results.push({
                         'type': 'Approve',
@@ -5958,7 +5764,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             else if (unpacked.name == 'withdrawAndTransfer') {
                 //withdrawAndTransfer(uint256 _amount, address _target)
                 let results = [];
-                let token = badFromTo ? this.setToken(tx.contractAddress) : this.setToken(tx.to);
+                let token = this.setToken(tx.to);
                 let base = this.setToken(this.config.ethAddr);
                 let rawVal = new BigNumber(unpacked.params[0].value);
                 let amount = utility.weiToToken(rawVal, token);
@@ -5973,7 +5779,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
                 {  //transfer token
                     let dest = unpacked.params[1].toLowerCase();
-                    let origin = badFromTo ? txTo : txFrom;
+                    let origin = txFrom;
                     results.push({
                         'type': 'Transfer',
                         'note': 'Transfer ETH',
@@ -6197,6 +6003,17 @@ DeltaBalances.prototype.isBaseToken = function (probableBaseToken, otherToken) {
     }
 };
 
+DeltaBalances.prototype.getExchangeName = function (addr, defaultName = '') {
+    let exchangeName = defaultName;
+    let addrName = this.addressName(addr, false);
+
+    // if addressName does not return 
+    if (addrName && addrName !== addr.toLowerCase()) {
+        exchangeName = addrName;
+    }
+    return exchangeName;
+}
+
 DeltaBalances.prototype.addressName = function (addr, showAddr) {
     var lcAddr = addr.toLowerCase();
 
@@ -6322,12 +6139,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     base = tokenGive;
                 }
 
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base && token.addr && base.addr) {
                     var rawAmount = new BigNumber(0);
@@ -6453,12 +6265,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     base = tokenGive;
                 }
 
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base && token.addr && base.addr) {
                     var rawAmount = new BigNumber(0);
@@ -6521,11 +6328,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     rawAmount = new BigNumber(unpacked.events[0].value);
                 }
 
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base && token.addr && base.addr) {
 
@@ -6584,14 +6387,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     transType = 'Maker';
                 }
 
-
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
-
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 let rawAmount = new BigNumber(unpacked.events[3].value);
                 let price = new BigNumber(unpacked.events[2].value);
@@ -6686,16 +6482,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     }
                 }
 
-                let exchange = '';
-                let addrName = utility.relayName(relayer);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                } else {
-                    addrName = this.addressName(relayer);
-                    if (addrName.indexOf('0x') !== -1) {
-                        exchange = 'Unknown DDEX';
-                    }
-                }
+                let exchange = utility.relayName(relayer, 'DDEX');
 
                 if (token && base && token.addr && base.addr) {
                     let amount = utility.weiToToken(rawTokenAmount, token);
@@ -6764,16 +6551,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     transType = 'Maker';
                 }
 
-                let exchange = '';
-                let addrName = utility.relayName(relayer);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                } else {
-                    addrName = this.addressName(relayer);
-                    if (addrName.indexOf('0x') !== -1) {
-                        exchange = 'Unknown DDEX';
-                    }
-                }
+                let exchange = utility.relayName(relayer, 'DDEX');
 
                 if (token && base && token.addr && base.addr) {
                     let amount = utility.weiToToken(rawTokenAmount, token);
@@ -6908,11 +6686,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     base = makerToken;
                 }
 
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base && token.addr && base.addr) {
                     var rawAmount = new BigNumber(0);
@@ -7007,12 +6781,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     base = makerToken;
                 }
 
-
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base && token.addr && base.addr) {
                     var rawAmount = new BigNumber(0);
@@ -7362,12 +7131,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 var user = unpacked.events[1].value;
                 var rawAmount = unpacked.events[2].value;
                 var rawBalance = unpacked.events[3].value;
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && token.addr) {
                     var amount = utility.weiToToken(rawAmount, token);
@@ -7420,12 +7184,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     type = type.replace('Token', '');
                 }
 
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && token.addr) {
                     var amount = utility.weiToToken(rawAmount, token);
@@ -7477,12 +7236,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 }
                 let user = unpacked.events[0].value.toLowerCase();
                 let token = this.setToken(unpacked.events[1].value);
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && token.addr) {
                     let rawAmount = unpacked.events[2].value;
@@ -7561,11 +7315,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
             }
             // DDEX hydro (1.0, 1.1) cancel event  (TODO, get order from hash?)
             else if (unpacked.name == 'Cancel' && unpacked.events.length == 1 && unpacked.events[0].name == 'orderHash') {
-                var exchange = '';
-                let addrName = this.addressName(unpacked.address);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 return {
                     'type': 'Cancel order',
@@ -7598,11 +7348,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         base = tokenGive;
                     }
 
-                    var exchange = '';
-                    let addrName = this.addressName(unpacked.address);
-                    if (addrName.indexOf('0x') === -1) {
-                        exchange = addrName;
-                    }
+                    let exchange = this.getExchangeName(unpacked.address, '');
 
                     /*   let maker = '';
                        if (unpacked.events.length >= 7 && unpacked.events[6].name == 'user') {
@@ -7779,8 +7525,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 var token = undefined;
                 var base = undefined;
 
-                var exchange = '';
-                exchange = this.addressName(unpacked.address);
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (this.isBaseToken(takerToken, makerToken)) // get eth  -> sell
                 {
@@ -7856,8 +7601,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 let feeCurrency = '';
                 let fee = new BigNumber(0);
 
-                var exchange = '';
-                exchange = this.addressName(unpacked.address);
+                let exchange = this.getExchangeName(unpacked.address, '');
                 var tradeType = 'Sell';
                 var token = undefined;
                 var base = undefined;
@@ -7976,16 +7720,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     token = this.setToken(token.addr + '-' + rawAmount);
                 }
 
-                var exchange = 'unknown ';
-                let addrName = this.addressName(to);
-                if (addrName !== to) {
-                    exchange = addrName;
-                } else {
+                let exchange = this.getExchangeName(unpacked.address, 'unknown ');
+                if (exchange === 'unknown ') {
                     // bancor quick convert, sending out approves?
-                    addrName = this.addressName(sender);
-                    if (addrName !== sender) {
-                        exchange = addrName;
-                    }
+                    this.getExchangeName(sender, 'unknown ');
                 }
 
                 return {
@@ -8012,16 +7750,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     this.uniqueTokens[token.addr] = token;
                 }
 
-                var exchange = 'unknown ';
-                let addrName = this.addressName(to);
-                if (addrName !== to) {
-                    exchange = addrName;
-                } else {
+                let exchange = this.getExchangeName(to, 'unknown ');
+                if (exchange === 'unknown ') {
                     // bancor quick convert, sending out approves?
-                    addrName = this.addressName(sender);
-                    if (addrName !== sender) {
-                        exchange = addrName;
-                    }
+                    this.getExchangeName(sender, 'unknown ');
                 }
                 return {
                     'type': 'Approve',
@@ -8070,12 +7802,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 let base = this.setToken(this.config.ethAddr);
                 let token = this.setToken(unpacked.events[1].value);
 
-                let exchange = '';
-                let addrName = this.addressName(unpacked.address);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
-
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base) {
                     let tokenAmount = utility.weiToToken(unpacked.events[2].value, token);
@@ -8151,12 +7878,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 }
 
                 let maker = unpacked.events[4].value.toLowerCase();
-
-                let exchange = '';
-                let addrName = this.addressName(unpacked.address);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (base && token) {
                     let tokenAmount = utility.weiToToken(unpacked.events[2].value, token);
@@ -8224,17 +7946,9 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     buyer = maker;
                 }
 
-
-
                 let base = this.setToken(this.config.ethAddr);
                 let token = this.setToken(unpacked.events[1 + offset].value);
-
-                let exchange = '';
-                let addrName = this.addressName(unpacked.address);
-                if (addrName.indexOf('0x') === -1) {
-                    exchange = addrName;
-                }
-
+                let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base) {
                     let tokenAmount = utility.weiToToken(unpacked.events[4 + offset].value, token);
@@ -30368,7 +30082,7 @@ module.exports = (db) => {
     }
 
     //name for a 0x relayer based on feerecipient address
-    utility.relayName = function (address) {
+    utility.relayName = function (address, relayType = '0x') {
         let name = '';
         if (address) {
             address = address.toLowerCase();
@@ -30380,7 +30094,7 @@ module.exports = (db) => {
                 name = db.config.admins[address];
             }
             if (!name) {
-                name = 'Unknown 0x';
+                name = 'Unknown ' + relayType;
             }
         }
         if (name && name.indexOf(' Admin') !== -1) {

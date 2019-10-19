@@ -158,7 +158,7 @@ module.exports = (db) => {
     }
 
     //name for a 0x relayer based on feerecipient address
-    utility.relayName = function (address) {
+    utility.relayName = function (address, relayType = '0x') {
         let name = '';
         if (address) {
             address = address.toLowerCase();
@@ -170,7 +170,7 @@ module.exports = (db) => {
                 name = db.config.admins[address];
             }
             if (!name) {
-                name = 'Unknown 0x';
+                name = 'Unknown ' + relayType;
             }
         }
         if (name && name.indexOf(' Admin') !== -1) {

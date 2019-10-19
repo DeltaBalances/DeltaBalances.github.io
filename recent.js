@@ -1399,60 +1399,34 @@ var pageType = 'recent';
 							addUnknownTransfer();
 						}
 
-						// make a transaciton a transfer if we can't determine anything else
-						function addUnknownTransfer(tok) {
-							let trans2 = undefined;
-							let exchange = '';
+					}
+					// make a transaction a transfer if we can't determine anything else
+					function addUnknownTransfer(tok) {
+						let trans2 = undefined;
+						let exchange = '';
 
-							let ercToken = undefined;
-							if (contract) {
-								ercToken = contract;
-							} 
-							if (tok) {
-								ercToken = tok;
-							}
+						let ercToken = undefined;
+						if (contract) {
+							ercToken = contract;
+						}
+						if (tok) {
+							ercToken = tok;
+						}
 
-							//Ether transferred or unknown func accepting ETH
-							if (!ercToken && value.greaterThan(0)) {
+						//Ether transferred or unknown func accepting ETH
+						if (!ercToken && value.greaterThan(0)) {
 
-								let amount = value;
+							let amount = value;
 
-								// Ether token wrapping that uses fallback
-								if (_util.isWrappedETH(to)) {
-									trans2 = createOutputTransaction("Wrap", getEther(), amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
-								} else {
-									//Ether transfer
-									if (tx.input !== '0x') {
-										exchange = 'unknown ';
-									}
-
-									// do we know an alias, but not a token
-									if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
-										exchange = _delta.addressName(to);
-									} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
-										exchange = _delta.addressName(from);
-									}
-
-									if (to === myAddr) {
-										trans2 = createOutputTransaction('In', getEther(), amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
-										trans2.Incomplete = true;
-									} else if (from === myAddr) {
-										trans2 = createOutputTransaction('Out', getEther(), amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
-										trans2.Incomplete = true;
-									}
-
-								}
-							}
-							//unknown source of token transfer
-							else if (ercToken) {
-								let newType = '';
-								if (from == myAddr) {
-									newType = 'Out';
-								} else if (to == myAddr) {
-									newType = 'In';
+							// Ether token wrapping that uses fallback
+							if (_util.isWrappedETH(to)) {
+								trans2 = createOutputTransaction("Wrap", getEther(), amount, _delta.uniqueTokens[to], amount, tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+							} else {
+								//Ether transfer
+								if (tx.input !== '0x') {
+									exchange = 'unknown ';
 								}
 
-								exchange = 'unknown ';
 								// do we know an alias, but not a token
 								if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
 									exchange = _delta.addressName(to);
@@ -1460,26 +1434,53 @@ var pageType = 'recent';
 									exchange = _delta.addressName(from);
 								}
 
-								let token = _delta.setToken(ercToken);
-								//uniswap liquidity token minting/destruction
-								if (token && exchange == 'unknown ' && (_delta.config.uniswapContracts[contract] || token.name.indexOf('UNI') >= 0)
-									&& (from == _delta.config.ethAddr || to == _delta.config.ethAddr)) {
-									exchange = 'Uniswap';
-								};
-
-								if (token) {
-									let dvsr = _delta.divisorFromDecimals(token.decimals);
-									let amount = _util.weiToEth(tx.value, dvsr);
-									trans2 = createOutputTransaction(newType, token, amount, '', '', tx.hash, tx.timeStamp, token.unlisted, '', tx.isError === '0', exchange);
+								if (to === myAddr) {
+									trans2 = createOutputTransaction('In', getEther(), amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
+									trans2.Incomplete = true;
+								} else if (from === myAddr) {
+									trans2 = createOutputTransaction('Out', getEther(), amount, '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', exchange);
 									trans2.Incomplete = true;
 								}
-							}
 
-							if (trans2) {
-								addTransaction(trans2, 0);
 							}
 						}
+						//unknown source of token transfer
+						else if (ercToken) {
+							let newType = '';
+							if (from == myAddr) {
+								newType = 'Out';
+							} else if (to == myAddr) {
+								newType = 'In';
+							}
+
+							exchange = 'unknown ';
+							// do we know an alias, but not a token
+							if (_delta.addressName(to) !== to && !_delta.uniqueTokens[to]) {
+								exchange = _delta.addressName(to);
+							} else if (_delta.addressName(from) !== from && !_delta.uniqueTokens[from]) {
+								exchange = _delta.addressName(from);
+							}
+
+							let token = _delta.setToken(ercToken);
+							//uniswap liquidity token minting/destruction
+							if (token && exchange == 'unknown ' && (_delta.config.uniswapContracts[contract] || token.name.indexOf('UNI') >= 0)
+								&& (from == _delta.config.ethAddr || to == _delta.config.ethAddr)) {
+								exchange = 'Uniswap';
+							};
+
+							if (token) {
+								let dvsr = _delta.divisorFromDecimals(token.decimals);
+								let amount = _util.weiToEth(tx.value, dvsr);
+								trans2 = createOutputTransaction(newType, token, amount, '', '', tx.hash, tx.timeStamp, token.unlisted, '', tx.isError === '0', exchange);
+								trans2.Incomplete = true;
+							}
+						}
+
+						if (trans2) {
+							addTransaction(trans2, 0);
+						}
 					}
+
 
 				} // end for-loop
 

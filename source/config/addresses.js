@@ -19,6 +19,7 @@ module.exports = {
     '0xab8199eba802e7e6634d4389bf23999b7ae6b253': '3xchange',
     '0x66a836664adc7c525c0cc4527dee8619d4faf669': 'BoxSwap',
     '0x013ec57d1237e7727f818b1a35e3506f754304e4': 'GUDecks',
+    '0xd9c3ed92520a2f3076a9bd5ea9d4a2c2a0cf6457': 'GUDecks',
     '0xb0d7398d779ee9ffc727d2d5b045a5b441da8233': 'Emoon',
     '0x5620413261751d93978c6e752f6c351d10e75238': 'Lake Project',
     '0xa9274fda6d91a063f6aa0cfb172d6eb3b61ecf89': 'MetaMorph',
@@ -26,6 +27,7 @@ module.exports = {
     '0x853da5cecc1ea601ab978c2001565a0377a7dca6': 'Fordex',
     '0x2a5f5f36c20d7e56358db78bbfac0bace25c1198': 'EtherBlockchain',
     '0x8752d14a086cee9b8c108611ba9aefe04042c9f9': 'MARKET protocol',
+    '0x0d056bb17ad4df5593b93a1efc29cb35ba4aa38d': 'TokenTrove',
 
     '0x8124071f810d533ff63de61d0c98db99eeb99d64': 'STAR BIT',
     '0x0681e844593a051e2882ec897ecd5444efe19ff2': 'STAR BIT',

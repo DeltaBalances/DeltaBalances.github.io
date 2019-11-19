@@ -38,6 +38,7 @@ module.exports = {
     //0x279594b6843014376a422ebb26a6eab7a30e36f0 Oasisdirect only 2 txs
 
     AirSwap: { addr: '0x8fd3121013a07c57f0d69646e86e7a4880b467b7', name: 'AirSwap', supportedDex: true },
+    AirSwapTrader : { addr: '0x9af9c0cf3cd15e0afe63930fbf20941c89f3ff98', name: 'AirSwap OTC', supportedDex: false},
     Kyber: { addr: '0x964f35fae36d75b1e72770e244f6595b68508cf5', name: 'Kyber Network', supportedDex: true }, // contract disabled?
     KyberTest: { addr: '0xd2d21fdef0d054d2864ce328cc56d1238d6b239e', name: 'Kyber Test', supportedDex: true },
 
@@ -138,7 +139,8 @@ module.exports = {
     BitEye2: { addr: '0x9e2f2dd1e3641f389673f89dc316bb00b01cd83a', name: 'BitEye', supportedDex: false },
     AXNET: { addr: '0xacf999bfa9347e8ebe6816ed30bf44b127233177', name: 'AXNET', supportedDex: false },
     WeiDex: { addr: '0xccd7ce9ec004bfbd5711245f917d6109813a909c', name: 'WeiDex', supportedDex: false },
-    DexBlue: { addr: '0x257586004f6828a01ba4a874d3cfd0757029f32a', name: 'dexBlue', supportedDex: false },
+    DexBlue: { addr: '0x257586004f6828a01ba4a874d3cfd0757029f32a', name: 'dexBlue (old)', supportedDex: false },
+    DexBlue2: { addr: '0x000000000000541e251335090ac5b47176af4f7e', name: 'dexBlue', supportedDex: false },
     AllBit: { addr: '0xdc1882f350b42ac9a23508996254b1915c78b204', name: 'AllBit', supportedDex: false },
     AllBit2: { addr: '0xff6b1cdfd2d3e37977d7938aa06b6d89d6675e27', name: 'AllBit', supportedDex: false },
     Saturn: { addr: '0x13f64609bf1ef46f6515f8cd3115433a93a00dc6', name: 'Saturn Network', supportedDex: false },

@@ -40,21 +40,29 @@ module.exports = {
     "0x50cb61afa3f023d17276dcfb35abf85c710d1cff": 1, // ethfinex ETHW
     "0x53b04999c1ff2d77fcdde98935bb936a67209e4c": 1, // Veil ETH
   },
-  // currencies that take precedence to be the base pair in a trade found on the blockchain
+  // currencies that take precedence to be the base pair in a trade found on the blockchain (e.g ETH<->BAT is shown as BAT-ETH)
   baseToken: {
     "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359": 1, // DAI stablecoin
-    "0xdac17f958d2ee523a2206206994597c13d831ec7": 2, // USDT 
-    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": 3, // USDC
-    "0x8dd5fbce2f6a956c3022ba3663759011dd51e73e": 4, // TUSD
+    "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359": 2, // SAI (DAI) stablecoin
+    "0xdac17f958d2ee523a2206206994597c13d831ec7": 3, // USDT 
+    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": 4, // USDC
     "0x0000000000085d4780b73119b644ae5ecd22b376": 5, //TUSD v2
-    "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599": 6, // WBTC
-    "0xe41d2489571d322189246dafa5ebde1f4699f498": 7, // ZRX (fee in 0x sometimes as a zrx trade)
-    "0x0027449bf0887ca3e431d263ffdefb244d95b555": 8, // NOT (airdrop coin openrelay)
-    "0x1a9b2d827f26b7d7c18fec4c1b27c1e8deeba26e": 9, // USDT-W (ethfinex wrapped)
-    "0xd9ebebfdab08c643c5f2837632de920c70a56247": 10, // DAI-W (ethfinex wrapped)
-    "0x8e870d67f660d95d5be530380d0ec0bd388289e1": 11, // PAX 
-    "0xa4bdb11dc0a2bec88d24a3aa1e6bb17201112ebe": 12, // USDS
-    "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c": 13, // BNT (internal Bancor trades)
+    "0x8dd5fbce2f6a956c3022ba3663759011dd51e73e": 6, // TUSD
+    "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599": 7, // WBTC
+    "0x8e870d67f660d95d5be530380d0ec0bd388289e1": 8, // PAX 
+    "0xa4bdb11dc0a2bec88d24a3aa1e6bb17201112ebe": 9, // USDS
+                                                    //ethfinex (diversifi) wrappers
+    "0x2da4f4ff3eb51bff53b66f00054d6cf8d028349f": 10, //daiw
+    "0xd9ebebfdab08c643c5f2837632de920c70a56247": 11, //daiw
+    "0x1a9b2d827f26b7d7c18fec4c1b27c1e8deeba26e": 12, //daiw
+    "0x243318cb80785ab92f2c39543cb58958320e64b2": 13, //tusdw
+    "0xeb52a95695ffa4cf411b804455287f0717884899": 14, //tusdw
+    "0x69391cca2e38b845720c7deb694ec837877a8e53": 15, //usdcw
+    "0x33d019eb137b853f0cdf555a5d5bd2749135ac31": 16, //usdtw
+
+    "0xe41d2489571d322189246dafa5ebde1f4699f498": 17, // ZRX (fee in 0x sometimes as a zrx trade)
+    "0x0027449bf0887ca3e431d263ffdefb244d95b555": 18, // NOT (airdrop coin openrelay)
+    "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c": 19, // BNT (internal Bancor trades)
   },
 
   /* address variables */
@@ -162,6 +170,7 @@ module.exports = {
     '0xab8199eba802e7e6634d4389bf23999b7ae6b253': '3xchange',
     '0x66a836664adc7c525c0cc4527dee8619d4faf669': 'BoxSwap',
     '0x013ec57d1237e7727f818b1a35e3506f754304e4': 'GUDecks',
+    '0xd9c3ed92520a2f3076a9bd5ea9d4a2c2a0cf6457': 'GUDecks',
     '0xb0d7398d779ee9ffc727d2d5b045a5b441da8233': 'Emoon',
     '0x5620413261751d93978c6e752f6c351d10e75238': 'Lake Project',
     '0xa9274fda6d91a063f6aa0cfb172d6eb3b61ecf89': 'MetaMorph',
@@ -169,6 +178,7 @@ module.exports = {
     '0x853da5cecc1ea601ab978c2001565a0377a7dca6': 'Fordex',
     '0x2a5f5f36c20d7e56358db78bbfac0bace25c1198': 'EtherBlockchain',
     '0x8752d14a086cee9b8c108611ba9aefe04042c9f9': 'MARKET protocol',
+    '0x0d056bb17ad4df5593b93a1efc29cb35ba4aa38d': 'TokenTrove',
 
     '0x8124071f810d533ff63de61d0c98db99eeb99d64': 'STAR BIT',
     '0x0681e844593a051e2882ec897ecd5444efe19ff2': 'STAR BIT',
@@ -348,6 +358,7 @@ module.exports = {
         "0x069c97dba948175d10af4b2414969e0b88d44669":"0xb62132e35a6c13ee1ee0f84dc5d40bad8d815206",
         "0x071002d8f0e5e210e510c68504e435c4a425df8b":"0xf5ed2dc77f0d1ea7f106ecbd1850e406adc41b51",
         "0x077d52b047735976dfda76fef74d4d988ac25196":"0x960b236a07cf122663c4303350609a66a7b288c0",
+        "0x084f002671a5f03d5498b1e5fb15fc0cfee9a470":"0x6fb3e0a217407efff7ca062d46c26e5d60a14d69",
         "0x08850bd3ce3a8f6b64d724c3dabdbf6f4f8561fc":"0x4dadf81edf74e9b1a9ad1f364d51a176be48f0ac",
         "0x09cabec1ead1c0ba254b09efb3ee13841712be14":"0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
         "0x09f448c70c99124024cd9e8dcae6c2f51c0896db":"0xdf2c7238198ad8b389666574f2d8bc411a4b7428",
@@ -385,6 +396,7 @@ module.exports = {
         "0x28d9353611c5a0d5a026a648c05e5d6523e41cbf":"0x09617f6fd6cf8a71278ec86e23bbab29c04353a7",
         "0x28fe20afbf3450f13b803a639e19a8b0c005a5f3":"0x081f67afa0ccf8c7b17540767bbe95df2ba8d97f",
         "0x2995b7f65cbc1b0ae8095eae314246508c49182a":"0x95daaab98046846bf4b2853e23cba236fa394a31",
+        "0x2a1530c4c41db0b0b2bb646cb5eb1a67b7158667":"0x6b175474e89094c44da98b954eedeac495271d0f",
         "0x2a98460615481a456a1d763460167514dcd21f2c":"0x6671c24dd5b8e4ced34033991418e4bc0cca05af",
         "0x2afbcc0bb7a78bd4d9a63c24c13042212b37f665":"0xe7049114562c759d5e9d1d25783773ccd61c0a65",
         "0x2afc64cd5e64a32a363ea84b8cad1ce5239a1a3d":"0x006bea43baa3f7a6f765f14f10a1a1b08334ef45",
@@ -433,6 +445,7 @@ module.exports = {
         "0x505c02b4aa1286375fbdf0c390ac0fe9209dcb05":"0x0000852600ceb001e08e00bc008be620d60031f2",
         "0x526353fbb4a37eddcebf63f96796a078d908f568":"0x8e3aeb75392ca824d55479cae07f7f0b765743dd",
         "0x52b9c94031dee81b2c36be736fa7f6b7ca7ad84e":"0x8a3cf860eca6d8e4579bfb052488e336e0fd9eae",
+        "0x536956fab86774fb55cfaacf496bc25e4d2b435c":"0x3a9fff453d50d4ac52a6890647b823379ba36b9e",
         "0x5386c0e6b417138f09236f86aca243e6f5b05dd3":"0x7ca121b093e2fbd4bb9a894bd5ff487d16f1f83b",
         "0x53e31a941b76ef1b486e86aa39bcd5ae56829870":"0x47bc01597798dcd7506dcca36ac4302fc93a8cfb",
         "0x57c6e18ee62fc660575db273ffaab02436aad222":"0xf8e386eda857484f5a12e4b5daa9984e06e73705",
@@ -479,6 +492,8 @@ module.exports = {
         "0x80f0f3e1482bab7fb6ed70185476f2fcdb596fa9":"0xd559f20296ff4895da39b5bd9add54b442596a61",
         "0x8138e39124c65d7fe6874b2f5c47d5fad2581060":"0x5c679a0a79d495affe049c02483519d51e37f32b",
         "0x817e391baf312dc5078cd7a98a7a0255ac63ca48":"0x7728dfef5abd468669eb7f9b48a7f70a501ed29d",
+        "0x81eed7f1ecbd7fa9978fcc7584296fb0c215dc5c":"0x14094949152eddbfcd073717200da82fed8dc960",
+        "0x82db9fc4956fa40efe1e35d881004612b5cb2cc2":"0x99ea4db9ee77acd40b119bd1dc4e33e1c070b80d",
         "0x85c1ef96960884f802789400160b21d9c7043520":"0xe5e7d48abbb999880ea0f6533068dfd3944f0e7e",
         "0x877104c369bb563f3a893fae861b4baf0cdd9d37":"0xc528c28fec0a90c083328bc45f587ee215760a0f",
         "0x87d80dbd37e551f58680b4217b23af6a752da83f":"0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c",
@@ -586,6 +601,7 @@ module.exports = {
         "0xdf02ffeafdb79e564ae9fdac6545c5f4c2178400":"0x8eb24319393716668d768dcec29356ae9cffe285",
         "0xe0cce4518ea70d98231c47e5b977ba90cfcec615":"0x471daee6e481b2ab7d2f2f64b8f9b083daae29da",
         "0xe18256cd23efcdc4f95581e86f61ea1b09afd02a":"0x5adc961d6ac3f7062d2ea45fefb8d8167d44b190",
+        "0xe1b7aec3639068b474bfbcb916580fc28a20717b":"0x8888889213dd4da823ebdd1e235b09590633c150",
         "0xe1e005d82922303ca9fb5cb6426c2eb07f8e5c84":"0xcd7d0042fdb92f3dde312aa61af084953aa914ee",
         "0xe2833ad850513faa973747e4495db1d0b0e038a0":"0xc9c0ff6344b4bfdee7ace21c4deddd6e43ecb454",
         "0xe2f548a3b898eca923bd61919f2635b071a7f95e":"0x23ccc43365d9dd3882eab88f43d515208f832430",
@@ -606,6 +622,7 @@ module.exports = {
         "0xe9cf7887b93150d4f2da7dfc6d502b216438f244":"0x5e74c9036fb86bd7ecdcb084a0673efc32ea31cb",
         "0xea3a62838477082d8f2106c43796d636dc78d8a4":"0xb683d83a532e2cb7dfa5275eed3698436371cc9f",
         "0xeb765bc156de3249b491d2db7aba3450fbcf9c5b":"0x4cbdd06fcc050c7e0bd77478ed0fe4ea5eec651c",
+        "0xebd8aa50b26bfa63007d61eba777a9dde7e43c64":"0x9469d013805bffb7d3debe5e7839237e535ec483",
         "0xed9d5aa6124a3310b80a2468c67763627653887d":"0x23d80c4ee8fb55d4183dd9329296e176dc7464e1",
         "0xedc485266aa0ebe9ccbfc1f255bb5ffea1f9e3cc":"0xb63b606ac810a52cca15e44bb630fd42d8d1d83d",
         "0xf173214c720f58e03e194085b1db28b50acdeead":"0x514910771af9ca656af840dff83e8264ecf986ca",
@@ -870,6 +887,7 @@ module.exports = {
     //0x279594b6843014376a422ebb26a6eab7a30e36f0 Oasisdirect only 2 txs
 
     AirSwap: { addr: '0x8fd3121013a07c57f0d69646e86e7a4880b467b7', name: 'AirSwap', supportedDex: true },
+    AirSwapTrader : { addr: '0x9af9c0cf3cd15e0afe63930fbf20941c89f3ff98', name: 'AirSwap OTC', supportedDex: false},
     Kyber: { addr: '0x964f35fae36d75b1e72770e244f6595b68508cf5', name: 'Kyber Network', supportedDex: true }, // contract disabled?
     KyberTest: { addr: '0xd2d21fdef0d054d2864ce328cc56d1238d6b239e', name: 'Kyber Test', supportedDex: true },
 
@@ -970,7 +988,8 @@ module.exports = {
     BitEye2: { addr: '0x9e2f2dd1e3641f389673f89dc316bb00b01cd83a', name: 'BitEye', supportedDex: false },
     AXNET: { addr: '0xacf999bfa9347e8ebe6816ed30bf44b127233177', name: 'AXNET', supportedDex: false },
     WeiDex: { addr: '0xccd7ce9ec004bfbd5711245f917d6109813a909c', name: 'WeiDex', supportedDex: false },
-    DexBlue: { addr: '0x257586004f6828a01ba4a874d3cfd0757029f32a', name: 'dexBlue', supportedDex: false },
+    DexBlue: { addr: '0x257586004f6828a01ba4a874d3cfd0757029f32a', name: 'dexBlue (old)', supportedDex: false },
+    DexBlue2: { addr: '0x000000000000541e251335090ac5b47176af4f7e', name: 'dexBlue', supportedDex: false },
     AllBit: { addr: '0xdc1882f350b42ac9a23508996254b1915c78b204', name: 'AllBit', supportedDex: false },
     AllBit2: { addr: '0xff6b1cdfd2d3e37977d7938aa06b6d89d6675e27', name: 'AllBit', supportedDex: false },
     Saturn: { addr: '0x13f64609bf1ef46f6515f8cd3115433a93a00dc6', name: 'Saturn Network', supportedDex: false },

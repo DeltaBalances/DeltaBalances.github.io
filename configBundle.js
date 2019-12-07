@@ -870,6 +870,7 @@ module.exports = {
     '0xProxy5': { addr: '0xefc70a1b18c432bdc64b596838b4d138f6bc6cad', name: '0x ERC721 Proxy', supportedDex: false },
     '0xProxy6': { addr: '0xef701d5389ae74503d633396c4d654eabedc9d78', name: '0x MAP Proxy', supportedDex: false },
     '0xForwarder3': { addr: '0xdc4587cb17d2a1829512e2cfec621f8066290e6a', name: '0x Instant', supportedDex: false },
+    '0x3': { addr: '0xb27f1db0a7e473304a5a06e54bdf035f671400c0', name: '0x Exchange 3', supportedDex: false },
 
     // ethfinex v1, 0x v1 clone
     Ethfinex: { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex', supportedDex: true },
@@ -1101,6 +1102,7 @@ module.exports = {
     { m: "Aug 2019", blockFrom: 8261512, blockTo: 8461047 },
     { m: "Sep 2019", blockFrom: 8461047, blockTo: 8653171 },
     { m: "Oct 2019", blockFrom: 8653171, blockTo: 8849471 },
+    { m: "Nov 2019", blockFrom: 8849471, blockTo: 9029510 },
   ],
   // history settings per exchange
   history: {

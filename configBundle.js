@@ -218,6 +218,7 @@ module.exports = {
     '0x853da5cecc1ea601ab978c2001565a0377a7dca6': 'ForDex',
     '0xd3d0474124c1013ed6bfcfd9a49cfedb8c78fc44': 'Erc Dex', //indirect execution
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX', //v1 
+    '0xb04239b53806ab31141e6cd47c63fb3480cac908': 'Gods Unchained',
   },
   // other addresses associated with DEX admins
   admins: {
@@ -230,6 +231,8 @@ module.exports = {
     '0x457804851eaf090dad4871f9609010c6868d99d4': 'BithumbDex Admin',
     '0xdb0a49ebed788cd412744a4f9f1ce8d16d019b2e': 'Totle Admin',
     '0x583d03451406d179182efc742a1d811a9e34c36b': 'Totle Admin',
+    '0x571037cc2748c340e3c6d9c7af589c6d65806618': 'Switcheo Admin',
+    '0x8ecf87fc9d7336cc0052d40abf806fb1af2ea81c': 'DINNGO Admin',
   },
   // known (centralized) exchange wallets, (personal experience + https://etherscan.io/accounts/1?&l=Exchange )
   exchangeWallets: {
@@ -332,6 +335,10 @@ module.exports = {
 
     '0x3baa64a4401bbe18865547e916a9be8e6dd89a5a': 'Request',
 
+    '0xc692453625023c6e03fec04158ea31ab4de2650a': 'LocalCoin Dex 1',
+    '0x37c4bcaba4bcf3a605414236b8b108f160eb45a6': 'LocalCoin Dex 2',
+    '0x8d1c1571367a148e92d6ac83494b1bdf3b497d07': 'LocalCoin Dex 3',
+
     // saturn network aidrop
     '0x25f17d6cb23cc85bfa6c5e9b8f1d5226f5927cbc': 'Airdrop',
   },
@@ -364,9 +371,11 @@ module.exports = {
         "0x09f448c70c99124024cd9e8dcae6c2f51c0896db":"0xdf2c7238198ad8b389666574f2d8bc411a4b7428",
         "0x0b5ce6f7cbe0627aa8ad2e7e69ed554c0fe79162":"0xa44e5137293e855b1b7bc7e2c6f8cd796ffcb037",
         "0x0ce13e66bef17801c9f19fb763be2dd2f391d7c2":"0xb26631c6dda06ad89b93c71400d25692de89c068",
+        "0x0d2e1a84638bd1b6c0c260c758c39451d4587be1":"0x45804880de22913dafe09f4980848ece6ecbaf78",
         "0x0e6a53b13688018a3df8c69f99afb19a3068d04f":"0x107c4504cd79c5d2696ea0030a8dd4e92601b82e",
         "0x104f5ac4fdf92fd4668a08ac2e305b5bcf3de215":"0x108c05cac356d93b351375434101cfd3e14f7e44",
         "0x112558c05b1e7f28daa98e48c8d7e0ced2f496c8":"0x189c05c3c191015c694032e1b09c190d5db3fb50",
+        "0x122327fd43b2c66dd9e4b6c91c8f071e217558ef":"0x2c537e5624e4af88a7ae4060c022609376c8d0eb",
         "0x164c93580839f40609ce0250dd4c98a25da175de":"0x949bed886c739f1a3273629b3320db0c5024c719",
         "0x174dfb6e6e78c95678580b553eee7f282b28c795":"0x86c8bf8532aa2601151c9dbbf4e4c4804e042571",
         "0x17e5bf07d696eaf0d14caa4b44ff8a1e17b34de3":"0x8f3470a7388c05ee4e7af3d01d8c722b0ff52374",
@@ -408,6 +417,7 @@ module.exports = {
         "0x329c9642efe33a62161dda6b4eb3821965191441":"0x87f56ee356b434187105b40f96b230f5283c0ab4",
         "0x32a29c4269dee1a9e87eb75d66da71591a7aee96":"0x4b4a70cae3f7c84e36ce9aa19abc98f85db7f058",
         "0x32ff139e48c05d636307f61e476bb395bd319b05":"0x89f10cead72d1ebf3e08a9378932c6f4f5a4c476",
+        "0x34e89740adf97c3a9d3f63cc2ce4a914382c230b":"0x5d3a536e4d6dbd6114cc1ead35777bab948e3643",
         "0x37134075f5b5a0a94ac891c7b5ec5db5cfcf392c":"0xc12d099be31567add4e4e4d0d45691c3f58f5663",
         "0x380fdc8bb8722915076a09479d1bbc75e69c8be0":"0x2bf91c18cd4ae9c2f2858ef9fe518180f7b5096d",
         "0x38577ccec0ceffd178fd3be66e1c6f531bfa410e":"0xaa7a9ca87d3694b5755f213b5d04094b8d0f0a6f",
@@ -453,6 +463,7 @@ module.exports = {
         "0x5a67d8ea5c9bf381fe0da2862cec1ec90a5ca329":"0x824c0659f6940604506aa8fa829d13fde17fb900",
         "0x5d40522c20326f2ebcec2d371f250e352e3bed27":"0xd49ff13661451313ca1553fd6954bd1d9b6e02b9",
         "0x5d8888a212d033cff5f2e0ac24ad91a5495bad62":"0x3772f9716cf6d7a09ede3587738aa2af5577483a",
+        "0x5e7907ac70b9a781365c72f2acee96710bda042e":"0x06f65b8cfcb13a9fe37d836fe9708da38ecb29b2",
         "0x601c32e0580d3aef9437db52d09f5a5d7e60ec22":"0x09cabec1ead1c0ba254b09efb3ee13841712be14",
         "0x60a87cc7fca7e53867facb79da73181b1bb4238b":"0x419d0d8bdd9af5e606ae2232ed285aff190e711b",
         "0x61792f290e5100fbbcbb2309f03a1bab869fb850":"0xc719d010b63e5bbf2c0551872cd5316ed26acd83",
@@ -466,6 +477,7 @@ module.exports = {
         "0x69f276abd6456152d519d23086031da7c73f91b8":"0x57ab1e02fee23774580c119740129eac7081e9d3",
         "0x6b4540f5ee32ddd5616c792f713435e6ee4f24ab":"0x3883f5e181fccaf8410fa61e12b59bad963fb645",
         "0x6bfa119a191576ba26bc5e711432aca0cfda04de":"0x00000000441378008ea67f4284a57932b1c000a5",
+        "0x6c3942b383bc3d0efd3f36efa1cbe7c8e12c8a2b":"0x06af07097c9eeb7fd685c692751d5c66db49c215",
         "0x6dd1d97e5817ca376e653a1e7326e0563d13ceeb":"0x910dfc18d6ea3d6a7124a6f8b5458f281060fa4c",
         "0x6f1c46e91ce29d430e31205ead148b0bee46b9fc":"0xb97048628db6b661d4c2aa833e95dbe1a905b280",
         "0x6fca96a679490ed8a80c7344799f1b090fd4c94d":"0x9709907cb2cf9e16df841f7b145b78c230d8205e",
@@ -481,6 +493,7 @@ module.exports = {
         "0x77e885fbc67b7c6ea2b889c96bbd78f9e647463b":"0x056017c55ae7ae32d12aef7c679df83a85ca75ff",
         "0x78bac62f2a4cd3a7cb7da2991affc7b11590f682":"0xfa3e941d1f6b7b10ed84a0c211bfa8aee907965e",
         "0x7a05354b796958e439b1780204a89f81094ea4b9":"0xb2af8d4d286e2087590f085ee7e8ccb05d3c7f29",
+        "0x7b6e5278a14d5318571d65aced036d09c998c707":"0x0f7f961648ae6db43c75663ac7e5414eb79b5704",
         "0x7cdff5f7e1886767ae561ea0c2f926db3c25706d":"0x39550dc5919a990a5786fcdc1d5b7c392d362dde",
         "0x7d03cecb36820b4666f45e1b4ca2538724db271c":"0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6",
         "0x7d31fc38ddd7d6907f820f4268f1d8d5d5797826":"0xecf3958d0f82291ca1ff6c9bda8eb3c50ee41ce3",
@@ -488,6 +501,7 @@ module.exports = {
         "0x7dc095a5cf7d6208cc680fa9866f80a53911041a":"0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27",
         "0x7ea7134ed6c41d9e35dae7e7e1ff0fcc406224ca":"0x01b3ec4aae1b8729529beb4965f27d008788b0eb",
         "0x7eb81c7a0b322d31c11064105e14dce6e852e8c1":"0x539efe69bcdd21a83efd9122571a64cc25e0282b",
+        "0x7ef7191ab91ddb4d7cc347fbfa170355acbaf02d":"0xa4bdb11dc0a2bec88d24a3aa1e6bb17201112ebe",
         "0x80a393b2e1e4aa07862c24ad8ac14511c91bd562":"0xd2cc32cc34b0b975bf9b812061a1a040017972fc",
         "0x80f0f3e1482bab7fb6ed70185476f2fcdb596fa9":"0xd559f20296ff4895da39b5bd9add54b442596a61",
         "0x8138e39124c65d7fe6874b2f5c47d5fad2581060":"0x5c679a0a79d495affe049c02483519d51e37f32b",
@@ -506,6 +520,7 @@ module.exports = {
         "0x8da198a049426bfcf1522b0dc52f84beda6e38ff":"0xc011a72400e58ecd99ee497cf89e3775d4bd732f",
         "0x8de0d002dc83478f479dc31f76cb0a8aa7ccea17":"0xb4272071ecadd69d933adcd19ca99fe80664fc08",
         "0x917d8f35a10985add5d7d95770af8cabefb05eaa":"0x1ebda9b505ad2c6ccee86bfc18f58035dcfdc26a",
+        "0x929507cd3d90ab11ec4822e9eb5a48eb3a178f19":"0x0000000000b3f879cb30fe243b4dfee438691c04",
         "0x93ff2c787c140c4ce21f01cc211fbdace274077f":"0xa15c7ebe1f07caf6bff097d8a589fb8ac49ae5b3",
         "0x95e4649f5209dd292caf1f087b8f1db3be24927f":"0xcb94be6f13a1182e4a4b6140cb7bf2025d28e41b",
         "0x95efaafe52e89992bfd4f33c96ad971fccdc31f6":"0x7b94a1281db0335c9efd68aca5c98b494d775c70",
@@ -619,6 +634,7 @@ module.exports = {
         "0xe8e45431b93215566ba923a7e611b7342ea954df":"0x6810e776880c02933d47db1b9fc05908e5386b96",
         "0xe9078a97eef2bb502a9f792169f9c03626649248":"0x4d8fc1453a0f359e99c9675954e656d80d996fbf",
         "0xe94c4dc3a75fad623391a68b4fbdd4b3c9b3eeb4":"0xfa6f7881e52fdf912c4a285d78a3141b089ce859",
+        "0xe9a5bbe41dc63d555e06746b047d624e3343ea52":"0x4575f41308ec1483f3d399aa9a2826d74da13deb",
         "0xe9cf7887b93150d4f2da7dfc6d502b216438f244":"0x5e74c9036fb86bd7ecdcb084a0673efc32ea31cb",
         "0xea3a62838477082d8f2106c43796d636dc78d8a4":"0xb683d83a532e2cb7dfa5275eed3698436371cc9f",
         "0xeb765bc156de3249b491d2db7aba3450fbcf9c5b":"0x4cbdd06fcc050c7e0bd77478ed0fe4ea5eec651c",
@@ -637,6 +653,7 @@ module.exports = {
         "0xf996d7d9bacb9217ca64bbce1b1cd72e0e886be6":"0x00000100f2a2bd000715001920eb70d229700085",
         "0xfaddccf91009c6383bc7b75c7f19a2c8be2f75ef":"0x2515905dd027cc38f139feda8e7e6945c7f9d07a",
         "0xfe3f05c7da9fe53591fab3f920798a67a95747ed":"0xa66daa57432024023db65477ba87d4e7f5f95213",
+        "0xffcf45b540e6c9f094ae656d2e34ad11cdfdb187":"0x3212b29e33587a00fb1c83346f5dbfa69a458923",
     },
     //some of the many bancor converter contracts, address not necessary to find trades, but makes reading things easier
     bancorConverters:[ 
@@ -857,20 +874,28 @@ module.exports = {
     TokenStore: { addr: '0x1ce7ae555139c5ef5a57cc8d814a867ee6ee33d8', name: 'Token Store', supportedDex: true },
     Idex: { addr: '0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208', name: 'IDEX', supportedDex: true },
     Decentrex: { addr: '0xbf29685856fae1e228878dfb35b280c0adcc3b05', name: 'Decentrex', supportedDex: true },
+    //0x protocol v1
     '0x': { addr: '0x12459c951127e0c374ff9105dda097662a027093', name: '0x Exchange', supportedDex: true },
     '0xProxy': { addr: '0x8da0d80f5007ef1e431dd2127178d224e32c2ef4', name: '0x Proxy', supportedDex: true },
+    '0xForwarder': { addr: '0x7afc2d5107af94c462a194d2c21b5bdd238709d6', name: '0x Instant', supportedDex: false },
+    //0x protocol v2
     '0x2': { addr: '0x4f833a24e1f95d70f028921e27040ca56e09ab0b', name: '0x Exchange2', supportedDex: true },
     '0xProxy2': { addr: '0x2240dab907db71e64d3e0dba4800c83b5c502d4e', name: '0x ERC20 Proxy', supportedDex: true },
     '0xProxy3': { addr: '0x208e41fb445f1bb1b6780d58356e81405f3e6127', name: '0x ERC721 Proxy', supportedDex: false },
-    '0xForwarder': { addr: '0x7afc2d5107af94c462a194d2c21b5bdd238709d6', name: '0x Instant', supportedDex: false },
     '0xForwarder2': { addr: '0x5468a1dc173652ee28d249c271fa9933144746b1', name: '0x Instant', supportedDex: false },
+    '0xForwarder3': { addr: '0x76481caa104b5f6bccb540dae4cefaf1c398ebea', name: '0x Instant', supportedDex: false },
+    '0xForwarder4': { addr: '0xdc4587cb17d2a1829512e2cfec621f8066290e6a', name: '0x Instant', supportedDex: false },
     //0x v2.1 bugfix release
     '0x2.1': { addr: '0x080bf510fcbf18b91105470639e9561022937712', name: '0x Exchange 2.1', supportedDex: true },
     '0xProxy4': { addr: '0x95e6f48254609a6ee006f7d493c8e5fb97094cef', name: '0x ERC20 Proxy', supportedDex: true },
     '0xProxy5': { addr: '0xefc70a1b18c432bdc64b596838b4d138f6bc6cad', name: '0x ERC721 Proxy', supportedDex: false },
     '0xProxy6': { addr: '0xef701d5389ae74503d633396c4d654eabedc9d78', name: '0x MAP Proxy', supportedDex: false },
-    '0xForwarder3': { addr: '0xdc4587cb17d2a1829512e2cfec621f8066290e6a', name: '0x Instant', supportedDex: false },
-    '0x3': { addr: '0xb27f1db0a7e473304a5a06e54bdf035f671400c0', name: '0x Exchange 3', supportedDex: false },
+    //0x protocol v3
+    '0x3Test': { addr: '0xb27f1db0a7e473304a5a06e54bdf035f671400c0', name: '0x v3 test', supportedDex: false },
+    '0x3': { addr: '0x61935cbdd02287b511119ddb11aeb42f1593b7ef', name: '0x Exchange 3', supportedDex: false },
+    '0xForwarder5': { addr: '0xa3ac9844514b96bb502627ca9dceb57c4be289e3', name: '0x Instant', supportedDex: false },
+    '0xForwarder6': { addr: '0x5ff2c495055d4f6284f317a9c2edb7045497b14f', name: '0x Instant', supportedDex: false },
+
 
     // ethfinex v1, 0x v1 clone
     Ethfinex: { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex', supportedDex: true },
@@ -878,7 +903,7 @@ module.exports = {
 
     OasisDex: { addr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425', name: 'OasisDex', supportedDex: true },
     OasisDex2: { addr: '0xb7ac09c2c0217b07d7c103029b4918a2c401eecb', name: 'OasisDex', supportedDex: true },
-    OasisDex3: { addr: '0x39755357759ce0d7f32dc8dc45414cca409ae24e', name: 'Eth2Dai (Oasis)', supportedDex: true },
+    OasisDex3: { addr: '0x39755357759ce0d7f32dc8dc45414cca409ae24e', name: 'Oasis (Eth2Dai)', supportedDex: true },
     OasisDexOld: { addr: '0x3aa927a97594c3ab7d7bf0d47c71c3877d1de4a1', name: 'OasisDex (OLD)', supportedDex: true },
     OasisDexOld2: { addr: '0x83ce340889c15a3b4d38cfcd1fc93e5d8497691f', name: 'OasisDex (OLD2)', supportedDex: true },
     OasisDexOld3: { addr: '0xa1b5eedc73a978d181d1ea322ba20f0474bb2a25', name: 'OasisDex (OLD3)', supportedDex: false },
@@ -933,6 +958,11 @@ module.exports = {
     TotleProxy: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
     TotleProxy2: { addr: '0x74758acfce059f503a7e6b0fc2c8737600f9f2c4', name: 'Totle', supportedDex: false },
     TotleProxy3: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
+    ParaSwap: { addr: '0xf92c1ad75005e6436b4ee84e88cb23ed8a290988', name: 'ParaSwap', supportedDex: false },
+    DexAG: { addr: '0xd3bed3a8e3e6b24b740ead108ba776e0ad298588', name: 'DEX.AG v1', supportedDex: false },
+    DexAG2: { addr: '0x932348df588923ba3f1fd50593b22c4e2a287919', name: 'DEX.AG v2', supportedDex: false },
+    DexAG3: { addr: '0xa540fb50288cc31639305b1675c70763c334953b', name: 'DEX.AG v3', supportedDex: false },
+
 
 
     /* small ED/FD clones, not in balance & history pages yet, input/events should parse */
@@ -963,6 +993,9 @@ module.exports = {
     Swatx: { addr: '0x513c07e83237124e08672be4c8d481246d6f03f2', name: 'SWATX', supportedDex: true },
     CryptloDex: { addr: '0xcf5d889e2336d0f35f6121718f6c25e0650d4b25', name: 'CryptloDex', supportedDex: true},
     UnknownED: { addr: '0x4d55f76ce2dbbae7b48661bef9bd144ce0c9091b', name: 'Unknown', supportedDex: true },
+    Afrodex: { addr: '0xe8fff15bb5e14095bfdfa8bb85d83cc900c23c56', name: 'Afrodex', supportedDex: true },
+    EDex: { addr: '0x4fbcfa90ac5a1f7f70b7ecc6dc1589bbe6904b02', name: 'EDex', supportedDex: true },
+    AlgoDEX: { addr: '0x4bc78f6619991b029b867b6d88d39c196332aba3', name: 'AlgoDEX', supportedDex: true }, 
 
     /* exchanges with no parsing support yet */
     DDEX: { addr: '0x2cb4b49c0d6e9db2164d94ce48853bf77c4d883e', name: 'DDEX Hydro', supportedDex: false },
@@ -973,9 +1006,15 @@ module.exports = {
     BithumbDex: { addr: '0xc7c9b856d33651cc2bcd9e0099efa85f59f78302', name: 'BithumbDex', supportedDex: false },     //bithumb dex R1
     Martle: { addr: '0x551d56781e0cd16ac2c61a03e6537844a41c7709', name: 'Martle instant', supportedDex: false },
     Switcheo: { addr: '0xba3ed686cc32ffa8664628b1e96d8022e40543de', name: 'Switcheo', supportedDex: true }, //partial
+    Switcheo2: { addr: '0x7ee7ca6e75de79e618e88bdf80d0b1db136b22d0', name: 'Switcheo v2', supportedDex: false },
     DutchX: { addr: '0x039fb002d21c1c5eeb400612aef3d64d49eb0d94', name: 'DutchX', supportedDex: false },
     DutchXProxy: { addr: '0xaf1745c0f8117384dfa5fff40f824057c70f2ed3', name: 'DutchX', supportedDex: false },
-    Ethermium: { addr: '0xa5CC679A3528956E8032df4F03756C077C1eE3F4', name: 'Ethermium', supportedDex: false },
+    Ethermium: { addr: '0xa5cc679a3528956e8032df4f03756c077c1ee3f4', name: 'Ethermium', supportedDex: false },
+    Wedex: { addr: '0x7d3d221a8d8abdd868e8e88811ffaf033e68e108', name: 'WEDEX beta', supportedDex: false },
+    Tokenlon: { addr: '0xdc6c91b569c98f9f6f74d90f9beff99fdaf4248b', name: 'Tokenlon', supportedDex: false },
+    Miime: { addr: '0x7a6425c9b3f5521bfa5d71df710a2fb80508319b', name: 'Miime', supportedDex: false },
+    DdexMargin: { addr: '0x241e82c79452f51fbfc89fac6d912e021db1a3b7', name: 'DDEX Margin', supportedDex: false },
+    DefiSaver: { addr: '0x865b41584a22f8345fca4b71c42a1e7abcd67ecb', name: 'DefiSaver MCD', supportedDex: false },
     // UniSwap (contract per token pair)
 
     /* small exchanges, no input/event parsing yet */
@@ -994,7 +1033,8 @@ module.exports = {
     AllBit: { addr: '0xdc1882f350b42ac9a23508996254b1915c78b204', name: 'AllBit', supportedDex: false },
     AllBit2: { addr: '0xff6b1cdfd2d3e37977d7938aa06b6d89d6675e27', name: 'AllBit', supportedDex: false },
     Saturn: { addr: '0x13f64609bf1ef46f6515f8cd3115433a93a00dc6', name: 'Saturn Network', supportedDex: false },
-    Loopring: { addr: '0x8d8812b72d1e4ffcec158d25f56748b7d67c1e78', name: 'LoopRing', supportedDex: false },
+    Loopring: { addr: '0x8d8812b72d1e4ffcec158d25f56748b7d67c1e78', name: 'LoopRing v1', supportedDex: false },
+    Loopring3: { addr: '0xc2d1e8fb0c10810bb888231e7b85118042846105', name: 'LoopRing v3', supportedDex: false },
     Aiwallet: { addr: '0x3dbf4ee7ed88157cda8b2c1578861cea1a1230f1', name: 'Aiwallet', supportedDex: false },
     AmisDex: { addr: '0x2cc69caaaaa6114ddf48f4ddb2adb9c5d5d3e048', name: 'AmisDex', supportedDex: false },
     Verify1: { addr: '0x48bf5e13a1ee8bd4385c182904b3abf73e042675', name: '0xVerify', supportedDex: false },
@@ -1007,13 +1047,23 @@ module.exports = {
     Blockonix2: { addr: '0x67b084e4654e1d62afa9694b6a626cec5c9ff2bd', name: 'Blockonix', supportedDex: false },
     CryptoKitty: { addr: '0xb1690c08e213a35ed9bab7b318de14420fb57d8c', name: 'CryptoKitties', supportedDex: false }, //auction
     Dinngo: { addr: '0xd494938d0524edadfc239adc2c233e50550fa152', name: 'Dinngo', supportedDex: false },
-    DappDex: { addr: '0xec3d7968b0d3fff0a074668e08eb56c5e6d38b21', name: 'DappDex', supportedDex: false},
+    DappDex: { addr: '0xec3d7968b0d3fff0a074668e08eb56c5e6d38b21', name: 'DappDex', supportedDex: false },
+    MCDEX: { addr: '0xfe3a6567a25d74b3a7f10ed49631502806ed1a17', name: 'MCDEX', supportedDex: false },
+    Coinected: { addr: '0xdf00412a54951e0ff42267427c3f17fa792a14a0', name: 'Coinected', supportedDex: false },
+    McAfeeSwap: { addr: '0x47653de428ff814cc2b78e7a4b569c1aec4add7c', name: 'McAffeeSwap', supportedDex: false },
+    DMEX1: { addr: '0x0c74f22130c985fa02e7105d6095fb782e9eb08c', name: 'DMEX', supportedDex: false },
+    DMEX2: { addr: '0x33d6461a9dba4c234fc01bc4a2df59bf26720e66', name: 'DMEX', supportedDex: false },
+    Atomex: { addr: '0xe9c251cbb4881f9e056e40135e7d3ea9a7d037df', name: 'Atomex', supportedDex: false },
+    ERCOTC: { addr: '0x2b3a44a25e62943f5bc2b44b27e6d7734dd14427', name: 'ERCOTC', supportedDex: false },
+    DEXIO: { addr: '0xababb61a9f837aad53ed4320221737fc6e9dc84b', name: 'Dex.io', supportedDex: false },
+
+    Counter: { addr: '0xc0deee11aa091189fff0713353c43c7c8cae7881', name: 'Counter', supportedDex: false },
+    Counter2: { addr: '0x1234567896326230a28ee368825d11fe6571be4a', name: 'Counter', supportedDex: false },
+    Counter3: { addr: '0x12345678979f29ebc99e00bdc5693ddea564ca80', name: 'Counter', supportedDex: false },
 
     // hb dex 0xf5f310b4bc81917c39a73cfec2c1b36325437fea, 0x5907aecf617c5019d9b3b43a5d65e583ce0f48bf
     // cryptozodiac 0xf238f55ede5120915b36715b0fffe20ff57f8134
-    // dex.io 0xababb61a9f837aad53ed4320221737fc6e9dc84b
 
-    // counter.market 0x12345678979f29ebc99e00bdc5693ddea564ca80, 0xc0deee11aa091189fff0713353c43c7c8cae7881, 0x12345678982cb986dd291b50239295e3cb10cdf6
     // 0xverify 0x48bf5e13a1ee8bd4385c182904b3abf73e042675
 
 
@@ -1059,6 +1109,8 @@ module.exports = {
     // 0xec65d776a9624e1186fabe988280b2f8e13bbf80
     // 0xccdabeaa4c1c54efab58484c791428b22083b432
     // 0xdb212bb6dd0c9cbc9fc0c5ffe88be35b81cbeb92
+
+    //unknown kyber clone? 0xafbf0d08269a7eee8d587121f3b0616c8cef5077, 0x6326dd73e368c036d4c4997053a021cbc52c7367
 
     // fake 0x? 0x5fb2f392772a6cb5ac423ceb587b62898c06c8cf
     // 0x v2 ?? 0xec200345f7e2991bcead2d299902e1380f902dca

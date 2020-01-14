@@ -8,20 +8,28 @@ module.exports = {
     TokenStore: { addr: '0x1ce7ae555139c5ef5a57cc8d814a867ee6ee33d8', name: 'Token Store', supportedDex: true },
     Idex: { addr: '0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208', name: 'IDEX', supportedDex: true },
     Decentrex: { addr: '0xbf29685856fae1e228878dfb35b280c0adcc3b05', name: 'Decentrex', supportedDex: true },
+    //0x protocol v1
     '0x': { addr: '0x12459c951127e0c374ff9105dda097662a027093', name: '0x Exchange', supportedDex: true },
     '0xProxy': { addr: '0x8da0d80f5007ef1e431dd2127178d224e32c2ef4', name: '0x Proxy', supportedDex: true },
+    '0xForwarder': { addr: '0x7afc2d5107af94c462a194d2c21b5bdd238709d6', name: '0x Instant', supportedDex: false },
+    //0x protocol v2
     '0x2': { addr: '0x4f833a24e1f95d70f028921e27040ca56e09ab0b', name: '0x Exchange2', supportedDex: true },
     '0xProxy2': { addr: '0x2240dab907db71e64d3e0dba4800c83b5c502d4e', name: '0x ERC20 Proxy', supportedDex: true },
     '0xProxy3': { addr: '0x208e41fb445f1bb1b6780d58356e81405f3e6127', name: '0x ERC721 Proxy', supportedDex: false },
-    '0xForwarder': { addr: '0x7afc2d5107af94c462a194d2c21b5bdd238709d6', name: '0x Instant', supportedDex: false },
     '0xForwarder2': { addr: '0x5468a1dc173652ee28d249c271fa9933144746b1', name: '0x Instant', supportedDex: false },
+    '0xForwarder3': { addr: '0x76481caa104b5f6bccb540dae4cefaf1c398ebea', name: '0x Instant', supportedDex: false },
+    '0xForwarder4': { addr: '0xdc4587cb17d2a1829512e2cfec621f8066290e6a', name: '0x Instant', supportedDex: false },
     //0x v2.1 bugfix release
     '0x2.1': { addr: '0x080bf510fcbf18b91105470639e9561022937712', name: '0x Exchange 2.1', supportedDex: true },
     '0xProxy4': { addr: '0x95e6f48254609a6ee006f7d493c8e5fb97094cef', name: '0x ERC20 Proxy', supportedDex: true },
     '0xProxy5': { addr: '0xefc70a1b18c432bdc64b596838b4d138f6bc6cad', name: '0x ERC721 Proxy', supportedDex: false },
     '0xProxy6': { addr: '0xef701d5389ae74503d633396c4d654eabedc9d78', name: '0x MAP Proxy', supportedDex: false },
-    '0xForwarder3': { addr: '0xdc4587cb17d2a1829512e2cfec621f8066290e6a', name: '0x Instant', supportedDex: false },
-    '0x3': { addr: '0xb27f1db0a7e473304a5a06e54bdf035f671400c0', name: '0x Exchange 3', supportedDex: false },
+    //0x protocol v3
+    '0x3Test': { addr: '0xb27f1db0a7e473304a5a06e54bdf035f671400c0', name: '0x v3 test', supportedDex: false },
+    '0x3': { addr: '0x61935cbdd02287b511119ddb11aeb42f1593b7ef', name: '0x Exchange 3', supportedDex: false },
+    '0xForwarder5': { addr: '0xa3ac9844514b96bb502627ca9dceb57c4be289e3', name: '0x Instant', supportedDex: false },
+    '0xForwarder6': { addr: '0x5ff2c495055d4f6284f317a9c2edb7045497b14f', name: '0x Instant', supportedDex: false },
+
 
     // ethfinex v1, 0x v1 clone
     Ethfinex: { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex', supportedDex: true },
@@ -29,7 +37,7 @@ module.exports = {
 
     OasisDex: { addr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425', name: 'OasisDex', supportedDex: true },
     OasisDex2: { addr: '0xb7ac09c2c0217b07d7c103029b4918a2c401eecb', name: 'OasisDex', supportedDex: true },
-    OasisDex3: { addr: '0x39755357759ce0d7f32dc8dc45414cca409ae24e', name: 'Eth2Dai (Oasis)', supportedDex: true },
+    OasisDex3: { addr: '0x39755357759ce0d7f32dc8dc45414cca409ae24e', name: 'Oasis (Eth2Dai)', supportedDex: true },
     OasisDexOld: { addr: '0x3aa927a97594c3ab7d7bf0d47c71c3877d1de4a1', name: 'OasisDex (OLD)', supportedDex: true },
     OasisDexOld2: { addr: '0x83ce340889c15a3b4d38cfcd1fc93e5d8497691f', name: 'OasisDex (OLD2)', supportedDex: true },
     OasisDexOld3: { addr: '0xa1b5eedc73a978d181d1ea322ba20f0474bb2a25', name: 'OasisDex (OLD3)', supportedDex: false },
@@ -84,6 +92,11 @@ module.exports = {
     TotleProxy: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
     TotleProxy2: { addr: '0x74758acfce059f503a7e6b0fc2c8737600f9f2c4', name: 'Totle', supportedDex: false },
     TotleProxy3: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
+    ParaSwap: { addr: '0xf92c1ad75005e6436b4ee84e88cb23ed8a290988', name: 'ParaSwap', supportedDex: false },
+    DexAG: { addr: '0xd3bed3a8e3e6b24b740ead108ba776e0ad298588', name: 'DEX.AG v1', supportedDex: false },
+    DexAG2: { addr: '0x932348df588923ba3f1fd50593b22c4e2a287919', name: 'DEX.AG v2', supportedDex: false },
+    DexAG3: { addr: '0xa540fb50288cc31639305b1675c70763c334953b', name: 'DEX.AG v3', supportedDex: false },
+
 
 
     /* small ED/FD clones, not in balance & history pages yet, input/events should parse */
@@ -114,6 +127,9 @@ module.exports = {
     Swatx: { addr: '0x513c07e83237124e08672be4c8d481246d6f03f2', name: 'SWATX', supportedDex: true },
     CryptloDex: { addr: '0xcf5d889e2336d0f35f6121718f6c25e0650d4b25', name: 'CryptloDex', supportedDex: true},
     UnknownED: { addr: '0x4d55f76ce2dbbae7b48661bef9bd144ce0c9091b', name: 'Unknown', supportedDex: true },
+    Afrodex: { addr: '0xe8fff15bb5e14095bfdfa8bb85d83cc900c23c56', name: 'Afrodex', supportedDex: true },
+    EDex: { addr: '0x4fbcfa90ac5a1f7f70b7ecc6dc1589bbe6904b02', name: 'EDex', supportedDex: true },
+    AlgoDEX: { addr: '0x4bc78f6619991b029b867b6d88d39c196332aba3', name: 'AlgoDEX', supportedDex: true }, 
 
     /* exchanges with no parsing support yet */
     DDEX: { addr: '0x2cb4b49c0d6e9db2164d94ce48853bf77c4d883e', name: 'DDEX Hydro', supportedDex: false },
@@ -124,9 +140,15 @@ module.exports = {
     BithumbDex: { addr: '0xc7c9b856d33651cc2bcd9e0099efa85f59f78302', name: 'BithumbDex', supportedDex: false },     //bithumb dex R1
     Martle: { addr: '0x551d56781e0cd16ac2c61a03e6537844a41c7709', name: 'Martle instant', supportedDex: false },
     Switcheo: { addr: '0xba3ed686cc32ffa8664628b1e96d8022e40543de', name: 'Switcheo', supportedDex: true }, //partial
+    Switcheo2: { addr: '0x7ee7ca6e75de79e618e88bdf80d0b1db136b22d0', name: 'Switcheo v2', supportedDex: false },
     DutchX: { addr: '0x039fb002d21c1c5eeb400612aef3d64d49eb0d94', name: 'DutchX', supportedDex: false },
     DutchXProxy: { addr: '0xaf1745c0f8117384dfa5fff40f824057c70f2ed3', name: 'DutchX', supportedDex: false },
-    Ethermium: { addr: '0xa5CC679A3528956E8032df4F03756C077C1eE3F4', name: 'Ethermium', supportedDex: false },
+    Ethermium: { addr: '0xa5cc679a3528956e8032df4f03756c077c1ee3f4', name: 'Ethermium', supportedDex: false },
+    Wedex: { addr: '0x7d3d221a8d8abdd868e8e88811ffaf033e68e108', name: 'WEDEX beta', supportedDex: false },
+    Tokenlon: { addr: '0xdc6c91b569c98f9f6f74d90f9beff99fdaf4248b', name: 'Tokenlon', supportedDex: false },
+    Miime: { addr: '0x7a6425c9b3f5521bfa5d71df710a2fb80508319b', name: 'Miime', supportedDex: false },
+    DdexMargin: { addr: '0x241e82c79452f51fbfc89fac6d912e021db1a3b7', name: 'DDEX Margin', supportedDex: false },
+    DefiSaver: { addr: '0x865b41584a22f8345fca4b71c42a1e7abcd67ecb', name: 'DefiSaver MCD', supportedDex: false },
     // UniSwap (contract per token pair)
 
     /* small exchanges, no input/event parsing yet */
@@ -145,7 +167,8 @@ module.exports = {
     AllBit: { addr: '0xdc1882f350b42ac9a23508996254b1915c78b204', name: 'AllBit', supportedDex: false },
     AllBit2: { addr: '0xff6b1cdfd2d3e37977d7938aa06b6d89d6675e27', name: 'AllBit', supportedDex: false },
     Saturn: { addr: '0x13f64609bf1ef46f6515f8cd3115433a93a00dc6', name: 'Saturn Network', supportedDex: false },
-    Loopring: { addr: '0x8d8812b72d1e4ffcec158d25f56748b7d67c1e78', name: 'LoopRing', supportedDex: false },
+    Loopring: { addr: '0x8d8812b72d1e4ffcec158d25f56748b7d67c1e78', name: 'LoopRing v1', supportedDex: false },
+    Loopring3: { addr: '0xc2d1e8fb0c10810bb888231e7b85118042846105', name: 'LoopRing v3', supportedDex: false },
     Aiwallet: { addr: '0x3dbf4ee7ed88157cda8b2c1578861cea1a1230f1', name: 'Aiwallet', supportedDex: false },
     AmisDex: { addr: '0x2cc69caaaaa6114ddf48f4ddb2adb9c5d5d3e048', name: 'AmisDex', supportedDex: false },
     Verify1: { addr: '0x48bf5e13a1ee8bd4385c182904b3abf73e042675', name: '0xVerify', supportedDex: false },
@@ -158,13 +181,23 @@ module.exports = {
     Blockonix2: { addr: '0x67b084e4654e1d62afa9694b6a626cec5c9ff2bd', name: 'Blockonix', supportedDex: false },
     CryptoKitty: { addr: '0xb1690c08e213a35ed9bab7b318de14420fb57d8c', name: 'CryptoKitties', supportedDex: false }, //auction
     Dinngo: { addr: '0xd494938d0524edadfc239adc2c233e50550fa152', name: 'Dinngo', supportedDex: false },
-    DappDex: { addr: '0xec3d7968b0d3fff0a074668e08eb56c5e6d38b21', name: 'DappDex', supportedDex: false},
+    DappDex: { addr: '0xec3d7968b0d3fff0a074668e08eb56c5e6d38b21', name: 'DappDex', supportedDex: false },
+    MCDEX: { addr: '0xfe3a6567a25d74b3a7f10ed49631502806ed1a17', name: 'MCDEX', supportedDex: false },
+    Coinected: { addr: '0xdf00412a54951e0ff42267427c3f17fa792a14a0', name: 'Coinected', supportedDex: false },
+    McAfeeSwap: { addr: '0x47653de428ff814cc2b78e7a4b569c1aec4add7c', name: 'McAffeeSwap', supportedDex: false },
+    DMEX1: { addr: '0x0c74f22130c985fa02e7105d6095fb782e9eb08c', name: 'DMEX', supportedDex: false },
+    DMEX2: { addr: '0x33d6461a9dba4c234fc01bc4a2df59bf26720e66', name: 'DMEX', supportedDex: false },
+    Atomex: { addr: '0xe9c251cbb4881f9e056e40135e7d3ea9a7d037df', name: 'Atomex', supportedDex: false },
+    ERCOTC: { addr: '0x2b3a44a25e62943f5bc2b44b27e6d7734dd14427', name: 'ERCOTC', supportedDex: false },
+    DEXIO: { addr: '0xababb61a9f837aad53ed4320221737fc6e9dc84b', name: 'Dex.io', supportedDex: false },
+
+    Counter: { addr: '0xc0deee11aa091189fff0713353c43c7c8cae7881', name: 'Counter', supportedDex: false },
+    Counter2: { addr: '0x1234567896326230a28ee368825d11fe6571be4a', name: 'Counter', supportedDex: false },
+    Counter3: { addr: '0x12345678979f29ebc99e00bdc5693ddea564ca80', name: 'Counter', supportedDex: false },
 
     // hb dex 0xf5f310b4bc81917c39a73cfec2c1b36325437fea, 0x5907aecf617c5019d9b3b43a5d65e583ce0f48bf
     // cryptozodiac 0xf238f55ede5120915b36715b0fffe20ff57f8134
-    // dex.io 0xababb61a9f837aad53ed4320221737fc6e9dc84b
 
-    // counter.market 0x12345678979f29ebc99e00bdc5693ddea564ca80, 0xc0deee11aa091189fff0713353c43c7c8cae7881, 0x12345678982cb986dd291b50239295e3cb10cdf6
     // 0xverify 0x48bf5e13a1ee8bd4385c182904b3abf73e042675
 
 
@@ -210,6 +243,8 @@ module.exports = {
     // 0xec65d776a9624e1186fabe988280b2f8e13bbf80
     // 0xccdabeaa4c1c54efab58484c791428b22083b432
     // 0xdb212bb6dd0c9cbc9fc0c5ffe88be35b81cbeb92
+
+    //unknown kyber clone? 0xafbf0d08269a7eee8d587121f3b0616c8cef5077, 0x6326dd73e368c036d4c4997053a021cbc52c7367
 
     // fake 0x? 0x5fb2f392772a6cb5ac423ceb587b62898c06c8cf
     // 0x v2 ?? 0xec200345f7e2991bcead2d299902e1380f902dca

@@ -67,6 +67,7 @@ module.exports = {
     '0x853da5cecc1ea601ab978c2001565a0377a7dca6': 'ForDex',
     '0xd3d0474124c1013ed6bfcfd9a49cfedb8c78fc44': 'Erc Dex', //indirect execution
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX', //v1 
+    '0xb04239b53806ab31141e6cd47c63fb3480cac908': 'Gods Unchained',
   },
   // other addresses associated with DEX admins
   admins: {
@@ -79,6 +80,8 @@ module.exports = {
     '0x457804851eaf090dad4871f9609010c6868d99d4': 'BithumbDex Admin',
     '0xdb0a49ebed788cd412744a4f9f1ce8d16d019b2e': 'Totle Admin',
     '0x583d03451406d179182efc742a1d811a9e34c36b': 'Totle Admin',
+    '0x571037cc2748c340e3c6d9c7af589c6d65806618': 'Switcheo Admin',
+    '0x8ecf87fc9d7336cc0052d40abf806fb1af2ea81c': 'DINNGO Admin',
   },
   // known (centralized) exchange wallets, (personal experience + https://etherscan.io/accounts/1?&l=Exchange )
   exchangeWallets: {
@@ -180,6 +183,10 @@ module.exports = {
     '0x5a4ade4f3e934a0885f42884f7077261c3f4f66f': 'Synthetix',
 
     '0x3baa64a4401bbe18865547e916a9be8e6dd89a5a': 'Request',
+
+    '0xc692453625023c6e03fec04158ea31ab4de2650a': 'LocalCoin Dex 1',
+    '0x37c4bcaba4bcf3a605414236b8b108f160eb45a6': 'LocalCoin Dex 2',
+    '0x8d1c1571367a148e92d6ac83494b1bdf3b497d07': 'LocalCoin Dex 3',
 
     // saturn network aidrop
     '0x25f17d6cb23cc85bfa6c5e9b8f1d5226f5927cbc': 'Airdrop',

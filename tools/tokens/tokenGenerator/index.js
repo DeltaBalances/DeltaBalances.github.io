@@ -183,6 +183,9 @@ function parseKnownToken(tok) {
     if (tok.old) {
         token.old = true;
     }
+	if (tok.warn) {
+        token.warning = true;
+    }
     if (tok.kill) {
         token.killed = true;
     }
@@ -245,7 +248,7 @@ async function addTokenByAddress(address) {
 }
 
 async function loadEthfinexTrustless() {
-    let response = await getJson('https://api.ethfinex.com/trustless/v1/r/get/conf', true);
+    let response = await getJson('https://api.deversifi.com/v1/trading/r/get/conf /*https://api.ethfinex.com/trustless/v1/r/get/conf*/', true);
     if (response && response['0x']) {
         let tokenData = response['0x'].tokenRegistry;
         let symbols = Object.keys(tokenData);
@@ -326,7 +329,7 @@ async function loadListedTokens() {
         return tokens;
     });
 
-    await getTokens('https://api.radarrelay.com/v2/tokens', 'Radar', function (jsonData) {
+    await getTokens('https://api.radarrelay.com/v3/tokens', 'Radar', function (jsonData) {
         let tokens = [];
         if (jsonData && jsonData.length > 0) {
             jsonData = jsonData.filter((x) => { return x.active; });
@@ -363,6 +366,8 @@ async function loadListedTokens() {
             }
             if (tokens && tokens.length > 0) {
                 //cleanup and format tokens
+                let amount = tokens.length;
+                let newAmount = 0;
                 tokens = tokens.forEach(token => {
                     token.symbol = escapeHtml(token.symbol);
                     token.address = token.address.toLowerCase();
@@ -383,6 +388,7 @@ async function loadListedTokens() {
                     if (!allTokens[token.address]) {
                         if (token.decimal >= 0) {
                             allTokens[token.address] = token;
+                            newAmount++;
                         } else {
                             badTokens[token.address] = token;
                         }
@@ -395,7 +401,7 @@ async function loadListedTokens() {
                         }
                     }
                 });
-                console.log('loaded ' + exchange + ' tokens');
+                console.log('loaded ' + exchange + ' tokens (' + newAmount + ' / ' + amount + ' )');
             } else {
                 console.log('empty token list ' + exchange);
             }
@@ -423,6 +429,7 @@ function writeJsonToFile(filename, json) {
     str = str.replace(/"inactive":/g, 'inactive:');
     str = str.replace(/"killed":/g, 'kill:');
     str = str.replace(/"old":/g, 'old:');
+	str = str.replace(/"warning":/g, 'warn:');
     str = str.replace(/"spam":/g, 'spam:');
     str = str.replace(/"blockIDEX":/g, 'blockIDEX:');
     str = str.replace(/"blockFork":/g, 'blockFork:');
@@ -545,7 +552,7 @@ function handleTokenInfo(response) {
 
     if (response.alert) {
         if (allTokens[addr]) {
-            if (!allTokens[addr].old && !allTokens[addr].locked) {
+            if (!allTokens[addr].old && !allTokens[addr].locked && !allTokens[addr].warning) {
                 alerts[addr] = response.alert;
             }
         } else {

@@ -883,7 +883,7 @@ var pageType = 'balance';
             return prices;
         });
 
-        priceRequest('Radar', 'https://api.radarrelay.com/v2/markets?include=base,ticker,stats', (result) => {
+        priceRequest('Radar', 'https://api.radarrelay.com/v3/markets?include=base,ticker,stats', (result) => {
             let prices = {};
             result.map((pair) => {
                 if (pair && pair.ticker && pair.stats) {

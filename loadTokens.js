@@ -4,7 +4,7 @@
 
 // List of tokens per exchange
 var exchangeTokens = {
-    forkdelta: [],  // new domain CORS protection
+   // forkdelta: [],  // new domain CORS protection
     idex: [],
     ddex: [],
     radar: [],
@@ -34,7 +34,7 @@ var unknownTokenCache = [];
 
     // last update time for exchange token lists, default to the past
     let exchangeUpdates = {
-        forkdelta: 0,
+       // forkdelta: 0,
         idex: 0,
         ddex: 0,
         radar: 0,
@@ -64,7 +64,7 @@ var unknownTokenCache = [];
 
 
     // CORS issue on new domain
-    getTokens('https://cors.io/?https://forkdelta.app/config/main.json', 'ForkDelta', function (json) {
+   /* getTokens('https://cors.io/?https://forkdelta.app/config/main.json', 'ForkDelta', function (json) {
         if (json && json.tokens) {
             let tokens = json.tokens;
             tokens.map(x => { x.address = x.addr.toLowerCase() });
@@ -73,6 +73,7 @@ var unknownTokenCache = [];
             return [];
         }
     });
+    */
 
 
     getTokens("https://api.idex.market/returnCurrencies", 'IDEX', function (data) {
@@ -88,6 +89,7 @@ var unknownTokenCache = [];
         }
     });
 
+    // legacy.ddex.io , TOOD fix for new ddex https://api.ddex.io/v4/markets
     getTokens('https://api.ddex.io/v3/tokens', 'DDEX', function (jsonData) {
         if (jsonData && jsonData.data && jsonData.data.tokens) {
             let tokens = jsonData.data.tokens;
@@ -98,7 +100,7 @@ var unknownTokenCache = [];
         }
     });
 
-    getTokens('https://api.radarrelay.com/v2/tokens', 'Radar', function (jsonData) {
+    getTokens('https://api.radarrelay.com/v3/tokens', 'Radar', function (jsonData) {
         if (jsonData && jsonData.length > 0) {
             jsonData = jsonData.filter((x) => { return x.active; });
             return jsonData.map((x) => { return { symbol: x.symbol, address: x.address.toLowerCase(), decimals: x.decimals, name: x.name } });

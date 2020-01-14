@@ -204,6 +204,9 @@ function parseKnownToken(tok) {
     if (tok.Binance) {
         token.Binance = tok.Binance;
     }
+	if (tok.DDEX2) {
+		token.DDEX2 = tok.DDEX2;
+	}	
     return token;
 }
 
@@ -438,6 +441,7 @@ function writeJsonToFile(filename, json) {
     str = str.replace(/"ForkDelta":/g, 'ForkDelta:');
     str = str.replace(/"IDEX":/g, 'IDEX:');
     str = str.replace(/"DDEX":/g, 'DDEX:');
+	str = str.replace(/"DDEX2":/g, 'DDEX2:');
     str = str.replace(/"Radar":/g, 'Radar:');
     str = str.replace(/"Kyber":/g, 'Kyber:');
     str = str.replace(/"TokenStore":/g, 'TokenStore:');

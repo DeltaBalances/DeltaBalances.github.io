@@ -204,6 +204,7 @@ module.exports = {
     "0x28f5cf7044f509af67f473c18b1f5f4f97fb4ce9": 'Erc Dex',
     "0xd592cfa56f4c443fb27008329d67ed7d4edb59c0": 'Erc Dex',
 
+    '0xaf8ae6955d07776ab690e565ba6fbc79b8de3a5d': 'DiversiFi',
     // non zrx
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex', //0x clone contract
     '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX', // DDEX hydro
@@ -227,6 +228,7 @@ module.exports = {
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX Admin', //0x v1
     '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX Admin', // Hydro ex
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex Admin',
+    '0xaf8ae6955d07776ab690e565ba6fbc79b8de3a5d': 'DiversiFi Admin', //ethfinex
     '0x1f8cdd31345faa00bbdf946fa257b7feb706b535': 'Switcheo Admin',
     '0x457804851eaf090dad4871f9609010c6868d99d4': 'BithumbDex Admin',
     '0xdb0a49ebed788cd412744a4f9f1ce8d16d019b2e': 'Totle Admin',
@@ -900,6 +902,9 @@ module.exports = {
     // ethfinex v1, 0x v1 clone
     Ethfinex: { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex', supportedDex: true },
     EthfinexProxy: { addr: '0x7e03d2b8edc3585ecd8a5807661fff0830a0b603', name: 'Ethfinex Proxy', supportedDex: true },
+    EthfinexOtc: { addr: '0xbaea5bc6568dcb1f1c5aa24223a47333a6b3a8f5', name: 'Ethfinex OTC', supportedDex: false },
+    EthfinexOtc2: { addr: '0x93dc6a333a99c0ede1cd346ccf079ea8451013db', name: 'Ethfinex OTC', supportedDex: false },
+    EthfinexOtc3: { addr: '0xd924bdd6fa7fd3d0eb1337853a814a4263dcbfe8', name: 'DiversiFi OTC', supportedDex: false }, 
 
     OasisDex: { addr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425', name: 'OasisDex', supportedDex: true },
     OasisDex2: { addr: '0xb7ac09c2c0217b07d7c103029b4918a2c401eecb', name: 'OasisDex', supportedDex: true },

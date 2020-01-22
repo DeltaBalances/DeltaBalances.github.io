@@ -34,6 +34,9 @@ module.exports = {
     // ethfinex v1, 0x v1 clone
     Ethfinex: { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex', supportedDex: true },
     EthfinexProxy: { addr: '0x7e03d2b8edc3585ecd8a5807661fff0830a0b603', name: 'Ethfinex Proxy', supportedDex: true },
+    EthfinexOtc: { addr: '0xbaea5bc6568dcb1f1c5aa24223a47333a6b3a8f5', name: 'Ethfinex OTC', supportedDex: false },
+    EthfinexOtc2: { addr: '0x93dc6a333a99c0ede1cd346ccf079ea8451013db', name: 'Ethfinex OTC', supportedDex: false },
+    EthfinexOtc3: { addr: '0xd924bdd6fa7fd3d0eb1337853a814a4263dcbfe8', name: 'DiversiFi OTC', supportedDex: false }, 
 
     OasisDex: { addr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425', name: 'OasisDex', supportedDex: true },
     OasisDex2: { addr: '0xb7ac09c2c0217b07d7c103029b4918a2c401eecb', name: 'OasisDex', supportedDex: true },

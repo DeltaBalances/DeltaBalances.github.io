@@ -53,6 +53,7 @@ module.exports = {
     "0x28f5cf7044f509af67f473c18b1f5f4f97fb4ce9": 'Erc Dex',
     "0xd592cfa56f4c443fb27008329d67ed7d4edb59c0": 'Erc Dex',
 
+    '0xaf8ae6955d07776ab690e565ba6fbc79b8de3a5d': 'DiversiFi',
     // non zrx
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex', //0x clone contract
     '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX', // DDEX hydro
@@ -76,6 +77,7 @@ module.exports = {
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX Admin', //0x v1
     '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX Admin', // Hydro ex
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex Admin',
+    '0xaf8ae6955d07776ab690e565ba6fbc79b8de3a5d': 'DiversiFi Admin', //ethfinex
     '0x1f8cdd31345faa00bbdf946fa257b7feb706b535': 'Switcheo Admin',
     '0x457804851eaf090dad4871f9609010c6868d99d4': 'BithumbDex Admin',
     '0xdb0a49ebed788cd412744a4f9f1ce8d16d019b2e': 'Totle Admin',

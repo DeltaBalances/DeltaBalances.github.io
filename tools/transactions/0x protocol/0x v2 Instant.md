@@ -8,4 +8,5 @@
 `https://etherscan.io/tx/0x380b23aa55f82f3fadf622efb610a6cb3875d1d0258c0fc266ea4068c58975ca`
 
 ###### marketSellOrdersWithEth
-`??`
+`https://etherscan.io/tx/0x15f72ae00ea23a8b9c7473c40061defad0ba1aedebf7d93e0dad9ff645e18ff8` No trade event
+`https://etherscan.io/tx/0x19269a072b077544f4529545774cab2071601fdf5ea72dae389592bd70079c61` partial fill

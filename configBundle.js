@@ -1246,6 +1246,18 @@ module.exports = {
       hideFees: false,
       hideOpponent: false,
     },
+    '0x Protocol v3': {
+      contract: ['0x3'],
+      minBlock: 8952139,
+      tradeTopic: '0x6869791f0a34781b29882982cc39e882768cf2c96995c2a110c577c53bc932d5',
+      withdrawTopic: undefined,
+      depositTopic: undefined,
+      createTx: '0xd92b82dc8c3e0e6bdc4fccd7ad27bd5eafea00ed80034fc53a97105df135698c',
+      userIndexed: false, // only if maker
+      showExchange: true,
+      hideFees: false,
+      hideOpponent: false,
+    },
     OasisDex: {
       contract: ['OasisDex', 'OasisDex2','OasisDex3', 'OasisDexOld', 'OasisDexOld2'],
       minBlock: 3435757, //4262057, //4751582,

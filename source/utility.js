@@ -145,18 +145,6 @@ module.exports = (db) => {
         return false;
     };
 
-    //Check if 0x v2 assetData contains an erc20 token
-    utility.assetIsERC20 = function assetIsERC20(data) {
-        const erc20ID = '0xf47261b'; //erc20 proxy tag
-        return (data && typeof data === 'string' && data.indexOf(erc20ID) != -1);
-    };
-
-    //Check if 0x v2 assetData contains an erc20 token
-    utility.assetIsERC721 = function assetIsERC721(data) {
-        const erc721ID = '0x02571792'; //erc 721 proxy tag
-        return (data && typeof data === 'string' && data.indexOf(erc721ID) != -1);
-    }
-
     //name for a 0x relayer based on feerecipient address
     utility.relayName = function (address, relayType = '0x') {
         let name = '';

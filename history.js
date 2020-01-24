@@ -1576,9 +1576,9 @@ var pageType = 'history';
 				let allTrades = lastResult.filter((x) => {
 					return (
 						(x.Type == 'Maker' || x.Type == 'Taker')
-						//exclude erc721 tokens from the export for now
-						&& (x.Token && !x.Token.erc721)
-						&& (x.Base && !x.Base.erc721)
+						//exclude erc721 tokens & multiple-asset setc from the export for now
+						&& (x.Token && !x.Token.erc721 && !x.Token.mult)
+						&& (x.Base && !x.Base.erc721 && !x.Base.multi)
 					);
 				});
 				if (allTrades && allTrades.length > 0) {

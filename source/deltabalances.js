@@ -966,8 +966,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'maker': maker,
                 };
             }
-            // 0x v1 cancel input
-            //0x v2 cancel input
+            // 0x v1 v2 v3 cancel input
             else if (unpacked.name === 'cancelOrder' || unpacked.name === 'batchCancelOrders') {
 
                 //check if this is the 0x v2 variant with structs
@@ -976,7 +975,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 if (isV2) {
 
                     if (unpacked.name == 'cancelOrder') {
-                        let order = convert0xV2Order(unpacked.params[0].value);
+                        let order = convert0xOrder(unpacked.params[0].value);
                         if (!order) {
                             return undefined;
                         }
@@ -1001,10 +1000,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                                     orders[i][11] = takerAsset;
                                 }
                             }
-                            let order = convert0xV2Order(orders[i]);
+                            let order = convert0xOrder(orders[i]);
                             if (order) {
                                 allOrderAdresses.push(order.orderAddresses);
-                                allOrderValues.push(order.allOrderValues);
+                                allOrderValues.push(order.orderValues);
                             }
                         }
 
@@ -1164,9 +1163,22 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                 }
             }
-            //0x v2, function called with signed data, from sender != signer
+            //0x v2,v3 function called with signed data, from sender != signer
             else if (unpacked.name == 'executeTransaction') {
-                let exchange = utility.relayName(txFrom, '0x Exchange V2');
+
+                let signer = undefined;
+                let txData = undefined;
+                //v2 (salt, signer, data, signature)    
+                //v3( transaction[salt, expire, gas, signer, data], signature)
+                if (unpacked.params[0].name == 'transaction') {
+                    signer = unpacked.params[0].value[3].value.toLowerCase();
+                    txData = unpacked.params[0].value[4].value;
+                } else {
+                    signer = unpacked.params[1].value.toLowerCase();
+                    txData = unpacked.params[2].value;
+                }
+
+                let exchange = utility.relayName(txFrom, '0x Exchange');
                 let returns = [
                     //signed execution
                     {
@@ -1174,15 +1186,14 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'Exchange': exchange,
                         'note': 'a 0x trade/cancel executed through a third party for a signer address',
                         'sender': tx.from,
-                        'signer': unpacked.params[1].value.toLowerCase()
+                        'signer': signer,
                     }
                 ];
 
                 //try to add parsed subcall
                 try {
-                    const data = unpacked.params[2].value;
+                    const data = txData;
                     let unpacked2 = utility.processInput(data);
-                    let signer = unpacked.params[1].value.toLowerCase();
                     if (unpacked2) {
                         let newTx = tx;
                         if (newTx.to !== signer) {
@@ -1206,12 +1217,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                 return returns;
             }
-            //0x v2 cancel up to
+            //0x v2 v3 cancel up to
             else if (unpacked.name === 'cancelOrdersUpTo') {
+                let exchange = this.getExchangeName(txTo, '0x Exchange');
                 return {
                     'type': 'Cancel up to',
-                    'exchange': '0x Exchange V2',
-                    'note': 'Cancels all open 0x(V2) orders up to a certain date',
+                    'exchange': exchange,
+                    'note': 'Cancels all open 0x orders up to a certain date',
                     'tokens': 'All',
                     'maker': tx.from,
                     'orderEpoch': unpacked.params[0].value,
@@ -1831,22 +1843,24 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             // 0x v1 trade input, ethfinex v1 input
             // 0x v2 trade input
             // 0x v2 Forwarder input
-            else if (unpacked.name === 'fillOrder' // 0xv1 0xv2
-                || unpacked.name === 'fillOrKillOrder' //0xv1 0xv2
-                || unpacked.name === 'batchFillOrders' //0xv1 0xv2
-                || unpacked.name === 'batchFillOrKillOrders' //0xv1 0xv2
+            else if (unpacked.name === 'fillOrder' // 0xv1 0xv2 0xv3
+                || unpacked.name === 'fillOrKillOrder' //0xv1 0xv2 0xv3
                 || unpacked.name === 'fillOrdersUpTo' //0xv1
                 || unpacked.name === 'fillOrderNoThrow' //0xv2
-                || unpacked.name === 'batchFillOrdersNoThrow' //0xv2
+                || unpacked.name === 'batchFillOrders' //0xv1 0xv2 0xv3
+                || unpacked.name === 'batchFillOrKillOrders' //0xv1 0xv2 0xv3
+                || unpacked.name === 'batchFillOrdersNoThrow' //0xv2 0xv3 
                 || unpacked.name === 'marketSellOrders' //0xv2
-                || unpacked.name === 'marketSellOrdersNoThrow' //0xv2
+                || unpacked.name === 'marketSellOrdersNoThrow' //0xv2 0xv3
+                || unpacked.name == 'marketSellOrdersFillOrKill' //0xv3
                 || unpacked.name === 'marketBuyOrders' //0xv2
-                || unpacked.name === 'marketBuyOrdersNoThrow' //0xv2
+                || unpacked.name === 'marketBuyOrdersNoThrow' //0xv2 0xv3
+                || unpacked.name == 'marketBuyOrdersFillOrKill' //0xv3
                 || unpacked.name === 'matchOrders' //0xv2
-                || unpacked.name == 'marketBuyOrdersWithEth' //0xv2 Forwarder
-                || unpacked.name == 'marketSellOrdersWithEth' //0xv2 Forwarder
+                || unpacked.name == 'marketBuyOrdersWithEth' //0xv2 0xv3 Forwarder
+                || unpacked.name == 'marketSellOrdersWithEth' //0xv2 0xv3 Forwarder
             ) {
-                /* //0x v2 order
+                /* //0x v2 &v3 order
                     struct Order array 
                         0:{name: "makerAddress", type: "address"}
                         1: {name: "takerAddress", type: "address"}
@@ -1860,7 +1874,9 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         9: {name: "salt", type: "uint256"}
                         10: {name: "makerAssetData", type: "bytes"}
                         11: {name: "takerAssetData", type: "bytes"}
-                       
+                    V3  12: {name: "makerFeeAssetData", type: "bytes"}      
+                    V3  13: {name: "takerFeeAssetData", type: "bytes"}
+
                    // 0x v1 order
                     Order memory order = Order({
                         maker: orderAddresses[0],
@@ -1882,7 +1898,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 // Convert v2 orders to matching v1 orders to re-use the old v1 trade parsing
                 if (isV2) {
                     if (unpacked.name == 'fillOrder' || unpacked.name == 'fillOrKillOrder' || unpacked.name == 'fillOrderNoThrow') {
-                        let order = convert0xV2Order(unpacked.params[0].value);
+                        let order = convert0xOrder(unpacked.params[0].value);
                         if (!order) {
                             return undefined;
                         }
@@ -1896,13 +1912,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         unpacked.params[2].value = takeAmount;
 
                     } else if (unpacked.name == 'matchOrders') {
-                        let order1 = convert0xV2Order(unpacked.params[0].value);
+                        let order1 = convert0xOrder(unpacked.params[0].value);
                         // assets for 2nd order might be omitted to save on gas, inverse assets of the 1st order
                         if (unpacked.params[1].value[10].value == '0x' || unpacked.params[1].value[11] == '0x') {
                             unpacked.params[1].value[10] = unpacked.params[0].value[11];
                             unpacked.params[1].value[11] = unpacked.params[0].value[10];
                         }
-                        let order2 = convert0xV2Order(unpacked.params[1].value);
+                        let order2 = convert0xOrder(unpacked.params[1].value);
 
                         if (!order1 && order2) {
                             return undefined;
@@ -1937,7 +1953,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                                     orders[i][11].value = takerAsset;
                                 }
                             }
-                            let order = convert0xV2Order(orders[i]);
+                            let order = convert0xOrder(orders[i]);
                             if (order) {
 
                                 let takeAmount = unpacked.params[1].value[i];
@@ -1958,21 +1974,27 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         unpacked.params[1].value = allOrderValues;
                         unpacked.params[2].value = allTakeAmounts;
 
-                    } else if (unpacked.name == 'marketSellOrders' || unpacked.name == 'marketSellOrdersNoThrow'
-                        || unpacked.name == 'marketBuyOrders' || unpacked.name == 'marketBuyOrdersNoThrow'
+                    } else if (unpacked.name == 'marketSellOrders' || unpacked.name == 'marketSellOrdersNoThrow' || unpacked.name == 'marketSellOrdersFillOrKill'
+                        || unpacked.name == 'marketBuyOrders' || unpacked.name == 'marketBuyOrdersNoThrow' || unpacked.name == 'marketBuyOrdersFillOrKill'
                         || unpacked.name == 'marketBuyOrdersWithEth' || unpacked.name == 'marketSellOrdersWithEth' // WithEth is 0x Forwarder2
                     ) {
 
                         let orders = unpacked.params[0].value;
                         let allOrderAdresses = [];
                         let allOrderValues = [];
-                        let takeAmount = unpacked.params[1].value;
+                        let takeAmount = undefined;
+                        if (unpacked.name == "marketSellOrdersWithEth") {
+                            takeAmount = tx.value;
+                        } else {
+                            takeAmount = unpacked.params[1].value;
+                        }
 
                         let makerAsset = orders[0][10].value;
                         let takerAsset = orders[0][11].value;
 
                         if (unpacked.name.indexOf('WithEth') !== -1) {
-                            let fakeAsset = '0xf47261b' + '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'; // Assetdata for WETH
+                            //set assetData for WETH
+                            let fakeAsset = "0xf47261b0000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
                             // forwarder leaves asset blank for ETH
                             if (takerAsset == '0x') {
                                 takerAsset = fakeAsset
@@ -1991,7 +2013,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                                     orders[i][11].value = takerAsset;
                                 }
                             }
-                            let order = convert0xV2Order(orders[i]);
+                            let order = convert0xOrder(orders[i]);
                             if (order) {
                                 allOrderAdresses.push(order.orderAddresses);
                                 allOrderValues.push(order.orderValues);
@@ -2062,15 +2084,22 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     return objs;
                 }
-                else if (unpacked.name === 'fillOrdersUpTo') {
+                else if (unpacked.name === 'fillOrdersUpTo') { //marketBuy, marketSell use this one too
                     let orderAddresses3 = unpacked.params[0].value;
                     let orderValues3 = unpacked.params[1].value;
-                    let fillTakerTokenAmount3 = new BigNumber(unpacked.params[2].value);
+                    let fillTokenAmount3 = new BigNumber(unpacked.params[2].value);
+                    let fillToken = this.setToken(orderAddresses3[0][3]);
+                    let fillIsMaker = false;
 
-                    // objs are the maker orders to be filled
-                    var objs = [];
+                    //marketBuy in v2 and v3 use makerToken instead of takerToken for fillAmount
+                    if (oldName && oldName.indexOf('arketBuy') >= 0) {
+                        fillIsMaker = true;
+                    }
+
+                    // The set of maker orders to match the single taker market order with
+                    let objs = [];
                     for (let i = 0; i < orderAddresses3.length; i++) {
-                        var obj = unpack0xOrderInput(orderAddresses3[i], orderValues3[i], fillTakerTokenAmount3);
+                        let obj = unpack0xOrderInput(orderAddresses3[i], orderValues3[i], fillTokenAmount3, fillIsMaker);
                         if (obj)
                             objs.push(obj);
                     }
@@ -2091,33 +2120,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         }
                     }
 
-                    let takeAmount = fillTakerTokenAmount3;
-                    let isAmount = false;
-                    let tok = undefined;
-                    let tok2 = undefined;
-                    if (objs[0].type.indexOf('Sell') !== -1) {
-                        tok = this.setToken(orderAddresses3[0][3]);
-                        tok2 = this.setToken(orderAddresses3[0][2]);
-                        if (isV2) {
-                            takeAmount = utility.weiToToken(takeAmount, tok);
-                            isAmount = true;
-                        } else {
-                            takeAmount = utility.weiToToken(takeAmount, tok);
-                            isAmount = true;
-                        }
 
-                    } else {
-                        tok = this.setToken(orderAddresses3[0][2]);
-                        tok2 = this.setToken(orderAddresses3[0][3]);
-                        if (isV2) {
-                            takeAmount = utility.weiToToken(takeAmount, tok);
-                            isAmount = true;
-                        } else {
-                            takeAmount = utility.weiToToken(takeAmount, tok2);
-                            isAmount = false;
-                        }
-
+                    let isAmount = (fillToken.addr == objs[0].token.addr);  //is fill the amount or baseAmount in the output
+                    if (fillIsMaker) {
+                        isAmount = !isAmount;
+                        fillToken = this.setToken(orderAddresses3[0][2]);
                     }
+                    let fillAmount = utility.weiToToken(fillTokenAmount3, fillToken);
 
                     // single units if erc721
                     if (objs[0].token.erc721) {
@@ -2140,12 +2149,14 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'exchange': exchange,
                         'note': utility.addressLink(taker3, true, true) + 'selects 1 or more orders to fill an amount',
                         'token': objs[0].token,
-                        'amount': takeAmount,
+                        'amount': fillAmount,
                         'minPrice': minPrice,
                         'maxPrice': maxPrice,
+                        //'price': maxPrice, // delete if min != max
                         'unlisted': objs[0].unlisted,
                         'base': objs[0].base,
-                        'baseAmount': takeAmount,
+                        'baseAmount': fillAmount,
+                        'estBaseAmount': undefined,
                         'relayer': relayer3,
                         'taker': taker3,
                     };
@@ -2154,35 +2165,44 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         unpacked.name = oldName;
                     }
 
+                    /* if (minPrice === maxPrice) {
+                         delete initObj.minPrice;
+                         delete initObj.maxPrice;
+                     } else {
+                         delete initObj.price;
+                     }*/
+
                     if (oldName.indexOf('WithEth') !== -1) {
                         initObj.exchange = '0x Instant ';
-                        if (utility.isWrappedETH(initObj.base.addr)) {
-                            initObj.baseAmount = utility.weiToEth(tx.value);
-                            if (initObj.type.indexOf('Buy') !== -1) {
-                                delete initObj.minPrice;
-                            } else {
-                                delete initObj.maxPrice;
-                            }
+                        if (oldName === "marketBuyOrdersWithEth" && isAmount && utility.isWrappedETH(initObj.base.addr)) {
+                            initObj.estBaseAmount = utility.weiToEth(tx.value);
+                        } else {
+                            delete initObj.estBaseAmount;
                         }
                     } else {
-                        // buy up to// sell up to  has either an amount or baseAmount
-                        if (isAmount) {
-                            delete initObj.baseAmount;
-                        } else {
-                            delete initObj.amount;
-                        }
+                        delete initObj.estBaseAmount;
                     }
 
+                    // buy up to// sell up to  has either an amount or baseAmount
+                    if (isAmount) {
+                        delete initObj.baseAmount;
+                    } else {
+                        delete initObj.amount;
+                    }
+
+
+                    //these are the maker orders filled by the taker, switch them around (buy->sell, sell->buy)
                     objs = objs.map(obj => {
-                        //these are the maker orders filled by the taker, switch them around
-                        if (obj.type.indexOf('Taker') !== -1) {
-                            obj.type = obj.type.replace('Taker', 'Maker');
-                            if (obj.type.indexOf('Buy') !== -1) {
-                                obj.type = obj.type.replace('Buy', 'Sell');
-                            } else {
-                                obj.type = obj.type.replace('Sell', 'Buy');
-                            }
+                        if (obj.type.indexOf('Buy') >= 0) {
+                            obj.type = obj.type.replace('Buy', 'Sell');
+                        } else {
+                            obj.type = obj.type.replace('Sell', 'Buy');
                         }
+
+                        //rename to 'orders' instead of trade, as these are orders we match with
+                        obj.type = obj.type.replace('Taker ', '');
+                        obj.type = obj.type.replace('Maker', '');
+                        obj.type += ' Order';
                         return obj;
                     });
 
@@ -2190,7 +2210,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
 
 
-                function unpack0xOrderInput(orderAddresses, orderValues, fillTakerTokenAmount) {
+                function unpack0xOrderInput(orderAddresses, orderValues, fillTokenAmount, fillMaker = false) {
 
                     let maker = orderAddresses[0].toLowerCase();
                     let taker = txFrom;
@@ -2201,10 +2221,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let makerAmount = new BigNumber(orderValues[0]);
                     let takerAmount = new BigNumber(orderValues[1]);
 
-                    // fee is ZRX
-                    //let feeCurrency = _delta.setToken('0xe41d2489571d322189246dafa5ebde1f4699f498');
-                    //let makerFee = utility.weiToToken(orderValues[2], feeCurrency);
-                    //let takerFee = utility.weiToToken(orderValues[3], feeCurrency);
+                    //TODO add fee in input display?
 
                     let relayer = orderAddresses[4].toLowerCase();
                     //Check for empty relayer 0x000000 and try taker or sender (possible admin)
@@ -2226,14 +2243,12 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var token = undefined;
                     var base = undefined;
 
-                    if (_delta.isBaseToken(takerToken, makerToken)) // get eth  -> sell
-                    {
+                    if (_delta.isBaseToken(takerToken, makerToken)) {
                         tradeType = 'Buy';
                         token = makerToken;
                         base = takerToken;
                     }
-                    else //if (_delta.isBaseToken(makerToken, takerToken)) // buy
-                    {
+                    else {
                         token = takerToken;
                         base = makerToken;
                     }
@@ -2242,7 +2257,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     if (token && base && token.addr && base.addr) {
                         var rawAmount = new BigNumber(0);
                         var rawBaseAmount = new BigNumber(0);
-                        var chosenAmount = fillTakerTokenAmount;
+                        var chosenAmount = fillTokenAmount;
                         if (tradeType === 'Sell') {
                             rawAmount = takerAmount;
                             rawBaseAmount = makerAmount;
@@ -2260,7 +2275,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                             price = baseAmount.div(amount);
                         }
 
-                        if (tradeType === 'Buy') {
+                        if ((tradeType === 'Buy' && !fillMaker) || (tradeType === 'Sell' && fillMaker)) {
                             orderSize = amount;
                             if (rawBaseAmount.greaterThan(chosenAmount)) {
                                 baseAmount = utility.weiToToken(chosenAmount, base);
@@ -3300,17 +3315,16 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
         return undefined;
     }
 
-    // convert 0x protocol v2 order (structs) to  0x protocol v1 order (arrays) to keep V2 compatible with existing V1 code
-    function convert0xV2Order(orderStructArray) {
+    // convert 0x protocol v2/v3 order (structs) to  0x protocol v1 order (arrays) to keep compatibility with existing V1 code
+    function convert0xOrder(orderStructArray) {
         let makerTokenData = orderStructArray[10].value;
         let takerTokenData = orderStructArray[11].value;
 
         let makerTokenAddr = _delta.addressFromAssetData(makerTokenData, true);
         let takerTokenAddr = _delta.addressFromAssetData(takerTokenData, true);
-
         if (makerTokenAddr && takerTokenAddr) {
 
-            return {
+            let newOrder = {
                 orderAddresses: [
                     orderStructArray[0].value.toLowerCase(), //maker
                     orderStructArray[1].value.toLowerCase(), //taker
@@ -3327,6 +3341,18 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     orderStructArray[8].value //expiry
                 ]
             };
+
+            // 0xv3 tokens for maker & taker fees
+            if (orderStructArray.length >= 14) {
+                let makerFeeAddr = _delta.addressFromAssetData(orderStructArray[12].value, true);
+                let takerFeeAddr = _delta.addressFromAssetData(orderStructArray[13].value, true);
+                if (makerFeeAddr && takerFeeAddr) {
+                    newOrder.orderAddresses.push(makerFeeAddr);
+                    newOrder.orderAddresses.push(takerFeeAddr);
+                }
+            }
+
+            return newOrder;
         } else {
             if (makerTokenData == '0x' || takerTokenData == '0x') {
                 console.log('empty asset data found');
@@ -3346,44 +3372,75 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
 //get token address from 0x (v2) assetdata bytes
 DeltaBalances.prototype.addressFromAssetData = function addressFromAssetData(data, appendId = false) {
+    if (data && data !== "0x" && (data.replace(/0/g, "") !== "x")) {
+        let unpacked = utility.processInput(data);
+        if (unpacked) {
 
-    if (utility.assetIsERC20(data)) {
-        //assetData bytes to erc20 token address
-        return ('0x' + data.slice(-40)).toLowerCase();
-    } else if (utility.assetIsERC721(data)) {
-        //assetdata to erc721 address
-        let addr = '0x' + data.slice(34, 74).toLowerCase();
-        //assetdata to erc721 id
-        let id = data.slice(74);
-        id = utility.hexToDec(id, id.length);
+            if (unpacked.name == "ERC20Token" || unpacked.name == "ERC20Bridge") {
+                return unpacked.params[0].value.toLowerCase();
+            }
+            else if (unpacked.name == "ERC721Token") {
+                let addr = unpacked.params[0].value.toLowerCase();
+                let id = unpacked.params[1].value;
 
-        //erc721 address with id appended
-        let idAddr = addr + '-' + id;
+                //erc721 address with id appended
+                let idAddr = addr + '-' + id;
 
-        // add unique token to tokenset in memory
-        if (!this.uniqueTokens[idAddr]) {
-            let tok = this.setToken(idAddr);
-            this.uniqueTokens[idAddr] = tok;
-            if (!this.uniqueTokens[addr]) {
-                this.uniqueTokens[addr] = {
-                    addr: tok.addr,
-                    name: tok.name,
-                    decimals: tok.decimals,
-                    unlisted: tok.unlisted,
-                    unknown: tok.unknown,
-                    erc721: true,
+                // add unique token to tokenset in memory
+                if (!this.uniqueTokens[idAddr]) {
+                    let tok = this.setToken(idAddr);
+                    this.uniqueTokens[idAddr] = tok;
+                    if (!this.uniqueTokens[addr]) {
+                        this.uniqueTokens[addr] = {
+                            addr: tok.addr,
+                            name: tok.name,
+                            decimals: tok.decimals,
+                            unlisted: tok.unlisted,
+                            unknown: tok.unknown,
+                            erc721: true,
+                        };
+                    }
+                }
+                if (appendId) {
+                    return idAddr;
+                } else {
+                    return addr;
                 }
             }
-        }
+            else if (unpacked.name == "MultiAsset") {
+                //([amounts],[tokens])
+                let assets = unpacked.params[1].value;
+                let addresses = [];
+                for (let i = 0; i < assets.length; i++) {
+                    addresses[i] = this.addressFromAssetData(assets[i], appendId);
+                }
+                let multiAddress = addresses.join('#');
 
-        if (appendId) {
-            return idAddr;
+                this.uniqueTokens[multiAddress] = {
+                    addr: multiAddress,
+                    name: 'Multiple(' + assets.length + ')',
+                    decimals: 0,
+                    unlisted: true,
+                    unknown: false,
+                    erc721: false,
+                    multi: true,
+                };
+
+                return multiAddress;
+            } else if (unpacked.name == "ERC1155Assets") {
+                console.log('unsupported ERC1155 in assetData');
+            } else if (unpacked.name == "StaticCall") {
+                console.log('unsupported StaticCall in assetData');
+            } else {
+                console.log('unsupported assetData ' + unpacked.name);
+            }
+        } else if (data.slice(0, 2) == "0x" && data.length == 42) { //bad format, actual address in here?
+            return data.toLowerCase();
         } else {
-            return addr;
+            console.log('could not decode assetdata');
         }
-    } else {
-        return undefined;
     }
+    return undefined;
 }
 
 //trade from IDEX api for in recent trades page
@@ -3491,6 +3548,8 @@ DeltaBalances.prototype.isBaseToken = function (probableBaseToken, otherToken) {
             return utility.isNonEthBase(probableBaseToken.addr) > utility.isNonEthBase(otherToken.addr)
         }
     } else if (utility.isNonEthBase(otherToken.addr)) {
+        return false;
+    } else if (probableBaseToken.multi && !otherToken.multi) {
         return false;
     } else if (probableBaseToken.erc721 && !otherToken.erc721) {
         return false;
@@ -4328,7 +4387,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
             // 0x v1 & v2 trade output event, (ethfinex)
             else if (unpacked.name == "LogFill" || unpacked.name == "Fill") {
                 //ethfinex uses a forked 0x v1 contract
-                const isEthfinex = (unpacked.address.toLowerCase() == '0xdcdb42c9a256690bd153a7b409751adfc8dd5851');
+                const isEthfinexV1 = (unpacked.address.toLowerCase() == '0xdcdb42c9a256690bd153a7b409751adfc8dd5851');
 
                 //0x v1: LogFill (index_topic_1 address maker, address taker, index_topic_2 address feeRecipient, address makerToken, address takerToken, uint256 filledMakerTokenAmount, uint256 filledTakerTokenAmount, uint256 paidMakerFee, uint256 paidTakerFee, index_topic_3 bytes32 tokens, bytes32 orderHash)
                 /* v2:  event Fill(
@@ -4344,10 +4403,31 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                             bytes makerAssetData,                 // Encoded data specific to makerAsset. 
                             bytes takerAssetData                  // Encoded data specific to takerAsset.
                         ); */
+                /*
+                v3  Fill (
+                        index address makerAddress, 
+                        index address feeRecipientAddress, 
+                        bytes makerAssetData, 
+                        bytes takerAssetData, 
+                        bytes makerFeeAssetData, 
+                        bytes takerFeeAssetData, 
+                        index bytes32 orderHash, 
+                        address takerAddress, 
+                        address senderAddress, 
+                        uint256 makerAssetFilledAmount, 
+                        uint256 takerAssetFilledAmount, 
+                        uint256 makerFeePaid, 
+                        uint256 takerFeePaid, 
+                        uint256 protocolFeePaid
+                    )
+                */
 
-                let maker, taker, makerToken, takerToken, makerAmount, takerAmount, makerFee, takerFee, relayer, sender, ethfinexFee;
-                //zrx fee
-                let feeCurrency = this.setToken('0xe41d2489571d322189246dafa5ebde1f4699f498');
+                let maker, taker, makerToken, takerToken, makerAmount, takerAmount,
+                    makerFee, takerFee, relayer, sender, ethfinexFee, makerFeeToken, takerFeeToken, protocolFeeAmount;
+
+                //zrx fee as default, (can change for v3)
+                makerFeeToken = this.setToken('0xe41d2489571d322189246dafa5ebde1f4699f498');
+                takerFeeToken = makerFeeToken;
 
                 //0x v1
                 if (unpacked.name == 'LogFill') {
@@ -4360,46 +4440,80 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     makerAmount = new BigNumber(unpacked.events[5].value);
                     takerAmount = new BigNumber(unpacked.events[6].value);
 
-                    makerFee = utility.weiToToken(unpacked.events[7].value, feeCurrency);
-                    takerFee = utility.weiToToken(unpacked.events[8].value, feeCurrency);
+                    makerFee = utility.weiToToken(unpacked.events[7].value, makerFeeToken);
+                    takerFee = utility.weiToToken(unpacked.events[8].value, takerFeeToken);
 
                     relayer = unpacked.events[2].value.toLowerCase();
 
-                    if (isEthfinex) {
-                        feeCurrency = takerToken;
-                        ethfinexFee = new BigNumber(unpacked.events[6].value).div(400);
-                        makerFee = utility.weiToToken(ethfinexFee, feeCurrency);
+                    if (isEthfinexV1) { //ethfinex v1 is a 0xv1 fork with custom fee calculations
+                        makerFeeToken = takerToken;
+                        takerFeeToken = takerToken;
+                        ethfinexFee = takerAmount.div(400);
+                        makerFee = utility.weiToToken(ethfinexFee, makerFeeToken);
                     }
                 }
-                //0x v2
+                //0x v2&v3
                 else {
+
                     // 'bytes' of proxy identifier + token address
-                    let makerTokenData = unpacked.events[9].value;
-                    let takerTokenData = unpacked.events[10].value;
+                    let makerTokenAddr, takerTokenAddr, makerFeeAddr, takerFeeAddr, makerFeeAmount, takerFeeAmount;
+                    maker = unpacked.events[0].value.toLowerCase();
+                    relayer = unpacked.events[1].value.toLowerCase();
 
-                    let makerTokenAddr = this.addressFromAssetData(makerTokenData, true);
-                    let takerTokenAddr = this.addressFromAssetData(takerTokenData, true);
+                    if (unpacked.events.length == 11) { //0x v2
 
-                    if (makerTokenAddr && takerTokenAddr) {
-
-                        maker = unpacked.events[0].value.toLowerCase();
                         taker = unpacked.events[2].value.toLowerCase();
                         sender = unpacked.events[3].value.toLowerCase();
-
-                        makerToken = this.setToken(makerTokenAddr);
-                        takerToken = this.setToken(takerTokenAddr);
+                        makerTokenAddr = this.addressFromAssetData(unpacked.events[9].value, true);
+                        takerTokenAddr = this.addressFromAssetData(unpacked.events[10].value, true);
+                        makerFeeAddr = "0xe41d2489571d322189246dafa5ebde1f4699f498";
+                        takerFeeAddr = "0xe41d2489571d322189246dafa5ebde1f4699f498";
 
                         makerAmount = new BigNumber(unpacked.events[4].value);
                         takerAmount = new BigNumber(unpacked.events[5].value);
+                        makerFeeAmount = new BigNumber(unpacked.events[6].value);
+                        takerFeeAmount = new BigNumber(unpacked.events[7].value);
+                        // utility.weiToToken(unpacked.events[7].value, feeCurrency);
 
-                        makerFee = utility.weiToToken(unpacked.events[6].value, feeCurrency);
-                        takerFee = utility.weiToToken(unpacked.events[7].value, feeCurrency);
+                    } else if (unpacked.events.length == 14) { //0x v3
+                        taker = unpacked.events[7].value.toLowerCase();
+                        sender = unpacked.events[8].value.toLowerCase();
+                        makerTokenAddr = this.addressFromAssetData(unpacked.events[2].value, true);
+                        takerTokenAddr = this.addressFromAssetData(unpacked.events[3].value, true);
+                        makerFeeAddr = this.addressFromAssetData(unpacked.events[4].value, true);
+                        takerFeeAddr = this.addressFromAssetData(unpacked.events[5].value, true);
 
-                        relayer = unpacked.events[1].value.toLowerCase();
+                        makerAmount = new BigNumber(unpacked.events[9].value);
+                        takerAmount = new BigNumber(unpacked.events[10].value);
+                        makerFeeAmount = new BigNumber(unpacked.events[11].value);
+                        takerFeeAmount = new BigNumber(unpacked.events[12].value);
+                        protocolFeeAmount = new BigNumber(unpacked.events[13].value);
                     } else {
+                        return { 'error': 'unsupported amount of Fill params' };
+                    }
+
+                    //can be null for unrecognized asset proxy types (not erc20, erc721 or MAP)
+                    if (!makerTokenAddr || !takerTokenAddr) {
                         return { 'error': 'unsupported AssetData token in trade' };
                     }
+
+                    makerToken = this.setToken(makerTokenAddr);
+                    takerToken = this.setToken(takerTokenAddr);
+
+                    if (makerFeeAddr) {
+                        makerFeeToken = this.setToken(makerFeeAddr);
+                        makerFee = utility.weiToToken(makerFeeAmount, makerFeeToken);
+                    } else {
+                        makerFee = new BigNumber(0);
+                    }
+                    if (takerFeeAddr) {
+                        takerFeeToken = this.setToken(takerFeeAddr);
+                        takerFee = utility.weiToToken(takerFeeAmount, takerFeeToken);
+                    } else {
+                        takerFee = new BigNumber(0);
+                    }
                 }
+                //from here on mixed 0x v1 v2 v3 output
 
                 //if relay is 0x0000000.. , assume the taker might be the relayer
                 if (taker && relayer === this.config.ethAddr) {
@@ -4408,39 +4522,31 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         relayer = sender;
                     }
                 }
-                var exchange = utility.relayName(relayer);
+                let exchange = utility.relayName(relayer);
+                let tradeType = 'Sell';
+                let token = undefined;
+                let base = undefined;
+                let transType = 'Taker';
 
-                // 9 xor tokenpair
-                // 10 orderhash
-
-                var tradeType = 'Sell';
-                var token = undefined;
-                var base = undefined;
-
-                var transType = 'Taker';
                 if (isMyAddress(maker)) {
                     transType = 'Maker';
                 }
 
-                if (this.isBaseToken(takerToken, makerToken)) // get eth  -> sell
-                {
+                if (this.isBaseToken(takerToken, makerToken)) {
                     tradeType = 'Buy';
                     token = makerToken;
                     base = takerToken;
-                }
-                else //if (this.isBaseToken(makerToken, takerToken)) // buy
-                {
+                } else {
                     tradeType = 'Sell';
                     token = takerToken;
                     base = makerToken;
                 }
 
-
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
-                    var buyUser = '';
-                    var sellUser = '';
+                    let rawAmount = new BigNumber(0);
+                    let rawBaseAmount = new BigNumber(0);
+                    let buyUser = '';
+                    let sellUser = '';
                     if (tradeType === 'Sell') {
                         rawAmount = takerAmount;
                         rawBaseAmount = makerAmount;
@@ -4453,14 +4559,14 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         buyUser = taker;
                     }
 
-                    var amount = utility.weiToToken(rawAmount, token);
-                    var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    let amount = utility.weiToToken(rawAmount, token);
+                    let baseAmount = utility.weiToToken(rawBaseAmount, base);
+                    let price = new BigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
 
-                    if (isEthfinex) {
+                    if (isEthfinexV1) {
                         if (tradeType === 'Sell') {
                             rawAmount = takerAmount.minus(ethfinexFee);
                             amount = utility.weiToToken(rawAmount, token);
@@ -4477,20 +4583,43 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     }
                     if (base.erc721) {
                         baseAmount = new BigNumber(1);
+                        if (token.erc721) {
+                            price = new BigNumber(1);
+                        }
                     }
-                    if (token.erc721 && base.erc721) {
-                        price = new BigNumber(1);
+
+                    let protocolFeeToken = this.setToken(this.config.ethAddr); //v3 only
+                    let protocolFee = new BigNumber(0);
+                    if (protocolFeeAmount) {
+                        protocolFee = utility.weiToToken(protocolFeeAmount, protocolFeeToken);
                     }
 
                     let fee = new BigNumber(0);
+                    let feeCurrency = undefined;
                     if (transType === 'Maker') {
                         fee = makerFee;
+                        feeCurrency = makerFeeToken;
                     } else {
                         fee = takerFee;
+                        feeCurrency = takerFeeToken;
+
+                        //it is v3 if protocol fee for taker
+                        if (protocolFeeAmount) {
+                            if (!takerFee || Number(takerFee) == 0) { // no taker fee, set protocl fee as taker fee
+                                fee = protocolFee;
+                                feeCurrency = protocolFeeToken;
+                            }
+                            else if (takerFee && utility.isWrappedETH(takerFeeToken.addr)) { //taker fee in (W)ETH, add protocol fee
+                                fee = protocolFee.plus(takerFee);
+                                feeCurrency = protocolFeeToken;
+                            }
+                            //else TODO handle taker fee & protocol fee in different tokens
+                        }
                     }
-                    if (isEthfinex) {
+                    if (isEthfinexV1) {
                         feeCurrency = takerToken;
                     }
+
 
                     if (isMyAddress(buyUser)) {
                         tradeType = "Buy";
@@ -4518,9 +4647,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         'relayer': relayer
                     };
 
-                    if (!isEthfinex) {
+                    if (!isEthfinexV1) {
                         delete obj.makerFee;
                     }
+
                     return obj;
                 }
             }
@@ -4869,7 +4999,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                 };
             }
             // Order cancel etherdelta, decentrex, token store, enclaves 
-            //  0x v2 
+            //  0x v2  v3
             else if (unpacked.name == 'Cancel') {
                 //everything besides 0x v2 cancel
                 if (unpacked.events[0].name !== 'makerAddress') {
@@ -4930,10 +5060,23 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                             'unlisted': token.unlisted,
                         };
                     }
-                } else { //0x v2 'Cancel' event
+                } else { //0x v2 v3 'Cancel' event
 
-                    let makerTokenData = unpacked.events[4].value;
-                    let takerTokenData = unpacked.events[5].value;
+                    //param order for 0xv2
+                    let makerAssetIndex = 4;
+                    let takerAssetIndex = 5;
+                    let senderIndex = 2;
+
+                    //switched param order for 0xv3
+                    if (unpacked.events[2].name == 'makerAssetData') {
+                        makerAssetIndex = 2;
+                        takerAssetIndex = 3;
+                        senderIndex = 4;
+                    }
+
+
+                    let makerTokenData = unpacked.events[makerAssetIndex].value;
+                    let takerTokenData = unpacked.events[takerAssetIndex].value;
 
                     let makerTokenAddr = this.addressFromAssetData(makerTokenData, true);
                     let takerTokenAddr = this.addressFromAssetData(takerTokenData, true);
@@ -4941,7 +5084,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     if (makerTokenAddr && takerTokenAddr) {
 
                         let maker = unpacked.events[0].value.toLowerCase();
-                        let sender = unpacked.events[2].value.toLowerCase();
+                        let sender = unpacked.events[senderIndex].value.toLowerCase();
 
                         let makerToken = this.setToken(makerTokenAddr);
                         let takerToken = this.setToken(takerTokenAddr);
@@ -4966,7 +5109,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                         return {
                             'type': 'Cancel',
                             'exchange': exchange,
-                            'note': 'Cancelled an open order (0x V2)',
+                            'note': 'Cancelled an open order',
                             'token': token,
                             //   'amount': "",
                             //    'price': "",
@@ -4980,18 +5123,20 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses) 
                     }
                 }
             }
+            // 0x v2 v3 cancelUpTo
             else if (unpacked.name == "CancelUpTo") {
-                let maker = unpacked.events[0].value.toLowerCase();
+                //let maker = unpacked.events[0].value.toLowerCase();
                 let upTo = Number(unpacked.events[2].value);
+                let exchange = this.getExchangeName(unpacked.address, '0x Exchange');
                 return {
                     'type': 'Cancel up to',
-                    'exchange': '0x Exchange V2',
+                    'exchange': exchange,
                     'tokens': 'All',
-                    'note': 'Cancelled all 0x(v2) orders placed up to a certain moment',
+                    'note': 'Cancelled all 0x orders placed up to a certain moment',
                     'orderEpoch': upTo
                 };
             }
-            //0x 1 cancel
+            //0x v1 cancel
             else if (unpacked.name == 'LogCancel') {
                 let maker = unpacked.events[0].value.toLowerCase();
                 let relayer = unpacked.events[1].value.toLowerCase();
@@ -5648,7 +5793,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
         if (!token.unlisted)
             labelClass = 'label-primary';
 
-        if (token.erc721) {
+        if (token.erc721 || token.multi) {
             labelClass = 'label-default';
         }
 
@@ -5656,7 +5801,20 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
         try {
             if (token && token.addr) {
                 if (!utility.isWrappedETH(token.addr)) {
-                    if (token.erc721) {
+                    if (token.multi) {
+                        title = 'Multiple Assets';
+                        contents = 'This is a bundle of multiple tokens <br>';
+                        let multiTokens = token.addr.split('#');
+                        for (let i = 0; i < multiTokens.length; i++) {
+                            let tok = this.setToken(multiTokens[i]);
+                            let linkName = tok.name;
+                            if (tok.erc721 && tok.erc721Id) {
+                                linkName += '-' + tok.erc721Id;
+                            }
+                            contents += linkName + ": " + utility.tokenLink(tok.addr, true, true, tok.erc721Id) + '<br>';
+                        }
+                    }
+                    else if (token.erc721) {
                         contents = '';
                         if (!this.uniqueTokens[token.addr] || token.unknown) {
                             contents += "Token unknown to DeltaBalances. <br>"
@@ -5681,7 +5839,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                     if (token.locked || token.killed) {
                         contents += '<br> <i class="text-red fa fa-lock" aria-hidden="true"></i> Token Locked or Paused.';
                     }
-                    if (!token.erc721) {
+                    if (!token.erc721 && !token.multi) {
                         contents += '<br><br> Trade centralized: <br><table class="popoverTable"><tr><td>' + utility.binanceURL(token, true) + '</td></tr></table>';
 
                         contents += 'Trade decentralized: <br><table class="popoverTable"><tr><td>' + utility.forkDeltaURL(token, true)
@@ -5713,7 +5871,12 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
 
         let name = token.name;
         if (token.erc721Id) {
-            name += ' - ' + token.erc721Id;
+            let id721 = token.erc721Id.toString();
+            //trim token id if it is too long (ENS names are like 30digits)
+            if (id721.length > 10) {
+                id721 = id721.slice(0, 8) + "...";
+            }
+            name += ' - ' + id721;
         } else if (token.erc721) {
             name = '<span class="text75">[ERC721]</span> ' + name;
         }

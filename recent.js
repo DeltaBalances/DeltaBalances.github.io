@@ -909,7 +909,7 @@ var pageType = 'recent';
 						if (_delta.isExchangeAddress(from)) {
 
 							let token = _delta.setToken(contract);
-							let dvsr = _util.divisorFromDecimals(token.decimals);
+							let dvsr = _delta.divisorFromDecimals(token.decimals);
 							let amount = _util.weiToEth(tx.value, dvsr);
 
 							if (_delta.config.exchangeContracts.Idex.addr == from || _delta.config.exchangeContracts.Switcheo.addr == from) {
@@ -1497,6 +1497,7 @@ var pageType = 'recent';
 				function addTransaction(transs, index = 0) {
 					if (transs && transs.Hash) {
 
+
 						let mainHash = transs.Hash + "(" + index + ")";
 
 						let oldTrans = outputHashes[mainHash];
@@ -1949,7 +1950,7 @@ var pageType = 'recent';
 				else if (head == 'Token' || head == 'Base') {
 
 					let token = cellValue;
-					if(typeof token === 'string') {
+					if (typeof token === 'string') {
 						row$.append($('<td data-sort="' + token + '" data-search="' + token + '"/>').html(token));
 					}
 					else if (token) {

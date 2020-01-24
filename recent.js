@@ -935,6 +935,7 @@ var pageType = 'recent';
 
 								for (let i = 0; i < objs.length; i++) {
 									let obj = objs[i];
+									let indexOffset = 0;
 
 									let trans = undefined;
 									let exchange = obj.exchange;
@@ -945,6 +946,10 @@ var pageType = 'recent';
 											exName = _delta.addressName(from, false);
 										if (exName.slice(0, 2) !== '0x')
 											exchange = exName;
+									}
+
+									if(unpacked.name == 'executeTransaction' && i > 0) {
+										indexOffset = -1;
 									}
 
 									if (unpacked.name === 'deposit' || unpacked.name === 'depositEther') {
@@ -1395,7 +1400,7 @@ var pageType = 'recent';
 									}
 
 									if (trans) {
-										addTransaction(trans, i);
+										addTransaction(trans, i + indexOffset);
 									}
 								}
 							}

@@ -1170,6 +1170,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let txData = undefined;
                 //v2 (salt, signer, data, signature)    
                 //v3( transaction[salt, expire, gas, signer, data], signature)
+                //v3 coordinator executeTransaction(transaction, txOrigin,transactionSignature,approvalSignatures)
                 if (unpacked.params[0].name == 'transaction') {
                     signer = unpacked.params[0].value[3].value.toLowerCase();
                     txData = unpacked.params[0].value[4].value;
@@ -1183,7 +1184,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     //signed execution
                     {
                         'type': 'Signed execution',
-                        'Exchange': exchange,
+                        'exchange': exchange,
                         'note': 'a 0x trade/cancel executed through a third party for a signer address',
                         'sender': tx.from,
                         'signer': signer,
@@ -1214,6 +1215,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         console.log('unable to parse executeTransaction subcall');
                     }
                 } catch (e) { }
+
+
+                if (returns.length > 1 && returns[0].exchange !== returns[1].exchange) {
+                    returns[0].exchange = returns[1].exchange;
+                }
 
                 return returns;
             }

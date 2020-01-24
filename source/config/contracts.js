@@ -27,8 +27,9 @@ module.exports = {
     //0x protocol v3
     '0x3Test': { addr: '0xb27f1db0a7e473304a5a06e54bdf035f671400c0', name: '0x v3 test', supportedDex: true },
     '0x3': { addr: '0x61935cbdd02287b511119ddb11aeb42f1593b7ef', name: '0x Exchange 3', supportedDex: true },
-    '0xForwarder5': { addr: '0xa3ac9844514b96bb502627ca9dceb57c4be289e3', name: '0x Instant', supportedDex: false },
-    '0xForwarder6': { addr: '0x5ff2c495055d4f6284f317a9c2edb7045497b14f', name: '0x Instant', supportedDex: false },
+    '0xForwarder5': { addr: '0xa3ac9844514b96bb502627ca9dceb57c4be289e3', name: '0x Instant', supportedDex: true },
+    '0xForwarder6': { addr: '0x5ff2c495055d4f6284f317a9c2edb7045497b14f', name: '0x Instant', supportedDex: true },
+    '0xCoordinator': { addr: '0x38a795580d0f687e399913a00ddef6a17612c722', name: '0x Coordinator', supportedDex: true },
 
 
     // ethfinex v1, 0x v1 clone

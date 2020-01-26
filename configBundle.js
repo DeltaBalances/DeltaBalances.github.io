@@ -908,6 +908,7 @@ module.exports = {
     '0xForwarder6': { addr: '0x5ff2c495055d4f6284f317a9c2edb7045497b14f', name: '0x Instant', supportedDex: true },
     '0xCoordinator': { addr: '0x38a795580d0f687e399913a00ddef6a17612c722', name: '0x Coordinator', supportedDex: true },
 
+    'OpenSea': { addr:'0x7be8076f4ea4a4ad08075c2508e481d6c946d12b', name: 'OpenSea', supportedDex: false },
 
     // ethfinex v1, 0x v1 clone
     Ethfinex: { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex', supportedDex: true },
@@ -929,6 +930,7 @@ module.exports = {
 
     AirSwap: { addr: '0x8fd3121013a07c57f0d69646e86e7a4880b467b7', name: 'AirSwap', supportedDex: true },
     AirSwapTrader : { addr: '0x9af9c0cf3cd15e0afe63930fbf20941c89f3ff98', name: 'AirSwap OTC', supportedDex: false},
+    AirSwap2: { addr: '0x54d2690e97e477a4b33f40d6e4afdd4832c07c57', name: 'AirSwap2', supportedDex: false },
     Kyber: { addr: '0x964f35fae36d75b1e72770e244f6595b68508cf5', name: 'Kyber Network', supportedDex: true }, // contract disabled?
     KyberTest: { addr: '0xd2d21fdef0d054d2864ce328cc56d1238d6b239e', name: 'Kyber Test', supportedDex: true },
 
@@ -1025,7 +1027,8 @@ module.exports = {
     DutchX: { addr: '0x039fb002d21c1c5eeb400612aef3d64d49eb0d94', name: 'DutchX', supportedDex: false },
     DutchXProxy: { addr: '0xaf1745c0f8117384dfa5fff40f824057c70f2ed3', name: 'DutchX', supportedDex: false },
     Ethermium: { addr: '0xa5cc679a3528956e8032df4f03756c077c1ee3f4', name: 'Ethermium', supportedDex: false },
-    Wedex: { addr: '0x7d3d221a8d8abdd868e8e88811ffaf033e68e108', name: 'WEDEX beta', supportedDex: false },
+    Wedex: { addr: '0x7d3d221a8d8abdd868e8e88811ffaf033e68e108', name: 'WEDEX beta1', supportedDex: false },
+    Wedex2: { addr: '0xd97d09f3bd931a14382ac60f156c1285a56bb51b', name: 'WEDEX beta2', supportedDex: false },
     Tokenlon: { addr: '0xdc6c91b569c98f9f6f74d90f9beff99fdaf4248b', name: 'Tokenlon', supportedDex: false },
     Miime: { addr: '0x7a6425c9b3f5521bfa5d71df710a2fb80508319b', name: 'Miime', supportedDex: false },
     DdexMargin: { addr: '0x241e82c79452f51fbfc89fac6d912e021db1a3b7', name: 'DDEX Margin', supportedDex: false },
@@ -1033,12 +1036,16 @@ module.exports = {
     // UniSwap (contract per token pair)
 
     /* small exchanges, no input/event parsing yet */
+    Eidoo3: { addr: '0x560d5afc42ad137dece2277fd75001c165cb9a22', name: 'Eidoo v3', supportedDex: false },
+    Eidoo2: { addr: '0x560d5afc42ad137dece2277fd75001c165cb9a22', name: 'Eidoo v2', supportedDex: false },
+    Eidoo1: { addr: '0xdf72b12a5f7f5a02e9949c475a8d90694d10f198', name: 'Eidoo v1', supportedDex: false },
     Dexy: { addr: '0x54b0de285c15d27b0daa687bcbf40cea68b2807f', name: 'Dexy', supportedDex: false },
     Dexy2: { addr: '0x9d160e257f1dff52ec81d5a4e7326dd82e144177', name: 'Dexy', supportedDex: false },
     Dubiex: { addr: '0x7c21d723af0f4594d4f8821aa16bc27c8ea6cec7', name: 'DUBIex', supportedDex: false },
     Radex: { addr: '0x9462eeb9124c99731cc7617348b3937a8f00b11f', name: 'Radex', supportedDex: false },
     Joyso: { addr: '0x04f062809b244e37e7fdc21d9409469c989c2342', name: 'Joyso', supportedDex: false },
-    DexTop: { addr: '0x7600977eb9effa627d6bd0da2e5be35e11566341', name: 'DEx.top', supportedDex: false },
+    DexTop1:  { addr: '0xdd7283ea985a030c66e85ed63e9dde4f5eab56d5', name: 'DEx.top v1', supportedDex: false },
+    DexTop2: { addr: '0x7600977eb9effa627d6bd0da2e5be35e11566341', name: 'DEx.top v2', supportedDex: false },
     BitEye: { addr: '0x39fbd1140cd1fc298f00c3ea64b3591de94c67e7', name: 'BitEye', supportedDex: false },
     BitEye2: { addr: '0x9e2f2dd1e3641f389673f89dc316bb00b01cd83a', name: 'BitEye', supportedDex: false },
     AXNET: { addr: '0xacf999bfa9347e8ebe6816ed30bf44b127233177', name: 'AXNET', supportedDex: false },
@@ -1075,6 +1082,11 @@ module.exports = {
     Counter: { addr: '0xc0deee11aa091189fff0713353c43c7c8cae7881', name: 'Counter', supportedDex: false },
     Counter2: { addr: '0x1234567896326230a28ee368825d11fe6571be4a', name: 'Counter', supportedDex: false },
     Counter3: { addr: '0x12345678979f29ebc99e00bdc5693ddea564ca80', name: 'Counter', supportedDex: false },
+
+    /*curvefi swap 0xe5FdBab9Ad428bBB469Dee4CB6608C0a8895CbA5 token 0xdbe281e17540da5305eb2aefb8cef70e6db1a0a9
+    swap 0x2e60cf74d81ac34eb21eeff58db4d385920ef419 token 0x3740fb63ab7a09891d7c0d4299442A551D06F5fD
+    abi https://github.com/curvefi/curve-contract/blob/compounded-0.2.2/deployed/2020-01-03_mainnet/swap.abi
+    */
 
     // hb dex 0xf5f310b4bc81917c39a73cfec2c1b36325437fea, 0x5907aecf617c5019d9b3b43a5d65e583ce0f48bf
     // cryptozodiac 0xf238f55ede5120915b36715b0fffe20ff57f8134
@@ -1247,7 +1259,7 @@ module.exports = {
       hideOpponent: false,
     },
     '0x Protocol v3': {
-      contract: ['0x3'],
+      contract: '0x3',
       minBlock: 8952139,
       tradeTopic: '0x6869791f0a34781b29882982cc39e882768cf2c96995c2a110c577c53bc932d5',
       withdrawTopic: undefined,

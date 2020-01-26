@@ -98,7 +98,7 @@ module.exports = {
     TotleProxy: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
     TotleProxy2: { addr: '0x74758acfce059f503a7e6b0fc2c8737600f9f2c4', name: 'Totle', supportedDex: false },
     TotleProxy3: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
-    ParaSwap: { addr: '0xf92c1ad75005e6436b4ee84e88cb23ed8a290988', name: 'ParaSwap', supportedDex: false },
+    ParaSwap3: { addr: '0xf92c1ad75005e6436b4ee84e88cb23ed8a290988', name: 'ParaSwap v3', supportedDex: false },
     DexAG: { addr: '0xd3bed3a8e3e6b24b740ead108ba776e0ad298588', name: 'DEX.AG v1', supportedDex: false },
     DexAG2: { addr: '0x932348df588923ba3f1fd50593b22c4e2a287919', name: 'DEX.AG v2', supportedDex: false },
     DexAG3: { addr: '0xa540fb50288cc31639305b1675c70763c334953b', name: 'DEX.AG v3', supportedDex: false },
@@ -201,6 +201,9 @@ module.exports = {
     Atomex: { addr: '0xe9c251cbb4881f9e056e40135e7d3ea9a7d037df', name: 'Atomex', supportedDex: false },
     ERCOTC: { addr: '0x2b3a44a25e62943f5bc2b44b27e6d7734dd14427', name: 'ERCOTC', supportedDex: false },
     DEXIO: { addr: '0xababb61a9f837aad53ed4320221737fc6e9dc84b', name: 'Dex.io', supportedDex: false },
+    Uniswapex: { addr: '0xbd2a43799b83d9d0ff56b85d4c140bce3d1d1c6c', name: 'UniswapEx', supportedDex: false },
+    ParaSwap1: { addr: '0x6b158039b9678b7452f311deb12dd08c579dad26', name: 'ParaSwap v1', supportedDex: false },
+    ParaSwap2: { addr: '0x72338b82800400f5488eca2b5a37270ba3b7a111', name: 'ParaSwap v2', supportedDex: false },
 
     Counter: { addr: '0xc0deee11aa091189fff0713353c43c7c8cae7881', name: 'Counter', supportedDex: false },
     Counter2: { addr: '0x1234567896326230a28ee368825d11fe6571be4a', name: 'Counter', supportedDex: false },

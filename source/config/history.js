@@ -149,7 +149,7 @@ module.exports = {
       hideOpponent: false,
     },
     Kyber: {
-      contract: ['Kyber', 'Kyber2Proxy'],
+      contract: ['Kyber', 'Kyber2Proxy'], //kyber v2-3 emit events on the proxy
       minBlock: 5049196,
       tradeTopic: '0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39', // ExecuteTrade
       withdrawTopic: undefined,

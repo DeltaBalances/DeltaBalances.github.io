@@ -67,6 +67,7 @@ module.exports = {
     Kyber2_4Proxy: { addr: '0xd76d2888828aea74247c41157020dad54865e730', name: 'Kyber Network', supportedDex: true },
 
     Kyber2_5: { addr: '0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950', name: 'Kyber Network', supportedDex: true },
+    Kyber3: { addr: '0x65bf64ff5f51272f729bdcd7acfb00677ced86cd', name: 'Kyber Network', supportedDex: true },
 
     BancorQuick: { addr: '0xcf1cc6ed5b653def7417e3fa93992c3ffe49139b', name: 'Bancor', supportedDex: false },
     BancorQuick2: { addr: '0xf87a7ec94884f44d9de33d36b73f42c7c0dd38b1', name: 'Bancor', supportedDex: false },

@@ -4103,15 +4103,23 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                      uint minConversionRate,
                      address walletId
                  ) */
+                //tradeWithHint(address src,uint256 srcAmount,address dest,address destAddress,uint256 maxDestAmount,uint256 minConversionRate,address walletId,bytes hint )
+                //tradeWithHint(address trader,address src,uint256 srcAmount,address dest,address destAddress,uint256 maxDestAmount,uint256 minConversionRate,address walletId,bytes hint )
+               
                 let maker = '';
+                let iOffset = 0;
+                if(unpacked.params[0].name == 'trader') {
+                    iOffset = 1;
+                }
+
                 let taker = txFrom;
-                let takerToken = this.setToken(unpacked.params[0].value);
-                let makerToken = this.setToken(unpacked.params[2].value);
+                let takerToken = this.setToken(unpacked.params[0+iOffset].value);
+                let makerToken = this.setToken(unpacked.params[2+iOffset].value);
 
-                let takerAmount = new BigNumber(unpacked.params[1].value);
-                let makerAmount = new BigNumber(unpacked.params[4].value); //max amount
+                let takerAmount = new BigNumber(unpacked.params[1+iOffset].value);
+                let makerAmount = new BigNumber(unpacked.params[4+iOffset].value); //max amount
 
-                let rate = new BigNumber(unpacked.params[5].value);
+                let rate = new BigNumber(unpacked.params[5+iOffset].value);
 
                 let minPrice = new BigNumber(0);
                 let maxPrice = new BigNumber(0);
@@ -30504,8 +30512,6 @@ module.exports = (db) => {
         for (let i = 0; i < abis.length; i++) {
             Decoder.addABI(abis[i]);
         }
-        // etherdelta last to fix overloading
-        Decoder.addABI(db.config.ABIs.EtherDelta);
         db.config.methodIDS = true;
     }
 

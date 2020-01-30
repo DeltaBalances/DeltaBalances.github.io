@@ -948,7 +948,7 @@ var pageType = 'recent';
 											exchange = exName;
 									}
 
-									if(unpacked.name == 'executeTransaction' && i > 0) {
+									if ((unpacked.name == 'executeTransaction' || unpacked.name == 'execute') && i > 0) {
 										indexOffset = -1;
 									}
 

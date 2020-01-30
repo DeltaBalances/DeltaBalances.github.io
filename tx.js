@@ -507,6 +507,7 @@ var pageType = 'tx';
 					var parsedOutput = parseOutput(tx, txLog.logs);
 					transaction.output = parsedOutput.output;
 					transaction.outputErrors = parsedOutput.errors;
+					transaction.outputHidden = parsedOutput.hidden;
 
 					if (parsedOutput.output && parsedOutput.output[0]) {
 						if (!parsedOutput.output[0].error && (parsedOutput.output[0].type == '0x Error' || parsedOutput.output[0].type == 'AirSwap Error')) {
@@ -532,6 +533,7 @@ var pageType = 'tx';
 			function parseOutput(tx, outputLogs) {
 				var outputs = [];
 				var unknownEvents = 0;
+				var hiddenEvents = 0;
 				var unpackedLogs = _util.processLogs(outputLogs);
 				if (unpackedLogs) {
 					for (let i = 0; i < unpackedLogs.length; i++) {
@@ -574,14 +576,15 @@ var pageType = 'tx';
 									delete obj.fee;
 								}
 								outputs.push(obj);
-							} else {
-								unknownEvents++;
+							}
+							else if (!obj) {
+								hiddenEvents++;
 								continue;
 							}
 						}
 					}
 				}
-				return { output: outputs, errors: unknownEvents };
+				return { output: outputs, errors: unknownEvents, hidden: hiddenEvents };
 			}
 
 			function parseInput(tx, input) {
@@ -877,7 +880,10 @@ var pageType = 'tx';
 		if (transaction.output) {
 			displayParse(transaction.output, "#outputdata");
 			if (transaction.outputErrors) {
-				$('#outputdata').append('<br> + ' + transaction.outputErrors + ' unrecognized events emitted');
+				$('#outputdata').append('<br> + ' + transaction.outputErrors + ' unrecognized events emitted. ');
+			}
+			if (transaction.outputHidden) {
+				$('#outputdata').append('<br> + ' + transaction.outputHidden + ' hidden events.');
 			}
 		}
 		else if (transaction.status === 'Pending')

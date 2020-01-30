@@ -999,12 +999,15 @@ module.exports = {
     Kyber2_5: { addr: '0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950', name: 'Kyber Network', supportedDex: true },
     Kyber3: { addr: '0x65bf64ff5f51272f729bdcd7acfb00677ced86cd', name: 'Kyber Network', supportedDex: true },
 
-    BancorQuick: { addr: '0xcf1cc6ed5b653def7417e3fa93992c3ffe49139b', name: 'Bancor', supportedDex: false },
-    BancorQuick2: { addr: '0xf87a7ec94884f44d9de33d36b73f42c7c0dd38b1', name: 'Bancor', supportedDex: false },
-    // network is quick v3?
-    BancorNetwork: { addr: '0xf20b9e713a33f61fa38792d2afaf1cd30339126a', name: 'Bancor', supportedDex: false },
-    BancorX: { addr: '0xda96eb2fa67642c171650c428f93abdfb8a63a2d', name: 'BancorX', supportedDex: false },
-    // bancor quick3? 0x111913ca1c1a8d4e3283213ba115bf6dcde07d6f
+    BancorX: { addr: '0xda96eb2fa67642c171650c428f93abdfb8a63a2d', name: 'BancorX', supportedDex: true },
+    /* 
+    Uniswap & Bancor (convertor, quickconvertor) 
+    These use too many unique contracts to list here.
+    They are detected by function input and emitted events 
+    */
+    
+
+
     Enclaves: { addr: '0xbf45f4280cfbe7c2d2515a7d984b8c71c15e82b7', name: 'EnclavesDex', supportedDex: true },
     Enclaves2: { addr: '0xed06d46ffb309128c4458a270c99c824dc127f5d', name: 'EnclavesDex', supportedDex: false },
     Ethen: { addr: '0xf4c27b8b002389864ac214cb13bfeef4cc5c4e8d', name: 'ETHEN', supportedDex: true },
@@ -1087,7 +1090,6 @@ module.exports = {
     Miime: { addr: '0x7a6425c9b3f5521bfa5d71df710a2fb80508319b', name: 'Miime', supportedDex: false },
     DdexMargin: { addr: '0x241e82c79452f51fbfc89fac6d912e021db1a3b7', name: 'DDEX Margin', supportedDex: false },
     DefiSaver: { addr: '0x865b41584a22f8345fca4b71c42a1e7abcd67ecb', name: 'DefiSaver MCD', supportedDex: false },
-    // UniSwap (contract per token pair)
 
     /* small exchanges, no input/event parsing yet */
     Eidoo3: { addr: '0x560d5afc42ad137dece2277fd75001c165cb9a22', name: 'Eidoo v3', supportedDex: false },

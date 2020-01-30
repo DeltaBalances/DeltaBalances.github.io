@@ -340,8 +340,6 @@ module.exports = (db) => {
         for (let i = 0; i < abis.length; i++) {
             Decoder.addABI(abis[i]);
         }
-        // etherdelta last to fix overloading
-        Decoder.addABI(db.config.ABIs.EtherDelta);
         db.config.methodIDS = true;
     }
 

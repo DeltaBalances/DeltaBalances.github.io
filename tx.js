@@ -548,11 +548,11 @@ var pageType = 'tx';
 							let myAddr = tx.from;
 							if (tx.to.toLowerCase() !== unpacked.address.toLowerCase() && unpacked.name !== 'Transfer' && unpacked.name !== 'Approve')
 								myAddr = tx.to.toLowerCase();
-							let obj = _delta.processUnpackedEvent(unpacked, myAddr);
+							let obj = _delta.processUnpackedEvent(unpacked, myAddr, tx.from.toLowerCase());
 							if (obj && !obj.error) {
 								if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 									unknownToken = true;
-								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion'
+								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion' || unpacked.name == 'Change'
 									|| (unpacked.name == 'Order' && unpacked.combinedEvents) || unpacked.name == 'TakeBuyOrder' || unpacked.name == 'TakeSellOrder' || unpacked.name == 'EthPurchase' || unpacked.name == 'TokenPurchase') {
 									obj.feeToken = obj.feeCurrency;
 									delete obj.feeCurrency;

@@ -1062,9 +1062,16 @@ var pageType = 'recent';
 										}
 									}
 									//bancor
-									else if (unpacked.name === 'convert' || unpacked.name === 'quickConvert' || unpacked.name === 'quickConvertPrioritized'
-										|| unpacked.name === 'convertFor' || unpacked.name == 'convertForPrioritized' || unpacked.name === 'convertForPrioritized2' || unpacked.name === 'convertForPrioritized3') {
-
+									else if (
+										unpacked.name === 'quickConvert' || unpacked.name === 'quickConvert2'
+										|| unpacked.name === 'quickConvertPrioritized' || unpacked.name === 'quickConvertPrioritized2'
+										|| unpacked.name === 'convert' || unpacked.name === 'convert2'
+										|| unpacked.name == 'convertFor' || unpacked.name == 'convertFor2'
+										|| unpacked.name == 'convertForPrioritized' || unpacked.name == 'convertForPrioritized2' || unpacked.name == 'convertForPrioritized3' || unpacked.name == 'convertForPrioritized4'
+										|| unpacked.name == 'claimAndConvert' || unpacked.name == 'claimAndConvert2'
+										|| unpacked.name == 'claimAndConvertFor' || unpacked.name == 'claimAndConvertFor2'
+										|| ((unpacked.name == 'change' || unpacked.name == 'quickChange') && _util.isWrappedETH(to))
+									) {
 										if (obj.type == 'Buy up to') {
 											// did send ETH along with tx and base is wrapped ether
 											if (obj.base && _util.isWrappedETH(obj.base.addr) && value.greaterThan(0)) {
@@ -1081,7 +1088,8 @@ var pageType = 'recent';
 										}
 									}
 									// bancorX cross-chain trades
-									else if (unpacked.name === 'xConvert' || unpacked.name === 'xConvertPrioritized') {
+									else if (unpacked.name === 'xConvert' || unpacked.name === 'xConvert2' || unpacked.name === 'xConvertPrioritized'
+										|| unpacked.name === 'xConvertPrioritized2' || unpacked.name === 'xConvertPrioritized3') {
 
 										if (obj.type == 'Trade (cross-chain)') {
 											trans = createOutputTransaction('Trade', obj.token, obj.amount, obj.blockchain, undefined, tx.hash, tx.timeStamp, obj.unlisted, undefined, tx.isError === '0', exchange);

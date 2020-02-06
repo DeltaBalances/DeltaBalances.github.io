@@ -766,16 +766,20 @@ var pageType = 'recent';
 						} catch (e) { }
 					}
 
-					// this is a token transfer seen after we already have a 'buy up to, sell up to'
-					//oasisdex, kyber
-					if (checkTradeupTo(0) || checkTradeupTo(1)) { //index 1 for oasisDirect subcall
+					//see comment right below this
+					if ((contract || internal) && (fixMarketTrade(0) || fixMarketTrade(1))) { //index 1 for oasisDirect subcall
 						continue;
 					}
 
-					function checkTradeupTo(index) {
-						if (contract || internal) {
-							// this is a token/ETH transfer seen after we already have a 'buy up to, sell up to'
-							//oasisdex, kyber, uniswap
+
+					/* check token transfers that happen on the same tx hash as a trade.
+					 fix the final amounts for market trades on kyber/bancor/uniswap etc. ('buy up to' or 'sell up to')
+					 ignore the transfer on complete trades ('maker sell, taker buy)
+					*/
+					function fixMarketTrade(index) {
+						if (contract || internal) { //make sure this is an erc20 or eth transfer object
+
+							//check the stored hashes for a parsed trade
 							let defaultHash = tx.hash + '(' + index + ')';
 							if (outputHashes[defaultHash]) {
 								let knownObj = outputHashes[defaultHash];
@@ -783,23 +787,34 @@ var pageType = 'recent';
 								if (contract && knownObj.refundEth && !knownObj.anotherIteration) {// don't evalute tokens if we need to check ETH
 									return false;
 								}
-								if (knownObj.Type.indexOf('up to') !== -1) {
-									let token = undefined;
-									if (contract) {
-										token = _delta.uniqueTokens[contract];
-									} else if (internal) {
-										token = _delta.setToken(_delta.config.ethAddr);
-									}
 
-									if (token) {
+								let token = undefined;
+								if (contract) {
+									token = _delta.uniqueTokens[contract];
+								} else if (internal) {
+									token = _delta.setToken(_delta.config.ethAddr);
+								}
+
+
+								if (token) {
+									//for completed trades, ignore a transfer if the amount matches the trade
+									if (knownObj.Type.indexOf('aker ') !== -1) {
+										let amount = _util.weiToToken(tx.value, token);
+										if (knownObj.Token.addr == token.addr && amount.equals(knownObj.Amount)) {
+											return true;
+										} else if (knownObj.Base.addr == token.addr && amount.equals(knownObj.Total)) {
+											return true;
+										}
+									}
+									//for partial trade data, see if this transfer can add new data.
+									else if (knownObj.Type.indexOf('up to') !== -1) {
 										if (internal && _util.isWrappedETH(knownObj.Token.addr)) { // match ETH and WETH
 											knownObj.Token = token;
 										} else if (internal && _util.isWrappedETH(knownObj.Base.addr)) { // match ETH and WETH
 											knownObj.Base = token;
 										}
 
-										const dvsr = _delta.divisorFromDecimals(token.decimals)
-										let newAmount = _util.weiToEth(tx.value, dvsr);
+										let newAmount = _util.weiToToken(tx.value, token);
 										let anotherIteration = false; //after fixing with internal tx, also use token tx
 
 										if (token.addr == knownObj.Base.addr) {
@@ -824,7 +839,7 @@ var pageType = 'recent';
 												knownObj.Price = knownObj.Total.div(knownObj.Amount);
 											}
 
-										} else {
+										} else { // transfer doesn't match the trade
 											return false;
 										}
 										if (!anotherIteration) {

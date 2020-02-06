@@ -124,7 +124,7 @@ module.exports = {
       hideOpponent: false,
     },
     OasisDex: {
-      contract: ['OasisDex', 'OasisDex2','OasisDex3', 'OasisDexOld', 'OasisDexOld2'],
+      contract: ['OasisDex', 'OasisDex2','OasisDex3','OasisDex4', 'OasisDexOld', 'OasisDexOld2'],
       minBlock: 3435757, //4262057, //4751582,
       tradeTopic: '0x3383e3357c77fd2e3a4b30deea81179bc70a795d053d14d5b7f2f01d0fd4596f', // LogTake
       withdrawTopic: undefined,

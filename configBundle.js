@@ -75,7 +75,7 @@ module.exports = {
   uniswapContracts: instances.uniswapContracts,
 
   /* api related */
-  etherscanAPIKey: 'YHBUWV6P5B5ITKMI91JIRZZYBP1CG1V65R',
+  etherscanAPIKey: 'CY1M8MIE5IJ87GKNGYF98PGQFIHVQ99V13',
   infuraURL: 'https://mainnet.infura.io/v3/1b000043e1a84c468747a6b75b4541c1',  // infura project for ethereum logs (history)
   web3URLs: {
     Infura: 'https://mainnet.infura.io/v3/a736fb84e7d74effb636f41305a0afd3', // infura project for web3 calls

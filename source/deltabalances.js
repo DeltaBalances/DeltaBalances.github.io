@@ -5537,7 +5537,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                     token = this.setToken(token.addr + '-' + rawAmount);
                 }
 
-                let exchange = this.getExchangeName(unpacked.address, 'unknown ');
+                let exchange = this.getExchangeName(to, 'unknown ');
                 if (exchange === 'unknown ') {
                     // bancor quick convert, sending out approves?
                     this.getExchangeName(sender, 'unknown ');

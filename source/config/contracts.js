@@ -76,6 +76,7 @@ module.exports = {
     Kyber3: { addr: '0x65bf64ff5f51272f729bdcd7acfb00677ced86cd', name: 'Kyber Network', supportedDex: true },
 
     BancorX: { addr: '0xda96eb2fa67642c171650c428f93abdfb8a63a2d', name: 'BancorX', supportedDex: true },
+    UniswapFactory: { addr: '0xc0a47dfe034b400b47bdad5fecda2621de6c4d95', name: 'Uniswap Factor', supportedDex: false },
     /* 
     Uniswap & Bancor (convertor, quickconvertor) 
     These use too many unique contracts to list here.

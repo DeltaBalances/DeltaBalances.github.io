@@ -72,6 +72,8 @@ module.exports = {
   exchangeWallets: addresses.exchangeWallets,
   bancorConverters: instances.bancorConverters,
   uniswapContracts: instances.uniswapContracts,
+  uniswapNewExTopic: '0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9',
+  uniswapContractsBlock: 9620377, //blocknumber up to which all newExchange events are saved (min 6627917)
 
   /* api related */
   etherscanAPIKey: 'CY1M8MIE5IJ87GKNGYF98PGQFIHVQ99V13',

@@ -43,7 +43,7 @@ module.exports = {
   },
   // currencies that take precedence to be the base pair in a trade found on the blockchain (e.g ETH<->BAT is shown as BAT-ETH)
   baseToken: {
-    "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359": 1, // DAI stablecoin
+    "0x6b175474e89094c44da98b954eedeac495271d0f": 1, // DAI stablecoin
     "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359": 2, // SAI (DAI) stablecoin
     "0xdac17f958d2ee523a2206206994597c13d831ec7": 3, // USDT 
     "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": 4, // USDC
@@ -215,7 +215,6 @@ module.exports = {
     "0x3b4ce2ea700ff327c3b4fe624f328c4106fd2885": 'Erc Dex',
     "0x3fa5f23d42847e49d242496ffe2a3c8fda66706c": 'Erc Dex',
     "0x173a2467cece1f752eb8416e337d0f0b58cad795": 'Erc Dex',
-    "0x58a5959a6c528c5d5e03f7b9e5102350e24005f1": 'Erc Dex',
     "0x7df569a165bee41ca74374c76bd888ea02dcc4a8": 'Erc Dex',
     "0x3d974ce554fec1acd8d034f13b6640b300689a37": 'Erc Dex',
     "0xbd069e7ad0b7366ed1f0559dd8fe3e8efc0c4a72": 'Erc Dex',
@@ -356,7 +355,6 @@ module.exports = {
     '0xb794f5ea0ba39494ce839613fffba74279579268': 'Poloniex',
     '0xab11204cfeaccffa63c2d23aef2ea9accdb0a0d5': 'Poloniex',
     '0x209c4784ab1e8183cf58ca33cb740efbf3fc18ef': 'Poloniex',
-    '0xb794f5ea0ba39494ce839613fffba74279579268': 'Poloniex',
     '0x027beefcbad782faf69fad12dee97ed894c68549': 'QuadrigaCX',
     '0xb6aac3b56ff818496b747ea57fcbe42a9aae6218': 'QuadrigaCX',
     '0x70faa28a6b8d6829a4b1e649d26ec9a2a39ba413': 'ShapeShift',
@@ -3200,7 +3198,7 @@ module.exports = {
     DexAG3: { addr: '0xa540fb50288cc31639305b1675c70763c334953b', name: 'DEX.AG v3', supportedDex: false },
     DexAGProxy: { addr: '0x745daa146934b27e3f0b6bff1a6e36b9b90fb131', name: 'DEX.AG', supportedDex: false },
     Oneinch: { addr: '0x11111254369792b2Ca5d084aB5eEA397cA8fa48B', name: '1inch', supportedDex: false },
-    Oneinch: { addr: '0x111111254b08ceeee8ad6ca827de9952d2a46781', name: '1inch', supportedDex: false },
+    Oneinch2: { addr: '0x111111254b08ceeee8ad6ca827de9952d2a46781', name: '1inch', supportedDex: false },
     
     //onesplit aggregated swap
     OneSplit1: { addr: '0x111112549cfedf7822eb11fbd8fd485d8a10f93f', name: '1Split', supportedDex: false },
@@ -3298,6 +3296,7 @@ module.exports = {
     AllBit: { addr: '0xdc1882f350b42ac9a23508996254b1915c78b204', name: 'AllBit', supportedDex: false },
     AllBit2: { addr: '0xff6b1cdfd2d3e37977d7938aa06b6d89d6675e27', name: 'AllBit', supportedDex: false },
     Saturn: { addr: '0x13f64609bf1ef46f6515f8cd3115433a93a00dc6', name: 'Saturn Network', supportedDex: false },
+    Saturn2: { addr: '0x1f0d1de1558582ad6f13763f477119a1455502af', name: 'Saturn Network', supportedDex: false },
     Loopring: { addr: '0x8d8812b72d1e4ffcec158d25f56748b7d67c1e78', name: 'LoopRing v1', supportedDex: false },
     Loopring3: { addr: '0xc2d1e8fb0c10810bb888231e7b85118042846105', name: 'LoopRing v3', supportedDex: false },
     Aiwallet: { addr: '0x3dbf4ee7ed88157cda8b2c1578861cea1a1230f1', name: 'Aiwallet', supportedDex: false },
@@ -3355,10 +3354,10 @@ module.exports = {
 
     //bilink
     Bilink1: { addr: '0xffd883e94f7a3700aaf81a411bd164ad27acc656', name: 'Bilink', supportedDex: false }, //loan
-    Bilink1: { addr: '0xaea870ca4ad2ee820050124a7580e78176d9c806', name: 'Bilink', supportedDex: false }, //loan
-    Bilink1: { addr: '0x4acbad9064c1a248ff73b1855613c16d9f5894b4', name: 'Bilink', supportedDex: false }, // exchange, trades
-    Bilink1: { addr: '0x611ce695290729805e138c9c14dbddf132e76de3', name: 'Bilink', supportedDex: false }, // data
-    Bilink1: { addr: '0xc75fa06f6002b458468d9e484d13bf522030d4ae', name: 'Bilink', supportedDex: false }, // balance
+    Bilink2: { addr: '0xaea870ca4ad2ee820050124a7580e78176d9c806', name: 'Bilink', supportedDex: false }, //loan
+    Bilink3: { addr: '0x4acbad9064c1a248ff73b1855613c16d9f5894b4', name: 'Bilink', supportedDex: false }, // exchange, trades
+    Bilink4: { addr: '0x611ce695290729805e138c9c14dbddf132e76de3', name: 'Bilink', supportedDex: false }, // data
+    Bilink5: { addr: '0xc75fa06f6002b458468d9e484d13bf522030d4ae', name: 'Bilink', supportedDex: false }, // balance
 
 
     // kernel? 0x740f8b58f5562c8379f2a8c2230c9be5c03ac3fc
@@ -3434,6 +3433,7 @@ module.exports = {
     { m: "Dec 2019", blockFrom: 9029510, blockTo: 9193266 },
     { m: "Jan 2020", blockFrom: 9193266, blockTo: 9393154 },
     { m: "Feb 2020", blockFrom: 9393154, blockTo: 9581792 },
+    { m: "Mar 2020", blockFrom: 9581792, blockTo: 9782602 },
   ],
   // history settings per exchange
   history: {

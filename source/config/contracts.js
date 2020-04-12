@@ -118,7 +118,7 @@ module.exports = {
     DexAG3: { addr: '0xa540fb50288cc31639305b1675c70763c334953b', name: 'DEX.AG v3', supportedDex: false },
     DexAGProxy: { addr: '0x745daa146934b27e3f0b6bff1a6e36b9b90fb131', name: 'DEX.AG', supportedDex: false },
     Oneinch: { addr: '0x11111254369792b2Ca5d084aB5eEA397cA8fa48B', name: '1inch', supportedDex: false },
-    Oneinch: { addr: '0x111111254b08ceeee8ad6ca827de9952d2a46781', name: '1inch', supportedDex: false },
+    Oneinch2: { addr: '0x111111254b08ceeee8ad6ca827de9952d2a46781', name: '1inch', supportedDex: false },
     
     //onesplit aggregated swap
     OneSplit1: { addr: '0x111112549cfedf7822eb11fbd8fd485d8a10f93f', name: '1Split', supportedDex: false },
@@ -216,6 +216,7 @@ module.exports = {
     AllBit: { addr: '0xdc1882f350b42ac9a23508996254b1915c78b204', name: 'AllBit', supportedDex: false },
     AllBit2: { addr: '0xff6b1cdfd2d3e37977d7938aa06b6d89d6675e27', name: 'AllBit', supportedDex: false },
     Saturn: { addr: '0x13f64609bf1ef46f6515f8cd3115433a93a00dc6', name: 'Saturn Network', supportedDex: false },
+    Saturn2: { addr: '0x1f0d1de1558582ad6f13763f477119a1455502af', name: 'Saturn Network', supportedDex: false },
     Loopring: { addr: '0x8d8812b72d1e4ffcec158d25f56748b7d67c1e78', name: 'LoopRing v1', supportedDex: false },
     Loopring3: { addr: '0xc2d1e8fb0c10810bb888231e7b85118042846105', name: 'LoopRing v3', supportedDex: false },
     Aiwallet: { addr: '0x3dbf4ee7ed88157cda8b2c1578861cea1a1230f1', name: 'Aiwallet', supportedDex: false },
@@ -273,10 +274,10 @@ module.exports = {
 
     //bilink
     Bilink1: { addr: '0xffd883e94f7a3700aaf81a411bd164ad27acc656', name: 'Bilink', supportedDex: false }, //loan
-    Bilink1: { addr: '0xaea870ca4ad2ee820050124a7580e78176d9c806', name: 'Bilink', supportedDex: false }, //loan
-    Bilink1: { addr: '0x4acbad9064c1a248ff73b1855613c16d9f5894b4', name: 'Bilink', supportedDex: false }, // exchange, trades
-    Bilink1: { addr: '0x611ce695290729805e138c9c14dbddf132e76de3', name: 'Bilink', supportedDex: false }, // data
-    Bilink1: { addr: '0xc75fa06f6002b458468d9e484d13bf522030d4ae', name: 'Bilink', supportedDex: false }, // balance
+    Bilink2: { addr: '0xaea870ca4ad2ee820050124a7580e78176d9c806', name: 'Bilink', supportedDex: false }, //loan
+    Bilink3: { addr: '0x4acbad9064c1a248ff73b1855613c16d9f5894b4', name: 'Bilink', supportedDex: false }, // exchange, trades
+    Bilink4: { addr: '0x611ce695290729805e138c9c14dbddf132e76de3', name: 'Bilink', supportedDex: false }, // data
+    Bilink5: { addr: '0xc75fa06f6002b458468d9e484d13bf522030d4ae', name: 'Bilink', supportedDex: false }, // balance
 
 
     // kernel? 0x740f8b58f5562c8379f2a8c2230c9be5c03ac3fc

@@ -485,24 +485,28 @@
           <div class="col-sm-12 col-md-8 col-lg-7 noPadM">
 
             <div class="form-group">
-              <select id="exchangeDropdown" data-width="100%"
-                data-none-selected-text="Click to select one or more exchange(s)" class="selectpicker" multiple>
-                <option data-icon="icon-etherdelta" data-subtext="ForkDelta">EtherDelta</option>
-                <option data-icon="icon-idex">IDEX</option>
-                <option data-icon="icon-tokenstore">Token store</option>
-                <option data-icon="icon-switcheo">Switcheo v2</option>
-                <option data-icon="icon-enclaves">Joyso</option>
-                
-                <!-- <option>Ethen</option>-->
-                <option data-icon="icon-enclaves">SingularX</option>
-				<option data-icon="icon-enclaves">dex.blue</option>
-                <option data-icon="icon-enclaves">EtherC</option>
-				<option data-icon="icon-enclaves">SwitchDex</option>
-				<option data-icon="icon-enclaves">Bitcratic</option>
-				<option data-icon="icon-switcheo" data-subtext="(Discontinued 10-2019)">Switcheo</option>
-				<option data-icon="icon-enclaves" data-subtext="(Discontinued)">Enclaves</option>
-                <option data-icon="icon-enclaves" data-subtext="(Discontinued)">DEXY</option>
-                <option data-icon="icon-decentrex" data-subtext="(Discontinued)">Decentrex</option>
+              <select id="exchangeDropdown" class="selectpicker" data-width="100%"
+                data-none-selected-text="Click to select one or more exchange(s)"
+				data-container=".wrapper" data-max-options="4" multiple>
+				<optgroup label="Active">
+                  <option data-icon="icon-etherdelta" data-subtext="ForkDelta">EtherDelta</option>
+                  <option data-icon="icon-idex">IDEX</option>
+                  <option data-icon="icon-tokenstore">Token store</option>
+                  <option data-icon="icon-switcheo">Switcheo v2</option>
+                  <option data-icon="icon-enclaves">Joyso</option>
+                  <!-- <option>Ethen</option>-->
+                  <option data-icon="icon-enclaves">SingularX</option>
+				  <option data-icon="icon-enclaves">dex.blue</option>
+                  <option data-icon="icon-enclaves">EtherC</option>
+				  <option data-icon="icon-enclaves">SwitchDex</option>
+				  <option data-icon="icon-enclaves">Bitcratic</option>
+				</optgroup>
+				<optgroup label="Legacy">
+				  <option data-icon="icon-switcheo" data-subtext="(Discontinued 10-2019)">Switcheo</option>
+				  <option data-icon="icon-enclaves" data-subtext="(Discontinued)">Enclaves</option>
+                  <option data-icon="icon-enclaves" data-subtext="(Discontinued)">DEXY</option>
+                  <option data-icon="icon-decentrex" data-subtext="(Discontinued)">Decentrex</option>
+				</optgroup>
               </select>
             </div>
 

@@ -258,6 +258,7 @@ module.exports = {
     '0x583d03451406d179182efc742a1d811a9e34c36b': 'Totle Admin',
     '0x571037cc2748c340e3c6d9c7af589c6d65806618': 'Switcheo Admin',
     '0x8ecf87fc9d7336cc0052d40abf806fb1af2ea81c': 'DINNGO Admin',
+    '0x004dc6cb71104f64098fe70825516d2075cfa030': 'dex.blue Admin',
   },
   // known (centralized) exchange wallets, (personal experience + https://etherscan.io/accounts/1?&l=Exchange )
   exchangeWallets: {
@@ -3291,8 +3292,8 @@ module.exports = {
     BitEye2: { addr: '0x9e2f2dd1e3641f389673f89dc316bb00b01cd83a', name: 'BitEye', supportedDex: false },
     AXNET: { addr: '0xacf999bfa9347e8ebe6816ed30bf44b127233177', name: 'AXNET', supportedDex: false },
     WeiDex: { addr: '0xccd7ce9ec004bfbd5711245f917d6109813a909c', name: 'WeiDex', supportedDex: false },
-    DexBlue: { addr: '0x257586004f6828a01ba4a874d3cfd0757029f32a', name: 'dexBlue (old)', supportedDex: false },
-    DexBlue2: { addr: '0x000000000000541e251335090ac5b47176af4f7e', name: 'dexBlue', supportedDex: false },
+    DexBlue: { addr: '0x257586004f6828a01ba4a874d3cfd0757029f32a', name: 'dex.blue (old)', supportedDex: false },
+    DexBlue2: { addr: '0x000000000000541e251335090ac5b47176af4f7e', name: 'dex.blue', supportedDex: true },
     AllBit: { addr: '0xdc1882f350b42ac9a23508996254b1915c78b204', name: 'AllBit', supportedDex: false },
     AllBit2: { addr: '0xff6b1cdfd2d3e37977d7938aa06b6d89d6675e27', name: 'AllBit', supportedDex: false },
     Saturn: { addr: '0x13f64609bf1ef46f6515f8cd3115433a93a00dc6', name: 'Saturn Network', supportedDex: false },

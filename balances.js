@@ -57,13 +57,16 @@ var pageType = 'balance';
     addExchange('IDEX', _delta.config.exchangeContracts.Idex.addr);
     addExchange('Token store', _delta.config.exchangeContracts.TokenStore.addr);
     addExchange('Switcheo', _delta.config.exchangeContracts.Switcheo.addr, "0xc23f001f", true);
+    addExchange('Switcheo v2', _delta.config.exchangeContracts.Switcheo2.addr, "0xc23f001f", true);
     addExchange('Joyso', _delta.config.exchangeContracts.Joyso.addr, "0xd4fac45d", false);
+    addExchange('dex.blue', _delta.config.exchangeContracts.DexBlue2.addr, "0xd4fac45d", false); // "getBalance(address,address)"
     addExchange('Enclaves', _delta.config.exchangeContracts.Enclaves.addr);
     addExchange('SingularX', _delta.config.exchangeContracts.Singularx.addr);
     addExchange('EtherC', _delta.config.exchangeContracts.EtherC.addr);
     addExchange('SwitchDex', _delta.config.exchangeContracts.SwitchDex.addr);
     addExchange('Decentrex', _delta.config.exchangeContracts.Decentrex.addr);
-    addExchange('Ethen', _delta.config.exchangeContracts.Ethen.addr);
+    //addExchange('Ethen', _delta.config.exchangeContracts.Ethen.addr);
+    addExchange('Bitcratic', _delta.config.exchangeContracts.Bitcratic2.addr);
     addExchange('DEXY', _delta.config.exchangeContracts.Dexy.addr);
 
 

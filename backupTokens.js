@@ -5077,7 +5077,7 @@ let offlineCustomTokens = [
  {s:"iSUSD",a:"0x49f4592e641820e928f9919ef4abd92a719b4b49",d:18,n:"Fulcrum sUSD iToken",block:1},
  {s:"IT",a:"0x73d7e1dcfac94282dfda16c8f369b488580f7408",d:18,n:"IDC Token"},
  {s:"IT",a:"0xbf5f8bfcee9502a30018d91c63eca66980e6e9bb",d:18,n:"IDAX Token"},
- {s:"ITC",a:"0x5e6b6d9abad9093fdc861ea1600eba1b355cd940",d:0,n:"IOT on Chain",IDEX:"ITC"},
+ {s:"ITC",a:"0x5e6b6d9abad9093fdc861ea1600eba1b355cd940",d:18,n:"IOT on Chain",IDEX:"ITC"},
  {s:"ITC",a:"0x5e706cf35c0ab07ec763743e2bb3c74a8586a7e2",d:2,n:"INTEGRATION COIN",block:3,inactive:1},
  {s:"ITC",a:"0x96d8fbf95f72f5abe9ef04f1ade94e1ba79be508",d:18,n:"itCoin® Black",lock:1,old:1,inactive:1},
  {s:"ITCB",a:"0xb344f584e002e2ad84a71a60e395ecd057060d19",d:18,n:"itCoin® Black"},

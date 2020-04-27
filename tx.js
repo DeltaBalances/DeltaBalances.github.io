@@ -293,25 +293,29 @@ var pageType = 'tx';
 						finished = true;
 						handleTransData(result.result);
 					} else {
-						web3GetTransaction();
+						web3GetTransaction(true);
 					}
 				} else {
-					web3GetTransaction();
+					web3GetTransaction(true);
 				}
 			});
 
-			function web3GetTransaction() {
+			function web3GetTransaction(isFallback = false) {
 				//etherscan failed, try web3
 				if (!finished) {
 					let web3Provider = getWeb3();
-					web3Provider.eth.getTransaction(transactionHash, (err, result) => {
-						if (!err && result) {
-							finished = true;
-							handleTransData(result);
-						} else {
-							handleTransData(undefined);
-						}
-					});
+					if (web3Provider) {
+						web3Provider.eth.getTransaction(transactionHash, (err, result) => {
+							if (!err && result) {
+								finished = true;
+								handleTransData(result);
+							} else {
+								handleTransData(undefined);
+							}
+						});
+					} else if (isFallback) {
+						handleTransData(undefined);
+					}
 				}
 			}
 
@@ -322,7 +326,7 @@ var pageType = 'tx';
 						transLoaded++;
 
 						if (res.blockNumber) {
-							getBlockTime(Number(res.blockNumber));
+							getBlockTime(Number(res.blockNumber)); //calls processTransactions
 							return;
 						} else {
 							isPending = true;

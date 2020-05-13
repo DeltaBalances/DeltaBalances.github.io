@@ -80,7 +80,7 @@ module.exports = {
   infuraURL: 'https://mainnet.infura.io/v3/1b000043e1a84c468747a6b75b4541c1',  // infura project for ethereum logs (history)
   web3URLs: {
     Infura: 'https://mainnet.infura.io/v3/a736fb84e7d74effb636f41305a0afd3', // infura project for web3 calls
-    Cloudflare: 'https://cloudflare-eth.com',
+    //Cloudflare: 'https://cloudflare-eth.com',
     myCrypto: 'https://api.mycryptoapi.com/eth',
   },
   localNode: 'http://localhost:8545',

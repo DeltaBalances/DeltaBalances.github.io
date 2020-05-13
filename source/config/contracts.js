@@ -59,7 +59,8 @@ module.exports = {
 
     AirSwap: { addr: '0x8fd3121013a07c57f0d69646e86e7a4880b467b7', name: 'AirSwap', supportedDex: true },
     AirSwapTrader : { addr: '0x9af9c0cf3cd15e0afe63930fbf20941c89f3ff98', name: 'AirSwap OTC', supportedDex: false},
-    AirSwap2: { addr: '0x54d2690e97e477a4b33f40d6e4afdd4832c07c57', name: 'AirSwap2', supportedDex: false },
+    AirSwap2: { addr: '0x54d2690e97e477a4b33f40d6e4afdd4832c07c57', name: 'AirSwap', supportedDex: false },
+    AirSwap3: { addr: '0x4572f2554421bd64bef1c22c8a81840e8d496bea', name: 'AirSwap', supportedDex: false },
     Kyber: { addr: '0x964f35fae36d75b1e72770e244f6595b68508cf5', name: 'Kyber Network', supportedDex: true }, // contract disabled?
     KyberTest: { addr: '0xd2d21fdef0d054d2864ce328cc56d1238d6b239e', name: 'Kyber Test', supportedDex: true },
 
@@ -217,8 +218,10 @@ module.exports = {
     AllBit2: { addr: '0xff6b1cdfd2d3e37977d7938aa06b6d89d6675e27', name: 'AllBit', supportedDex: false },
     Saturn: { addr: '0x13f64609bf1ef46f6515f8cd3115433a93a00dc6', name: 'Saturn Network', supportedDex: false },
     Saturn2: { addr: '0x1f0d1de1558582ad6f13763f477119a1455502af', name: 'Saturn Network', supportedDex: false },
+    Saturn3: { addr: '0xaa5bbd5a177a588b9f213505ca3740b444dbd586', name: 'Saturn Network', supportedDex: false },
     Loopring: { addr: '0x8d8812b72d1e4ffcec158d25f56748b7d67c1e78', name: 'LoopRing v1', supportedDex: false },
     Loopring3: { addr: '0xc2d1e8fb0c10810bb888231e7b85118042846105', name: 'LoopRing v3', supportedDex: false },
+    Loopring4: { addr: '0x944644ea989ec64c2ab9ef341d383cef586a5777', name: 'LoopRing', supportedDex: false },
     Aiwallet: { addr: '0x3dbf4ee7ed88157cda8b2c1578861cea1a1230f1', name: 'Aiwallet', supportedDex: false },
     AmisDex: { addr: '0x2cc69caaaaa6114ddf48f4ddb2adb9c5d5d3e048', name: 'AmisDex', supportedDex: false },
     Verify1: { addr: '0x48bf5e13a1ee8bd4385c182904b3abf73e042675', name: '0xVerify', supportedDex: false },
@@ -231,6 +234,7 @@ module.exports = {
     Blockonix2: { addr: '0x67b084e4654e1d62afa9694b6a626cec5c9ff2bd', name: 'Blockonix', supportedDex: false },
     CryptoKitty: { addr: '0xb1690c08e213a35ed9bab7b318de14420fb57d8c', name: 'CryptoKitties', supportedDex: false }, //auction
     Dinngo: { addr: '0xd494938d0524edadfc239adc2c233e50550fa152', name: 'Dinngo', supportedDex: false },
+    Dinngo2: { addr: '0x268be5667d4e5bd036bd608d0601ef1441604429', name: 'Dinngo', supportedDex: false },
     DappDex: { addr: '0xec3d7968b0d3fff0a074668e08eb56c5e6d38b21', name: 'DappDex', supportedDex: false },
     MCDEX: { addr: '0xfe3a6567a25d74b3a7f10ed49631502806ed1a17', name: 'MCDEX', supportedDex: false },
     Coinected: { addr: '0xdf00412a54951e0ff42267427c3f17fa792a14a0', name: 'Coinected', supportedDex: false },
@@ -246,6 +250,7 @@ module.exports = {
     Kulap1: { addr: '0xcee7eea7e58434997a59049f7da4d0ad46f1f141', name: 'KulapDex', supportedDex: false },
     Kulap2: { addr: '0x3f7a7fe9b5304042d179deadf2521ea12d97a5c7', name: 'KulapDex', supportedDex: false },
     TrexDex: { addr: '0x2fca5f257895b8bcede0c0d06141b718ec9a3041', name: 'TrexDex', supportedDex: false },
+    Tokedo: { addr: '0xc3dc5b72cba5922b95ebc81606b2581e577feca0', name: 'Tokedo', supportedDex: false },
 
     Counter: { addr: '0xc0deee11aa091189fff0713353c43c7c8cae7881', name: 'Counter', supportedDex: false },
     Counter2: { addr: '0x1234567896326230a28ee368825d11fe6571be4a', name: 'Counter', supportedDex: false },

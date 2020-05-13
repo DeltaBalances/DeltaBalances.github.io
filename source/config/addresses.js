@@ -86,6 +86,7 @@ module.exports = {
     '0x571037cc2748c340e3c6d9c7af589c6d65806618': 'Switcheo Admin',
     '0x8ecf87fc9d7336cc0052d40abf806fb1af2ea81c': 'DINNGO Admin',
     '0x004dc6cb71104f64098fe70825516d2075cfa030': 'dex.blue Admin',
+    '0x3d5a2fbed1b64ec88abacbd0c287461e8e8f7331': 'dex.blue Admin', //old one
   },
   // known (centralized) exchange wallets, (personal experience + https://etherscan.io/accounts/1?&l=Exchange )
   exchangeWallets: {

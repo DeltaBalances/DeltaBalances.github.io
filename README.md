@@ -29,7 +29,7 @@ Supported Decentralized exchanges for each website feature.
 | 0x Protocol v1 | - | Yes| Yes| Yes |
 | 0x Protocol v2(.1) | - | Yes| Yes| Yes |
 | 0x Protocol v3 | - | Yes| Yes| Yes |
-| [AirSwap](https://airswap.io)| - | Yes |Yes |Yes|
+| [AirSwap v1](https://airswap.io)| - | Yes |Yes |Yes|
 | [Bancor](https://bancor.network)  | - | Yes| Yes | No|
 | [BancorX](https://bancor.network) cross-chain  | - | Yes| Yes | No|
 | [DDEX hydro 1.0](https://ddex.io/)| - | Yes| Yes| Not yet |
@@ -37,15 +37,15 @@ Supported Decentralized exchanges for each website feature.
 | Decentrex †| Yes| Yes| Yes| Yes |
 | [Dexy †](https://app.dexy.exchange) |Yes| No| No | No|
 | [EasyTrade](https://easytrade.io) |-| Yes| Yes | Yes|
-| [Enclaves Dex](https://enclaves.io) | Yes | Yes| Yes | Yes|
+| [Enclaves Dex †](https://enclaves.io) | Yes | Yes| Yes | Yes|
 | DiversiFi [Etfinex trustless v1 (v2<sup>*</sup>)](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
 | [Eth2Dai](https://eth2dai.com/) |-|Yes| Yes | Yes|
 | [ETHEN](https://ethen.market) |No|Yes|Yes|Yes|
 | [EtherC](https://etherc.io) |Yes|Yes|Yes|Yes|
 | [EtherDelta](https://etherdelta.com)| Yes| Yes| Yes| Yes | 
-| [ETHEX](https://ethex.market)|-|Yes|Yes|Yes|
+| [ETHEX †](https://ethex.market)|-|Yes|Yes|Yes|
 | [ForkDelta](https://forkDelta.app)| Yes| Yes| Yes| Yes | 
-| [IDEX](https://idex.market)| Yes |Yes |Yes| No |
+| [IDEX v1](https://idex.market)| Yes |Yes |Yes| No |
 | [Joyso](https://joyso.io)|Yes| Not yet| Not yet | No|
 | [Kyber Network](https://kyber.network) |-|Yes|Yes| Yes | Yes|
 | [Oasis](https://oasis.app/trade/) [OasisDex †](https://oasisdex.com)|-|Yes| Yes | Yes|
@@ -53,9 +53,10 @@ Supported Decentralized exchanges for each website feature.
 | [SingularX](https://singularx.com)|Yes| Yes| Yes | Yes|
 | [SwitchDex](https://switchdex.ag)|Yes| Yes| Yes | Not yet|
 | [Switcheo v1](https://switcheo.exchange)|Yes| Partial (WIP)| Partial (WIP) | Not yet|
+| [Switcheo v1](https://switcheo.exchange)|Yes| Not yet| Not yet | Not yet|
 | [Token Store (ETH)](https://token.store)| Yes| Yes| Yes| Yes |
 | [Token store Instant-trade](https://token.store)| - | Yes| Yes | No|
-| [Uniswap](https://uniswap.exchange)| - | Yes| Yes| Not yet|  
+| [Uniswap v1](https://uniswap.exchange)| - | Yes| Yes| Not yet|  
 
 († = Exchange is no longer active)  
 <sup>*</sup> Ethfinex v2 uses 0x v2  

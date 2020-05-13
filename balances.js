@@ -33,6 +33,7 @@ var pageType = 'balance';
         'Wallet': {
             enabled: true,
             loaded: 0, // integer loading progress, number of tokens
+            failed: 0,
             loadedTokens: {}, // addr -> bool, all tokens that are loaded for this exchange
             displayed: false, // has the result been output to a table
             contract: undefined,
@@ -651,6 +652,7 @@ var pageType = 'balance';
 
         function setLoad(name) {
             exchanges[name].loaded = exchanges[name].enabled ? 0 : -1;
+            exchanges[name].failed = 0;
             exchanges[name].displayed = !exchanges[name].enabled;
             exchanges[name].loadedTokens = {};
             balanceHeaders[name] = exchanges[name].enabled;
@@ -736,7 +738,7 @@ var pageType = 'balance';
 
             let allDone = true;
             Object.keys(exchanges).forEach(function (key) {
-                if (exchanges[key].enabled && exchanges[key].loaded < tokenCount) {
+                if (exchanges[key].enabled && exchanges[key].loaded + exchanges[key].failed < tokenCount) {
                     allDone = false;
                 }
             });
@@ -1209,7 +1211,7 @@ var pageType = 'balance';
                     web3Provider = undefined;
                     web3Index = 0;
                 }
-                if (completed || requestID > rqid)
+                if (success || requestID > rqid)
                     return;
 
 
@@ -1245,8 +1247,8 @@ var pageType = 'balance';
                                             console.log('received unrequested token balance');
                                         }
                                     }
-                                    if (exchanges[exName].loaded >= tokenCount)
-                                        finishedBalanceRequest();
+                                    // if (exchanges[exName].loaded + exchanges[exName].failed >= tokenCount)
+                                    finishedBalanceRequest();
                                 }
                             } else {
                                 console.log('unexpected funcName');
@@ -1255,15 +1257,15 @@ var pageType = 'balance';
                         else if (!success && completed >= 2) // both requests returned with bad response
                         {
                             const retryAmount = 2;
-                            if (totalTries >= retryAmount * 2) { //if we retried too much, show an error
+                            if (totalTries >= retryAmount) { //if we retried too much, show an error
                                 if (funcName == 'tokenBalances') {
                                     showError('Failed to load all Wallet balances after 3 tries, try again later');
-                                    exchanges[exName].loaded = -1;
+                                    exchanges[exName].failed += tokens.length;
                                     finishedBalanceRequest();
                                 }
                                 else if (funcName == 'depositedBalances') {
                                     showError('Failed to load all ' + exName + ' balances after 3 tries, try again later');
-                                    exchanges[exName].loaded = -1;
+                                    exchanges[exName].failed += tokens.length;
                                     finishedBalanceRequest();
                                 }
                             }
@@ -1394,7 +1396,7 @@ var pageType = 'balance';
         let noneDone = true;
         let allDone = true;
         for (let i = 0; i < keys.length; i++) {
-            if (exchanges[keys[i]].loaded >= tokenCount || exchanges[keys[i]].loaded == -1) {
+            if ((exchanges[keys[i]].loaded + exchanges[keys[i]].failed) >= tokenCount || exchanges[keys[i]].loaded == -1) {
                 if (exchanges[keys[i]].enabled)
                     noneDone = false;
             } else if (exchanges[keys[i]].enabled) {
@@ -1415,7 +1417,7 @@ var pageType = 'balance';
 
         for (let i = 0; i < keys.length; i++) {
             if (exchanges[keys[i]].enabled)
-                exchanges[keys[i]].displayed = exchanges[keys[i]].loaded >= tokenCount || exchanges[keys[i]].loaded == -1;
+                exchanges[keys[i]].displayed = (exchanges[keys[i]].loaded + exchanges[keys[i]].failed) >= tokenCount || exchanges[keys[i]].loaded == -1;
         }
 
         exchangePrices.displayedAll = exchangePrices.complete;
@@ -1437,7 +1439,7 @@ var pageType = 'balance';
                 bal['EUR'] = '';
                 bal.Total = _delta.web3.toBigNumber(0);
                 for (let i = 0; i < keys.length; i++) {
-                    if (exchanges[keys[i]].enabled && exchanges[keys[i]].loaded >= tokenCount) {
+                    if (exchanges[keys[i]].enabled && (exchanges[keys[i]].loaded + exchanges[keys[i]].failed >= tokenCount)) {
                         if (bal[keys[i]])
                             bal.Total = bal.Total.plus(bal[keys[i]]);
                     }

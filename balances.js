@@ -1172,12 +1172,12 @@ var pageType = 'balance';
         tokens2 = tokens2.map((x) => { return x.addr; });
 
         //split in separate requests to match maxPerRequest
-        for (var i = 0; i < tokens2.length; i += maxPerRequest) {
-            allBalances(i, i + maxPerRequest, tokens2, i);
+        for (let i = 0; i < tokens2.length; i += maxPerRequest) {
+            allBalances(i, i + maxPerRequest, tokens2);
         }
 
         // make the call to get balances for a (sub)section of tokens
-        function allBalances(startIndex, endIndex, tokens3, balanceRequestIndex) {
+        function allBalances(startIndex, endIndex, tokens3, splits = 0) {
 
             var tokens = tokens3.slice(startIndex, endIndex);
 
@@ -1268,11 +1268,24 @@ var pageType = 'balance';
                                     exchanges[exName].failed += tokens.length;
                                     finishedBalanceRequest();
                                 }
+                                console.log("Aborting retries, Balance request failed");
                             }
                             else if (retried < retryAmount) //retry up to 3 times per request
                             {
-                                totalTries++;
-                                makeCall(exName, funcName, args, retried + 1);
+
+                                if (!err && result.length == 0 && tokens.length >= 2 && splits < 10) {
+                                    // we got a response of length 0, possible revert from ethereum call
+                                    // split tokens and try those again
+                                    let splits2 = splits++;
+                                    allBalances(0, (tokens.length / 2), tokens, splits2);
+                                    allBalances((tokens.length / 2), tokens.length, tokens, splits2);
+                                    console.log("Split balance request of " + tokens.length + " tokens");
+                                } else {
+                                    //request failure, try it again
+                                    totalTries++;
+                                    makeCall(exName, funcName, args, retried + 1);
+                                    console.log("Balance request failed, retry");
+                                }
                                 return;
                             }
                         }

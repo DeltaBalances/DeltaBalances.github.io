@@ -69,6 +69,10 @@ var pageType = 'balance';
     //addExchange('Ethen', _delta.config.exchangeContracts.Ethen.addr);
     addExchange('Bitcratic', _delta.config.exchangeContracts.Bitcratic2.addr);
     addExchange('DEXY', _delta.config.exchangeContracts.Dexy.addr);
+    addExchange('EtherDelta-old', _delta.config.exchangeContracts.EtherDelta2.addr);
+    addExchange('EtherDelta-old2', _delta.config.exchangeContracts.EtherDelta3.addr);
+    addExchange('EtherDelta-old3', _delta.config.exchangeContracts.EtherDelta4.addr);
+    addExchange('EtherDelta-old4', _delta.config.exchangeContracts.EtherDelta5.addr);
 
 
     var exchangePrices = {

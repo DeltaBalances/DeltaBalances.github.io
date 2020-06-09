@@ -2,6 +2,7 @@ module.exports = {
   // List of addresses with a name or label attached
 
   // feeRecipients for 0x relayers,  https://github.com/0xProject/0x-relayer-registry/blob/master/relayers.json
+  // https://github.com/0xTracker/0x-tracker-worker/blob/master/src/relayers/relayer-registry.js
   zrxRelayers: {
     '0xa258b39954cef5cb142fd567a46cddb31a670124': "RadarRelay",
     '0xeb71bad396acaa128aeadbc7dbd59ca32263de01': "IDT",
@@ -55,14 +56,28 @@ module.exports = {
     "0xd592cfa56f4c443fb27008329d67ed7d4edb59c0": 'Erc Dex',
 
     '0xaf8ae6955d07776ab690e565ba6fbc79b8de3a5d': 'DiversiFi',
+    "0x1000000000000000000000000000000000000011": '0x API',
+    "0x382310cbb159b64c2e7c5675d110202701a436dd": 'Odee',
+    "0x5265bde27f57e738be6c1f6ab3544e82cdc92a8f": 'VeriDex',
+    "0xa5004c8b2d64ad08a80d33ad000820d63aa2ccc9": 'Udex',
+    "0x68a17b587caf4f9329f0e372e3a78d23a46de6b5": '1inch',
+    "0x4d37f28d2db99e8d35a6c725a5f1749a085850a3": '1inch',
+    "0x1af29de80f743be444aa195e2cae38ee9bc74c4c": "OC2 Dex",
+    "0x879047421625b87b5895ef1ac0d9dbd241805aa3": "OC2 Dex",
+    "0x584860fe460a16cd11e6fdebb2e77146d1835be8": "MerchCoins",
+    "0x3151e8ab9bfe754ada6682b9d75906e06a18a741": "Instex",
+    "0x1b38d2613698488cbac0e7d21abb2fdbbe1d6704": "Bit2MeDex",
+
     // non zrx
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex', //0x clone contract
     '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX', // DDEX hydro
   },
   // admin taker addresses for 0x relayers
   zrxTakers: {
-    '0x6af9ec649821c2213dc488c36e3e3e999c3d7934': 'Tokenlon', 
+    '0x6af9ec649821c2213dc488c36e3e3e999c3d7934': 'Tokenlon',
+    '0x41f8d14c9475444f30a80431c68cf24dc9a8369a': 'Toeknlon',
     '0x4a821aa1affbf7ee89a245bf750d1d7374e77409': 'Tokenmom',
+    '0x0681e844593a051e2882ec897ecd5444efe19ff2': 'STAR BIT',
     '0xdf1bc6498338135de5ffdbcb98817d81e2665912': 'Veil',
     '0x4969358e80cdc3d74477d7447bffa3b2e2acbe92': 'Paradex',
     '0xd2045edc40199019e221d71c0913343f7908d0d5': 'Paradex',

@@ -113,6 +113,7 @@ module.exports = {
     TotleProxy: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
     TotleProxy2: { addr: '0x74758acfce059f503a7e6b0fc2c8737600f9f2c4', name: 'Totle', supportedDex: false },
     TotleProxy3: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
+    Totle6: { addr: '0x77208a6000691e440026bed1b178ef4661d37426', name: 'Totle', supportedDex: false },
     ParaSwap3: { addr: '0xf92c1ad75005e6436b4ee84e88cb23ed8a290988', name: 'ParaSwap v3', supportedDex: false },
     DexAG: { addr: '0xd3bed3a8e3e6b24b740ead108ba776e0ad298588', name: 'DEX.AG v1', supportedDex: false },
     DexAG2: { addr: '0x932348df588923ba3f1fd50593b22c4e2a287919', name: 'DEX.AG v2', supportedDex: false },

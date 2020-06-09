@@ -175,6 +175,7 @@ module.exports = {
   // List of addresses with a name or label attached
 
   // feeRecipients for 0x relayers,  https://github.com/0xProject/0x-relayer-registry/blob/master/relayers.json
+  // https://github.com/0xTracker/0x-tracker-worker/blob/master/src/relayers/relayer-registry.js
   zrxRelayers: {
     '0xa258b39954cef5cb142fd567a46cddb31a670124': "RadarRelay",
     '0xeb71bad396acaa128aeadbc7dbd59ca32263de01': "IDT",
@@ -228,14 +229,30 @@ module.exports = {
     "0xd592cfa56f4c443fb27008329d67ed7d4edb59c0": 'Erc Dex',
 
     '0xaf8ae6955d07776ab690e565ba6fbc79b8de3a5d': 'DiversiFi',
+    "0x1000000000000000000000000000000000000011": '0x API',
+    "0x382310cbb159b64c2e7c5675d110202701a436dd": 'Odee',
+    "0x5265bde27f57e738be6c1f6ab3544e82cdc92a8f": 'VeriDex',
+    "0xa5004c8b2d64ad08a80d33ad000820d63aa2ccc9": 'Udex',
+    "0x68a17b587caf4f9329f0e372e3a78d23a46de6b5": '1inch',
+    "0x4d37f28d2db99e8d35a6c725a5f1749a085850a3": '1inch',
+    "0x1af29de80f743be444aa195e2cae38ee9bc74c4c": "OC2 Dex",
+    "0x879047421625b87b5895ef1ac0d9dbd241805aa3": "OC2 Dex",
+    "0x584860fe460a16cd11e6fdebb2e77146d1835be8": "MerchCoins",
+    "0x3151e8ab9bfe754ada6682b9d75906e06a18a741": "Instex",
+    "0x1b38d2613698488cbac0e7d21abb2fdbbe1d6704": "Bit2MeDex",
+
+
+
     // non zrx
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex', //0x clone contract
     '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX', // DDEX hydro
   },
   // admin taker addresses for 0x relayers
   zrxTakers: {
-    '0x6af9ec649821c2213dc488c36e3e3e999c3d7934': 'Tokenlon', 
+    '0x6af9ec649821c2213dc488c36e3e3e999c3d7934': 'Tokenlon',
+    '0x41f8d14c9475444f30a80431c68cf24dc9a8369a': 'Toeknlon',
     '0x4a821aa1affbf7ee89a245bf750d1d7374e77409': 'Tokenmom',
+    '0x0681e844593a051e2882ec897ecd5444efe19ff2': 'STAR BIT',
     '0xdf1bc6498338135de5ffdbcb98817d81e2665912': 'Veil',
     '0x4969358e80cdc3d74477d7447bffa3b2e2acbe92': 'Paradex',
     '0xd2045edc40199019e221d71c0913343f7908d0d5': 'Paradex',
@@ -259,6 +276,7 @@ module.exports = {
     '0x571037cc2748c340e3c6d9c7af589c6d65806618': 'Switcheo Admin',
     '0x8ecf87fc9d7336cc0052d40abf806fb1af2ea81c': 'DINNGO Admin',
     '0x004dc6cb71104f64098fe70825516d2075cfa030': 'dex.blue Admin',
+    '0x3d5a2fbed1b64ec88abacbd0c287461e8e8f7331': 'dex.blue Admin', //old one
   },
   // known (centralized) exchange wallets, (personal experience + https://etherscan.io/accounts/1?&l=Exchange )
   exchangeWallets: {
@@ -3140,7 +3158,8 @@ module.exports = {
 
     AirSwap: { addr: '0x8fd3121013a07c57f0d69646e86e7a4880b467b7', name: 'AirSwap', supportedDex: true },
     AirSwapTrader : { addr: '0x9af9c0cf3cd15e0afe63930fbf20941c89f3ff98', name: 'AirSwap OTC', supportedDex: false},
-    AirSwap2: { addr: '0x54d2690e97e477a4b33f40d6e4afdd4832c07c57', name: 'AirSwap2', supportedDex: false },
+    AirSwap2: { addr: '0x54d2690e97e477a4b33f40d6e4afdd4832c07c57', name: 'AirSwap', supportedDex: false },
+    AirSwap3: { addr: '0x4572f2554421bd64bef1c22c8a81840e8d496bea', name: 'AirSwap', supportedDex: false },
     Kyber: { addr: '0x964f35fae36d75b1e72770e244f6595b68508cf5', name: 'Kyber Network', supportedDex: true }, // contract disabled?
     KyberTest: { addr: '0xd2d21fdef0d054d2864ce328cc56d1238d6b239e', name: 'Kyber Test', supportedDex: true },
 
@@ -3193,6 +3212,7 @@ module.exports = {
     TotleProxy: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
     TotleProxy2: { addr: '0x74758acfce059f503a7e6b0fc2c8737600f9f2c4', name: 'Totle', supportedDex: false },
     TotleProxy3: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
+    Totle6: { addr: '0x77208a6000691e440026bed1b178ef4661d37426', name: 'Totle', supportedDex: false },
     ParaSwap3: { addr: '0xf92c1ad75005e6436b4ee84e88cb23ed8a290988', name: 'ParaSwap v3', supportedDex: false },
     DexAG: { addr: '0xd3bed3a8e3e6b24b740ead108ba776e0ad298588', name: 'DEX.AG v1', supportedDex: false },
     DexAG2: { addr: '0x932348df588923ba3f1fd50593b22c4e2a287919', name: 'DEX.AG v2', supportedDex: false },
@@ -3298,8 +3318,10 @@ module.exports = {
     AllBit2: { addr: '0xff6b1cdfd2d3e37977d7938aa06b6d89d6675e27', name: 'AllBit', supportedDex: false },
     Saturn: { addr: '0x13f64609bf1ef46f6515f8cd3115433a93a00dc6', name: 'Saturn Network', supportedDex: false },
     Saturn2: { addr: '0x1f0d1de1558582ad6f13763f477119a1455502af', name: 'Saturn Network', supportedDex: false },
+    Saturn3: { addr: '0xaa5bbd5a177a588b9f213505ca3740b444dbd586', name: 'Saturn Network', supportedDex: false },
     Loopring: { addr: '0x8d8812b72d1e4ffcec158d25f56748b7d67c1e78', name: 'LoopRing v1', supportedDex: false },
     Loopring3: { addr: '0xc2d1e8fb0c10810bb888231e7b85118042846105', name: 'LoopRing v3', supportedDex: false },
+    Loopring4: { addr: '0x944644ea989ec64c2ab9ef341d383cef586a5777', name: 'LoopRing', supportedDex: false },
     Aiwallet: { addr: '0x3dbf4ee7ed88157cda8b2c1578861cea1a1230f1', name: 'Aiwallet', supportedDex: false },
     AmisDex: { addr: '0x2cc69caaaaa6114ddf48f4ddb2adb9c5d5d3e048', name: 'AmisDex', supportedDex: false },
     Verify1: { addr: '0x48bf5e13a1ee8bd4385c182904b3abf73e042675', name: '0xVerify', supportedDex: false },
@@ -3312,6 +3334,7 @@ module.exports = {
     Blockonix2: { addr: '0x67b084e4654e1d62afa9694b6a626cec5c9ff2bd', name: 'Blockonix', supportedDex: false },
     CryptoKitty: { addr: '0xb1690c08e213a35ed9bab7b318de14420fb57d8c', name: 'CryptoKitties', supportedDex: false }, //auction
     Dinngo: { addr: '0xd494938d0524edadfc239adc2c233e50550fa152', name: 'Dinngo', supportedDex: false },
+    Dinngo2: { addr: '0x268be5667d4e5bd036bd608d0601ef1441604429', name: 'Dinngo', supportedDex: false },
     DappDex: { addr: '0xec3d7968b0d3fff0a074668e08eb56c5e6d38b21', name: 'DappDex', supportedDex: false },
     MCDEX: { addr: '0xfe3a6567a25d74b3a7f10ed49631502806ed1a17', name: 'MCDEX', supportedDex: false },
     Coinected: { addr: '0xdf00412a54951e0ff42267427c3f17fa792a14a0', name: 'Coinected', supportedDex: false },
@@ -3327,6 +3350,7 @@ module.exports = {
     Kulap1: { addr: '0xcee7eea7e58434997a59049f7da4d0ad46f1f141', name: 'KulapDex', supportedDex: false },
     Kulap2: { addr: '0x3f7a7fe9b5304042d179deadf2521ea12d97a5c7', name: 'KulapDex', supportedDex: false },
     TrexDex: { addr: '0x2fca5f257895b8bcede0c0d06141b718ec9a3041', name: 'TrexDex', supportedDex: false },
+    Tokedo: { addr: '0xc3dc5b72cba5922b95ebc81606b2581e577feca0', name: 'Tokedo', supportedDex: false },
 
     Counter: { addr: '0xc0deee11aa091189fff0713353c43c7c8cae7881', name: 'Counter', supportedDex: false },
     Counter2: { addr: '0x1234567896326230a28ee368825d11fe6571be4a', name: 'Counter', supportedDex: false },

@@ -838,7 +838,6 @@ var pageType = 'balance';
             ForkDelta: { attempts: 0, done: false, failed: false, prices: [] },
             IDEX: { attempts: 0, done: false, failed: false, prices: [] },
             Kyber: { attempts: 0, done: false, failed: false, prices: [] },
-            TokenStore: { attempts: 0, done: false, failed: false, prices: [] },
             Radar: { attempts: 0, done: false, failed: false, prices: [] },
             DDEX: { attempts: 0, done: false, failed: false, prices: [] },
         };
@@ -994,24 +993,6 @@ var pageType = 'balance';
                         ask: tok.current_ask,
                         volumeETH: tok.eth_24h_volume,
                         //change24h: tok.change_eth_24h,
-                    };
-                    prices[tokenPrice.addr] = tokenPrice;
-                }
-            });
-            return prices;
-        });
-
-        priceRequest('TokenStore', 'https://v1-1.api.token.store/ticker', (result) => {
-            let keys = Object.keys(result);
-            let prices = {};
-            keys.map((key) => {
-                if (key.indexOf('ETH_') == 0) {
-                    let tok = result[key];
-                    let tokenPrice = {
-                        addr: tok.tokenAddr.toLowerCase(),
-                        bid: tok.bid,
-                        ask: tok.ask,
-                        volumeETH: Number(tok.baseVolume),
                     };
                     prices[tokenPrice.addr] = tokenPrice;
                 }
@@ -1478,7 +1459,7 @@ var pageType = 'balance';
                     //get bid/ask prices for this token
 
                     // set prices in this order, later in the list is assumed to be more accurate 
-                    let keyOrder = ['TokenStore', 'DDEX', 'ForkDelta', 'Radar', 'IDEX', 'Kyber'];
+                    let keyOrder = ['DDEX', 'ForkDelta', 'Radar', 'IDEX', 'Kyber'];
                     //price obj for this token {forkdelta: {bid, ask}, idex:{bid,ask}}
                     let tokenPrices = exchangePrices.prices[token.addr];
 

@@ -4,12 +4,12 @@
 
 // List of tokens per exchange
 var exchangeTokens = {
-   // forkdelta: [],  // new domain CORS protection
+    //forkdelta: [],  // new domain CORS protection
     idex: [],
     ddex: [],
     radar: [],
     kyber: [],
-    tokenstore: [],
+    oneinch: [],
 };
 
 // unknown tokens found in a previous session
@@ -39,7 +39,7 @@ var unknownTokenCache = [];
         ddex: 0,
         radar: 0,
         kyber: 0,
-        tokenstore: 0,
+        oneinch: 0,
     };
 
 
@@ -118,6 +118,30 @@ var unknownTokenCache = [];
         }
     });
 
+    getTokens('https://api.1inch.exchange/v1.1/tokens', "OneInch", function (jsonData) {
+        let tokens = [];
+        if (jsonData) {
+            tokens = Object.values(jsonData);
+            tokens = tokens.map(tok => { return { symbol: tok.symbol, address: tok.address.toLowerCase(), decimals: Number(tok.decimals), name: tok.name }; });
+        }
+        return tokens;
+    });
+
+    /*
+    getTokens('https://api-v2.dex.ag/token-list-full', "DEX.AG", function (jsonData) {
+        let tokens = [];
+        if (jsonData) {
+            tokens = Object.values(jsonData);
+            tokens = tokens.map(tok => {
+                let duplicate = " (" + tok.symbol + ")";
+                tok.name = tok.name.replace(duplicate, "");
+                return { symbol: tok.symbol, address: tok.address.toLowerCase(), decimal: Number(tok.decimals), name: tok.name };
+            });
+        }
+        return tokens;
+    }); */
+
+    /*
     getTokens('https://v1-1.api.token.store/ticker', 'TokenStore', function (jsonData) {
         if (jsonData) {
             let tokens = Object.values(jsonData);
@@ -125,7 +149,8 @@ var unknownTokenCache = [];
         } else {
             return [];
         }
-    });
+    });*/
+
 
 
 

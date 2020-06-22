@@ -294,6 +294,7 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
     loadCachedTokens('IDEX');
     loadCachedTokens('Radar');
     loadCachedTokens('Kyber');
+    loadCachedTokens('OneInch');
 
     try {
         //unknown tokens saved from etherscan responses
@@ -321,8 +322,6 @@ DeltaBalances.prototype.initTokens = function (useBlacklist) {
         console.log('failed to parse unknown token list');
     }
 
-    //load this last as it doesn't include decimals, we might get them from another source
-    loadCachedTokens('TokenStore');
 
     {  //init internal uniswap tokens
         let uniKeys = Object.keys(this.config.uniswapContracts).map(x => x.toLowerCase());
@@ -5971,12 +5970,15 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
 
                         contents += 'Trade decentralized: <br><table class="popoverTable"><tr><td>' + utility.forkDeltaURL(token, true)
                             + '</td><td>' + utility.idexURL(token, true)
-                            + '</td></tr><tr><td>' + utility.tokenStoreURL(token, true)
+                            + '</td></tr><tr><td>' + utility.oneInchUrl(token, true)
                             + '</td><td>' + utility.ddexURL(token, true)
                             + '</td></tr><tr><td>' + utility.radarURL(token, true)
                             + '</td><td>' + utility.kyberURL(token, true)
-                            + '</td></tr><tr><td>' + utility.etherDeltaURL(token, true)
-                            + '</td><td></td></tr></table>';
+                            + '</td></tr></table>';
+
+                        contents += 'Legacy decentralized: <br><table class="popoverTable"><tr><td>'
+                            + utility.etherDeltaURL(token, true)
+                            + '</td><td>' + utility.tokenStoreURL(token, true) + '</td></tr>';
                     }
                 } else if (token.addr == this.config.ethAddr) {
                     contents = "Ether (not a token)<br> Decimals: 18";

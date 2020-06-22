@@ -19,7 +19,7 @@ module.exports = {
   history: historyConf.history,
 
   //attributes on tokens for exchanges that makes tokens show up as listed
-  listedExchanges: ['ForkDelta', 'IDEX', 'DDEX', 'DDEX2', 'Binance', 'Radar', 'Kyber'],
+  listedExchanges: ['ForkDelta', 'IDEX', 'DDEX', 'DDEX2', 'Binance', 'Radar', 'Kyber', 'OneInch'],
 
   /* token related variables, see backuptokens.js for a full token list */
 

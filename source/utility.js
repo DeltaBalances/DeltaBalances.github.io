@@ -402,6 +402,24 @@ module.exports = (db) => {
         return url;
     }
 
+    utility.oneInchUrl = function (tokenObj, html) {
+        let url = '';
+
+        if (tokenObj && tokenObj.OneInch) {
+            url = "https://1inch.exchange/#/r/0xf6E914D07d12636759868a61E52973d17ED7111B";
+        }
+        let labelClass = 'label-primary';
+
+        if (html) {
+            if (url == '') {
+                url = '<span class="label label-default' + '">1inch</span>';
+            } else {
+                url = '<a class="label label-primary" href="' + url + '" target="_blank" rel="noopener noreferrer">1inch <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+            }
+        }
+        return url;
+    }
+
     utility.idexURL = function (tokenObj, html) {
         var url = "https://idex.market/eth/"
         var labelClass = "label-primary";

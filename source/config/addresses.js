@@ -115,7 +115,7 @@ module.exports = {
     '0x00799bbc833d5b168f0410312d2a8fd9e0e3079c': 'Binance',
     '0xfe9e8709d3215310075d67e3ed32a380ccf451c8': 'Binance',
     '0x4e9ce36e442e55ecd9025b9a6e0d88485d628a67': 'Binance',
-    '0xbe0eb53f46cd790cd13851d5eff43d12404d33e8': 'Binance',	
+    '0xbe0eb53f46cd790cd13851d5eff43d12404d33e8': 'Binance',
     '0xf977814e90da44bfa03b6295a0616a897441acec': 'Binance',
     '0xab83d182f3485cf1d6ccdd34c7cfef95b4c08da4': 'Binance JEX',
     '0x1151314c646ce4e0efd76d1af4760ae66a9fe30f': 'Bitfinex',

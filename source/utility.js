@@ -446,7 +446,7 @@ module.exports = (db) => {
         let labelClass = "label-primary";
         if (tokenObj && (tokenObj.DDEX || tokenObj.DDEX2)) {
             //fallback to legacy ddex website
-            if(tokenObj.DDEX2) {
+            if (tokenObj.DDEX2) {
                 url += "ddex.io/spot/" + tokenObj.DDEX2;
             } else {
                 url += "legacy.ddex.io/trade/" + tokenObj.DDEX + '-ETH';
@@ -461,7 +461,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">DDEX</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">DDEX' + urlAddition+'<i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">DDEX' + urlAddition + '<i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;

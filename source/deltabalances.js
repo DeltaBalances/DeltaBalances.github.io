@@ -616,7 +616,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'unlisted': token.unlisted,
                 };
             }
-            // exchange deposit/withdraw ETH (etherdelta, idex deposit, tokenstore, ethen, switcheo deopsit) 
+            // exchange deposit/withdraw ETH (etherdelta, idex deposit, tokenstore, ethen, switcheo deposit) 
             // wrap  0x ETH->WETH, wrap ethfinex lockTokens. (un)wrapping
             else if (unpacked.name === 'deposit' || (unpacked.name === 'withdraw' && unpacked.params[0].name !== 'token' && unpacked.params.length < 9)
                 || unpacked.name === 'withdrawEther' || unpacked.name === 'depositEther') {
@@ -712,6 +712,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
 
                 if (type.indexOf('rap') === -1) {
+                    //deposit / withdraw
                     return {
                         'type': type,
                         'exchange': exchange,
@@ -720,6 +721,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         'amount': amount,
                     };
                 } else {
+                    //wrap / unwrap
                     return {
                         'type': type,
                         'token In': token,
@@ -743,7 +745,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     if (unpacked.name === 'withdrawToken' || unpacked.name === 'withdrawBoth' || unpacked.name === 'withdraw') {
                         type = 'Withdraw';
                         if (exchange) {
-                            note = 'Request ' + exchange + 'contract to withdraw ' + token.name;
+                            note = 'Request ' + exchange + ' contract to withdraw ' + token.name;
                         } else {
                             note = 'Request the exchange to withdraw ' + token.name;
                         }
@@ -751,7 +753,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     else {
                         type = 'Deposit';
                         if (exchange) {
-                            note = 'Request the ' + exchange + 'contract to deposit ' + token.name;
+                            note = 'Request the ' + exchange + ' contract to deposit ' + token.name;
                         } else {
                             note = 'Request the exchange contract to deposit ' + token.name;
                         }
@@ -809,7 +811,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         note = utility.addressLink(unpacked.params[2].value, true, true) + ' requested Switcheo to withdraw tokens';
                     } else {
                         type = 'Withdraw';
-                        note = utility.addressLink(unpacked.params[2].value, true, true) + ' requested Switc to withdraw ETH';
+                        note = utility.addressLink(unpacked.params[2].value, true, true) + ' requested Switcheo to withdraw ETH';
                     }
 
                     return {
@@ -835,7 +837,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let exchange = this.getExchangeName(txTo, '');
                     var note = '';
                     if (exchange) {
-                        note = 'Request the ' + exchange + 'contract to deposit ' + token.name;
+                        note = 'Request the ' + exchange + ' contract to deposit ' + token.name;
                     } else {
                         note = 'Request the exchange contract to deposit ' + token.name;
                     }
@@ -3265,7 +3267,6 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         delete result.maxPrice;
                     }
                     return result;
-
                 }
             }
             //uniswap liquidity
@@ -5798,7 +5799,6 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                         'tradeType': tradeType,
                     };
                 }
-
             }
             else if (unpacked.name == 'TokenPurchase' || unpacked.name == 'EthPurchase') {
 

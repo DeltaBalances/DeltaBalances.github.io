@@ -73,14 +73,14 @@ module.exports = {
   bancorConverters: instances.bancorConverters,
   uniswapContracts: instances.uniswapContracts,
   uniswapNewExTopic: '0x9d42cb017eb05bd8944ab536a8b35bc68085931dd5f4356489801453923953f9',
-  uniswapContractsBlock: 9620377, //blocknumber up to which all newExchange events are saved (min 6627917)
+  uniswapContractsBlock: 10235031, //(uniswapV1) blocknumber up to which all newExchange events are saved (min 6627917)
 
   /* api related */
   etherscanAPIKey: 'CY1M8MIE5IJ87GKNGYF98PGQFIHVQ99V13',
   infuraURL: 'https://mainnet.infura.io/v3/1b000043e1a84c468747a6b75b4541c1',  // infura project for ethereum logs (history)
   web3URLs: {
     Infura: 'https://mainnet.infura.io/v3/a736fb84e7d74effb636f41305a0afd3', // infura project for web3 calls
-    //Cloudflare: 'https://cloudflare-eth.com',
+    Cloudflare: 'https://cloudflare-eth.com',
     myCrypto: 'https://api.mycryptoapi.com/eth',
   },
   localNode: 'http://localhost:8545',

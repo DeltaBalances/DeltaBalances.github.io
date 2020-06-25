@@ -20,10 +20,24 @@
 `https://etherscan.io/tx/0xec1d0f87e47adf161c89c885abe0e4aede9d1a1f0b86ddb4f88a9c05c6844be2`
 
 ###### deposit
-`https://etherscan.io/tx/0x349a2f07586ab2fdf9dc328e831f40902c7fe1b01210baf81bd6d0fb3281b0cf`
+`https://etherscan.io/tx/0xfecc069ad29ed5c835304929ffcef3a392adcc69f93f92c936fdce2ad90d45e0`
+
+###### (unknown) deposit
+``https://etherscan.io/tx/0x349a2f07586ab2fdf9dc328e831f40902c7fe1b01210baf81bd6d0fb3281b0cf``
+
 ## WETH Bancor
-###### issue
+###### (fallback) -> issue
 `https://etherscan.io/tx/0x615cb191ef539691fc01928c93593539cfbfc464f7b89ff8625711a1ff2c4982`
 
-###### destroy
-``
+###### withdrawto
+`https://etherscan.io/tx/0xabba7bc812d301585489319f595b4dd420d3604f644b69fee509ea27bc2f776a`
+
+###### withdraw -> destroy
+`https://etherscan.io/tx/0xd49b5e5ea55632aceff734b4a78054fb002bca7bb0650e5dd980ec6932be0626`
+
+###### withdrawFromToken
+`https://etherscan.io/tx/0xc091c2b9a61605bcad78c1e736b59c8b4706a8c36f982711e0e73ec3c5708104`
+
+###### change (wrap ETH)
+`https://etherscan.io/tx/0xbce8de8fc8b1ec4fba33bfe61be93e1c404bd4c324c621e23a0a8062db9ad454`
+`https://etherscan.io/tx/0xc603396ce90df82c9601258ffb47c6cfaf450c9caa817234eeebf3bf2a4b279c` (wrap 0)

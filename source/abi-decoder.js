@@ -1,4 +1,4 @@
-const sha3 = require('web3/lib/utils/sha3.js');
+const sha3 = require('@ethersproject/hash/lib/index.js').id;
 const BigNumber = require('bignumber.js'); //keep classic bigNumber for legacy reasons instead of ether BN.js
 const abiCoder = require("@ethersproject/abi/lib/abi-coder.js").defaultAbiCoder;
 const Fragment = require("@ethersproject/abi/lib/fragments.js").Fragment;
@@ -29,7 +29,7 @@ function _addABI(abiArray) {
       }
 
       if (abi.name) {
-        const signature = '0x' + sha3(_getSignature(abi));
+        const signature = sha3(_getSignature(abi));
         if (abi.type == "event") {
           state.methodIDs[signature.slice(2)] = abi;
         } else {
@@ -37,7 +37,6 @@ function _addABI(abiArray) {
         }
       }
     });
-
     state.savedABIs = state.savedABIs.concat(abiArray);
   }
   else {
@@ -98,7 +97,7 @@ function _removeABI(abiArray) {
     // Iterate new abi to generate method id's
     abiArray.map(function (abi) {
       if (abi.name) {
-        const signature = '0x' + sha3(_getSignature(abi));
+        const signature = sha3(_getSignature(abi));
         if (abi.type == "event") {
           if (state.methodIDs[signature.slice(2)]) {
             delete state.methodIDs[signature.slice(2)];

@@ -10,8 +10,6 @@ var pageType = 'balance';
     var initiated = false;
     var autoStart = false;
 
-    var web3Index = 0;  //last used web3 instance
-
     var requestID = 0;
 
     // loading states
@@ -1182,28 +1180,16 @@ var pageType = 'balance';
             var success = false;
             var totalTries = 0;
 
-            //get balances from 2 web3 sources at once, use the fastest response
             // web3 provider (infura, myetherapi, mycryptoapi) or etherscan
-            makeCall(exchangeKey, functionName, arguments, 0);
             makeCall(exchangeKey, functionName, arguments, 0);
 
             function makeCall(exName, funcName, args, retried) {
-
-                if (web3Index < _delta.web3s.length) {
-                    web3Provider = _delta.web3s[web3Index];
-                    web3Index++;
-                } else {
-                    web3Provider = undefined;
-                    web3Index = 0;
-                }
                 if (success || requestID > rqid)
                     return;
 
 
-                _util.call(
-                    web3Provider,
+                _util.getBatchedBalances(
                     _delta.contractDeltaBalance,
-                    _delta.config.DeltaBalanceAddr,
                     funcName,
                     args,
                     (err, result) => {
@@ -1409,9 +1395,9 @@ var pageType = 'balance';
             return;
         }
 
-        let sumETH = _delta.web3.toBigNumber(0);
-        let sumWETH = _delta.web3.toBigNumber(0);
-        let sumToken = _delta.web3.toBigNumber(0);
+        let sumETH = _util.toBigNumber(0);
+        let sumWETH = _util.toBigNumber(0);
+        let sumToken = _util.toBigNumber(0);
 
         for (let i = 0; i < keys.length; i++) {
             if (exchanges[keys[i]].enabled)
@@ -1432,10 +1418,10 @@ var pageType = 'balance';
             let bal = balances[token.addr];
 
             if (bal) {
-                bal['Est. ETH'] = _delta.web3.toBigNumber(0);
+                bal['Est. ETH'] = _util.toBigNumber(0);
                 bal['USD'] = '';
                 bal['EUR'] = '';
-                bal.Total = _delta.web3.toBigNumber(0);
+                bal.Total = _util.toBigNumber(0);
                 for (let i = 0; i < keys.length; i++) {
                     if (exchanges[keys[i]].enabled && (exchanges[keys[i]].loaded + exchanges[keys[i]].failed >= tokenCount)) {
                         if (bal[keys[i]])
@@ -1486,7 +1472,7 @@ var pageType = 'balance';
 
                     if (bal.Total) {
                         // calculate estimate if not (wrapped) ETH
-                        var val = _delta.web3.toBigNumber(0);
+                        var val = _util.toBigNumber(0);
 
                         if (useAsk) {
                             if (bal.Ask) {

@@ -1,5 +1,5 @@
 let config = require('./config.js');
-const Web3 = require('web3');
+const Ethers = require('ethers');
 const BigNumber = require('bignumber.js');
 BigNumber.config({ ERRORS: false });
 
@@ -12,8 +12,11 @@ function DeltaBalances() {
     this.uniqueTokens = {};
     this.connection = undefined;
     this.secondsPerBlock = 14;
-    this.web3 = undefined;
-    this.web3s = [];
+    this.provider = Ethers.getDefaultProvider('homestead', {
+        etherscan: config.etherscanAPIKey,
+        infura: config.infuraKey,
+        quorum: 2
+    });
     this.contractDeltaBalance = undefined;
     this.socket = null;
     this.socketConnected = false;
@@ -105,87 +108,44 @@ DeltaBalances.prototype.divisorFromDecimals = function (decimals) {
     if (decimals !== undefined) {
         result = Math.pow(10, decimals);
     }
-    return new BigNumber(result);
+    return utility.toBigNumber(result);
 }
 
 DeltaBalances.prototype.loadWeb3 = function loadWeb3(wait, callback) {
     this.config = config;
-    let delta = this;
+    let completed = false;
 
-    let names = Object.keys(this.config.web3URLs);
-    let urls = Object.values(this.config.web3URLs);
-
-    let detected = 0;
-    let calledBack = false;
-
-    //etherscan fallback web3
-    this.web3 = new Web3();
-    this.web3.setProvider(undefined);
-
-    //backup blocknumber from etherscan, to check if web3 is up-to-date
-    utility.blockNumber(undefined, function (error, result) {
+    //check current blockNumber
+    utility.blockNumber((error, result) => {
         if (!error && result) {
             const block = Number(result);
             if (block > blocknum) {
                 blocknum = block;
-                console.log(`etherscan block: ${block}`);
+                console.log(`block: ${block}`);
+            }
+            if (!completed) {
+                completed = true;
+                callback();
             }
         }
     });
 
-    let timedOut = false;
     setTimeout(function () {
-        if (detected >= 1 && !calledBack) {
-            console.log('web3 search timed out');
-            calledBack = true;
+        if (!completed) {
+            console.log('Web3 timed out');
+            completed = true;
             callback();
         }
     }, 2000);
-
-    for (let i = 0; i < urls.length; i++) {
-        let provider = urls[i];
-
-        let localWeb3 = new Web3(new Web3.providers.HttpProvider(provider));
-        localWeb3.eth.getBlockNumber(function (error, result) {
-            if (!error && result) {
-                const block = Number(result);
-                if (block > blocknum) {
-                    blocknum = block;
-                    console.log(names[i] + ` block: ${block}`);
-                    delta.web3s.push(localWeb3);
-                } else if (block >= (blocknum - 5)) {
-                    console.log(names[i] + ` block: ${block}`);
-                    delta.web3s.push(localWeb3);
-                }
-            } else {
-                console.log(names[i] + 'web3 connection failed');
-            }
-            detected++;
-            if (!wait || detected >= urls.length) {
-                if (!calledBack) {
-                    calledBack = true;
-                    callback();
-                }
-            }
-        });
-    }
 };
 
 
 DeltaBalances.prototype.initContracts = function initContracts(callback) {
     let _delta = this;
-    /*
-    this.web3.version.getNetwork((error, version) => {
-        if (!error && version && Number(version) !== 1) {
-            _delta.dialogError('You are connected to the Ethereum testnet. Please connect to the Ethereum mainnet.');
-        }
-    }); */
-
     this.config = config;
 
     // load contract
     utility.loadContract(
-        _delta.web3,
         _delta.config.ABIs.DeltaBalances,
         _delta.config.DeltaBalanceAddr,
         (err, contractDeltaBalance) => {
@@ -494,7 +454,9 @@ DeltaBalances.prototype.setToken = function (address) {
 };
 
 DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
-
+    if (tx.data && !tx.input) {
+        tx.input = tx.data;
+    }
     if (!tx || !tx.input) {
         return undefined;
     }
@@ -524,7 +486,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let to = undefined;
                 let from = undefined;
                 let rawAmount = undefined;
-                let amount = new BigNumber(0);
+                let amount = utility.toBigNumber(0);
                 let token = this.setToken(tx.to);
 
                 if (unpacked.name === 'transfer') {
@@ -545,7 +507,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                     //erc721 token 
                     else { // transfer erc721, safeTransferFrom, transferFrom unknown token
-                        amount = new BigNumber(1);
+                        amount = utility.toBigNumber(1);
                         // set token to unique erc721 token ID, id field matches amount in erc20
                         token = this.setToken(token.addr + '-' + rawAmount);
                     }
@@ -566,14 +528,14 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             else if (unpacked.name === 'approve') {
                 var sender = unpacked.params[0].value;
                 var rawAmount = unpacked.params[1].value;
-                var amount = new BigNumber(0);
+                var amount = utility.toBigNumber(0);
                 var token = this.setToken(tx.to);
 
                 if (token && token.addr) {
                     if (!token.erc721) {
                         amount = utility.weiToToken(rawAmount, token);
                     } else {
-                        amount = new BigNumber(1);
+                        amount = utility.toBigNumber(1);
                         // set token to unique erc721 token ID, id field matches amount in erc20
                         token = this.setToken(token.addr + '-' + rawAmount);
                     }
@@ -622,7 +584,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 || unpacked.name === 'withdrawEther' || unpacked.name === 'depositEther') {
                 var type = '';
                 var note = '';
-                var rawVal = new BigNumber(0);
+                var rawVal = utility.toBigNumber(0);
                 var token = undefined;
                 var base = undefined;
                 var exchange = '';
@@ -632,7 +594,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     // Wrap ETH to WETH or ETH-W
                     if (utility.isWrappedETH(tx.to)) {
-                        rawVal = new BigNumber(tx.value);
+                        rawVal = utility.toBigNumber(tx.value);
                         type = 'Wrap ETH';
                         note = 'Wrap ETH to WETH';
                         token = this.setToken(this.config.ethAddr);
@@ -640,7 +602,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                     // Wrap erc20 token into lockable ethfinex token
                     else if (unpacked.params.length == 2 && unpacked.params[1].name == '_forTime') {
-                        rawVal = new BigNumber(unpacked.params[0].value);
+                        rawVal = utility.toBigNumber(unpacked.params[0].value);
                         base = this.setToken(tx.to);
                         // TODO find token in recent tx?
 
@@ -657,7 +619,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     else {
                         type = 'Deposit';
                         token = this.setToken(this.config.ethAddr);
-                        rawVal = new BigNumber(tx.value);
+                        rawVal = utility.toBigNumber(tx.value);
                         exchange = this.getExchangeName(txTo, 'unknown');
                         if (exchange === 'unknown') {
                             note = 'Deposit ETH into ' + exchange;
@@ -678,7 +640,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                     //unwrap ethfinex wrapped token
                     else if (unpacked.params.length == 5 && unpacked.params[4].name == "signatureValidUntilBlock") {
-                        rawVal = new BigNumber(unpacked.params[0].value);
+                        rawVal = utility.toBigNumber(unpacked.params[0].value);
                         token = this.setToken(txTo);
                         // TODO find base token?
 
@@ -732,17 +694,27 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
             }
             // exchange erc20 deposit / withdraw
-            else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || /* enclaves */ unpacked.name === 'withdrawBoth' || unpacked.name === 'depositBoth'
+            else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || unpacked.name === 'directWithdrawal' || unpacked.name === 'depositWrappedEther'
+                || /* enclaves */ unpacked.name === 'withdrawBoth' || unpacked.name === 'depositBoth'
                 || (unpacked.name === 'withdraw' && unpacked.params.length == 2 && unpacked.params[0].name === 'token')
+                || unpacked.name == 'multiSigWithdrawal'
             ) {
-                var token = this.setToken(unpacked.params[0].value);
+                let token = undefined;
+                let valueIndex = 1;
+                if (unpacked.name === 'depositWrappedEther') {
+                    token = this.setToken('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'); //WETH
+                    valueIndex = 0;
+                } else {
+                    token = this.setToken(unpacked.params[0].value);
+                }
+
                 if (token && token.addr) {
-                    var amount = utility.weiToToken(unpacked.params[1].value, token);
+                    var amount = utility.weiToToken(unpacked.params[valueIndex].value, token);
                     var type = '';
                     var note = '';
                     let exchange = this.getExchangeName(txTo, '');
 
-                    if (unpacked.name === 'withdrawToken' || unpacked.name === 'withdrawBoth' || unpacked.name === 'withdraw') {
+                    if (unpacked.name === 'withdrawToken' || unpacked.name === 'withdrawBoth' || unpacked.name === 'withdraw' || unpacked.name === 'directWithdrawal' || unpacked.name == 'multiSigWithdrawal') {
                         type = 'Withdraw';
                         if (exchange) {
                             note = 'Request ' + exchange + ' contract to withdraw ' + token.name;
@@ -777,11 +749,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         obj.base = this.setToken(this.config.ethAddr);
 
 
-                        let rawEthVal = new BigNumber(0);
+                        let rawEthVal = utility.toBigNumber(0);
                         if (unpacked.name === 'withdrawBoth') {
-                            rawEthVal = new BigNumber(unpacked.params[2].value);
+                            rawEthVal = utility.toBigNumber(unpacked.params[2].value);
                         } else {
-                            rawEthVal = new BigNumber(tx.value);
+                            rawEthVal = utility.toBigNumber(tx.value);
                         }
                         let ethVal = utility.weiToEth(rawEthVal);
                         obj.baseAmount = ethVal;
@@ -789,22 +761,48 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     return obj;
                 }
             }
-            // Switcheo admin withdraw
-            else if (unpacked.name === 'withdraw' && unpacked.params.length == 9) {
-                var token = this.setToken(unpacked.params[1].value);
-                var feeToken = this.setToken(unpacked.params[3].value);
-                if (token && feeToken && token.addr && feeToken.addr) {
-                    var rawAmount = new BigNumber(unpacked.params[2].value);
-                    var rawFee = new BigNumber(unpacked.params[4].value);
+            //dex.blue signature withdraw
+            else if (unpacked.name == 'userSigWithdrawal') {
+                // amount is in packedData1, token id is in packedData2 
+                let numData = unpacked.params[0].value.slice(0, 34); //0x + 32
+                let amount = utility.hexToDec(numData);
+                // 
+                let tokenID = unpacked.params[1].value.slice(0, 6); //0x + 4
 
+                //todo dex.blue token id to erc20 address
+
+                let exchange = this.getExchangeName(txTo, '');
+                return {
+                    'type': "Withdraw",
+                    'exchange': exchange,
+                    'note': "Tokens withdrawn by admin",
+                    'token': "",
+                    'amount': "",
+                    'unlisted': true,
+                };
+            }
+            // Switcheo admin withdraw
+            else if ((unpacked.name === 'withdraw' && unpacked.params.length == 9) || unpacked.name == 'emergencyWithdraw') {
+                var token = this.setToken(unpacked.params[1].value);
+                var feeToken = '';
+                if (unpacked.name === 'withdraw') {
+                    feeToken = this.setToken(unpacked.params[3].value);
+                }
+                if (token && token.addr) {
+                    var rawAmount = utility.toBigNumber(unpacked.params[2].value);
                     var amount = utility.weiToToken(rawAmount, token);
 
                     var type = '';
                     var note = '';
 
-                    var feeVal = utility.weiToToken(rawFee, feeToken);
+                    var feeVal = utility.toBigNumber(0);
 
                     let exchange = this.getExchangeName(txTo, '');
+
+                    if (feeToken && feeToken.addr) {
+                        var rawFee = utility.toBigNumber(unpacked.params[4].value);
+                        feeVal = utility.weiToToken(rawFee, feeToken);
+                    }
 
                     if (token.addr !== this.config.ethAddr) {
                         type = 'Token Withdraw';
@@ -876,20 +874,20 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     if (cancelType === 'sell') {
-                        rawAmount = new BigNumber(unpacked.params[1].value);
-                        rawBaseAmount = new BigNumber(unpacked.params[3].value);
+                        rawAmount = utility.toBigNumber(unpacked.params[1].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[3].value);
                     } else {
-                        rawBaseAmount = new BigNumber(unpacked.params[1].value);
-                        rawAmount = new BigNumber(unpacked.params[3].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[1].value);
+                        rawAmount = utility.toBigNumber(unpacked.params[3].value);
                     }
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -933,8 +931,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let base = _delta.setToken(unpacked.params[0].value[3].value);
                 let token = _delta.setToken(unpacked.params[0].value[2].value);
 
-                let rawBaseAmount = new BigNumber(unpacked.params[0].value[5].value);
-                let rawTokenAmount = new BigNumber(unpacked.params[0].value[4].value);
+                let rawBaseAmount = utility.toBigNumber(unpacked.params[0].value[5].value);
+                let rawTokenAmount = utility.toBigNumber(unpacked.params[0].value[4].value);
 
                 let rawData = unpacked.params[0].value[1].value.toLowerCase();
                 let cancelType = rawData.slice(4, 6); // 0-1 is 0x,  2-3 is version, 4-5 side
@@ -949,7 +947,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let amount = utility.weiToToken(rawTokenAmount, token);
                 let baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                let price = new BigNumber(0);
+                let price = utility.toBigNumber(0);
                 if (amount.greaterThan(0)) {
                     price = baseAmount.div(amount);
                 }
@@ -1031,13 +1029,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 if (unpacked.name === 'cancelOrder') {
                     let orderAddresses1 = unpacked.params[0].value;
                     let orderValues1 = unpacked.params[1].value;
-                    let cancelTakerTokenAmount1 = new BigNumber(unpacked.params[2].value);
+                    let cancelTakerTokenAmount1 = utility.toBigNumber(unpacked.params[2].value);
 
                     return unpack0xCancelInput(orderAddresses1, orderValues1, cancelTakerTokenAmount1);
                 } else if (unpacked.name === 'batchCancelOrders') {
                     let orderAddresses2 = unpacked.params[0].value;
                     let orderValues2 = unpacked.params[1].value;
-                    let cancelTakerTokenAmounts2 = unpacked.params[2].value.map(x => new BigNumber(x));
+                    let cancelTakerTokenAmounts2 = unpacked.params[2].value.map(x => utility.toBigNumber(x));
 
                     var objs = [];
                     for (let i = 0; i < orderAddresses2.length; i++) {
@@ -1055,8 +1053,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let makerToken = _delta.setToken(orderAddresses[2]);
                     let takerToken = _delta.setToken(orderAddresses[3]);
 
-                    let makerAmount = new BigNumber(orderValues[0]);
-                    let takerAmount = new BigNumber(orderValues[1]);
+                    let makerAmount = utility.toBigNumber(orderValues[0]);
+                    let takerAmount = utility.toBigNumber(orderValues[1]);
 
                     // fee is ZRX
                     //let feeCurrency = _delta.setToken('0xe41d2489571d322189246dafa5ebde1f4699f498');
@@ -1099,8 +1097,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
 
                     if (token && base && token.addr && base.addr) {
-                        var rawAmount = new BigNumber(0);
-                        var rawBaseAmount = new BigNumber(0);
+                        var rawAmount = utility.toBigNumber(0);
+                        var rawBaseAmount = utility.toBigNumber(0);
                         var chosenAmount = cancelTakerTokenAmount;
                         if (tradeType === 'Sell') {
                             rawAmount = takerAmount;
@@ -1113,8 +1111,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         var amount = utility.weiToToken(rawAmount, token);
                         var baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                        var orderSize = new BigNumber(0);
-                        var price = new BigNumber(0);
+                        var orderSize = utility.toBigNumber(0);
+                        var price = utility.toBigNumber(0);
                         if (amount.greaterThan(0)) {
                             price = baseAmount.div(amount);
                         }
@@ -1137,14 +1135,14 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                         // single units if erc721
                         if (token.erc721) {
-                            amount = new BigNumber(1);
+                            amount = utility.toBigNumber(1);
                             baseAmount = amount.times(price);
                         }
                         if (base.erc721) {
-                            baseAmount = new BigNumber(1);
+                            baseAmount = utility.toBigNumber(1);
                         }
                         if (token.erc721 && base.erc721) {
-                            price = new BigNumber(1);
+                            price = utility.toBigNumber(1);
                         }
 
                         return {
@@ -1247,8 +1245,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let makerToken = this.setToken(unpacked.params[2].value);
                 let takerToken = this.setToken(unpacked.params[5].value);
 
-                let makerAmount = new BigNumber(unpacked.params[1].value);
-                let takerAmount = new BigNumber(unpacked.params[4].value);
+                let makerAmount = utility.toBigNumber(unpacked.params[1].value);
+                let takerAmount = utility.toBigNumber(unpacked.params[4].value);
 
                 let exchange = this.getExchangeName(txTo, '');
 
@@ -1271,8 +1269,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     if (tradeType === 'Sell') {
                         rawAmount = takerAmount;
                         rawBaseAmount = makerAmount;
@@ -1283,7 +1281,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -1327,7 +1325,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 return {
                     'type': 'Cancel offer',
                     'exchange': exchange,
-                    'orderID': new BigNumber(unpacked.params[0].value),
+                    'orderID': utility.toBigNumber(unpacked.params[0].value),
                     'note': 'Cancel an open order',
                 };
             }
@@ -1382,22 +1380,22 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
 
                     if (tradeType === 'Sell') {
-                        rawAmount = new BigNumber(unpacked.params[1].value);
-                        rawBaseAmount = new BigNumber(unpacked.params[3].value);
+                        rawAmount = utility.toBigNumber(unpacked.params[1].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[3].value);
                     } else {
-                        rawBaseAmount = new BigNumber(unpacked.params[1].value);
-                        rawAmount = new BigNumber(unpacked.params[3].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[1].value);
+                        rawAmount = utility.toBigNumber(unpacked.params[3].value);
                     }
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                    var orderSize = new BigNumber(0);
-                    var price = new BigNumber(0);
+                    var orderSize = utility.toBigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -1406,7 +1404,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     orderSize = amount;
                     // selected amount, aailable in trades, not available in 'order'
                     if (unpacked.params.length >= 11) {
-                        var chosenAmount = new BigNumber(unpacked.params[10].value);
+                        var chosenAmount = utility.toBigNumber(unpacked.params[10].value);
 
                         if (tradeType === 'Buy') {
                             if (rawBaseAmount.greaterThan(chosenAmount)) {
@@ -1426,15 +1424,15 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let takerAddr = idex ? unpacked.params[11].value : txFrom;
                     let makerAddr = unpacked.name !== 'order' ? unpacked.params[6].value.toLowerCase() : txFrom;
 
-                    let takeFee = new BigNumber(0);
-                    let makeFee = new BigNumber(0);
+                    let takeFee = utility.toBigNumber(0);
+                    let makeFee = utility.toBigNumber(0);
                     let takeFeeCurrency = '';
                     let makeFeeCurrency = '';
 
                     if (idex) {
-                        const ether1 = new BigNumber(1000000000000000000);
-                        let takerFee = new BigNumber(2000000000000000); //0.2% fee in wei
-                        let makerFee = new BigNumber(1000000000000000); //0.1% fee in wei
+                        const ether1 = utility.toBigNumber(1000000000000000000);
+                        let takerFee = utility.toBigNumber(2000000000000000); //0.2% fee in wei
+                        let makerFee = utility.toBigNumber(1000000000000000); //0.1% fee in wei
 
                         //assume take trade
 
@@ -1511,8 +1509,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     var obj = unpackEthenOrderInput(
                         Number(unpacked.params[0].value[0 + offset]) > 0,
-                        new BigNumber(unpacked.params[0].value[6 + offset]),
-                        new BigNumber(unpacked.params[0].value[5 + offset]),
+                        utility.toBigNumber(unpacked.params[0].value[6 + offset]),
+                        utility.toBigNumber(unpacked.params[0].value[5 + offset]),
                         unpacked.params[1].value[0].toLowerCase(),
                         unpacked.params[1].value[i + 1]
                     );
@@ -1591,13 +1589,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let takerToken = this.setToken(unpacked.params[0 + iOffset].value);
                 let makerToken = this.setToken(unpacked.params[2 + iOffset].value);
 
-                let takerAmount = new BigNumber(unpacked.params[1 + iOffset].value);
-                let makerAmount = new BigNumber(unpacked.params[4 + iOffset].value); //max amount
+                let takerAmount = utility.toBigNumber(unpacked.params[1 + iOffset].value);
+                let makerAmount = utility.toBigNumber(unpacked.params[4 + iOffset].value); //max amount
 
-                let rate = new BigNumber(unpacked.params[5 + iOffset].value);
+                let rate = utility.toBigNumber(unpacked.params[5 + iOffset].value);
 
-                let minPrice = new BigNumber(0);
-                let maxPrice = new BigNumber(0);
+                let minPrice = utility.toBigNumber(0);
+                let maxPrice = utility.toBigNumber(0);
 
                 var tradeType = 'Sell';
                 var token = undefined;
@@ -1618,8 +1616,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     if (tradeType === 'Sell') {
                         rawAmount = takerAmount;
                         rawBaseAmount = makerAmount;
@@ -1652,7 +1650,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         };
                     } else {
 
-                        let one = new BigNumber(1000000000000000000);
+                        let one = utility.toBigNumber(1000000000000000000);
                         maxPrice = one.div(rate);
                         //estimated amount by max price
                         amount = baseAmount.div(maxPrice);
@@ -1686,24 +1684,24 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 if (unpacked.name == 'swapTokenToEther') {
                     takerToken = this.setToken(unpacked.params[0].value);
                     makerToken = this.setToken(this.config.ethAddr);
-                    takerAmount = new BigNumber(unpacked.params[1].value);
-                    rate = new BigNumber(unpacked.params[2].value);
+                    takerAmount = utility.toBigNumber(unpacked.params[1].value);
+                    rate = utility.toBigNumber(unpacked.params[2].value);
                 } else if (unpacked.name == 'swapEtherToToken') {
                     takerToken = this.setToken(this.config.ethAddr);
                     makerToken = this.setToken(unpacked.params[0].value);
-                    takerAmount = new BigNumber(tx.value);
-                    rate = new BigNumber(unpacked.params[1].value);
+                    takerAmount = utility.toBigNumber(tx.value);
+                    rate = utility.toBigNumber(unpacked.params[1].value);
                 } else {
                     takerToken = this.setToken(unpacked.params[0].value);
                     makerToken = this.setToken(unpacked.params[2].value);
-                    takerAmount = new BigNumber(unpacked.params[1].value);
-                    rate = new BigNumber(unpacked.params[3].value);
+                    takerAmount = utility.toBigNumber(unpacked.params[1].value);
+                    rate = utility.toBigNumber(unpacked.params[3].value);
                 }
 
                 let taker = txFrom;
 
-                let minPrice = new BigNumber(0);
-                let maxPrice = new BigNumber(0);
+                let minPrice = utility.toBigNumber(0);
+                let maxPrice = utility.toBigNumber(0);
 
                 var tradeType = 'Sell';
                 var token = undefined;
@@ -1711,8 +1709,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                 let exchange = this.getExchangeName(txTo, '');
 
-                let amount = new BigNumber(0);
-                let baseAmount = new BigNumber(0);
+                let amount = utility.toBigNumber(0);
+                let baseAmount = utility.toBigNumber(0);
 
                 if (this.isBaseToken(takerToken, makerToken)) {
                     tradeType = 'Buy';
@@ -1721,7 +1719,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     baseAmount = utility.weiToToken(takerAmount, base)
                     inverseMax = utility.weiToToken(rate, base);
-                    maxPrice = new BigNumber(1).div(inverseMax);
+                    maxPrice = utility.toBigNumber(1).div(inverseMax);
                     amount = baseAmount.div(maxPrice);
                 }
                 else {
@@ -1813,8 +1811,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let token = _delta.setToken(orderAddressStructArray[0].value);
                     let relayer = orderAddressStructArray[2].value.toLowerCase();
 
-                    let rawBaseAmount = new BigNumber(orderStructArray[2].value);
-                    let rawTokenAmount = new BigNumber(orderStructArray[1].value);
+                    let rawBaseAmount = utility.toBigNumber(orderStructArray[2].value);
+                    let rawTokenAmount = utility.toBigNumber(orderStructArray[1].value);
 
                     let rawData = orderStructArray[4].value.toLowerCase();
                     let tradeType = rawData.slice(4, 6); // 0-1 is 0x,  2-3 is version, 4-5 side
@@ -1829,7 +1827,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let amount = utility.weiToToken(rawTokenAmount, token);
                     let baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                    let price = new BigNumber(0);
+                    let price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -2054,7 +2052,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 if (unpacked.name === 'fillOrder' || unpacked.name == 'fillOrKillOrder') {
                     let orderAddresses1 = unpacked.params[0].value;
                     let orderValues1 = unpacked.params[1].value;
-                    let fillTakerTokenAmount1 = new BigNumber(unpacked.params[2].value);
+                    let fillTakerTokenAmount1 = utility.toBigNumber(unpacked.params[2].value);
 
                     if (oldName) {
                         unpacked.name = oldName;
@@ -2063,7 +2061,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 } else if (unpacked.name === 'batchFillOrders' || unpacked.name == 'batchFillOrKillOrders') {
                     let orderAddresses2 = unpacked.params[0].value;
                     let orderValues2 = unpacked.params[1].value;
-                    let fillTakerTokenAmounts2 = unpacked.params[2].value.map(x => new BigNumber(x));
+                    let fillTakerTokenAmounts2 = unpacked.params[2].value.map(x => utility.toBigNumber(x));
 
                     var objs = [];
                     for (let i = 0; i < orderAddresses2.length; i++) {
@@ -2081,7 +2079,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     // always matches 2 orders
                     let orderAddresses2 = unpacked.params[0].value;
                     let orderValues2 = unpacked.params[1].value;
-                    let fillTakerTokenAmounts2 = unpacked.params[2].value.map(x => new BigNumber(x));
+                    let fillTakerTokenAmounts2 = unpacked.params[2].value.map(x => utility.toBigNumber(x));
 
                     var objs = [];
                     for (let i = 0; i < orderAddresses2.length; i++) {
@@ -2102,7 +2100,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 else if (unpacked.name === 'fillOrdersUpTo') { //marketBuy, marketSell use this one too
                     let orderAddresses3 = unpacked.params[0].value;
                     let orderValues3 = unpacked.params[1].value;
-                    let fillTokenAmount3 = new BigNumber(unpacked.params[2].value);
+                    let fillTokenAmount3 = utility.toBigNumber(unpacked.params[2].value);
                     let fillToken = this.setToken(orderAddresses3[0][3]);
                     let fillIsMaker = false;
 
@@ -2145,14 +2143,14 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     // single units if erc721
                     if (objs[0].token.erc721) {
-                        amount = new BigNumber(1);
+                        amount = utility.toBigNumber(1);
                     }
                     if (objs[0].base.erc721) {
-                        baseAmount = new BigNumber(1);
+                        baseAmount = utility.toBigNumber(1);
                     }
                     if (objs[0].token.erc721 && objs[0].base.erc721) {
-                        minPrice = new BigNumber(1);
-                        maxPrice = new BigNumber(1);
+                        minPrice = utility.toBigNumber(1);
+                        maxPrice = utility.toBigNumber(1);
                     }
 
                     let relayer3 = objs[0].relayer;
@@ -2233,8 +2231,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let makerToken = _delta.setToken(orderAddresses[2]);
                     let takerToken = _delta.setToken(orderAddresses[3]);
 
-                    let makerAmount = new BigNumber(orderValues[0]);
-                    let takerAmount = new BigNumber(orderValues[1]);
+                    let makerAmount = utility.toBigNumber(orderValues[0]);
+                    let takerAmount = utility.toBigNumber(orderValues[1]);
 
                     //TODO add fee in input display?
 
@@ -2270,8 +2268,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
 
                     if (token && base && token.addr && base.addr) {
-                        var rawAmount = new BigNumber(0);
-                        var rawBaseAmount = new BigNumber(0);
+                        var rawAmount = utility.toBigNumber(0);
+                        var rawBaseAmount = utility.toBigNumber(0);
                         var chosenAmount = fillTokenAmount;
                         if (tradeType === 'Sell') {
                             rawAmount = takerAmount;
@@ -2284,8 +2282,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         var amount = utility.weiToToken(rawAmount, token);
                         var baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                        var orderSize = new BigNumber(0);
-                        var price = new BigNumber(0);
+                        var orderSize = utility.toBigNumber(0);
+                        var price = utility.toBigNumber(0);
                         if (amount.greaterThan(0)) {
                             price = baseAmount.div(amount);
                         }
@@ -2308,14 +2306,14 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                         // single units if erc721
                         if (token.erc721) {
-                            amount = new BigNumber(1);
+                            amount = utility.toBigNumber(1);
                             baseAmount = amount.times(price);
                         }
                         if (base.erc721) {
-                            baseAmount = new BigNumber(1);
+                            baseAmount = utility.toBigNumber(1);
                         }
                         if (token.erc721 && base.erc721) {
-                            price = new BigNumber(1);
+                            price = utility.toBigNumber(1);
                         }
 
                         return {
@@ -2335,6 +2333,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         };
                     }
                 }
+            }
+            //dex.blue trades called by admin
+            else if (unpacked.name == 'settleTrade' || unpacked.name == 'batchSettleTrades' || unpacked.name == 'settleReserveTrade') {
+                //todo
             }
             //oasisdex placing new offer
             else if (unpacked.name == 'offer' || unpacked.name == 'make') {
@@ -2371,21 +2373,21 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     if (tradeType === 'Sell') {
-                        rawAmount = new BigNumber(unpacked.params[0].value);
-                        rawBaseAmount = new BigNumber(unpacked.params[2].value);
+                        rawAmount = utility.toBigNumber(unpacked.params[0].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[2].value);
                     } else {
-                        rawBaseAmount = new BigNumber(unpacked.params[0].value);
-                        rawAmount = new BigNumber(unpacked.params[2].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[0].value);
+                        rawAmount = utility.toBigNumber(unpacked.params[2].value);
                     }
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                    var orderSize = new BigNumber(0);
-                    var price = new BigNumber(0);
+                    var orderSize = utility.toBigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -2414,7 +2416,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 return {
                     'type': 'Fill offer',
                     'exchange': exchange,
-                    'orderID': new BigNumber(unpacked.params[0].value),
+                    'orderID': utility.toBigNumber(unpacked.params[0].value),
                     'note': ' Fill a trade order',
                 };
             }
@@ -2464,14 +2466,14 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 if (unpacked.name == 'buyAllAmount' || unpacked.name == 'buyAllAmountBuyEth') {
                     tokenGet = this.setToken(unpacked.params[3].value);
                     tokenGive = this.setToken(unpacked.params[1].value);
-                    tokenGetAmount = new BigNumber(unpacked.params[4].value);
-                    tokenGiveAmount = new BigNumber(unpacked.params[2].value);
+                    tokenGetAmount = utility.toBigNumber(unpacked.params[4].value);
+                    tokenGiveAmount = utility.toBigNumber(unpacked.params[2].value);
                 }
                 else if (unpacked.name == 'buyAllAmountPayEth') {
                     tokenGet = this.setToken(unpacked.params[3].value);
                     tokenGive = this.setToken(unpacked.params[1].value);
-                    tokenGetAmount = new BigNumber(tx.value);
-                    tokenGiveAmount = new BigNumber(unpacked.params[2].value);
+                    tokenGetAmount = utility.toBigNumber(tx.value);
+                    tokenGiveAmount = utility.toBigNumber(unpacked.params[2].value);
                 }
 
                 let exchange = this.getExchangeName(txTo, 'OasisDirect');
@@ -2500,8 +2502,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                    var orderSize = new BigNumber(0);
-                    var price = new BigNumber(0);
+                    var orderSize = utility.toBigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -2577,14 +2579,14 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 if (unpacked.name == 'sellAllAmount' || unpacked.name == 'sellAllAmountBuyEth') {
                     tokenGet = this.setToken(unpacked.params[1].value);
                     tokenGive = this.setToken(unpacked.params[3].value);
-                    tokenGetAmount = new BigNumber(unpacked.params[2].value);
-                    tokenGiveAmount = new BigNumber(unpacked.params[4].value);
+                    tokenGetAmount = utility.toBigNumber(unpacked.params[2].value);
+                    tokenGiveAmount = utility.toBigNumber(unpacked.params[4].value);
                 }
                 else if (unpacked.name == 'sellAllAmountPayEth') {
                     tokenGet = this.setToken(unpacked.params[1].value);
                     tokenGive = this.setToken(unpacked.params[2].value);
-                    tokenGetAmount = new BigNumber(tx.value);
-                    tokenGiveAmount = new BigNumber(unpacked.params[3].value);
+                    tokenGetAmount = utility.toBigNumber(tx.value);
+                    tokenGiveAmount = utility.toBigNumber(unpacked.params[3].value);
                 }
 
                 let exchange = this.getExchangeName(txTo, 'OasisDirect');
@@ -2613,8 +2615,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                    var orderSize = new BigNumber(0);
-                    var price = new BigNumber(0);
+                    var orderSize = utility.toBigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -2774,21 +2776,21 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    let rawAmount = new BigNumber(0);
-                    let rawBaseAmount = new BigNumber(0);
+                    let rawAmount = utility.toBigNumber(0);
+                    let rawBaseAmount = utility.toBigNumber(0);
                     if (tradeType === 'Sell') {
-                        rawAmount = new BigNumber(unpacked.params[1].value);
-                        rawBaseAmount = new BigNumber(unpacked.params[2].value);
+                        rawAmount = utility.toBigNumber(unpacked.params[1].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[2].value);
                     } else {
-                        rawBaseAmount = new BigNumber(unpacked.params[1].value);
-                        rawAmount = new BigNumber(unpacked.params[2].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[1].value);
+                        rawAmount = utility.toBigNumber(unpacked.params[2].value);
                     }
 
 
                     let amount = utility.weiToToken(rawAmount, token);
                     let baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                    let price = new BigNumber(0);
+                    let price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -2822,7 +2824,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     }
                     //crosschain
                     if (unpacked.name.indexOf('x') === 0) {
-                        let chain = this.web3.toUtf8(unpacked.params[3].value);
+                        let chain = Ethers.utils.parseBytes32String(unpacked.params[3].value).trim();
                         let obj2 = {
                             'type': 'Trade (cross-chain)',
                             'exchange': 'BancorX',
@@ -2830,7 +2832,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                             'token': tokenGet,
                             'amount': token === tokenGet ? amount : baseAmount,
                             'blockchain': chain,
-                            'chainDestination': this.web3.toUtf8(unpacked.params[4].value),
+                            'chainDestination': Ethers.utils.parseBytes32String(unpacked.params[4].value).trim(),
                             'unlisted': tokenGive.unlisted,
                         }
                         return [obj2, obj];
@@ -2852,7 +2854,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let tokenGet = this.setToken(tokenPath[0]);
 
                 let exchange = 'Bancor';
-                let rawAmount = new BigNumber(unpacked.params[1].value);
+                let rawAmount = utility.toBigNumber(unpacked.params[1].value);
                 amount = utility.weiToToken(rawAmount, tokenGet);
 
                 if (this.isBaseToken(tokenGet, tokenGive)) {
@@ -2898,7 +2900,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let to = unpacked.params[2].value.toLowerCase();
                 let rawAmount = unpacked.params[3].value;
                 let token = this.setToken('0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c'); // BNT hardcoded
-                let chain = this.web3.toUtf8(unpacked.params[0].value);
+                let chain = Ethers.utils.parseBytes32String(unpacked.params[0].value).trim();
                 let amount = utility.weiToToken(rawAmount, token);
 
                 let note = 'Cross-chain token transfer of BNT from ' + chain;
@@ -2918,15 +2920,15 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             else if (unpacked.name === 'adminWithdraw') {
                 var token = this.setToken(unpacked.params[0].value);
                 if (token && token.addr) {
-                    var rawAmount = new BigNumber(unpacked.params[1].value);
-                    var fee = new BigNumber(unpacked.params[7].value);
+                    var rawAmount = utility.toBigNumber(unpacked.params[1].value);
+                    var fee = utility.toBigNumber(unpacked.params[7].value);
 
                     var amount = utility.weiToToken(rawAmount, token);
 
                     var type = '';
                     var note = '';
 
-                    const ether1 = new BigNumber(1000000000000000000);
+                    const ether1 = utility.toBigNumber(1000000000000000000);
                     var feeVal = utility.weiToToken((fee.times(rawAmount)).div(ether1), token);
 
                     if (token.addr !== this.config.ethAddr) {
@@ -2972,7 +2974,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let tokenAmount = utility.weiToToken(unpacked.params[1].value, token);
                     let baseAmount = utility.weiToToken(unpacked.params[2].value, base);
 
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (tokenAmount.greaterThan(0)) {
                         price = baseAmount.div(tokenAmount);
                     }
@@ -2980,7 +2982,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     var orderSize = tokenAmount;
 
                     // less than full base amount
-                    if (unpacked.name == 'takeSellOrder' && new BigNumber(unpacked.params[2].value) !== new BigNumber(tx.value)) {
+                    if (unpacked.name == 'takeSellOrder' && utility.toBigNumber(unpacked.params[2].value) !== utility.toBigNumber(tx.value)) {
                         baseAmount = utility.weiToToken(unpacked.params[2].value, base);
                         tokenAmount = baseAmount.div(price);
                     }
@@ -3015,13 +3017,13 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                 let rawETH = undefined;
                 if (unpacked.name.indexOf('Sell') !== -1) {
-                    rawETH = new BigNumber(unpacked.params[2].value);
+                    rawETH = utility.toBigNumber(unpacked.params[2].value);
                     tradeType = 'Sell';
                 } else {
                     if (unpacked.name.slice(0, 6) == 'cancel') {
-                        rawETH = new BigNumber(unpacked.params[2].value);
+                        rawETH = utility.toBigNumber(unpacked.params[2].value);
                     } else {
-                        rawETH = new BigNumber(tx.value);
+                        rawETH = utility.toBigNumber(tx.value);
                     }
                     tradeType = 'Buy';
                 }
@@ -3033,7 +3035,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     let tokenAmount = utility.weiToToken(unpacked.params[1].value, token);
                     let baseAmount = utility.weiToEth(rawETH);
 
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (tokenAmount.greaterThan(0)) {
                         price = baseAmount.div(tokenAmount);
                     }
@@ -3081,10 +3083,10 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                 let rawETH = undefined;
                 if (unpacked.name == 'sell' || unpacked.name == 'createSellOrder') {
-                    rawETH = new BigNumber(unpacked.params[2].value);
+                    rawETH = utility.toBigNumber(unpacked.params[2].value);
                     tradeType = 'Sell';
                 } else {
-                    rawETH = new BigNumber(tx.value);
+                    rawETH = utility.toBigNumber(tx.value);
                     tradeType = 'Buy';
                 }
 
@@ -3165,8 +3167,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     token = this.setToken(this.config.uniswapContracts[swapContract]);
                     base = this.setToken(this.config.ethAddr);
                     deadline = Number(unpacked.params[1].value);
-                    rawTokenAmount = new BigNumber(unpacked.params[0].value);
-                    rawBaseAmount = new BigNumber(tx.value);
+                    rawTokenAmount = utility.toBigNumber(unpacked.params[0].value);
+                    rawBaseAmount = utility.toBigNumber(tx.value);
                     tradeType = 'Buy';
                     if (unpacked.name.indexOf('Input') !== -1) {
                         fixedBaseAmount = true;
@@ -3177,11 +3179,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     base = this.setToken(this.config.ethAddr);
                     deadline = Number(unpacked.params[2].value);
                     if (unpacked.name.indexOf('Output') == -1) {
-                        rawTokenAmount = new BigNumber(unpacked.params[0].value);
-                        rawBaseAmount = new BigNumber(unpacked.params[1].value);
+                        rawTokenAmount = utility.toBigNumber(unpacked.params[0].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[1].value);
                     } else {
-                        rawTokenAmount = new BigNumber(unpacked.params[1].value);
-                        rawBaseAmount = new BigNumber(unpacked.params[0].value);
+                        rawTokenAmount = utility.toBigNumber(unpacked.params[1].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[0].value);
                         fixedBaseAmount = true;
                     }
                     tradeType = 'Sell';
@@ -3203,11 +3205,11 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
 
                     deadline = Number(unpacked.params[3].value);
                     if (unpacked.name.indexOf('Output') == -1) {
-                        rawTokenAmount = new BigNumber(unpacked.params[0].value);
-                        rawBaseAmount = new BigNumber(unpacked.params[1].value);
+                        rawTokenAmount = utility.toBigNumber(unpacked.params[0].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[1].value);
                     } else {
-                        rawTokenAmount = new BigNumber(unpacked.params[1].value);
-                        rawBaseAmount = new BigNumber(unpacked.params[0].value);
+                        rawTokenAmount = utility.toBigNumber(unpacked.params[1].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.params[0].value);
                         fixedBaseAmount = true;
                     }
 
@@ -3227,7 +3229,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                         recipient = unpacked.params[recipientIndex].value.toLowerCase();
                     }
 
-                    let price = new BigNumber(0);
+                    let price = utility.toBigNumber(0);
                     if (tokenAmount.greaterThan(0)) {
                         price = baseAmount.div(tokenAmount);
                     }
@@ -3332,7 +3334,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let results = [];
                 let base = this.setToken(tx.to);
                 { //wrap veil ETH
-                    let rawVal = new BigNumber(tx.value);
+                    let rawVal = utility.toBigNumber(tx.value);
                     let token = this.setToken(this.config.ethAddr);
                     let amount = utility.weiToEth(rawVal);
                     results.push({
@@ -3374,7 +3376,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 let results = [];
                 let token = this.setToken(tx.to);
                 let base = this.setToken(this.config.ethAddr);
-                let rawVal = new BigNumber(unpacked.params[0].value);
+                let rawVal = utility.toBigNumber(unpacked.params[0].value);
                 let amount = utility.weiToToken(rawVal, token);
                 { //unwrap veil ETH
                     results.push({
@@ -3584,9 +3586,9 @@ DeltaBalances.prototype.parseRecentIdexTrade = function (key, obj, userAddress) 
         }
     }
 
-    let baseAmount = new BigNumber(obj.total);
-    let amount = new BigNumber(obj.amount);
-    let price = new BigNumber(obj.price);
+    let baseAmount = utility.toBigNumber(obj.total);
+    let amount = utility.toBigNumber(obj.amount);
+    let price = utility.toBigNumber(obj.price);
 
     let hash = obj.transactionHash;
     let tradeType = obj.type;
@@ -3795,25 +3797,25 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     var buyUser = '';
                     var sellUser = '';
                     if (tradeType === 'Sell') {
-                        rawAmount = new BigNumber(unpacked.events[1].value);
-                        rawBaseAmount = new BigNumber(unpacked.events[3].value);
+                        rawAmount = utility.toBigNumber(unpacked.events[1].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.events[3].value);
                         sellUser = taker;
                         buyUser = maker;
                     } else {
-                        rawBaseAmount = new BigNumber(unpacked.events[1].value);
-                        rawAmount = new BigNumber(unpacked.events[3].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.events[1].value);
+                        rawAmount = utility.toBigNumber(unpacked.events[3].value);
                         sellUser = maker;
                         buyUser = taker;
                     }
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -3825,28 +3827,28 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                         tradeType = "Sell";
 
 
-                    let takerFee = new BigNumber(0);
-                    let makerFee = new BigNumber(0);
-                    const ether1 = new BigNumber(1000000000000000000); // 1 ether in wei
+                    let takerFee = utility.toBigNumber(0);
+                    let makerFee = utility.toBigNumber(0);
+                    const ether1 = utility.toBigNumber(1000000000000000000); // 1 ether in wei
 
                     let contractList = this.config.exchangeContracts;
                     if (exchange == contractList.EtherDelta.name || exchange == contractList.Decentrex.name || exchange == contractList.TokenStore.name
                         || exchange == contractList.Singularx.name || exchange == contractList.EtherC.name
                     ) {
-                        takerFee = new BigNumber(3000000000000000); //0.3% fee in wei
+                        takerFee = utility.toBigNumber(3000000000000000); //0.3% fee in wei
                     } else if (exchange == contractList.Enclaves.name) {
                         let exchangeNum = Number(unpacked.events[6].value);
 
                         //etherdelta proxy
                         if (exchangeNum == 1) {
-                            takerFee = new BigNumber(3000000000000000); //0.3% fee in wei
+                            takerFee = utility.toBigNumber(3000000000000000); //0.3% fee in wei
                         } else if (exchangeNum == 0) {
                             //enclaves itself
-                            takerFee = new BigNumber(2000000000000000); //0.2% fee in wei
+                            takerFee = utility.toBigNumber(2000000000000000); //0.2% fee in wei
                         }
                     }
 
-                    let fee = new BigNumber(0);
+                    let fee = utility.toBigNumber(0);
                     let feeCurrency = '';
                     if (transType === 'Taker') {
 
@@ -3921,19 +3923,19 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     if (tradeType === 'Sell') {
-                        rawAmount = new BigNumber(unpacked.events[1].value);
-                        rawBaseAmount = new BigNumber(unpacked.events[3].value);
+                        rawAmount = utility.toBigNumber(unpacked.events[1].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.events[3].value);
                     } else {
-                        rawBaseAmount = new BigNumber(unpacked.events[1].value);
-                        rawAmount = new BigNumber(unpacked.events[3].value);
+                        rawBaseAmount = utility.toBigNumber(unpacked.events[1].value);
+                        rawAmount = utility.toBigNumber(unpacked.events[3].value);
                     }
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -3962,23 +3964,23 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 var transType = 'Taker';
                 let tokenGet = this.setToken(unpacked.events[1].value);
                 let tokenGive = this.setToken(unpacked.events[3].value);
-                var rawAmount = new BigNumber(0);
-                var rawBaseAmount = new BigNumber(0);
+                var rawAmount = utility.toBigNumber(0);
+                var rawBaseAmount = utility.toBigNumber(0);
 
                 if (this.isBaseToken(tokenGet, tokenGive)) // get eth  -> sell
                 {
                     tradeType = 'Sell';
                     token = tokenGive;
                     base = tokenGet;
-                    rawAmount = new BigNumber(unpacked.events[0].value);
-                    rawBaseAmount = new BigNumber(unpacked.events[2].value);
+                    rawAmount = utility.toBigNumber(unpacked.events[0].value);
+                    rawBaseAmount = utility.toBigNumber(unpacked.events[2].value);
                 }
                 else //if (this.isBaseToken(tokenGive, tokenGet)) // buy
                 {
                     token = tokenGet;
                     base = tokenGive;
-                    rawBaseAmount = new BigNumber(unpacked.events[2].value);
-                    rawAmount = new BigNumber(unpacked.events[0].value);
+                    rawBaseAmount = utility.toBigNumber(unpacked.events[2].value);
+                    rawAmount = utility.toBigNumber(unpacked.events[0].value);
                 }
 
                 let exchange = this.getExchangeName(unpacked.address, '');
@@ -3987,12 +3989,12 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
 
-                    let fee = new BigNumber(0);
+                    let fee = utility.toBigNumber(0);
                     let feeCurrency = '';
 
                     return {
@@ -4042,8 +4044,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                 let exchange = this.getExchangeName(unpacked.address, '');
 
-                let rawAmount = new BigNumber(unpacked.events[3].value);
-                let price = new BigNumber(unpacked.events[2].value);
+                let rawAmount = utility.toBigNumber(unpacked.events[3].value);
+                let price = utility.toBigNumber(unpacked.events[2].value);
 
                 var amount = utility.weiToToken(rawAmount, token);
 
@@ -4061,12 +4063,12 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                     tradeType = "Sell";
 
 
-                let takerFee = new BigNumber(1000000 * 2500);
-                let makerFee = new BigNumber(0);
-                const ether1 = new BigNumber(1000000000000000000); // 1 ether in wei
+                let takerFee = utility.toBigNumber(1000000 * 2500);
+                let makerFee = utility.toBigNumber(0);
+                const ether1 = utility.toBigNumber(1000000000000000000); // 1 ether in wei
 
 
-                let fee = new BigNumber(unpacked.events[7].value);
+                let fee = utility.toBigNumber(unpacked.events[7].value);
                 let feeCurrency = base; //only ETH fees?
 
                 if (transType === 'Taker') {
@@ -4077,7 +4079,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                         fee = utility.weiToToken(fee, base);
                     }
                 } else if (transType === 'Maker') {
-                    fee = new BigNumber(0);
+                    fee = utility.toBigNumber(0);
                 }
 
                 return {
@@ -4122,8 +4124,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let base = this.setToken(unpacked.events[0].value[1]);
                 let token = this.setToken(unpacked.events[0].value[0]);
 
-                let rawBaseAmount = new BigNumber(unpacked.events[1].value[9]);
-                let rawTokenAmount = new BigNumber(unpacked.events[1].value[8]);
+                let rawBaseAmount = utility.toBigNumber(unpacked.events[1].value[9]);
+                let rawTokenAmount = utility.toBigNumber(unpacked.events[1].value[8]);
 
                 let transType = 'Taker';
                 if (isMyAddress(maker)) {
@@ -4140,24 +4142,24 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 if (token && base && token.addr && base.addr) {
                     let amount = utility.weiToToken(rawTokenAmount, token);
                     let baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    let price = new BigNumber(0);
+                    let price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
 
                     let feeToken = base;
-                    let fee = new BigNumber(0);
+                    let fee = utility.toBigNumber(0);
                     if (transType === 'Maker') {
-                        let makerFeeAmount = new BigNumber(unpacked.events[1].value[3]);
-                        let makerGasAmount = new BigNumber(unpacked.events[1].value[6]);
-                        let makerRebateAmount = new BigNumber(unpacked.events[1].value[4]);
+                        let makerFeeAmount = utility.toBigNumber(unpacked.events[1].value[3]);
+                        let makerGasAmount = utility.toBigNumber(unpacked.events[1].value[6]);
+                        let makerRebateAmount = utility.toBigNumber(unpacked.events[1].value[4]);
 
                         fee = utility.weiToToken(makerFeeAmount, base);
                         fee = fee.plus(utility.weiToToken(makerGasAmount, base));
                         fee = fee.minus(utility.weiToToken(makerRebateAmount, base));
                     } else {
-                        let takerFeeAmount = new BigNumber(unpacked.events[1].value[5]);
-                        let takerGasAmount = new BigNumber(unpacked.events[1].value[7]);
+                        let takerFeeAmount = utility.toBigNumber(unpacked.events[1].value[5]);
+                        let takerGasAmount = utility.toBigNumber(unpacked.events[1].value[7]);
                         fee = utility.weiToToken(takerFeeAmount, base)
                         fee = fee.plus(utility.weiToToken(takerGasAmount, base));
                     }
@@ -4196,8 +4198,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let base = this.setToken(unpacked.events[1].value);
                 let token = this.setToken(unpacked.events[0].value);
 
-                let rawBaseAmount = new BigNumber(unpacked.events[6].value);
-                let rawTokenAmount = new BigNumber(unpacked.events[5].value);
+                let rawBaseAmount = utility.toBigNumber(unpacked.events[6].value);
+                let rawTokenAmount = utility.toBigNumber(unpacked.events[5].value);
 
                 let transType = 'Taker';
                 if (isMyAddress(maker)) {
@@ -4209,24 +4211,24 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 if (token && base && token.addr && base.addr) {
                     let amount = utility.weiToToken(rawTokenAmount, token);
                     let baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    let price = new BigNumber(0);
+                    let price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
 
                     let feeToken = base;
-                    let fee = new BigNumber(0);
+                    let fee = utility.toBigNumber(0);
                     if (transType === 'Maker') {
-                        let makerFeeAmount = new BigNumber(unpacked.events[7].value);
-                        let makerGasAmount = new BigNumber(unpacked.events[9].value);
-                        let makerRebateAmount = new BigNumber(unpacked.events[10].value);
+                        let makerFeeAmount = utility.toBigNumber(unpacked.events[7].value);
+                        let makerGasAmount = utility.toBigNumber(unpacked.events[9].value);
+                        let makerRebateAmount = utility.toBigNumber(unpacked.events[10].value);
 
                         fee = utility.weiToToken(makerFeeAmount, base);
                         fee = fee.plus(utility.weiToToken(makerGasAmount, base));
                         fee = fee.minus(utility.weiToToken(makerRebateAmount, base));
                     } else {
-                        let takerFeeAmount = new BigNumber(unpacked.events[8].value);
-                        let takerGasAmount = new BigNumber(unpacked.events[11].value);
+                        let takerFeeAmount = utility.toBigNumber(unpacked.events[8].value);
+                        let takerGasAmount = utility.toBigNumber(unpacked.events[11].value);
                         fee = utility.weiToToken(takerFeeAmount, base);
                         fee = fee.plus(utility.weiToToken(takerGasAmount, base));
                     }
@@ -4313,8 +4315,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let makerToken = this.setToken(unpacked.events[2].value);
                 let takerToken = this.setToken(unpacked.events[5].value);
 
-                let makerAmount = new BigNumber(unpacked.events[1].value);
-                let takerAmount = new BigNumber(unpacked.events[4].value);
+                let makerAmount = utility.toBigNumber(unpacked.events[1].value);
+                let takerAmount = utility.toBigNumber(unpacked.events[4].value);
 
                 var tradeType = 'Sell';
                 var token = undefined;
@@ -4342,8 +4344,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     var buyUser = '';
                     var sellUser = '';
                     if (tradeType === 'Sell') {
@@ -4360,7 +4362,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -4378,7 +4380,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                             'unlisted': token.unlisted,
                             'buyer': buyUser,
                             'seller': sellUser,
-                            'fee': new BigNumber(0),
+                            'fee': utility.toBigNumber(0),
                             'feeCurrency': undefined,
                             'transType': transType,
                             'tradeType': tradeType,
@@ -4408,8 +4410,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let makerToken = this.setToken(unpacked.events[2].value);
                 let takerToken = this.setToken(unpacked.events[1].value);
 
-                let takerAmount = new BigNumber(unpacked.events[3].value);
-                let makerAmount = new BigNumber(unpacked.events[4].value);
+                let takerAmount = utility.toBigNumber(unpacked.events[3].value);
+                let makerAmount = utility.toBigNumber(unpacked.events[4].value);
 
                 var tradeType = 'Sell';
                 var token = undefined;
@@ -4437,8 +4439,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let exchange = this.getExchangeName(unpacked.address, '');
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     var buyUser = '';
                     var sellUser = '';
                     if (tradeType === 'Sell') {
@@ -4455,7 +4457,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -4472,7 +4474,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                         'unlisted': token.unlisted,
                         'buyer': buyUser,
                         'seller': sellUser,
-                        'fee': new BigNumber(0),
+                        'fee': utility.toBigNumber(0),
                         'feeCurrency': undefined,
                         'transType': transType,
                         'tradeType': tradeType,
@@ -4532,8 +4534,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                     makerToken = this.setToken(unpacked.events[3].value);
                     takerToken = this.setToken(unpacked.events[4].value);
 
-                    makerAmount = new BigNumber(unpacked.events[5].value);
-                    takerAmount = new BigNumber(unpacked.events[6].value);
+                    makerAmount = utility.toBigNumber(unpacked.events[5].value);
+                    takerAmount = utility.toBigNumber(unpacked.events[6].value);
 
                     makerFee = utility.weiToToken(unpacked.events[7].value, makerFeeToken);
                     takerFee = utility.weiToToken(unpacked.events[8].value, takerFeeToken);
@@ -4564,10 +4566,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                         makerFeeAddr = "0xe41d2489571d322189246dafa5ebde1f4699f498";
                         takerFeeAddr = "0xe41d2489571d322189246dafa5ebde1f4699f498";
 
-                        makerAmount = new BigNumber(unpacked.events[4].value);
-                        takerAmount = new BigNumber(unpacked.events[5].value);
-                        makerFeeAmount = new BigNumber(unpacked.events[6].value);
-                        takerFeeAmount = new BigNumber(unpacked.events[7].value);
+                        makerAmount = utility.toBigNumber(unpacked.events[4].value);
+                        takerAmount = utility.toBigNumber(unpacked.events[5].value);
+                        makerFeeAmount = utility.toBigNumber(unpacked.events[6].value);
+                        takerFeeAmount = utility.toBigNumber(unpacked.events[7].value);
                         // utility.weiToToken(unpacked.events[7].value, feeCurrency);
 
                     } else if (unpacked.events.length == 14) { //0x v3
@@ -4578,11 +4580,11 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                         makerFeeAddr = this.addressFromAssetData(unpacked.events[4].value, true);
                         takerFeeAddr = this.addressFromAssetData(unpacked.events[5].value, true);
 
-                        makerAmount = new BigNumber(unpacked.events[9].value);
-                        takerAmount = new BigNumber(unpacked.events[10].value);
-                        makerFeeAmount = new BigNumber(unpacked.events[11].value);
-                        takerFeeAmount = new BigNumber(unpacked.events[12].value);
-                        protocolFeeAmount = new BigNumber(unpacked.events[13].value);
+                        makerAmount = utility.toBigNumber(unpacked.events[9].value);
+                        takerAmount = utility.toBigNumber(unpacked.events[10].value);
+                        makerFeeAmount = utility.toBigNumber(unpacked.events[11].value);
+                        takerFeeAmount = utility.toBigNumber(unpacked.events[12].value);
+                        protocolFeeAmount = utility.toBigNumber(unpacked.events[13].value);
                     } else {
                         return { 'error': 'unsupported amount of Fill params' };
                     }
@@ -4599,13 +4601,13 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                         makerFeeToken = this.setToken(makerFeeAddr);
                         makerFee = utility.weiToToken(makerFeeAmount, makerFeeToken);
                     } else {
-                        makerFee = new BigNumber(0);
+                        makerFee = utility.toBigNumber(0);
                     }
                     if (takerFeeAddr) {
                         takerFeeToken = this.setToken(takerFeeAddr);
                         takerFee = utility.weiToToken(takerFeeAmount, takerFeeToken);
                     } else {
-                        takerFee = new BigNumber(0);
+                        takerFee = utility.toBigNumber(0);
                     }
                 }
                 //from here on mixed 0x v1 v2 v3 output
@@ -4638,8 +4640,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    let rawAmount = new BigNumber(0);
-                    let rawBaseAmount = new BigNumber(0);
+                    let rawAmount = utility.toBigNumber(0);
+                    let rawBaseAmount = utility.toBigNumber(0);
                     let buyUser = '';
                     let sellUser = '';
                     if (tradeType === 'Sell') {
@@ -4656,7 +4658,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                     let amount = utility.weiToToken(rawAmount, token);
                     let baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    let price = new BigNumber(0);
+                    let price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -4673,23 +4675,23 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                     // single units if erc721
                     if (token.erc721) {
-                        amount = new BigNumber(1);
+                        amount = utility.toBigNumber(1);
                         baseAmount = amount.times(price);
                     }
                     if (base.erc721) {
-                        baseAmount = new BigNumber(1);
+                        baseAmount = utility.toBigNumber(1);
                         if (token.erc721) {
-                            price = new BigNumber(1);
+                            price = utility.toBigNumber(1);
                         }
                     }
 
                     let protocolFeeToken = this.setToken(this.config.ethAddr); //v3 only
-                    let protocolFee = new BigNumber(0);
+                    let protocolFee = utility.toBigNumber(0);
                     if (protocolFeeAmount) {
                         protocolFee = utility.weiToToken(protocolFeeAmount, protocolFeeToken);
                     }
 
-                    let fee = new BigNumber(0);
+                    let fee = utility.toBigNumber(0);
                     let feeCurrency = undefined;
                     if (transType === 'Maker') {
                         fee = makerFee;
@@ -4776,8 +4778,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                     isV4 = true;
                 }
 
-                let makerAmount = new BigNumber(unpacked.events[4].value);
-                let takerAmount = new BigNumber(unpacked.events[3].value);
+                let makerAmount = utility.toBigNumber(unpacked.events[4].value);
+                let takerAmount = utility.toBigNumber(unpacked.events[3].value);
 
 
 
@@ -4807,8 +4809,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     var buyUser = '';
                     var sellUser = '';
                     if (tradeType === 'Sell') {
@@ -4825,7 +4827,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -4836,7 +4838,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                     //variant that includes fee
                     if (!isV4 && (unpacked.events.length == 8 || unpacked.events.length == 6)) {
                         feeCurrency = makerToken;
-                        let rawFee = new BigNumber(unpacked.events[5].value);
+                        let rawFee = utility.toBigNumber(unpacked.events[5].value);
                         if (token == makerToken) {
                             fee = utility.weiToToken(rawFee, token);
                         } else {
@@ -4869,8 +4871,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let from = unpacked.events[0].value.toLowerCase();
                 let rawAmount = unpacked.events[3].value;
                 let token = this.setToken('0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c'); // BNT hardcoded
-                let chain = this.web3.toUtf8(unpacked.events[1].value);
-                let chainAddr = this.web3.toUtf8(unpacked.events[2].value);
+                let chain = Ethers.utils.parseBytes32String(unpacked.events[1].value).trim();
+                let chainAddr = Ethers.utils.parseBytes32String(unpacked.events[2].value).trim();
                 let amount = utility.weiToToken(rawAmount, token);
 
                 let note = 'Cross-chain token transfer of BNT to ' + chain;
@@ -4893,7 +4895,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let to = unpacked.events[3].value.toLowerCase();
                 let rawAmount = unpacked.events[4].value;
                 let token = this.setToken('0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c'); // BNT hardcoded
-                let chain = this.web3.toUtf8(unpacked.events[1].value);
+                let chain = Ethers.utils.parseBytes32String(unpacked.events[1].value).trim();
                 let amount = utility.weiToToken(rawAmount, token);
 
                 let note = 'Cross-chain token transfer of BNT from ' + chain;
@@ -4943,6 +4945,47 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                         'token': token,
                         'amount': amount,
                         'balance': balance,
+                        'unlisted': token.unlisted,
+                    };
+                }
+            }
+            //dex.blue deposit, withdraw events
+            else if (unpacked.name == 'LogDeposit' || unpacked.name == 'LogWithdrawal'
+                || unpacked.name == 'LogDirectWithdrawal' || unpacked.name == 'LogSingleSigWithdrawal') {
+                let type = unpacked.name;
+                type = type.replace('Log', '');
+                type = type.replace('Direct', '');
+                type = type.replace('SingleSig', '');
+                type = type.replace('wal', 'w');
+
+                let token = this.setToken(unpacked.events[1].value);
+                let user = unpacked.events[0].value;
+                let rawAmount = unpacked.events[2].value;
+                let exchange = this.getExchangeName(unpacked.address, '');
+
+                if (token && token.addr) {
+                    let amount = utility.weiToToken(rawAmount, token);
+                    if (type === 'Withdraw') {
+                        note = 'Withdrawn from ';
+                    }
+                    else {
+                        note = 'Deposited into ';
+                    }
+                    if (exchange) {
+                        note += exchange;
+                    } else {
+                        note += 'the exchange contract';
+                    }
+
+                    if (token.addr !== this.config.ethAddr)
+                        type = 'Token ' + type;
+                    return {
+                        'type': type,
+                        'exchange': exchange,
+                        'note': note,
+                        'token': token,
+                        'amount': amount,
+                        'balance': "",
                         'unlisted': token.unlisted,
                     };
                 }
@@ -5063,12 +5106,12 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 var token = this.setToken(unpacked.address);
                 var tokenETH = this.setToken(this.config.ethAddr);
                 var user = '';
-                var rawAmount = new BigNumber(0);
+                var rawAmount = utility.toBigNumber(0);
                 if (unpacked.events.length == 2) {
                     user = unpacked.events[0].value;
-                    rawAmount = new BigNumber(unpacked.events[1].value);
+                    rawAmount = utility.toBigNumber(unpacked.events[1].value);
                 } else {
-                    rawAmount = new BigNumber(unpacked.events[0].value);
+                    rawAmount = utility.toBigNumber(unpacked.events[0].value);
                 }
 
                 if (token && token.addr) {
@@ -5104,7 +5147,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let token = this.setToken(unpacked.address);
                 let amount = '';
                 if (token) {
-                    amount = utility.weiToEth(new BigNumber(unpacked.events[0].value));
+                    amount = utility.weiToEth(utility.toBigNumber(unpacked.events[0].value));
                 }
 
                 let type = (unpacked.name == 'Destruction' ? 'Burn tokens' : 'Mint tokens')
@@ -5158,19 +5201,19 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                        } */
 
                     if (token && base && token.addr && base.addr) {
-                        var rawAmount = new BigNumber(0);
-                        var rawBaseAmount = new BigNumber(0);
+                        var rawAmount = utility.toBigNumber(0);
+                        var rawBaseAmount = utility.toBigNumber(0);
                         if (cancelType === 'sell') {
-                            rawAmount = new BigNumber(unpacked.events[1].value);
-                            rawBaseAmount = new BigNumber(unpacked.events[3].value);
+                            rawAmount = utility.toBigNumber(unpacked.events[1].value);
+                            rawBaseAmount = utility.toBigNumber(unpacked.events[3].value);
                         } else {
-                            rawBaseAmount = new BigNumber(unpacked.events[1].value);
-                            rawAmount = new BigNumber(unpacked.events[3].value);
+                            rawBaseAmount = utility.toBigNumber(unpacked.events[1].value);
+                            rawAmount = utility.toBigNumber(unpacked.events[3].value);
                         }
 
                         var amount = utility.weiToToken(rawAmount, token);
                         var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                        var price = new BigNumber(0);
+                        var price = utility.toBigNumber(0);
                         if (amount.greaterThan(0)) {
                             price = baseAmount.div(amount);
                         }
@@ -5270,8 +5313,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let makerToken = this.setToken(unpacked.events[2].value);
                 let takerToken = this.setToken(unpacked.events[3].value);
 
-                let makerAmount = new BigNumber(unpacked.events[4].value);
-                let takerAmount = new BigNumber(unpacked.events[5].value);
+                let makerAmount = utility.toBigNumber(unpacked.events[4].value);
+                let takerAmount = utility.toBigNumber(unpacked.events[5].value);
 
                 var tradeType = 'Sell';
                 var token = undefined;
@@ -5294,8 +5337,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     if (tradeType === 'Sell') {
                         rawAmount = takerAmount;
                         rawBaseAmount = makerAmount;
@@ -5307,7 +5350,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -5335,8 +5378,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let makerToken = this.setToken(unpacked.events[4].value);
                 let takerToken = this.setToken(unpacked.events[3].value);
 
-                let makerAmount = new BigNumber(unpacked.events[6].value);
-                let takerAmount = new BigNumber(unpacked.events[5].value);
+                let makerAmount = utility.toBigNumber(unpacked.events[6].value);
+                let takerAmount = utility.toBigNumber(unpacked.events[5].value);
 
                 var tradeType = 'Sell';
                 var token = undefined;
@@ -5358,8 +5401,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     if (tradeType === 'Sell') {
                         rawAmount = takerAmount;
                         rawBaseAmount = makerAmount;
@@ -5371,7 +5414,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -5412,11 +5455,11 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 let takerToken = this.setToken(unpacked.events[4].value);
 
                 let taker = unpacked.events[5].value.toLowerCase();
-                let makerAmount = new BigNumber(unpacked.events[6].value);
-                let takerAmount = new BigNumber(unpacked.events[7].value);
+                let makerAmount = utility.toBigNumber(unpacked.events[6].value);
+                let takerAmount = utility.toBigNumber(unpacked.events[7].value);
 
                 let feeCurrency = '';
-                let fee = new BigNumber(0);
+                let fee = utility.toBigNumber(0);
 
                 let exchange = this.getExchangeName(unpacked.address, '');
                 var tradeType = 'Sell';
@@ -5443,8 +5486,8 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 }
 
                 if (token && base && token.addr && base.addr) {
-                    var rawAmount = new BigNumber(0);
-                    var rawBaseAmount = new BigNumber(0);
+                    var rawAmount = utility.toBigNumber(0);
+                    var rawBaseAmount = utility.toBigNumber(0);
                     var buyUser = '';
                     var sellUser = '';
                     if (tradeType === 'Sell') {
@@ -5461,7 +5504,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                     var amount = utility.weiToToken(rawAmount, token);
                     var baseAmount = utility.weiToToken(rawBaseAmount, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (amount.greaterThan(0)) {
                         price = baseAmount.div(amount);
                     }
@@ -5503,7 +5546,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 if (!token.erc721 && !(token.unknown && unpacked.events[2].name == 'tokenId')) { //tokenId renamed on erc721 based on abi overload
                     amount = utility.weiToToken(rawAmount, token);
                 } else {
-                    amount = new BigNumber(1);
+                    amount = utility.toBigNumber(1);
                     // set token to unique erc721 token ID, id field matches amount in erc20
                     token = this.setToken(token.addr + '-' + rawAmount);
                 }
@@ -5532,7 +5575,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 if (!token.erc721 && !(token.unknown && unpacked.events[2].name == 'tokenId')) { //tokenId renamed on erc721 based on abi overload
                     amount = utility.weiToToken(rawAmount, token);
                 } else {
-                    amount = new BigNumber(1);
+                    amount = utility.toBigNumber(1);
                     // set token to unique erc721 token ID, id field matches amount in erc20
                     token = this.setToken(token.addr + '-' + rawAmount);
                 }
@@ -5623,10 +5666,10 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                 if (token && base) {
                     let tokenAmount = utility.weiToToken(unpacked.events[2].value, token);
-                    let rawBaseAmount = new BigNumber(unpacked.events[3].value);
+                    let rawBaseAmount = utility.toBigNumber(unpacked.events[3].value);
                     let baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (tokenAmount.greaterThan(0)) {
                         price = baseAmount.div(tokenAmount);
                     }
@@ -5643,11 +5686,11 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                     }
 
 
-                    let fee = new BigNumber(0);
+                    let fee = utility.toBigNumber(0);
                     if (Number(unpacked.blockNumber) > 10000000) { // free fee period
-                        const takeFee = new BigNumber(2500000000000000);
-                        const makeFee = new BigNumber(0);
-                        const ether1 = new BigNumber(1000000000000000000);
+                        const takeFee = utility.toBigNumber(2500000000000000);
+                        const makeFee = utility.toBigNumber(0);
+                        const ether1 = utility.toBigNumber(1000000000000000000);
                         let currentFee = fee;
                         if (transType == 'Maker') {
                             currentFee = makeFee;
@@ -5700,7 +5743,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 if (base && token) {
                     let tokenAmount = utility.weiToToken(unpacked.events[2].value, token);
                     let baseAmount = utility.weiToToken(unpacked.events[3].value, base);
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (tokenAmount.greaterThan(0)) {
                         price = baseAmount.div(tokenAmount);
                     }
@@ -5769,15 +5812,15 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                 if (token && base) {
                     let tokenAmount = utility.weiToToken(unpacked.events[4 + offset].value, token);
-                    let rawBaseAmount = new BigNumber(unpacked.events[5 + offset].value);
+                    let rawBaseAmount = utility.toBigNumber(unpacked.events[5 + offset].value);
                     let baseAmount = utility.weiToToken(rawBaseAmount, base);
 
-                    var price = new BigNumber(0);
+                    var price = utility.toBigNumber(0);
                     if (tokenAmount.greaterThan(0)) {
                         price = baseAmount.div(tokenAmount);
                     }
 
-                    let fee = new BigNumber(0);
+                    let fee = utility.toBigNumber(0);
 
                     return {
                         'type': transType + ' ' + tradeType,
@@ -5829,7 +5872,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
 
                     let exchange = 'Uniswap';
 
-                    let price = new BigNumber(0);
+                    let price = utility.toBigNumber(0);
                     if (tokenAmount.greaterThan(0)) {
                         price = ethAmount.div(tokenAmount);
                     }
@@ -5857,6 +5900,77 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                     //todo, fetch unknown contract?
                     console.log('trade event for unknown uniswap contract');
                 }
+            }
+            // dex.blue trade events
+            else if (unpacked.name == 'LogTrade' || unpacked.name == 'LogSwap') {
+                //LogTrade(address makerAsset, uint256 makerAmount, address takerAsset, uint256 takerAmount);
+                //LogSwap(address soldAsset, uint256 soldAmount, address boughtAsset, uint256 boughtAmount);
+                let makerToken = this.setToken(unpacked.events[0].value);
+                let makerAmount = utility.toBigNumber(unpacked.events[1].value);
+                let takerToken = this.setToken(unpacked.events[2].value);
+                let takerAmount = utility.toBigNumber(unpacked.events[3].value);
+
+                let exchange = this.getExchangeName(unpacked.address, '');
+
+                let tradeType = 'Sell';
+                let token = undefined;
+                let base = undefined;
+
+                if (_delta.isBaseToken(takerToken, makerToken)) {
+                    tradeType = 'Buy';
+                    token = makerToken;
+                    base = takerToken;
+                } else {
+                    token = takerToken;
+                    base = makerToken;
+                }
+
+                if (token && base && token.addr && base.addr) {
+                    let rawAmount = utility.toBigNumber(0);
+                    let rawBaseAmount = utility.toBigNumber(0);
+                    if (tradeType === 'Sell') {
+                        rawAmount = takerAmount;
+                        rawBaseAmount = makerAmount;
+                    } else {
+                        rawBaseAmount = takerAmount;
+                        rawAmount = makerAmount;
+                    }
+
+                    let amount = utility.weiToToken(rawAmount, token);
+                    let baseAmount = utility.weiToToken(rawBaseAmount, base);
+                    let price = utility.toBigNumber(0);
+                    if (amount.greaterThan(0)) {
+                        price = baseAmount.div(amount);
+                    }
+
+                    let transType = 'Maker'; // unknown for dex.blue
+                    return {
+                        'type': transType + ' ' + tradeType,
+                        'exchange': exchange,
+                        'note': 'Matched 2 orders for a trade',
+                        'token': token,
+                        'amount': amount,
+                        'price': price,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        'buyer': '',
+                        'seller': '',
+                        'feeCurrency': '',
+                        'fee': '',
+                        'transType': transType,
+                        'tradeType': tradeType,
+                    };
+                }
+            }
+            //dex.blue failed trade event
+            else if (unpacked.name == 'LogTradeFailed') {
+                let exchange = this.getExchangeName(unpacked.address, 'unknown');
+                return {
+                    'type': 'Trade error',
+                    'exchange': exchange,
+                    'description': "Trade failed.",
+                };
             }
             //uniswap liquidity
             else if (unpacked.name == 'AddLiquidity' || unpacked.name == 'RemoveLiquidity') {
@@ -5887,6 +6001,18 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                     //todo, fetch unknown contract?
                     console.log('liquidity event for unknown uniswap contract');
                 }
+            }
+            //uniswap factory creating a new swap contract
+            else if (unpacked.name == 'NewExchange') {
+                let exchange = unpacked.events[1].value.toLowerCase();
+                let token = unpacked.events[0].value.toLowerCase();
+
+                return {
+                    'type': 'Uniswap creation',
+                    'contract': exchange,
+                    'tokenAddress': token
+                };
+
             }
 
         } else {

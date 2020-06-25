@@ -261,18 +261,7 @@ var pageType = 'tx';
 		let isPending = false;
 
 		var transLoaded = 0;
-		const transNumber = 5;
-		let web3Index = 0;
-
-		//spread web3 requests over available providers
-		function getWeb3() {
-			if (web3Index >= _delta.web3s.length) {
-				web3Index = 0;
-			}
-			let web3Provider = _delta.web3s[web3Index];
-			web3Index++;
-			return web3Provider;
-		}
+		const transNumber = 3;
 
 		getInternal();
 		getTransactionData();
@@ -280,73 +269,42 @@ var pageType = 'tx';
 
 
 		function getTransactionData() {
-			let finished = false;
 
-			web3GetTransaction();
-			// get tx data & input from etherscan
-			_util.getURL('https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (err, result) => {
-				if (finished) {
-					return;
-				}
+			_util.getTransaction(transactionHash, (err, result) => {
 				if (!err && result) {
-					if (result.result) {
-						finished = true;
-						handleTransData(result.result);
-					} else {
-						web3GetTransaction(true);
-					}
+					finished = true;
+					handleTransData(result);
 				} else {
-					web3GetTransaction(true);
+					handleTransData(undefined);
 				}
 			});
 
-			function web3GetTransaction(isFallback = false) {
-				//etherscan failed, try web3
-				if (!finished) {
-					let web3Provider = getWeb3();
-					if (web3Provider) {
-						web3Provider.eth.getTransaction(transactionHash, (err, result) => {
-							if (!err && result) {
-								finished = true;
-								handleTransData(result);
-							} else {
-								handleTransData(undefined);
-							}
-						});
-					} else if (isFallback) {
-						handleTransData(undefined);
-					}
-				}
-			}
-
 			function handleTransData(res) {
-				if (!transResult) {
-					if (res) {
-						transResult = res;
-						transLoaded++;
+				if (res) {
+					transResult = res;
+					transLoaded++;
 
-						if (res.blockNumber) {
-							getBlockTime(Number(res.blockNumber)); //calls processTransactions
-							return;
-						} else {
-							isPending = true;
-							// tx is pending, no need to wait for tx status or logs
-							transLoaded = transNumber;
-							processTransactions(transResult, undefined, undefined, undefined);
-							return;
-						}
+					if (res.blockNumber) {
+						getBlockTime(Number(res.blockNumber)); //calls processTransactions
+						return;
 					} else {
-						processTransactions(undefined, undefined, undefined, undefined);
+						isPending = true;
+						// tx is pending, no need to wait for tx status or logs
+						transLoaded = transNumber;
+						processTransactions(transResult, undefined, undefined, undefined);
 						return;
 					}
+				} else {
+					console.log('failed to load tx input from "getTransaction"');
+					processTransactions(undefined, undefined, undefined, undefined);
+					return;
 				}
 			}
 		}
 
 		//get tx output logs from etherscan
 		function getTransactionReceipt() {
-			let web3Provider = getWeb3();
-			_util.txReceipt(web3Provider, transactionHash, (err, result, _) => {
+			_util.txReceipt(transactionHash, (err, result) => {
 				if (!isPending) {
 					if (!err && result) {
 						logResult = result;
@@ -360,8 +318,9 @@ var pageType = 'tx';
 						} else {
 							isPending = true;
 						}
+					} else {
+						transLoaded++;
 					}
-					transLoaded++;
 					if (transLoaded >= transNumber)
 						processTransactions(transResult, statusResult, logResult, internalResult);
 				}
@@ -370,13 +329,17 @@ var pageType = 'tx';
 
 		function getBlockTime(num) {
 			num = Number(num);
-			if (gotBlockNum)
+			if (gotBlockNum) {
+				if (transLoaded >= transNumber)
+					processTransactions(transResult, statusResult, logResult, internalResult);
 				return;
-			else
+			}
+			else {
 				gotBlockNum = true;
+			}
 
 			if (!blockDates[num]) {
-				_util.getBlockDate(getWeb3(), num, (err, res, _) => {
+				_util.getBlockDate(num, (err, res, _) => {
 					if (!err && res) {
 
 						var unixtime = res;
@@ -386,13 +349,11 @@ var pageType = 'tx';
 							setBlockStorage();
 						}
 					}
-					transLoaded++;
 					if (transLoaded >= transNumber)
 						processTransactions(transResult, statusResult, logResult, internalResult);
 				});
 			} else {
 				txDate = blockDates[num];
-				transLoaded++;
 				if (transLoaded >= transNumber)
 					processTransactions(transResult, statusResult, logResult, internalResult);
 			}
@@ -447,12 +408,11 @@ var pageType = 'tx';
 				hash: tx.hash,
 				from: tx.from,
 				to: tx.to,
-				rawinput: tx.input,
 				nonce: Number(tx.nonce),
 				value: _util.weiToEth(tx.value),
 				gasPrice: _util.weiToEth(tx.gasPrice),
 				gasGwei: (Number(tx.gasPrice) / 1000000000),
-				gasLimit: Number(tx.gas),
+				gasLimit: Number(tx.gasLimit),
 				status: 'Pending',
 				inputName: parsedInput.name,
 				input: parsedInput.obj,
@@ -514,7 +474,7 @@ var pageType = 'tx';
 					transaction.outputHidden = parsedOutput.hidden;
 
 					if (parsedOutput.output && parsedOutput.output[0]) {
-						if (!parsedOutput.output[0].error && (parsedOutput.output[0].type == '0x Error' || parsedOutput.output[0].type == 'AirSwap Error')) {
+						if (!parsedOutput.output[0].error && (parsedOutput.output[0].type == '0x Error' || parsedOutput.output[0].type == 'AirSwap Error' || parsedOutput.output[0].type == 'Trade error')) {
 							transaction.status = 'Failed';
 						}
 					}
@@ -556,7 +516,7 @@ var pageType = 'tx';
 							if (obj && !obj.error) {
 								if (obj && obj.token && obj.token.name === "???" && obj.token.unknown)
 									unknownToken = true;
-								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion' || unpacked.name == 'Change'
+								if (unpacked.name === 'Trade' || unpacked.name == 'Filled' || unpacked.name === 'ExecuteTrade' || unpacked.name == 'LogTake' || unpacked.name == 'Conversion' || unpacked.name == 'Change' || unpacked.name == 'LogTrade' || unpacked.name == 'LogSwap'
 									|| (unpacked.name == 'Order' && unpacked.combinedEvents) || unpacked.name == 'TakeBuyOrder' || unpacked.name == 'TakeSellOrder' || unpacked.name == 'EthPurchase' || unpacked.name == 'TokenPurchase') {
 									obj.feeToken = obj.feeCurrency;
 									delete obj.feeCurrency;
@@ -772,8 +732,8 @@ var pageType = 'tx';
 				}
 			}
 
-			//var spent = _delta.web3.toBigNumber(0);
-			//var received = _delta.web3.toBigNumber(0);
+			//var spent = _util.toBigNumber(0);
+			//var received = _util.toBigNumber(0);
 
 			for (var i = 0; i < transaction.output.length; i++) {
 				if (transaction.output[i].type == 'Taker Buy' || transaction.output[i].type == 'Taker Sell') {

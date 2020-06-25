@@ -122,7 +122,7 @@ var pageType = 'history';
 					startblock = getStartBlock();
 				}
 				else {
-					_util.blockNumber(_delta.web3, (err, num) => {
+					_util.blockNumber((err, num) => {
 						if (!err && num) {
 							blocknum = num;
 							startblock = getStartBlock();
@@ -490,7 +490,7 @@ var pageType = 'history';
 		}
 		else {
 			console.log("try blocknum v2");
-			_util.blockNumber(_delta.web3, (err, num) => {
+			_util.blockNumber((err, num) => {
 				if (num) {
 					blocknum = num;
 					startblock = getStartBlock();
@@ -732,7 +732,7 @@ var pageType = 'history';
 			}
 
 			function getLogsInRange(startNum, endNum, rpcID) {
-				_util.getTradeLogs(_delta.web3, contractAddr, topics, startNum, endNum, rpcID, receiveLogs);
+				_util.getTradeLogs(contractAddr, topics, startNum, endNum, rpcID, receiveLogs);
 			}
 		}
 
@@ -879,24 +879,11 @@ var pageType = 'history';
 					activeDateRequests++;
 
 					pendingBlockDates[block] = true;
-					// try getting block date from etherscan
-					_util.getBlockDate(_delta.web3, block, (err, unixtimestamp, nr) => {
+					// try getting block date 
+					_util.getBlockDate(block, (err, unixtimestamp, nr) => {
 						if (err) {
 							console.log(err);
-							// etherscan fails, try web3 provider
-							if (_delta.web3s.length > 1 && nr) {
-								_util.getBlockDate(_delta.web3s[1], nr, (err2, unixtimestamp2, nr2) => {
-									activeDateRequests--;
-									receiveDates(err2, unixtimestamp2, nr2);
-								});
-							} else {
-								//return with a slight timeout, to give etherscan a break
-								setTimeout(function () {
-									activeDateRequests--;
-									receiveDates("unknown error", undefined, nr);
-								}, 50);
-
-							}
+							receiveDates(err, unixtimestamp, block);
 						} else {
 							activeDateRequests--;
 							receiveDates(err, unixtimestamp, nr);

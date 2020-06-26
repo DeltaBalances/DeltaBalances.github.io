@@ -5,7 +5,6 @@
   "description": "deltabalances utility functions",
   "private": true,
   "dependencies": {
-    "@ethersproject/abi": "^5.0.1",
     "bignumber.js": "5.0.0",
     "ethers": "^5.0.2"
   },

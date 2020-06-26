@@ -1,7 +1,9 @@
-const sha3 = require('@ethersproject/hash/lib/index.js').id;
 const BigNumber = require('bignumber.js'); //keep classic bigNumber for legacy reasons instead of ether BN.js
+
+//use @ethersproject to reduce the amount of npm packages included
 const abiCoder = require("@ethersproject/abi/lib/abi-coder.js").defaultAbiCoder;
 const Fragment = require("@ethersproject/abi/lib/fragments.js").Fragment;
+const sha3 = require('@ethersproject/hash/lib/index.js').id;
 
 const state = {
   savedABIs: [],

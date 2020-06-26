@@ -1,4 +1,12 @@
-const Ethers = require('ethers');
+//const Ethers = require('ethers');
+let Ethers = { //create a trimmed version of Ethers with only the needed components
+    utils: {
+        getAddress: require('@ethersproject/address/lib/index.js').getAddress,
+    },
+    Contract: require('@ethersproject/contracts/lib/index.js').Contract,
+    providers: require('@ethersproject/providers/lib/index.js')
+};
+
 const Decoder = require('./abi-decoder.js');
 const BigNumber = require('bignumber.js');
 BigNumber.config({ ERRORS: false });
@@ -1031,7 +1039,7 @@ module.exports = (db) => {
             }
         } else if (window && typeof window.web3 !== 'undefined') { //legacy metamask style with no privacy (window.web3, no window.ethereum)
             try {
-                let web3Provider = new ethers.providers.Web3Provider(window.web3.currentProvider);
+                let web3Provider = new Ethers.providers.Web3Provider(window.web3.currentProvider);
                 web3Provider.getSigner().getAddress().then(addr => {
                     callback(addr.toLowerCase());
                 }, _ => {

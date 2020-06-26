@@ -1,5 +1,14 @@
 let config = require('./config.js');
-const Ethers = require('ethers');
+
+//const Ethers = require('ethers');
+let Ethers = { //create a trimmed version of Ethers with only the needed components
+    utils: {
+        parseBytes32String: require('@ethersproject/strings/lib/bytes32.js').parseBytes32String,
+    },
+    providers: require('@ethersproject/providers/lib/index.js'),
+    getDefaultProvider: require('@ethersproject/providers/lib/index.js').getDefaultProvider,
+};
+
 const BigNumber = require('bignumber.js');
 BigNumber.config({ ERRORS: false });
 

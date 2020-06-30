@@ -1,11 +1,5 @@
 //const Ethers = require('ethers');
-let Ethers = { //create a trimmed version of Ethers with only the needed components
-    utils: {
-        getAddress: require('@ethersproject/address/lib/index.js').getAddress,
-    },
-    Contract: require('@ethersproject/contracts/lib/index.js').Contract,
-    providers: require('@ethersproject/providers/lib/index.js')
-};
+const Ethers = require('./ethersWrapper.js');
 
 const Decoder = require('./abi-decoder.js');
 const BigNumber = require('bignumber.js');

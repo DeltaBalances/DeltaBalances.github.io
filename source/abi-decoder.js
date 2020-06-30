@@ -1,9 +1,9 @@
 const BigNumber = require('bignumber.js'); //keep classic bigNumber for legacy reasons instead of ether BN.js
 
 //use @ethersproject to reduce the amount of npm packages included
-const abiCoder = require("@ethersproject/abi/lib/abi-coder.js").defaultAbiCoder;
-const Fragment = require("@ethersproject/abi/lib/fragments.js").Fragment;
-const sha3 = require('@ethersproject/hash/lib/index.js').id;
+const abiCoder = require("./ethersWrapper.js").utils.defaultAbiCoder;
+const Fragment = require("./ethersWrapper.js").utils.Fragment;
+const sha3 = require("./ethersWrapper.js").utils.id;
 
 const state = {
   savedABIs: [],
@@ -13,6 +13,7 @@ const state = {
 function _getABIs() {
   return state.savedABIs;
 }
+
 
 function _addABI(abiArray) {
   if (Array.isArray(abiArray)) {

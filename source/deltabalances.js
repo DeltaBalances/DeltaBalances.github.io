@@ -2704,11 +2704,24 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             // bancor conversions like below, but only wrapping. trading eth -> ether token
             else if (utility.isWrappedETH(txTo) && (unpacked.name == 'change' || unpacked.name == 'quickChange')) {
 
+                // everything else has (path[], amount, minRate), so convert this one to that format
+                if ((unpacked.name === 'convert' || unpacked.name == 'change') && unpacked.params[0].name == '_fromToken') {
+                    let params2 = [];
+                    params2[0] = { value: [unpacked.params[0].value, unpacked.params[1].value] };
+                    params2[1] = { value: unpacked.params[2].value };
+                    params2[2] = { value: unpacked.params[3].value };
+                    unpacked.params = params2;
+                }
+
+                let tokenPath = unpacked.params[0].value;
+                let firstToken = this.setToken(tokenPath[0]);
+                let lastToken = this.setToken(tokenPath[tokenPath.length - 1]);
+
                 // TODO recheck this one
                 let amount = utility.weiToEth(tx.value);
                 let token = this.setToken(txTo);
                 let ethToken = this.setToken(config.ethAddr);
-                if (utility.isWrappedETH(firstToken.addr)) {
+                if (utility.isWrappedETH(lastToken.addr) && firstToken.addr === "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c") { //BNT to WETH
 
                     return {
                         'type': 'Wrap ETH',

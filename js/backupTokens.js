@@ -12,10 +12,6 @@ Additional sources for unlisted tokens:
 */
 
 
-// tokens that shouldn't be included in balances  (broken token, or something else) 
-let tokenBlacklist = { // replaced by token.blocked 
-}; 
-
 
 /*
 Standard token attributes

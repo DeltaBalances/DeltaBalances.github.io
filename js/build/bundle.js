@@ -537,7 +537,7 @@ DeltaBalances.prototype.initContracts = function initContracts(callback) {
     );
 };
 
-DeltaBalances.prototype.initTokens = function (useBlacklist) {
+DeltaBalances.prototype.initTokens = function () {
 
     //init known bancor smartRelay tokens (smartRelays 'addr': name)
     let smartKeys = Object.keys(smartRelays).map(x => x.toLowerCase());

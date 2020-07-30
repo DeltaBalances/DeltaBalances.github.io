@@ -7207,6 +7207,10 @@ module.exports = (db) => {
     //get etherdelta history logs from INFURA
     //inclusive for start and end
     // can handle ranges of 5k-10k blocks
+
+    //https://infura.io/docs/ethereum/json-rpc/eth-getLogs
+    // max 10000 results
+    // max 10 sec load
     utility.getTradeLogs = function getTradeLogs(contractAddress, topics, startblock, endblock, rpcID, callback) {
         if (!Array.isArray(topics)) {
             topics = [topics];
@@ -7241,11 +7245,12 @@ module.exports = (db) => {
                 url: db.config.infuraURL,
                 data: '{"jsonrpc":"2.0","method":"eth_getLogs","params":' + filterObj + ' ,"id":' + rpcID + '}',
                 dataType: 'json',
-                timeout: 55000, // 55 sec timeout (these requests can be slooooow)
+                timeout: 11, // 11 sec timeout
             }).done((result) => {
                 if (result && result.jsonrpc) {
                     // success {"jsonrpc":"2.0","id":7,"result":[]}
                     // fail {"jsonrpc":"2.0","id":92,"error":{"code":-32005,"message":"query returned more than 1000 results"}}
+                    //"error": {"code": -32005,"message": "query timeout exceeded"}
 
                     if (result.result && Array.isArray(result.result)) {
                         callback(result.result, range);

@@ -211,7 +211,7 @@ process.umask = function() { return 0; };
 },{}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "abi/5.0.1";
+exports.version = "abi/5.0.2";
 
 },{}],4:[function(require,module,exports){
 "use strict";
@@ -2440,7 +2440,7 @@ exports.Interface = Interface;
 },{"./_version":3,"./abi-coder":4,"./coders/abstract-coder":5,"./fragments":16,"@ethersproject/address":24,"@ethersproject/bignumber":29,"@ethersproject/bytes":31,"@ethersproject/hash":36,"@ethersproject/keccak256":37,"@ethersproject/logger":39,"@ethersproject/properties":43}],19:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "abstract-provider/5.0.1";
+exports.version = "abstract-provider/5.0.2";
 
 },{}],20:[function(require,module,exports){
 "use strict";
@@ -2563,7 +2563,7 @@ exports.Provider = Provider;
 },{"./_version":19,"@ethersproject/bytes":31,"@ethersproject/logger":39,"@ethersproject/properties":43}],21:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "abstract-signer/5.0.1";
+exports.version = "abstract-signer/5.0.2";
 
 },{}],22:[function(require,module,exports){
 "use strict";
@@ -2880,7 +2880,7 @@ exports.VoidSigner = VoidSigner;
 },{"./_version":21,"@ethersproject/logger":39,"@ethersproject/properties":43}],23:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "address/5.0.1";
+exports.version = "address/5.0.2";
 
 },{}],24:[function(require,module,exports){
 "use strict";
@@ -3051,7 +3051,7 @@ exports.encode = encode;
 },{"@ethersproject/bytes":31}],26:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "bignumber/5.0.2";
+exports.version = "bignumber/5.0.5";
 
 },{}],27:[function(require,module,exports){
 "use strict";
@@ -3128,7 +3128,11 @@ var BigNumber = /** @class */ (function () {
         return toBigNumber(toBN(this).umod(value));
     };
     BigNumber.prototype.pow = function (other) {
-        return toBigNumber(toBN(this).pow(toBN(other)));
+        var value = toBN(other);
+        if (value.isNeg()) {
+            throwFault("cannot raise to negative values", "pow");
+        }
+        return toBigNumber(toBN(this).pow(value));
     };
     BigNumber.prototype.and = function (other) {
         var value = toBN(other);
@@ -3214,7 +3218,7 @@ var BigNumber = /** @class */ (function () {
             return value;
         }
         if (typeof (value) === "string") {
-            if (value.match(/-?0x[0-9a-f]+/i)) {
+            if (value.match(/^-?0x[0-9a-f]+$/i)) {
                 return new BigNumber(_constructorGuard, toHex(value));
             }
             if (value.match(/^-?[0-9]+$/)) {
@@ -3655,7 +3659,7 @@ exports.parseFixed = fixednumber_1.parseFixed;
 },{"./bignumber":27,"./fixednumber":28}],30:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "bytes/5.0.1";
+exports.version = "bytes/5.0.3";
 
 },{}],31:[function(require,module,exports){
 "use strict";
@@ -3945,8 +3949,6 @@ function splitSignature(signature) {
         result.r = hexlify(bytes.slice(0, 32));
         result.s = hexlify(bytes.slice(32, 64));
         result.v = bytes[64];
-        // Compute recoveryParam from v
-        result.recoveryParam = 1 - (result.v % 2);
         // Allow a recid to be used as the v
         if (result.v < 27) {
             if (result.v === 0 || result.v === 1) {
@@ -3956,6 +3958,8 @@ function splitSignature(signature) {
                 logger.throwArgumentError("signature invalid v byte", "signature", signature);
             }
         }
+        // Compute recoveryParam from v
+        result.recoveryParam = 1 - (result.v % 2);
         // Compute _vs from recoveryParam and s
         if (result.recoveryParam) {
             bytes[32] |= 0x80;
@@ -4082,7 +4086,7 @@ exports.MaxUint256 = MaxUint256;
 },{"@ethersproject/bignumber":29}],33:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "contracts/5.0.1";
+exports.version = "contracts/5.0.2";
 
 },{}],34:[function(require,module,exports){
 "use strict";
@@ -5202,7 +5206,7 @@ exports.ContractFactory = ContractFactory;
 },{"./_version":33,"@ethersproject/abi":17,"@ethersproject/abstract-provider":20,"@ethersproject/abstract-signer":22,"@ethersproject/address":24,"@ethersproject/bignumber":29,"@ethersproject/bytes":31,"@ethersproject/logger":39,"@ethersproject/properties":43}],35:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "hash/5.0.1";
+exports.version = "hash/5.0.2";
 
 },{}],36:[function(require,module,exports){
 "use strict";
@@ -5231,6 +5235,7 @@ function isValidName(name) {
 }
 exports.isValidName = isValidName;
 function namehash(name) {
+    /* istanbul ignore if */
     if (typeof (name) !== "string") {
         logger.throwArgumentError("invalid address - " + String(name), "name", name);
     }
@@ -5277,7 +5282,7 @@ exports.keccak256 = keccak256;
 },{"@ethersproject/bytes":31,"js-sha3":109}],38:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "logger/5.0.2";
+exports.version = "logger/5.0.4";
 
 },{}],39:[function(require,module,exports){
 "use strict";
@@ -5475,6 +5480,18 @@ var Logger = /** @class */ (function () {
             value: value
         });
     };
+    Logger.prototype.assert = function (condition, message, code, params) {
+        if (!!condition) {
+            return;
+        }
+        this.throwError(message, code, params);
+    };
+    Logger.prototype.assertArgument = function (condition, message, name, value) {
+        if (!!condition) {
+            return;
+        }
+        this.throwArgumentError(message, name, value);
+    };
     Logger.prototype.checkNormalize = function (message) {
         if (message == null) {
             message = "platform missing String.prototype.normalize";
@@ -5564,7 +5581,7 @@ var Logger = /** @class */ (function () {
         _permanentCensorErrors = !!permanent;
     };
     Logger.setLogLevel = function (logLevel) {
-        var level = LogLevels[logLevel];
+        var level = LogLevels[logLevel.toLowerCase()];
         if (level == null) {
             Logger.globalLogger().warn("invalid log level - " + logLevel);
             return;
@@ -5580,7 +5597,7 @@ exports.Logger = Logger;
 },{"./_version":38}],40:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "networks/5.0.1";
+exports.version = "networks/5.0.2";
 
 },{}],41:[function(require,module,exports){
 "use strict";
@@ -5588,8 +5605,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var logger_1 = require("@ethersproject/logger");
 var _version_1 = require("./_version");
 var logger = new logger_1.Logger(_version_1.version);
+;
+function isRenetworkable(value) {
+    return (value && typeof (value.renetwork) === "function");
+}
 function ethDefaultProvider(network) {
-    return function (providers, options) {
+    var func = function (providers, options) {
         if (options == null) {
             options = {};
         }
@@ -5633,14 +5654,22 @@ function ethDefaultProvider(network) {
         }
         return providerList[0];
     };
+    func.renetwork = function (network) {
+        return ethDefaultProvider(network);
+    };
+    return func;
 }
 function etcDefaultProvider(url, network) {
-    return function (providers, options) {
+    var func = function (providers, options) {
         if (providers.JsonRpcProvider) {
             return new providers.JsonRpcProvider(url, network);
         }
         return null;
     };
+    func.renetwork = function (network) {
+        return etcDefaultProvider(url, network);
+    };
+    return func;
 }
 var homestead = {
     chainId: 1,
@@ -5759,12 +5788,23 @@ function getNetwork(network) {
     if (network.chainId !== 0 && network.chainId !== standard.chainId) {
         logger.throwArgumentError("network chainId mismatch", "network", network);
     }
+    // @TODO: In the next major version add an attach function to a defaultProvider
+    // class and move the _defaultProvider internal to this file (extend Network)
+    var defaultProvider = network._defaultProvider || null;
+    if (defaultProvider == null && standard._defaultProvider) {
+        if (isRenetworkable(standard._defaultProvider)) {
+            defaultProvider = standard._defaultProvider.renetwork(network);
+        }
+        else {
+            defaultProvider = standard._defaultProvider;
+        }
+    }
     // Standard Network (allow overriding the ENS address)
     return {
         name: network.name,
         chainId: standard.chainId,
         ensAddress: (network.ensAddress || standard.ensAddress || null),
-        _defaultProvider: (network._defaultProvider || standard._defaultProvider || null)
+        _defaultProvider: defaultProvider
     };
 }
 exports.getNetwork = getNetwork;
@@ -5772,7 +5812,7 @@ exports.getNetwork = getNetwork;
 },{"./_version":40,"@ethersproject/logger":39}],42:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "properties/5.0.1";
+exports.version = "properties/5.0.2";
 
 },{}],43:[function(require,module,exports){
 "use strict";
@@ -5939,7 +5979,7 @@ exports.Description = Description;
 },{"./_version":42,"@ethersproject/logger":39}],44:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "providers/5.0.3";
+exports.version = "providers/5.0.5";
 
 },{}],45:[function(require,module,exports){
 "use strict";
@@ -5957,6 +5997,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var formatter_1 = require("./formatter");
+var websocket_provider_1 = require("./websocket-provider");
 var logger_1 = require("@ethersproject/logger");
 var _version_1 = require("./_version");
 var logger = new logger_1.Logger(_version_1.version);
@@ -5971,6 +6013,12 @@ var AlchemyProvider = /** @class */ (function (_super) {
     function AlchemyProvider() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
+    AlchemyProvider.getWebSocketProvider = function (network, apiKey) {
+        var provider = new AlchemyProvider(network, apiKey);
+        var url = provider.connection.url.replace(/^http/i, "ws")
+            .replace(".alchemyapi.", ".ws.alchemyapi.");
+        return new websocket_provider_1.WebSocketProvider(url, provider.network);
+    };
     AlchemyProvider.getApiKey = function (apiKey) {
         if (apiKey == null) {
             return defaultApiKey;
@@ -5984,30 +6032,38 @@ var AlchemyProvider = /** @class */ (function (_super) {
         var host = null;
         switch (network.name) {
             case "homestead":
-                host = "eth-mainnet.alchemyapi.io/jsonrpc/";
+                host = "eth-mainnet.alchemyapi.io/v2/";
                 break;
             case "ropsten":
-                host = "eth-ropsten.alchemyapi.io/jsonrpc/";
+                host = "eth-ropsten.alchemyapi.io/v2/";
                 break;
             case "rinkeby":
-                host = "eth-rinkeby.alchemyapi.io/jsonrpc/";
+                host = "eth-rinkeby.alchemyapi.io/v2/";
                 break;
             case "goerli":
-                host = "eth-goerli.alchemyapi.io/jsonrpc/";
+                host = "eth-goerli.alchemyapi.io/v2/";
                 break;
             case "kovan":
-                host = "eth-kovan.alchemyapi.io/jsonrpc/";
+                host = "eth-kovan.alchemyapi.io/v2/";
                 break;
             default:
                 logger.throwArgumentError("unsupported network", "network", arguments[0]);
         }
-        return ("https:/" + "/" + host + apiKey);
+        return {
+            url: ("https:/" + "/" + host + apiKey),
+            throttleCallback: function (attempt, url) {
+                if (apiKey === defaultApiKey) {
+                    formatter_1.showThrottleMessage();
+                }
+                return Promise.resolve(true);
+            }
+        };
     };
     return AlchemyProvider;
 }(url_json_rpc_provider_1.UrlJsonRpcProvider));
 exports.AlchemyProvider = AlchemyProvider;
 
-},{"./_version":44,"./url-json-rpc-provider":57,"@ethersproject/logger":39}],46:[function(require,module,exports){
+},{"./_version":44,"./formatter":52,"./url-json-rpc-provider":57,"./websocket-provider":59,"@ethersproject/logger":39}],46:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -7706,6 +7762,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var bytes_1 = require("@ethersproject/bytes");
 var properties_1 = require("@ethersproject/properties");
 var web_1 = require("@ethersproject/web");
+var formatter_1 = require("./formatter");
 var logger_1 = require("@ethersproject/logger");
 var _version_1 = require("./_version");
 var logger = new logger_1.Logger(_version_1.version);
@@ -7731,14 +7788,23 @@ function getResult(result) {
         return result.result;
     }
     if (result.status != 1 || result.message != "OK") {
-        // @TODO: not any
         var error = new Error("invalid response");
         error.result = JSON.stringify(result);
+        if ((result.result || "").toLowerCase().indexOf("rate limit") >= 0) {
+            error.throttleRetry = true;
+        }
         throw error;
     }
     return result.result;
 }
 function getJsonResult(result) {
+    // This response indicates we are being throttled
+    if (result && result.status == 0 && result.message == "NOTOK" && (result.result || "").toLowerCase().indexOf("rate limit") >= 0) {
+        var error = new Error("throttled response");
+        error.result = JSON.stringify(result);
+        error.throttleRetry = true;
+        throw error;
+    }
     if (result.jsonrpc != "2.0") {
         // @TODO: not any
         var error = new Error("invalid response");
@@ -7824,7 +7890,8 @@ var EtherscanProvider = /** @class */ (function (_super) {
                             apiKey += "&apikey=" + this.apiKey;
                         }
                         get = function (url, procFunc) { return __awaiter(_this, void 0, void 0, function () {
-                            var result;
+                            var connection, result;
+                            var _this = this;
                             return __generator(this, function (_a) {
                                 switch (_a.label) {
                                     case 0:
@@ -7833,7 +7900,17 @@ var EtherscanProvider = /** @class */ (function (_super) {
                                             request: url,
                                             provider: this
                                         });
-                                        return [4 /*yield*/, web_1.fetchJson(url, null, procFunc || getJsonResult)];
+                                        connection = {
+                                            url: url,
+                                            throttleSlotInterval: 1000,
+                                            throttleCallback: function (attempt, url) {
+                                                if (_this.apiKey === defaultApiKey) {
+                                                    formatter_1.showThrottleMessage();
+                                                }
+                                                return Promise.resolve(true);
+                                            }
+                                        };
+                                        return [4 /*yield*/, web_1.fetchJson(connection, null, procFunc || getJsonResult)];
                                     case 1:
                                         result = _a.sent();
                                         this.emit("debug", {
@@ -7882,12 +7959,12 @@ var EtherscanProvider = /** @class */ (function (_super) {
                     case 5:
                         url += "/api?module=proxy&action=eth_getCode&address=" + params.address;
                         url += "&tag=" + params.blockTag + apiKey;
-                        return [2 /*return*/, get(url, getJsonResult)];
+                        return [2 /*return*/, get(url)];
                     case 6:
                         url += "/api?module=proxy&action=eth_getStorageAt&address=" + params.address;
                         url += "&position=" + params.position;
                         url += "&tag=" + params.blockTag + apiKey;
-                        return [2 /*return*/, get(url, getJsonResult)];
+                        return [2 /*return*/, get(url)];
                     case 7:
                         url += "/api?module=proxy&action=eth_sendRawTransaction&hex=" + params.signedTransaction;
                         url += apiKey;
@@ -8046,7 +8123,17 @@ var EtherscanProvider = /** @class */ (function (_super) {
                 request: url,
                 provider: _this
             });
-            return web_1.fetchJson(url, null, getResult).then(function (result) {
+            var connection = {
+                url: url,
+                throttleSlotInterval: 1000,
+                throttleCallback: function (attempt, url) {
+                    if (_this.apiKey === defaultApiKey) {
+                        formatter_1.showThrottleMessage();
+                    }
+                    return Promise.resolve(true);
+                }
+            };
+            return web_1.fetchJson(connection, null, getResult).then(function (result) {
                 _this.emit("debug", {
                     action: "response",
                     request: url,
@@ -8077,7 +8164,7 @@ var EtherscanProvider = /** @class */ (function (_super) {
 }(base_provider_1.BaseProvider));
 exports.EtherscanProvider = EtherscanProvider;
 
-},{"./_version":44,"./base-provider":46,"@ethersproject/bytes":31,"@ethersproject/logger":39,"@ethersproject/properties":43,"@ethersproject/web":76}],51:[function(require,module,exports){
+},{"./_version":44,"./base-provider":46,"./formatter":52,"@ethersproject/bytes":31,"@ethersproject/logger":39,"@ethersproject/properties":43,"@ethersproject/web":76}],51:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -9108,6 +9195,27 @@ var Formatter = /** @class */ (function () {
     return Formatter;
 }());
 exports.Formatter = Formatter;
+// Show the throttle message only once
+var throttleMessage = false;
+function showThrottleMessage() {
+    if (throttleMessage) {
+        return;
+    }
+    throttleMessage = true;
+    console.log("========= NOTICE =========");
+    console.log("Request-Rate Exceeded  (this message will not be repeated)");
+    console.log("");
+    console.log("The default API keys for each service are provided as a highly-throttled,");
+    console.log("community resource for low-traffic projects and early prototyping.");
+    console.log("");
+    console.log("While your application will continue to function, we highly recommended");
+    console.log("signing up for your own API keys to improve performance, increase your");
+    console.log("request rate/limit and enable other perks, such as metrics and advanced APIs.");
+    console.log("");
+    console.log("For more details: https:/\/docs.ethers.io/api-keys/");
+    console.log("==========================");
+}
+exports.showThrottleMessage = showThrottleMessage;
 
 },{"./_version":44,"@ethersproject/address":24,"@ethersproject/bignumber":29,"@ethersproject/bytes":31,"@ethersproject/constants":32,"@ethersproject/logger":39,"@ethersproject/properties":43,"@ethersproject/transactions":73}],53:[function(require,module,exports){
 "use strict";
@@ -9207,6 +9315,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var websocket_provider_1 = require("./websocket-provider");
+var formatter_1 = require("./formatter");
 var logger_1 = require("@ethersproject/logger");
 var _version_1 = require("./_version");
 var logger = new logger_1.Logger(_version_1.version);
@@ -9241,12 +9350,8 @@ var InfuraProvider = /** @class */ (function (_super) {
             apiKeyObj.projectId = apiKey;
         }
         else if (apiKey.projectSecret != null) {
-            if (typeof (apiKey.projectId) !== "string") {
-                logger.throwArgumentError("projectSecret requires a projectId", "projectId", apiKey.projectId);
-            }
-            if (typeof (apiKey.projectSecret) !== "string") {
-                logger.throwArgumentError("invalid projectSecret", "projectSecret", "[REDACTED]");
-            }
+            logger.assertArgument((typeof (apiKey.projectId) === "string"), "projectSecret requires a projectId", "projectId", apiKey.projectId);
+            logger.assertArgument((typeof (apiKey.projectSecret) === "string"), "invalid projectSecret", "projectSecret", "[REDACTED]");
             apiKeyObj.projectId = apiKey.projectId;
             apiKeyObj.projectSecret = apiKey.projectSecret;
         }
@@ -9258,7 +9363,7 @@ var InfuraProvider = /** @class */ (function (_super) {
     };
     InfuraProvider.getUrl = function (network, apiKey) {
         var host = null;
-        switch (network.name) {
+        switch (network ? network.name : "unknown") {
             case "homestead":
                 host = "mainnet.infura.io";
                 break;
@@ -9281,7 +9386,13 @@ var InfuraProvider = /** @class */ (function (_super) {
                 });
         }
         var connection = {
-            url: ("https:/" + "/" + host + "/v3/" + apiKey.projectId)
+            url: ("https:/" + "/" + host + "/v3/" + apiKey.projectId),
+            throttleCallback: function (attempt, url) {
+                if (apiKey.projectId === defaultProjectId) {
+                    formatter_1.showThrottleMessage();
+                }
+                return Promise.resolve(true);
+            }
         };
         if (apiKey.projectSecret != null) {
             connection.user = "";
@@ -9293,7 +9404,7 @@ var InfuraProvider = /** @class */ (function (_super) {
 }(url_json_rpc_provider_1.UrlJsonRpcProvider));
 exports.InfuraProvider = InfuraProvider;
 
-},{"./_version":44,"./url-json-rpc-provider":57,"./websocket-provider":59,"@ethersproject/logger":39}],55:[function(require,module,exports){
+},{"./_version":44,"./formatter":52,"./url-json-rpc-provider":57,"./websocket-provider":59,"@ethersproject/logger":39}],55:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -9848,6 +9959,7 @@ var JsonRpcProvider = /** @class */ (function (_super) {
 exports.JsonRpcProvider = JsonRpcProvider;
 
 },{"./_version":44,"./base-provider":46,"@ethersproject/abstract-signer":22,"@ethersproject/bignumber":29,"@ethersproject/bytes":31,"@ethersproject/logger":39,"@ethersproject/properties":43,"@ethersproject/strings":70,"@ethersproject/web":76}],56:[function(require,module,exports){
+/* istanbul ignore file */
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -9973,6 +10085,9 @@ var json_rpc_provider_1 = require("./json-rpc-provider");
 // - locking up the UI
 // - block skew warnings
 // - wrong results
+// If the network is not explicit (i.e. auto-detection is expected), the
+// node MUST be running and available to respond to requests BEFORE this
+// is instantiated.
 var StaticJsonRpcProvider = /** @class */ (function (_super) {
     __extends(StaticJsonRpcProvider, _super);
     function StaticJsonRpcProvider() {
@@ -9986,10 +10101,18 @@ var StaticJsonRpcProvider = /** @class */ (function (_super) {
                     case 0:
                         network = this.network;
                         if (!(network == null)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, _super.prototype._ready.call(this)];
+                        return [4 /*yield*/, _super.prototype.detectNetwork.call(this)];
                     case 1:
-                        // After this call completes, network is defined
                         network = _a.sent();
+                        if (!network) {
+                            logger.throwError("no network detected", logger_1.Logger.errors.UNKNOWN_ERROR, {});
+                        }
+                        // If still not set, set it
+                        if (this._network == null) {
+                            // A static network does not support "any"
+                            properties_1.defineReadOnly(this, "_network", network);
+                            this.emit("network", network, null);
+                        }
                         _a.label = 2;
                     case 2: return [2 /*return*/, network];
                 }
@@ -10479,6 +10602,33 @@ var WebSocketProvider = /** @class */ (function (_super) {
             _this.send("eth_unsubscribe", [subId]);
         });
     };
+    WebSocketProvider.prototype.destroy = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(this._websocket.readyState === ws_1.default.CONNECTING)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, (new Promise(function (resolve) {
+                                _this._websocket.onopen = function () {
+                                    resolve(true);
+                                };
+                                _this._websocket.onerror = function () {
+                                    resolve(false);
+                                };
+                            }))];
+                    case 1:
+                        _a.sent();
+                        _a.label = 2;
+                    case 2:
+                        // Hangup
+                        // See: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Status_codes
+                        this._websocket.close(1000);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     return WebSocketProvider;
 }(json_rpc_provider_1.JsonRpcProvider));
 exports.WebSocketProvider = WebSocketProvider;
@@ -10486,7 +10636,7 @@ exports.WebSocketProvider = WebSocketProvider;
 },{"./_version":44,"./json-rpc-provider":55,"@ethersproject/bignumber":29,"@ethersproject/logger":39,"@ethersproject/properties":43,"ws":48}],60:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "random/5.0.1";
+exports.version = "random/5.0.2";
 
 },{}],61:[function(require,module,exports){
 (function (global){
@@ -10557,7 +10707,7 @@ exports.shuffled = shuffled;
 },{}],63:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "rlp/5.0.1";
+exports.version = "rlp/5.0.2";
 
 },{}],64:[function(require,module,exports){
 "use strict";
@@ -10686,7 +10836,7 @@ exports.decode = decode;
 },{"./_version":63,"@ethersproject/bytes":31,"@ethersproject/logger":39}],65:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "signing-key/5.0.2";
+exports.version = "signing-key/5.0.3";
 
 },{}],66:[function(require,module,exports){
 "use strict";
@@ -10772,7 +10922,7 @@ exports.computePublicKey = computePublicKey;
 },{"./_version":65,"@ethersproject/bytes":31,"@ethersproject/logger":39,"@ethersproject/properties":43,"elliptic":79}],67:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "strings/5.0.1";
+exports.version = "strings/5.0.2";
 
 },{}],68:[function(require,module,exports){
 "use strict";
@@ -11281,7 +11431,7 @@ exports.toUtf8CodePoints = toUtf8CodePoints;
 },{"./_version":67,"@ethersproject/bytes":31,"@ethersproject/logger":39}],72:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "transactions/5.0.1";
+exports.version = "transactions/5.0.2";
 
 },{}],73:[function(require,module,exports){
 "use strict";
@@ -11468,7 +11618,7 @@ exports.parse = parse;
 },{"./_version":72,"@ethersproject/address":24,"@ethersproject/bignumber":29,"@ethersproject/bytes":31,"@ethersproject/constants":32,"@ethersproject/keccak256":37,"@ethersproject/logger":39,"@ethersproject/properties":43,"@ethersproject/rlp":64,"@ethersproject/signing-key":66}],74:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = "web/5.0.1";
+exports.version = "web/5.0.2";
 
 },{}],75:[function(require,module,exports){
 "use strict";
@@ -11603,7 +11753,18 @@ var logger_1 = require("@ethersproject/logger");
 var _version_1 = require("./_version");
 var logger = new logger_1.Logger(_version_1.version);
 var geturl_1 = require("./geturl");
+function staller(duration) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, duration);
+    });
+}
 function fetchJson(connection, json, processFunc) {
+    // How many times to retry in the event of a throttle
+    var attemptLimit = (typeof (connection) === "object" && connection.throttleLimit != null) ? connection.throttleLimit : 12;
+    logger.assertArgument((attemptLimit > 0 && (attemptLimit % 1) === 0), "invalid connection throttle limit", "connection.throttleLimit", attemptLimit);
+    var throttleCallback = ((typeof (connection) === "object") ? connection.throttleCallback : null);
+    var throttleSlotInterval = ((typeof (connection) === "object" && typeof (connection.throttleSlotInterval) === "number") ? connection.throttleSlotInterval : 100);
+    logger.assertArgument((throttleSlotInterval > 0 && (throttleSlotInterval % 1) === 0), "invalid connection throttle slot interval", "connection.throttleSlotInterval", throttleSlotInterval);
     var headers = {};
     var url = null;
     // @TODO: Allow ConnectionInfo to override some of these values
@@ -11682,19 +11843,44 @@ function fetchJson(connection, json, processFunc) {
     })();
     var runningFetch = (function () {
         return __awaiter(this, void 0, void 0, function () {
-            var response, error_1, body, json, error_2;
+            var attempt, response, tryAgain, stall, retryAfter, error_1, body, json_1, error_2, tryAgain, timeout_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        response = null;
+                        attempt = 0;
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, geturl_1.getUrl(url, options)];
+                        if (!(attempt < attemptLimit)) return [3 /*break*/, 19];
+                        response = null;
+                        _a.label = 2;
                     case 2:
-                        response = _a.sent();
-                        return [3 /*break*/, 4];
+                        _a.trys.push([2, 8, , 9]);
+                        return [4 /*yield*/, geturl_1.getUrl(url, options)];
                     case 3:
+                        response = _a.sent();
+                        if (!(response.statusCode === 429 && attempt < attemptLimit)) return [3 /*break*/, 7];
+                        tryAgain = true;
+                        if (!throttleCallback) return [3 /*break*/, 5];
+                        return [4 /*yield*/, throttleCallback(attempt, url)];
+                    case 4:
+                        tryAgain = _a.sent();
+                        _a.label = 5;
+                    case 5:
+                        if (!tryAgain) return [3 /*break*/, 7];
+                        stall = 0;
+                        retryAfter = response.headers["retry-after"];
+                        if (typeof (retryAfter) === "string" && retryAfter.match(/^[1-9][0-9]*$/)) {
+                            stall = parseInt(retryAfter) * 1000;
+                        }
+                        else {
+                            stall = throttleSlotInterval * parseInt(String(Math.random() * Math.pow(2, attempt)));
+                        }
+                        return [4 /*yield*/, staller(stall)];
+                    case 6:
+                        _a.sent();
+                        return [3 /*break*/, 18];
+                    case 7: return [3 /*break*/, 9];
+                    case 8:
                         error_1 = _a.sent();
                         response = error_1.response;
                         if (response == null) {
@@ -11706,8 +11892,8 @@ function fetchJson(connection, json, processFunc) {
                                 url: url
                             });
                         }
-                        return [3 /*break*/, 4];
-                    case 4:
+                        return [3 /*break*/, 9];
+                    case 9:
                         body = response.body;
                         if (allow304 && response.statusCode === 304) {
                             body = null;
@@ -11723,13 +11909,13 @@ function fetchJson(connection, json, processFunc) {
                                 url: url
                             });
                         }
-                        runningTimeout.cancel();
-                        json = null;
+                        json_1 = null;
                         if (body != null) {
                             try {
-                                json = JSON.parse(body);
+                                json_1 = JSON.parse(body);
                             }
                             catch (error) {
+                                runningTimeout.cancel();
                                 logger.throwError("invalid JSON", logger_1.Logger.errors.SERVER_ERROR, {
                                     body: body,
                                     error: error,
@@ -11739,25 +11925,47 @@ function fetchJson(connection, json, processFunc) {
                                 });
                             }
                         }
-                        if (!processFunc) return [3 /*break*/, 8];
-                        _a.label = 5;
-                    case 5:
-                        _a.trys.push([5, 7, , 8]);
-                        return [4 /*yield*/, processFunc(json, response)];
-                    case 6:
-                        json = _a.sent();
-                        return [3 /*break*/, 8];
-                    case 7:
+                        if (!processFunc) return [3 /*break*/, 17];
+                        _a.label = 10;
+                    case 10:
+                        _a.trys.push([10, 12, , 17]);
+                        return [4 /*yield*/, processFunc(json_1, response)];
+                    case 11:
+                        json_1 = _a.sent();
+                        return [3 /*break*/, 17];
+                    case 12:
                         error_2 = _a.sent();
+                        if (!(error_2.throttleRetry && attempt < attemptLimit)) return [3 /*break*/, 16];
+                        tryAgain = true;
+                        if (!throttleCallback) return [3 /*break*/, 14];
+                        return [4 /*yield*/, throttleCallback(attempt, url)];
+                    case 13:
+                        tryAgain = _a.sent();
+                        _a.label = 14;
+                    case 14:
+                        if (!tryAgain) return [3 /*break*/, 16];
+                        timeout_1 = throttleSlotInterval * parseInt(String(Math.random() * Math.pow(2, attempt)));
+                        return [4 /*yield*/, staller(timeout_1)];
+                    case 15:
+                        _a.sent();
+                        return [3 /*break*/, 18];
+                    case 16:
+                        runningTimeout.cancel();
                         logger.throwError("processing response error", logger_1.Logger.errors.SERVER_ERROR, {
-                            body: json,
+                            body: json_1,
                             error: error_2,
                             requestBody: (options.body || null),
                             requestMethod: options.method,
                             url: url
                         });
-                        return [3 /*break*/, 8];
-                    case 8: return [2 /*return*/, json];
+                        return [3 /*break*/, 17];
+                    case 17:
+                        runningTimeout.cancel();
+                        return [2 /*return*/, json_1];
+                    case 18:
+                        attempt++;
+                        return [3 /*break*/, 1];
+                    case 19: return [2 /*return*/];
                 }
             });
         });
@@ -19232,6 +19440,12 @@ utils.intFromLE = intFromLE;
 
 },{"bn.js":77,"minimalistic-assert":110,"minimalistic-crypto-utils":111}],94:[function(require,module,exports){
 module.exports={
+  "_args": [
+    [
+      "elliptic@6.5.3",
+      "C:\\xampp\\htdocs\\balances\\node bundle"
+    ]
+  ],
   "_from": "elliptic@6.5.3",
   "_id": "elliptic@6.5.3",
   "_inBundle": false,
@@ -19254,9 +19468,8 @@ module.exports={
     "/create-ecdh"
   ],
   "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.5.3.tgz",
-  "_shasum": "cb59eb2efdaf73a0bd78ccd7015a62ad6e0f93d6",
-  "_spec": "elliptic@6.5.3",
-  "_where": "C:\\xampp\\htdocs\\balances\\node bundle\\node_modules\\@ethersproject\\signing-key",
+  "_spec": "6.5.3",
+  "_where": "C:\\xampp\\htdocs\\balances\\node bundle",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"
@@ -19264,7 +19477,6 @@ module.exports={
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
   },
-  "bundleDependencies": false,
   "dependencies": {
     "bn.js": "^4.4.0",
     "brorand": "^1.0.1",
@@ -19274,7 +19486,6 @@ module.exports={
     "minimalistic-assert": "^1.0.0",
     "minimalistic-crypto-utils": "^1.0.0"
   },
-  "deprecated": false,
   "description": "EC cryptography",
   "devDependencies": {
     "brfs": "^1.4.3",

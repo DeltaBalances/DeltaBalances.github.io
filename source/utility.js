@@ -397,7 +397,7 @@ module.exports = (db) => {
         }
 
         if (html) {
-            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">EtherDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">EtherDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
         }
         return url;
     }
@@ -417,7 +417,7 @@ module.exports = (db) => {
         }
 
         if (html) {
-            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">ForkDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">ForkDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
         }
         return url;
     }
@@ -435,7 +435,7 @@ module.exports = (db) => {
         }
 
         if (html) {
-            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Token store <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Token store <i class="fa fa-external-link" aria-hidden="true"></i></a>';
         }
         return url;
     }
@@ -472,7 +472,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">IDEX</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">IDEX <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">IDEX <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -499,7 +499,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">DDEX</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">DDEX' + urlAddition + '<i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">DDEX' + urlAddition + '<i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -523,7 +523,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">Binance</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Binance <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Binance <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -544,7 +544,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">RadarRelay</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">RadarRelay <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">RadarRelay <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -565,7 +565,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">Kyber</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Kyber <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Kyber <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -616,7 +616,7 @@ module.exports = (db) => {
                 }
             }
         }
-        return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
+        return '<a target="_blank" rel="noopener noreferrer" href="' + url + '">' + displayText + ' </a>';
     };
 
     utility.tokenLink = function (addr, html, short, erc721Id = undefined) {
@@ -632,7 +632,7 @@ module.exports = (db) => {
         else {
             displayText = db.addressName(addr, !short);
         }
-        return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
+        return '<a target="_blank" rel="noopener noreferrer" href="' + url + '">' + displayText + ' </a>';
     };
 
     utility.getBatchedBalances = function (contract, functionName, args, callback) {
@@ -654,6 +654,10 @@ module.exports = (db) => {
     //get etherdelta history logs from INFURA
     //inclusive for start and end
     // can handle ranges of 5k-10k blocks
+
+    //https://infura.io/docs/ethereum/json-rpc/eth-getLogs
+    // max 10000 results
+    // max 10 sec load
     utility.getTradeLogs = function getTradeLogs(contractAddress, topics, startblock, endblock, rpcID, callback) {
         if (!Array.isArray(topics)) {
             topics = [topics];
@@ -688,11 +692,12 @@ module.exports = (db) => {
                 url: db.config.infuraURL,
                 data: '{"jsonrpc":"2.0","method":"eth_getLogs","params":' + filterObj + ' ,"id":' + rpcID + '}',
                 dataType: 'json',
-                timeout: 55000, // 55 sec timeout (these requests can be slooooow)
+                timeout: 11, // 11 sec timeout
             }).done((result) => {
                 if (result && result.jsonrpc) {
                     // success {"jsonrpc":"2.0","id":7,"result":[]}
                     // fail {"jsonrpc":"2.0","id":92,"error":{"code":-32005,"message":"query returned more than 1000 results"}}
+                    //"error": {"code": -32005,"message": "query timeout exceeded"}
 
                     if (result.result && Array.isArray(result.result)) {
                         callback(result.result, range);

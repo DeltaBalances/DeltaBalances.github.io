@@ -6950,7 +6950,7 @@ module.exports = (db) => {
         }
 
         if (html) {
-            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">EtherDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">EtherDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
         }
         return url;
     }
@@ -6970,7 +6970,7 @@ module.exports = (db) => {
         }
 
         if (html) {
-            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">ForkDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">ForkDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
         }
         return url;
     }
@@ -6988,7 +6988,7 @@ module.exports = (db) => {
         }
 
         if (html) {
-            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Token store <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Token store <i class="fa fa-external-link" aria-hidden="true"></i></a>';
         }
         return url;
     }
@@ -7025,7 +7025,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">IDEX</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">IDEX <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">IDEX <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -7052,7 +7052,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">DDEX</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">DDEX' + urlAddition + '<i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">DDEX' + urlAddition + '<i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -7076,7 +7076,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">Binance</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Binance <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Binance <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -7097,7 +7097,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">RadarRelay</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">RadarRelay <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">RadarRelay <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -7118,7 +7118,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">Kyber</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Kyber <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Kyber <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -7169,7 +7169,7 @@ module.exports = (db) => {
                 }
             }
         }
-        return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
+        return '<a target="_blank" rel="noopener noreferrer" href="' + url + '">' + displayText + ' </a>';
     };
 
     utility.tokenLink = function (addr, html, short, erc721Id = undefined) {
@@ -7185,7 +7185,7 @@ module.exports = (db) => {
         else {
             displayText = db.addressName(addr, !short);
         }
-        return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
+        return '<a target="_blank" rel="noopener noreferrer" href="' + url + '">' + displayText + ' </a>';
     };
 
     utility.getBatchedBalances = function (contract, functionName, args, callback) {

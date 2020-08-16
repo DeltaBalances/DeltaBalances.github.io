@@ -30,6 +30,10 @@ module.exports = {
     '0xForwarder5': { addr: '0xa3ac9844514b96bb502627ca9dceb57c4be289e3', name: '0x Instant', supportedDex: true },
     '0xForwarder6': { addr: '0x5ff2c495055d4f6284f317a9c2edb7045497b14f', name: '0x Instant', supportedDex: true },
     '0xCoordinator': { addr: '0x38a795580d0f687e399913a00ddef6a17612c722', name: '0x Coordinator', supportedDex: true },
+    '0xForward': { addr: '0x6958f5e95332d93d21af0d7b9ca85b8212fee0a5', name: '0x Forwarder', supportedDex: true },
+    '0xExchangeProxy': { addr: '0xdef1c0ded9bec7f1a1670819833240f027b25eff', name: '0x Matcha', supportedDex: false },
+    // unknown forawrder 0xa3ac9844514b96bb502627ca9dceb57c4be289e3
+    // 0x transformErc20 0x761c446dfc9f7826374abdecc79f992e7f17330b
 
     DDEX: { addr: '0x2cb4b49c0d6e9db2164d94ce48853bf77c4d883e', name: 'DDEX Hydro 1.0', supportedDex: true },
     DDEX2: { addr: '0xe2a0bfe759e2a4444442da5064ec549616fff101', name: 'DDEX Hydro 1.1', supportedDex: true },
@@ -75,6 +79,9 @@ module.exports = {
 
     Kyber2_5: { addr: '0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950', name: 'Kyber Network', supportedDex: true },
     Kyber3: { addr: '0x65bf64ff5f51272f729bdcd7acfb00677ced86cd', name: 'Kyber Network', supportedDex: true },
+    KyberProxy: { addr: '0x9aab3f75489902f3a48495025729a0af77d4b11e', name: 'Kyber Network', supportedDex: true },
+    Kyber4: { addr: '0x7c66550c9c730b6fdd4c03bc2e73c5462c5f7acc', name: 'Kyber Network', supportedDex: false },
+    Kyber4_2: { addr: '0x9cb7bb6d4795a281860b9bfb7b1441361cc9a794', name: 'Kyber Network', supportedDex: false },
 
     BancorX: { addr: '0xda96eb2fa67642c171650c428f93abdfb8a63a2d', name: 'BancorX', supportedDex: true },
     UniswapFactory: { addr: '0xc0a47dfe034b400b47bdad5fecda2621de6c4d95', name: 'Uniswap Factor', supportedDex: false },
@@ -197,6 +204,7 @@ module.exports = {
     DdexMargin: { addr: '0x241e82c79452f51fbfc89fac6d912e021db1a3b7', name: 'DDEX Margin', supportedDex: false },
     DefiSaver: { addr: '0x865b41584a22f8345fca4b71c42a1e7abcd67ecb', name: 'DefiSaver MCD', supportedDex: false },
     SportCrypt: { addr: '0x37304b0ab297f13f5520c523102797121182fb5b', name: 'SportCrypt', supportedDex: false },
+    Dforce: { addr: '0x03ef3f37856bd08eb47e2de7abc4ddd2c19b60f2', name: 'Dforce', supportedDex: false },
 
     /* small exchanges, no input/event parsing yet */
     Eidoo3: { addr: '0x560d5afc42ad137dece2277fd75001c165cb9a22', name: 'Eidoo v3', supportedDex: false },
@@ -223,6 +231,9 @@ module.exports = {
     Loopring: { addr: '0x8d8812b72d1e4ffcec158d25f56748b7d67c1e78', name: 'LoopRing v1', supportedDex: false },
     Loopring3: { addr: '0xc2d1e8fb0c10810bb888231e7b85118042846105', name: 'LoopRing v3', supportedDex: false },
     Loopring4: { addr: '0x944644ea989ec64c2ab9ef341d383cef586a5777', name: 'LoopRing', supportedDex: false },
+    //loopring exchange v3 0x730ea81c982939931d7514cc3fbc22eaf7d372ec
+    // loopring registry 0x36f568ef555df25be4b6e15d16994f3a8374214e
+
     Aiwallet: { addr: '0x3dbf4ee7ed88157cda8b2c1578861cea1a1230f1', name: 'Aiwallet', supportedDex: false },
     AmisDex: { addr: '0x2cc69caaaaa6114ddf48f4ddb2adb9c5d5d3e048', name: 'AmisDex', supportedDex: false },
     Verify1: { addr: '0x48bf5e13a1ee8bd4385c182904b3abf73e042675', name: '0xVerify', supportedDex: false },

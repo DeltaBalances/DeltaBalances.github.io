@@ -1,6 +1,8 @@
 
 //use @ethersproject to create a trimmed ethers.js with only the needed modules, reduces build size
-// can instantly be replaced by the original Ethers package for compatibility;
+// can be replaced by the original Ethers package for compatibility;
+
+// Temporarily includes an ethersV4 decoder in 'legacy' to get around some decoding issues in v5.
 
 // const Ethers = require('ethers'); 
 const Ethers = {
@@ -14,6 +16,13 @@ const Ethers = {
   Contract: require('@ethersproject/contracts/lib/index.js').Contract,
   getDefaultProvider: require('@ethersproject/providers/lib/index.js').getDefaultProvider,
   //providers: require('@ethersproject/providers/lib/index.js'),
+  
+  
+  legacy: {
+    utils: {
+      defaultAbiCoder: require("ethersLegacy/utils/abi-coder.js").defaultAbiCoder
+    }
+  }
 };
 
 

@@ -6,7 +6,8 @@
   "private": true,
   "dependencies": {
     "bignumber.js": "5.0.0",
-    "ethers": "^5.0.8"
+    "ethers": "^5.0.8",
+    "ethersLegacy": "npm:ethers@4.0.47"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

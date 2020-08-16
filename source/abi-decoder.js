@@ -4,6 +4,7 @@ const BigNumber = require('bignumber.js'); //keep classic bigNumber for legacy r
 const abiCoder = require("./ethersWrapper.js").utils.defaultAbiCoder;
 const Fragment = require("./ethersWrapper.js").utils.Fragment;
 const sha3 = require("./ethersWrapper.js").utils.id;
+const abiCoder2 = require("./ethersWrapper.js").legacy.utils.defaultAbiCoder;
 
 const state = {
   savedABIs: [],
@@ -127,11 +128,18 @@ function _decodeMethod(data) {
   const abiItem = state.methodIDs[methodID];
   if (abiItem) {
     const params = _getInputTypes(abiItem.inputs);
-    let decoded = abiCoder.decode(params, '0x' + data.slice(10));
-    //turn ethers arrayish object into array
-    {
-      delete decoded['__length__'];
-      decoded = Object.values(decoded);
+    let decoded = undefined;
+
+    try {
+      decoded = abiCoder.decode(params, '0x' + data.slice(10));
+      //turn ethers arrayish object into array
+      {
+        delete decoded['__length__'];
+        decoded = Object.values(decoded);
+      }
+    } catch (e) {
+      // try a legacy ethers v4 decoder for badly formatted data that fails in v5 but not v4
+      decoded = abiCoder2.decode(params, '0x' + data.slice(10));
     }
 
     return {
@@ -309,7 +317,13 @@ function _decodeLogs(logs) {
           }
         }
       );
-      const decodedData = abiCoder.decode(dataTypes, logData);
+      let decodedData = undefined;
+      try {
+        decodedData = abiCoder.decode(dataTypes, logData);
+      } catch (e) {
+        // backup attempt with legacy ethers v4 decoder, parses some data that v5 errors on.
+        decodedData = abiCoder2.decode(dataTypes, logData);
+      }
       // Loop topic and data to get the params
       method.inputs.map(function (param) {
         var decodedP = {

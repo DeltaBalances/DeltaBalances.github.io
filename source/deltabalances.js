@@ -17,7 +17,7 @@ function DeltaBalances() {
     this.secondsPerBlock = 14;
     this.provider = Ethers.getDefaultProvider('homestead', {
         etherscan: config.etherscanAPIKey,
-       // infura: config.infuraKey,
+        infura: config.infuraKey,
         quorum: 1
     });
     this.contractDeltaBalance = undefined;

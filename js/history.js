@@ -737,7 +737,7 @@ var pageType = 'history';
 
 					activeRequests++;
 					console.log('retrying failed range ' + rangeObj.start + ' ' + rangeObj.end);
-					getLogsInRange(rangeObj.start, rangeObj.end, rpcId);
+					getLogsInRange(rangeObj.start, rangeObj.end, rpcId, rangeObj.retries);
 					rpcId++;
 					return true;
 				}
@@ -754,8 +754,8 @@ var pageType = 'history';
 				return false;
 			}
 
-			function getLogsInRange(startNum, endNum, rpcID) {
-				_util.getTradeLogs(contractAddr, topics, startNum, endNum, rpcID, receiveLogs);
+			function getLogsInRange(startNum, endNum, rpcID, retryCount = 0) {
+				_util.getTradeLogs(contractAddr, topics, startNum, endNum, rpcID, receiveLogs, retryCount);
 			}
 		}
 

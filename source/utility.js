@@ -658,7 +658,7 @@ module.exports = (db) => {
     //https://infura.io/docs/ethereum/json-rpc/eth-getLogs
     // max 10000 results
     // max 10 sec load
-    utility.getTradeLogs = function getTradeLogs(contractAddress, topics, startblock, endblock, rpcID, callback) {
+    utility.getTradeLogs = function getTradeLogs(contractAddress, topics, startblock, endblock, rpcID, callback, retryCount = 0) {
         if (!Array.isArray(topics)) {
             topics = [topics];
         }
@@ -675,7 +675,7 @@ module.exports = (db) => {
             start: startblock,
             end: endblock,
             count: (endblock - startblock) + 1,
-            retries: 0,
+            retries: retryCount,
             error: false
         };
 
@@ -692,7 +692,7 @@ module.exports = (db) => {
                 url: db.config.infuraURL,
                 data: '{"jsonrpc":"2.0","method":"eth_getLogs","params":' + filterObj + ' ,"id":' + rpcID + '}',
                 dataType: 'json',
-                timeout: 11, // 11 sec timeout
+                timeout: 12000, // 12 sec timeout
             }).done((result) => {
                 if (result && result.jsonrpc) {
                     // success {"jsonrpc":"2.0","id":7,"result":[]}
@@ -712,8 +712,8 @@ module.exports = (db) => {
                     //empty positive response?
                     returnError();
                 }
-            }).fail((result) => {
-                returnError();
+            }).fail((result, status, error) => {
+                returnError(error);
             });
         }
 
@@ -788,7 +788,8 @@ module.exports = (db) => {
 
 
     utility.getBlockDate = function getBlockDate(decBlocknr, callback) {
-        db.provider.getBlock(decBlocknr).then(block => {
+        let num = Number(decBlocknr);
+        db.provider.getBlock(num).then(block => {
             let time = block.timestamp || block.timeStamp;
             callback(undefined, time, decBlocknr);
         }, e => {

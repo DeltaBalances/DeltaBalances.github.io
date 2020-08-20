@@ -6784,7 +6784,7 @@ module.exports = (db) => {
         if (num.greaterThan(1000000000)) {
             num = num.toExponential(fixed);
         } else {
-            num = num.toFixed(fixed);
+            num = num.toFixed(fixed, 1);
         }
         return this.commaNotation(num);
     };

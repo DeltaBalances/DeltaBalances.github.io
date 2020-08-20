@@ -64,7 +64,7 @@ var pageType = 'balance';
     addExchange('EtherC', _delta.config.exchangeContracts.EtherC.addr);
     addExchange('SwitchDex', _delta.config.exchangeContracts.SwitchDex.addr);
     addExchange('Decentrex', _delta.config.exchangeContracts.Decentrex.addr);
-    //addExchange('Ethen', _delta.config.exchangeContracts.Ethen.addr);
+    addExchange('ETHEN', "0x442fe55412a5459de5e51cb220d395aaa8960825"); //Ethen balanceOf proxy
     addExchange('Bitcratic', _delta.config.exchangeContracts.Bitcratic2.addr);
     addExchange('DEXY', _delta.config.exchangeContracts.Dexy.addr);
     addExchange('EtherDelta-old', _delta.config.exchangeContracts.EtherDelta2.addr);

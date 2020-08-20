@@ -40,7 +40,7 @@ Supported Decentralized exchanges for each website feature.
 | [Enclaves Dex †](https://enclaves.io) | Yes | Yes| Yes | Yes|
 | DiversiFi v1 [Etfinex trustless v1 (v2<sup>*</sup>)](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
 | [Eth2Dai](https://eth2dai.com/) |-|Yes| Yes | Yes|
-| [ETHEN](https://ethen.market) |No|Yes|Yes|Yes|
+| [ETHEN](https://ethen.market) |Yes|Yes|Yes|Yes|
 | [EtherC](https://etherc.io) |Yes|Yes|Yes|Yes|
 | [EtherDelta †](https://etherdelta.com)| Yes| Yes| Yes| Yes | 
 | [ETHEX †](https://ethex.market)|-|Yes|Yes|Yes|

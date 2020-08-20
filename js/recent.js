@@ -703,9 +703,13 @@ var pageType = 'recent';
 
 						let from = tx.from.toLowerCase();
 						let to = tx.to.toLowerCase();
-						let contract = tx.contractAddress;
-						if (contract)
-							contract = contract.toLowerCase();
+						let contract = undefined;
+						if (tx.to !== "") {	// ignore contract deployment
+							contract = tx.contractAddress;
+							if (contract)
+								contract = contract.toLowerCase();
+						}
+
 
 						//save etherscan block dates in cache for tx details & history
 						if (tx.blockNumber) {
@@ -739,7 +743,10 @@ var pageType = 'recent';
 					var to = tx.to.toLowerCase();
 					var value = _util.weiToEth(tx.value); // eth value of tx
 
-					let contract = tx.contractAddress; //only on token transfer events form etherscan API
+					let contract = undefined;
+					if (tx.to !== "") {	// ignore contract deployment
+						contract = tx.contractAddress; // besides deployment, only on token transfer events form etherscan API
+					}
 					let internal = tx.type == "call" || tx.gasUsed == "0"; //from internal tx request
 
 					if (contract) {
@@ -1451,7 +1458,7 @@ var pageType = 'recent';
 						}
 
 						//Ether transferred or unknown func accepting ETH
-						if (!ercToken && value.greaterThan(0)) {
+						if (!ercToken && value.greaterThanOrEqualTo(0)) {
 
 							let amount = value;
 

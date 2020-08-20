@@ -53,7 +53,7 @@ Supported Decentralized exchanges for each website feature.
 | [SingularX](https://singularx.com)|Yes| Yes| Yes | Yes|
 | [SwitchDex](https://switchdex.ag)|Yes| Yes| Yes | Not yet|
 | [Switcheo v1](https://switcheo.exchange)|Yes| Partial (WIP)| Partial (WIP) | Not yet|
-| [Switcheo v1](https://switcheo.exchange)|Yes| Not yet| Not yet | Not yet|
+| [Switcheo v2](https://switcheo.exchange)|Yes| Not yet| Not yet | Not yet|
 | [Token Store (ETH) †](https://token.store)| Yes| Yes| Yes| Yes |
 | [Token store Instant-trade †](https://token.store)| - | Yes| Yes | No|
 | [Uniswap v1](https://uniswap.exchange)| - | Yes| Yes| Not yet|  

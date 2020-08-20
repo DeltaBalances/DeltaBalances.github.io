@@ -1632,6 +1632,85 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     'orderEpoch': unpacked.params[0].value,
                 };
             }
+
+            //0x v3 exchange proxy: matcha
+            else if (unpacked.name === 'transformERC20') {
+
+                let taker = txFrom;
+
+                let takerToken = this.setToken(unpacked.params[0].value);
+                let makerToken = this.setToken(unpacked.params[1].value);
+
+                let takerAmount = utility.toBigNumber(unpacked.params[2].value);
+                let makerAmount = utility.toBigNumber(unpacked.params[3].value); //min amount
+
+                let tradeType = 'Sell';
+                let token = undefined;
+                let base = undefined;
+
+                let exchange = this.getExchangeName(txTo, '');
+
+                if (this.isBaseToken(takerToken, makerToken)) {
+                    tradeType = 'Buy';
+                    token = makerToken;
+                    base = takerToken;
+                } else {
+                    tradeType = 'Sell';
+                    token = takerToken;
+                    base = makerToken;
+                }
+
+                if (token && base && token.addr && base.addr) {
+                    let rawAmount = utility.toBigNumber(0);
+                    let rawBaseAmount = utility.toBigNumber(0);
+
+                    if (tradeType === 'Sell') {
+                        rawAmount = takerAmount;
+                        rawBaseAmount = makerAmount;
+                    } else {
+                        rawBaseAmount = takerAmount;
+                        rawAmount = makerAmount;
+                    }
+
+                    let amount = utility.weiToToken(rawAmount, token);
+                    let baseAmount = utility.weiToToken(rawBaseAmount, base);
+                    let price = utility.toBigNumber(0);
+                    if (amount.greaterThan(0)) {
+                        price = baseAmount.div(amount);
+                    }
+
+                    if (tradeType === 'Sell') {
+                        return {
+                            'type': tradeType + ' up to',
+                            'exchange': exchange,
+                            'note': utility.addressLink(taker, true, true) + 'made a trade on ' + exchange,
+                            'token': token,
+                            'amount': amount,
+                            'minPrice': price,
+                            'base': base,
+                            'estBaseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                            'taker': taker,
+                        };
+
+                    } else {
+
+                        return {
+                            'type': tradeType + ' up to',
+                            'exchange': exchange,
+                            'note': utility.addressLink(taker, true, true) + 'made a trade on ' + exchange,
+                            'token': token,
+                            'estAmount': amount,
+                            'maxPrice': price,
+                            'base': base,
+                            'baseAmount': baseAmount,
+                            'unlisted': token.unlisted,
+                            'taker': taker,
+                        };
+                    }
+                }
+            }
+
             // airswap cancel && fill
             else if ((unpacked.name === 'cancel' || unpacked.name === 'fill') && unpacked.params.length > 10) {
 
@@ -2270,6 +2349,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 || unpacked.name === 'matchOrders' //0xv2
                 || unpacked.name == 'marketBuyOrdersWithEth' //0xv2 0xv3 Forwarder
                 || unpacked.name == 'marketSellOrdersWithEth' //0xv2 0xv3 Forwarder
+                || unpacked.name == 'marketSellAmountWithEth' //0xv3 new Forwarder
             ) {
                 /* //0x v2 &v3 order
                     struct Order array 
@@ -2388,6 +2468,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     } else if (unpacked.name == 'marketSellOrders' || unpacked.name == 'marketSellOrdersNoThrow' || unpacked.name == 'marketSellOrdersFillOrKill'
                         || unpacked.name == 'marketBuyOrders' || unpacked.name == 'marketBuyOrdersNoThrow' || unpacked.name == 'marketBuyOrdersFillOrKill'
                         || unpacked.name == 'marketBuyOrdersWithEth' || unpacked.name == 'marketSellOrdersWithEth' // WithEth is 0x Forwarder2
+                        || unpacked.name == 'marketSellAmountWithEth'
                     ) {
 
                         let orders = unpacked.params[0].value;
@@ -5944,6 +6025,84 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                     };
                 }
             }
+            // trade event for 0x v3 exchange proxy: Matcha.xyz
+            else if (unpacked.name == 'TransformedERC20') {
+                //"event TransformedERC20(address indexed taker, address inputToken, address outputToken, address inputTokenAmount, address outputTokenAmount)"
+
+                //TODO event doesn't include fees included in regualr 0x fills
+
+                let taker = unpacked.events[0].value.toLowerCase();
+                let takerToken = this.setToken(unpacked.events[1].value);
+                let makerToken = this.setToken(unpacked.events[2].value);
+
+                let makerAmount = utility.toBigNumber(unpacked.events[4].value);
+                let takerAmount = utility.toBigNumber(unpacked.events[3].value);
+
+                let feeCurrency = '';
+                let fee = utility.toBigNumber(0);
+                let transType = 'Taker';
+
+                let exchange = this.getExchangeName(unpacked.address, '');
+                let tradeType = 'Sell';
+                let token = undefined;
+                let base = undefined;
+
+
+                if (this.isBaseToken(takerToken, makerToken)) {
+                    tradeType = 'Buy';
+                    token = makerToken;
+                    base = takerToken;
+                }
+                else {
+                    tradeType = 'Sell';
+                    token = takerToken;
+                    base = makerToken;
+                }
+
+                if (token && base && token.addr && base.addr) {
+                    let rawAmount = utility.toBigNumber(0);
+                    let rawBaseAmount = utility.toBigNumber(0);
+
+                    let buyUser = '';
+                    let sellUser = '';
+                    if (tradeType === 'Sell') {
+                        rawAmount = takerAmount;
+                        rawBaseAmount = makerAmount;
+                        sellUser = taker;
+                    } else {
+                        rawBaseAmount = takerAmount;
+                        rawAmount = makerAmount;
+                        buyUser = taker;
+                    }
+
+                    let amount = utility.weiToToken(rawAmount, token);
+                    let baseAmount = utility.weiToToken(rawBaseAmount, base);
+                    let price = utility.toBigNumber(0);
+                    if (amount.greaterThan(0)) {
+                        price = baseAmount.div(amount);
+                    }
+
+
+                    return {
+                        'type': transType + ' ' + tradeType,
+                        'exchange': exchange,
+                        'note': utility.addressLink(taker, true, true) + ' traded with the ' + exchange + ' DEX aggregator',
+                        'token': token,
+                        'amount': amount,
+                        'price': price,
+                        'base': base,
+                        'baseAmount': baseAmount,
+                        'unlisted': token.unlisted,
+                        'buyer': buyUser,
+                        'seller': sellUser,
+                        'fee': fee,
+                        'feeCurrency': feeCurrency,
+                        'transType': transType,
+                        'tradeType': tradeType,
+                    };
+                }
+            }
+
             // erc 20 transfer event
             // erc 721 transfer event
             else if (unpacked.name == 'Transfer') {

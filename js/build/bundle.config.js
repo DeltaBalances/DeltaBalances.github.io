@@ -260,7 +260,16 @@ module.exports = {
   '0xCoordinator': [
     "function executeTransaction(tuple(uint256 salt, uint256 expirationTimeSeconds, uint256 gasPrice, address signerAddress, bytes data) transaction, address txOrigin, bytes transactionSignature, bytes[] approvalSignatures) payable"
   ],
-
+  '0xForwarderMatcha': [
+    "function marketBuyOrdersWithEth(tuple(address makerAddress, address takerAddress, address feeRecipientAddress, address senderAddress, uint256 makerAssetAmount, uint256 takerAssetAmount, uint256 makerFee, uint256 takerFee, uint256 expirationTimeSeconds, uint256 salt, bytes makerAssetData, bytes takerAssetData, bytes makerFeeAssetData, bytes takerFeeAssetData)[] orders, uint256 makerAssetBuyAmount, bytes[] signatures, uint256[] ethFeeAmounts, address[] feeRecipients) payable returns (uint256 wethSpentAmount, uint256 makerAssetAcquiredAmount)",
+    "function marketSellOrdersWithEth(tuple(address makerAddress, address takerAddress, address feeRecipientAddress, address senderAddress, uint256 makerAssetAmount, uint256 takerAssetAmount, uint256 makerFee, uint256 takerFee, uint256 expirationTimeSeconds, uint256 salt, bytes makerAssetData, bytes takerAssetData, bytes makerFeeAssetData, bytes takerFeeAssetData)[] orders, bytes[] signatures, uint256[] ethFeeAmounts, address[] feeRecipients) payable returns (uint256 wethSpentAmount, uint256 makerAssetAcquiredAmount)",
+    "function marketSellAmountWithEth(tuple(address makerAddress, address takerAddress, address feeRecipientAddress, address senderAddress, uint256 makerAssetAmount, uint256 takerAssetAmount, uint256 makerFee, uint256 takerFee, uint256 expirationTimeSeconds, uint256 salt, bytes makerAssetData, bytes takerAssetData, bytes makerFeeAssetData, bytes takerFeeAssetData)[] orders, uint256 ethSellAmount, bytes[] signatures, uint256[] ethFeeAmounts, address[] feeRecipients) payable returns (uint256 wethSpentAmount, uint256 makerAssetAcquiredAmount)",
+  ],
+  // matcha aggregator by 0x
+  '0xExchangeProxy': [
+    "function transformERC20(address inputToken, address outputToken, uint256 inputTokenAmount, uint256 minOutputTokenAmount, tuple(uint32 deploymentNonce, bytes data)[] transformations) payable returns (uin256 outputTokenAmount)",
+    "event TransformedERC20(address indexed taker, address inputToken, address outputToken, uint256 inputTokenAmount, uint256 outputTokenAmount)"
+  ],
   //DDEX post 0x protocol (hydro 1.0 and hydro 1.1)
   DDEX: [
     "function matchOrders(tuple(address trader, uint256 baseTokenAmount, uint256 quoteTokenAmount, uint256 gasTokenAmount, bytes32 data, tuple(bytes32 config, bytes32 r, bytes32 s) signature) takerOrderParam, tuple(address trader, uint256 baseTokenAmount, uint256 quoteTokenAmount, uint256 gasTokenAmount, bytes32 data, tuple(bytes32 config, bytes32 r, bytes32 s) signature)[] makerOrderParams, tuple(address baseToken, address quoteToken, address relayer) orderAddressSet)",

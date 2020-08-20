@@ -583,7 +583,8 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             }
             // exchange deposit/withdraw ETH (etherdelta, idex deposit, tokenstore, ethen, switcheo deposit) 
             // wrap  0x ETH->WETH, wrap ethfinex lockTokens. (un)wrapping
-            else if (unpacked.name === 'deposit' || (unpacked.name === 'withdraw' && unpacked.params[0].name !== 'token' && unpacked.params.length < 9)
+            else if ((unpacked.name === 'deposit' && (unpacked.params.length == 0 || unpacked.params[0].name !== 'token'))
+                || (unpacked.name === 'withdraw' && unpacked.params[0].name !== 'token' && unpacked.params.length < 9)
                 || unpacked.name === 'withdrawEther' || unpacked.name === 'depositEther') {
                 var type = '';
                 var note = '';
@@ -700,6 +701,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || unpacked.name === 'directWithdrawal' || unpacked.name === 'depositWrappedEther'
                 || /* enclaves */ unpacked.name === 'withdrawBoth' || unpacked.name === 'depositBoth'
                 || (unpacked.name === 'withdraw' && unpacked.params.length == 2 && unpacked.params[0].name === 'token')
+                || (unpacked.name === 'deposit' && unpacked.params.length == 2 && unpacked.params[0].name === 'token')
                 || unpacked.name == 'multiSigWithdrawal'
             ) {
                 let token = undefined;

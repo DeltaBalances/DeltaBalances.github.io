@@ -583,6 +583,11 @@ module.exports = {
     "event LogSingleSigWithdrawal(address account, address token, uint256 amount)",
     "event LogOrderCanceled(bytes32 hash)"
   ],
+  Loopring: [
+    "function withdraw(address token, uint96 amount)",
+    "function deposit(address token, uint96 amount)"
+    // function distributeWithdrawals(uint256 blockIdx, uint256 maxNumWithdrawals)
+  ],
 };
 },{}],2:[function(require,module,exports){
 module.exports = {

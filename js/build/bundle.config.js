@@ -78,8 +78,9 @@ module.exports = {
 
   /* api related */
   etherscanAPIKey: 'CY1M8MIE5IJ87GKNGYF98PGQFIHVQ99V13',
-  infuraKey: 'a736fb84e7d74effb636f41305a0afd3',
-  infuraURL: 'https://mainnet.infura.io/v3/1b000043e1a84c468747a6b75b4541c1',  // infura project for ethereum logs (history)
+  infuraKey: '87ee3513fad045acb1522ef7a30bd652',
+   // infura project for ethereum logs (history)
+  infuraURL: 'https://mainnet.infura.io/v3/a7ca261d0f724bac976dfdb263cb3866', 
   localNode: 'http://localhost:8545',
   socketURL: 'https://api.forkdelta.com', //forkdelta order/price api
 };

@@ -608,8 +608,8 @@ var pageType = 'history';
 		var days = 1;
 		if (input < 0.25)
 			days = 0.25;
-		else if (input > 100)
-			days = 100;
+		else if (input > 35)
+			days = 35;
 		else
 			days = input;
 

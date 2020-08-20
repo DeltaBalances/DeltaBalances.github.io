@@ -572,13 +572,37 @@ var pageType = 'history';
 	}
 
 	function checkBlockInput() {
+		const maxRange = 500000;
+
 		let block1 = Math.floor($('#blockSelect1').val());
 		let block2 = Math.floor($('#blockSelect2').val());
+
+		let changeIndex = 0;
+		//check which one th euser edited
+		if (block1 == startblock && block2 !== endblock) {
+			changeIndex = 2;
+		} else if (block1 !== startblock && block2 == endblock) {
+			changeIndex = 1;
+		}
+
+		block1 = Math.max(minBlock, block1);
+		block2 = Math.max(minBlock, block2);
+		block1 = Math.min(block1, blocknum);
+		block2 = Math.min(block2, blocknum);
 
 		if (block1 > block2) // swap if values are wrong
 		{
 			block1 = Math.floor($('#blockSelect2').val());
-			block2 = Math.floor($('#blockSelect1').val());
+			block2 = block1 + 1;
+		}
+
+		// limit blockrange to a max
+		if ((block2 - block1) > maxRange) {
+			if (changeIndex == 1) {
+				block2 = block1 + maxRange;
+			} else {
+				block1 = block2 - maxRange;
+			}
 		}
 
 		startblock = Math.max(minBlock, block1);
@@ -592,7 +616,6 @@ var pageType = 'history';
 			startblock = Math.floor(blocknum - ((transactionDays * 24 * 60 * 60) / blocktime));
 			startblock = Math.max(startblock, minBlock);
 			endblock = blocknum;
-
 		}
 
 		$('#blockSelect1').val(startblock);
@@ -1843,7 +1866,7 @@ var pageType = 'history';
 
 			for (var i = 0; i < allTrades.length; ++i) {
 				var row = [];
-				
+
 				const exchange = allTrades[i].Exchange;
 				const transactionDate = allTrades[i]['Date'].toISOString();
 				const transactionType = 'trade';
@@ -2026,5 +2049,4 @@ var pageType = 'history';
 		var result = transactionsPlaceholder;
 		makeTable(result);
 	}
-
 }

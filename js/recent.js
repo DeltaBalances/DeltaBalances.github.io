@@ -93,14 +93,13 @@ var pageType = 'recent';
 
 		getBlockStorage();
 
-		// borrow some ED code for compatibility
 		_delta.startDeltaBalances(false, () => {
 			if (!autoStart) {
 				if (blocknum > -1) {
 					startblock = getStartBlock();
 				}
 				else {
-					_util.blockNumber(_delta.web3, (err, num) => {
+					_util.blockNumber((err, num) => {
 						if (!err && num) {
 							blocknum = num;
 							startblock = getStartBlock();
@@ -435,7 +434,7 @@ var pageType = 'recent';
 			}
 			else {
 				console.log("try blocknum v2");
-				_util.blockNumber(_delta.web3, (err, num) => {
+				_util.blockNumber((err, num) => {
 					if (num) {
 						blocknum = num;
 						startblock = getStartBlock();

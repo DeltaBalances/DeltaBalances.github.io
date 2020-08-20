@@ -16,27 +16,27 @@
   <link href="css/combinedStyles.css" rel="stylesheet">
 
   <!-- JS  jquery -->
-  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/lib/jquery-3.2.1.min.js"></script>
 
   <!-- JS  datatables -->
-  <script src="js/jquery.dataTables.fixed.min.js"></script>
+  <script src="js/lib/jquery.dataTables.fixed.min.js"></script>
 
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
-  <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
+  <script src="js/lib/bootstrap.adminlte.blockies.min.js" defer></script>
 
   <!-- JS  Token discover / loading -->
-  <script src="backupTokens.js"></script>
-  <script src="loadTokens.js"></script>
+  <script src="js/backupTokens.js"></script>
+  <script src="js/loadTokens.js"></script>
 
   <!-- JS  Main functionality -->
-  <!--  config excluded from bundle -->
-  <script src="configBundle.js"></script>
-  <script src="bundle.min.js"></script>
+  <script src="js/build/bundle.config.min.js"></script>
+  <script src="js/build/bundle.modules.min.js"></script>
+  <script src="js/build/bundle.min.js"></script>
   <script>
     var exchanges = ['OasisDex'];
   </script>
-  <script src="user.js"></script>
-  <script src="history.js"></script>
+  <script src="js/user.js"></script>
+  <script src="js/history.js"></script>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -244,13 +244,13 @@
         </li>
         <li class="header">Links</li>
         <li>
-          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank">
+          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-github"></i>
             <span>GitHub</span>
           </a>
         </li>
         <li>
-          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank">
+          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-link"></i>
             <span>Smart contract</span>
           </a>
@@ -352,18 +352,18 @@
                   <div class="col-md-7 noPad" style="overflow:hidden;">
                     <h4>Info</h4>
                     History for
-					<a href="https://oasis.app/trade" target="_blank">Oasis Trade</a>, 
-                    <a href="https://old.oasisdex.com" target="_blank"><strike>OasisDex</strike></a>, <a href="https://eth2dai.com/" target="_blank"><strike>Eth2Dai</strike></a> and
+					<a href="https://oasis.app/trade" target="_blank" rel="noopener noreferrer">Oasis Trade</a>, 
+                    <a href="https://old.oasisdex.com" target="_blank" rel="noopener noreferrer"><strike>OasisDex</strike></a>, <a href="https://eth2dai.com/" target="_blank" rel="noopener noreferrer"><strike>Eth2Dai</strike></a> and
                     forked websites at contracts: <br>
 
 
-                    <a href="https://etherscan.io/address/0xB7ac09C2c0217B07d7c103029B4918a2C401eeCB" target="_blank">0xB7ac09..</a>,
-                    <a href="https://etherscan.io/address/0x83ce340889c15a3b4d38cfcd1fc93e5d8497691f" target="_blank">0x83ce34..</a>,
+                    <a href="https://etherscan.io/address/0xB7ac09C2c0217B07d7c103029B4918a2C401eeCB" target="_blank" rel="noopener noreferrer">0xB7ac09..</a>,
+                    <a href="https://etherscan.io/address/0x83ce340889c15a3b4d38cfcd1fc93e5d8497691f" target="_blank" rel="noopener noreferrer">0x83ce34..</a>,
 
-                    <a href="https://etherscan.io/address/0x3aa927a97594c3ab7d7bf0d47c71c3877d1de4a1" target="_blank">0x3aa927..</a>,
-                    <a href="https://etherscan.io/address/0x14fbca95be7e99c15cc2996c6c9d841e54b79425" target="_blank">0x14fbc..</a>,
-                    <a href="https://etherscan.io/address/0x39755357759ce0d7f32dc8dc45414cca409ae24e" target="_blank">0x39755..</a> and
-					<a href="https://etherscan.io/address/0x794e6e91555438afc3ccf1c5076a74f42133d08d" target="_blank">0x794e6..</a>.
+                    <a href="https://etherscan.io/address/0x3aa927a97594c3ab7d7bf0d47c71c3877d1de4a1" target="_blank" rel="noopener noreferrer">0x3aa927..</a>,
+                    <a href="https://etherscan.io/address/0x14fbca95be7e99c15cc2996c6c9d841e54b79425" target="_blank" rel="noopener noreferrer">0x14fbc..</a>,
+                    <a href="https://etherscan.io/address/0x39755357759ce0d7f32dc8dc45414cca409ae24e" target="_blank" rel="noopener noreferrer">0x39755..</a> and
+					<a href="https://etherscan.io/address/0x794e6e91555438afc3ccf1c5076a74f42133d08d" target="_blank" rel="noopener noreferrer">0x794e6..</a>.
 
                     <br>
                     <br>
@@ -465,13 +465,13 @@
       </div>
       <!-- Default to the left -->
       <p> Powered by
-        <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
-        <a target="_blank" href="https://infura.io/">Infura</a>
+        <a target="_blank" rel="noopener noreferrer" href="https://etherscan.io/">Etherscan</a> and
+        <a target="_blank" rel="noopener noreferrer" href="https://infura.io/">Infura</a>
         <br> Contact:
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
-        <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+        <a target="_blank" rel="noopener noreferrer" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
+        <a target="_blank" rel="noopener noreferrer" href="https://reddit.com/u/deltabalances">Reddit</a>
         <br> Buy me a beer:
-        <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
+        <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank" rel="noopener noreferrer">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
       </p>
     </footer>
 

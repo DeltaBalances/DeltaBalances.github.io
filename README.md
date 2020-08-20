@@ -30,7 +30,7 @@ Supported Decentralized exchanges for each website feature.
 | 0x Protocol v2(.1) | - | Yes| Yes| Yes |
 | 0x Protocol v3 | - | Yes| Yes| Yes |
 | [AirSwap v1](https://airswap.io)| - | Yes |Yes |Yes|
-| [Bancor](https://bancor.network)  | - | Yes| Yes | No|
+| [Bancor v1](https://bancor.network)  | - | Yes| Yes | No|
 | [BancorX](https://bancor.network) cross-chain  | - | Yes| Yes | No|
 | [DDEX hydro 1.0](https://ddex.io/)| - | Yes| Yes| Not yet |
 | [DDEX hydro 1.1](https://ddex.io/)| - | Yes| Yes| Yes |
@@ -38,24 +38,24 @@ Supported Decentralized exchanges for each website feature.
 | [Dexy †](https://app.dexy.exchange) |Yes| No| No | No|
 | [EasyTrade](https://easytrade.io) |-| Yes| Yes | Yes|
 | [Enclaves Dex †](https://enclaves.io) | Yes | Yes| Yes | Yes|
-| DiversiFi [Etfinex trustless v1 (v2<sup>*</sup>)](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
+| DiversiFi v1 [Etfinex trustless v1 (v2<sup>*</sup>)](https://trustless.ethfinex.com) | - | Yes | Yes | Yes |
 | [Eth2Dai](https://eth2dai.com/) |-|Yes| Yes | Yes|
 | [ETHEN](https://ethen.market) |No|Yes|Yes|Yes|
 | [EtherC](https://etherc.io) |Yes|Yes|Yes|Yes|
-| [EtherDelta](https://etherdelta.com)| Yes| Yes| Yes| Yes | 
+| [EtherDelta †](https://etherdelta.com)| Yes| Yes| Yes| Yes | 
 | [ETHEX †](https://ethex.market)|-|Yes|Yes|Yes|
 | [ForkDelta](https://forkDelta.app)| Yes| Yes| Yes| Yes | 
 | [IDEX v1](https://idex.market)| Yes |Yes |Yes| No |
 | [Joyso](https://joyso.io)|Yes| Not yet| Not yet | No|
-| [Kyber Network](https://kyber.network) |-|Yes|Yes| Yes | Yes|
+| [Kyber Network v1](https://kyber.network) |-|Yes|Yes| Yes | Yes|
 | [Oasis](https://oasis.app/trade/) [OasisDex †](https://oasisdex.com)|-|Yes| Yes | Yes|
 | [OasisDirect](https://oasis.direct) |-|Yes| Yes | No|
 | [SingularX](https://singularx.com)|Yes| Yes| Yes | Yes|
 | [SwitchDex](https://switchdex.ag)|Yes| Yes| Yes | Not yet|
 | [Switcheo v1](https://switcheo.exchange)|Yes| Partial (WIP)| Partial (WIP) | Not yet|
-| [Switcheo v1](https://switcheo.exchange)|Yes| Not yet| Not yet | Not yet|
-| [Token Store (ETH)](https://token.store)| Yes| Yes| Yes| Yes |
-| [Token store Instant-trade](https://token.store)| - | Yes| Yes | No|
+| [Switcheo v2](https://switcheo.exchange)|Yes| Not yet| Not yet | Not yet|
+| [Token Store (ETH) †](https://token.store)| Yes| Yes| Yes| Yes |
+| [Token store Instant-trade †](https://token.store)| - | Yes| Yes | No|
 | [Uniswap v1](https://uniswap.exchange)| - | Yes| Yes| Not yet|  
 
 († = Exchange is no longer active)  

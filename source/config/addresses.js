@@ -67,6 +67,10 @@ module.exports = {
     "0x584860fe460a16cd11e6fdebb2e77146d1835be8": "MerchCoins",
     "0x3151e8ab9bfe754ada6682b9d75906e06a18a741": "Instex",
     "0x1b38d2613698488cbac0e7d21abb2fdbbe1d6704": "Bit2MeDex",
+    "0x10aa8c82e3656170baae80d189b8b7dcea6865c9": "SwitchDex",
+    "0x86003b044f70dac0abc80ac8957305b6370893ed": "Matcha.xyz",
+
+
 
     // non zrx
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex', //0x clone contract

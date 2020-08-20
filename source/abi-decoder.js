@@ -1,6 +1,10 @@
-//const SolidityCoder = require("web3/lib/solidity/coder.js"); //replaced by Interface to correctly parse ABIv2
-const Web3 = require('web3');
-const Interface = require('ethers-contracts/interface.js');
+const BigNumber = require('bignumber.js'); //keep classic bigNumber for legacy reasons instead of ether BN.js
+
+//use @ethersproject to reduce the amount of npm packages included
+const abiCoder = require("./ethersWrapper.js").utils.defaultAbiCoder;
+const Fragment = require("./ethersWrapper.js").utils.Fragment;
+const sha3 = require("./ethersWrapper.js").utils.id;
+const abiCoder2 = require("./ethersWrapper.js").legacy.utils.defaultAbiCoder;
 
 const state = {
   savedABIs: [],
@@ -11,13 +15,25 @@ function _getABIs() {
   return state.savedABIs;
 }
 
+
 function _addABI(abiArray) {
   if (Array.isArray(abiArray)) {
 
     // Iterate new abi to generate method id's
     abiArray.map(function (abi) {
+
+      //if we get a 'human-readable-abi' signature, convert it to a classic ABI object
+      if (typeof abi === 'string') {
+        try {
+          let abiString = Fragment.fromString(abi).format('json');
+          abi = JSON.parse(abiString);
+        } catch (e) {
+          abi = {};
+        }
+      }
+
       if (abi.name) {
-        const signature = new Web3().sha3(_getSignature(abi));
+        const signature = sha3(_getSignature(abi));
         if (abi.type == "event") {
           state.methodIDs[signature.slice(2)] = abi;
         } else {
@@ -25,7 +41,6 @@ function _addABI(abiArray) {
         }
       }
     });
-
     state.savedABIs = state.savedABIs.concat(abiArray);
   }
   else {
@@ -86,7 +101,7 @@ function _removeABI(abiArray) {
     // Iterate new abi to generate method id's
     abiArray.map(function (abi) {
       if (abi.name) {
-        const signature = new Web3().sha3(_getSignature(abi));
+        const signature = sha3(_getSignature(abi));
         if (abi.type == "event") {
           if (state.methodIDs[signature.slice(2)]) {
             delete state.methodIDs[signature.slice(2)];
@@ -113,7 +128,19 @@ function _decodeMethod(data) {
   const abiItem = state.methodIDs[methodID];
   if (abiItem) {
     const params = _getInputTypes(abiItem.inputs);
-    let decoded = Interface.decodeParams(params, '0x' + data.slice(10));
+    let decoded = undefined;
+
+    try {
+      decoded = abiCoder.decode(params, '0x' + data.slice(10));
+      //turn ethers arrayish object into array
+      {
+        delete decoded['__length__'];
+        decoded = Object.values(decoded);
+      }
+    } catch (e) {
+      // try a legacy ethers v4 decoder for badly formatted data that fails in v5 but not v4
+      decoded = abiCoder2.decode(params, '0x' + data.slice(10));
+    }
 
     return {
       name: abiItem.name,
@@ -169,7 +196,7 @@ function _decodeMethod(data) {
           if (isArray) {
             parsedParam2 = param2.map(val => parseArrayNumber(val));
           } else {
-            parsedParam2 = new Web3().toBigNumber(param2).toString();
+            parsedParam2 = new BigNumber(param2).toString();
           }
           return parsedParam2;
         }
@@ -290,8 +317,13 @@ function _decodeLogs(logs) {
           }
         }
       );
-      //const decodedData = SolidityCoder.decodeParams(dataTypes, logData.slice(2));
-      const decodedData = Interface.decodeParams(dataTypes, logData);
+      let decodedData = undefined;
+      try {
+        decodedData = abiCoder.decode(dataTypes, logData);
+      } catch (e) {
+        // backup attempt with legacy ethers v4 decoder, parses some data that v5 errors on.
+        decodedData = abiCoder2.decode(dataTypes, logData);
+      }
       // Loop topic and data to get the params
       method.inputs.map(function (param) {
         var decodedP = {
@@ -309,10 +341,10 @@ function _decodeLogs(logs) {
         }
 
         if (param.type == "address") {
-          decodedP.value = padZeros(new Web3().toBigNumber(decodedP.value).toString(16));
+          decodedP.value = padZeros(new BigNumber(decodedP.value).toString(16));
         }
         else if (param.type == "uint256" || param.type == "uint8" || param.type == "int") {
-          decodedP.value = new Web3().toBigNumber(decodedP.value).toString(10);
+          decodedP.value = new BigNumber(decodedP.value).toString(10);
         }
 
         decodedParams.push(decodedP);

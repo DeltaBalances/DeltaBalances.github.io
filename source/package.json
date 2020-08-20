@@ -5,15 +5,24 @@
   "description": "deltabalances utility functions",
   "private": true,
   "dependencies": {
-    "bignumber.js": "^5.0.0",
-    "ethers-contracts": "^2.2.1",
-    "web3": "0.20.6"
+    "bignumber.js": "5.0.0",
+    "ethers": "^5.0.8",
+    "ethersLegacy": "npm:ethers@4.0.47"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-bundle": "browserify ./deltabalances.js --s bundle -x ./config.js > bundle.js",
-    "build-config": "browserify -o configBundle.js -r ./config.js"
+    "build": "browserify ./deltabalances.js --s bundle -x ./config.js -x ./ethersWrapper.js -x bignumber.js > ./bundle.js & browserify -r ./ethersWrapper.js -r bignumber.js > ./bundle.modules.js & browserify -r ./config.js > ./bundle.config.js",
+    "build-min": "browserify -g uglifyify  -r ./config.js |terser -c > ./bundle.config.min.js & browserify -g uglifyify ./deltabalances.js --s bundle -x ./config.js -x ./ethersWrapper.js -x bignumber.js -p browser-pack-flat/plugin | terser -cm > ./bundle.min.js & browserify -g unassertify -g uglifyify -r ./ethersWrapper.js -r bignumber.js -p common-shakeify -p browser-pack-flat/plugin | terser -cm > ./bundle.modules.min.js"
   },
   "author": "deltabalances",
-  "license": ""
+  "license": "",
+  "devDependencies": {
+    "browser-pack-flat": "^3.4.2",
+    "browser-resolve": "^1.11.3",
+    "browserify": "^16.5.1",
+    "common-shakeify": "^0.6.2",
+    "terser": "^4.8.0",
+    "uglifyify": "^5.0.2",
+    "unassertify": "^2.1.1"
+  }
 }

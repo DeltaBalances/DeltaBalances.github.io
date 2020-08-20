@@ -1,5 +1,6 @@
-const Web3 = require('web3');
-const SolidityFunction = require('web3/lib/web3/function.js');
+//const Ethers = require('ethers');
+const Ethers = require('./ethersWrapper.js');
+
 const Decoder = require('./abi-decoder.js');
 const BigNumber = require('bignumber.js');
 BigNumber.config({ ERRORS: false });
@@ -7,23 +8,34 @@ BigNumber.config({ ERRORS: false });
 module.exports = (db) => {
     const utility = {};
 
+    utility.toBigNumber = function (number) {
+        const num = String(number);
+        return new BigNumber(num);
+    }
+
     //give readable value, given a divisor (or eth divisor=undefined)
     utility.weiToEth = function weiToEth(wei, divisorIn) {
         const divisor = !divisorIn ? 1000000000000000000 : divisorIn;
-        return (new BigNumber(wei).div(divisor));
+        return (this.toBigNumber(wei).div(divisor));
     };
 
     //give readable value given a wei amount and a token object
     utility.weiToToken = function weiToToken(wei, token) {
-        let divisor = new BigNumber(1000000000000000000);
+        let divisor = this.toBigNumber(1000000000000000000);
         if (token && token.decimals !== undefined) {
-            divisor = new BigNumber(Math.pow(10, token.decimals));
+            divisor = this.toBigNumber(Math.pow(10, token.decimals));
         }
-        return new BigNumber(wei).div(divisor);
+        return this.toBigNumber(wei).div(divisor);
     }
 
     utility.isAddress = function (addr) {
-        return (addr && addr.length == 42 && db.web3.isAddress(addr));
+        if (addr && addr.length == 42) {
+            try {
+                let _ = Ethers.utils.getAddress(addr); // exception on invalid address
+                return true;
+            } catch (e) { }
+        }
+        return false;
     }
 
     // check if an input address or url (including address) is a valid address
@@ -167,19 +179,45 @@ module.exports = (db) => {
         return name;
     };
 
+    //check if an exchange is known for withdrawals that are sent by an external (admin) wallet
+    // users signs for the tx, but it is executed by a different address
+    utility.hasAdminWithdraw = function (exchangeAddress) {
+        if (exchangeAddress) {
+            let addr = exchangeAddress.toLowerCase();
+
+            return (addr == db.config.exchangeContracts.Idex.addr)
+                || (addr == db.config.exchangeContracts.Switcheo.addr)
+                || (addr == db.config.exchangeContracts.Switcheo2.addr)
+                || (addr == db.config.exchangeContracts.Joyso.addr)
+                || (addr == db.config.exchangeContracts.DexBlue2.addr);
+        }
+        return false;
+    }
+
+    // dex allows ETH deposit without a function, just a send into a fallback
+    utility.hasDepositFallback = function (exchangeAddress) {
+        if (exchangeAddress) {
+            let addr = exchangeAddress.toLowerCase();
+
+            return (addr == db.config.exchangeContracts.DexBlue.addr)
+                || (addr == db.config.exchangeContracts.DexBlue2.addr);
+        }
+        return false;
+    }
+
     //remove exponential notation 1e-8  etc.
     utility.exportNotation = function (num) {
         //.replace(/\.?0+$/,""); // rounded to 20 decimals, no trailing 0 //https://stackoverflow.com/questions/3612744/remove-insignificant-trailing-zeros-from-a-number
-        num = new BigNumber(num).toFixed(20);
+        num = this.toBigNumber(num).toFixed(20);
         return num.replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1');
     };
 
     utility.displayNotation = function (num, fixed) {
-        num = new BigNumber(num);
+        num = this.toBigNumber(num);
         if (num.greaterThan(1000000000)) {
             num = num.toExponential(fixed);
         } else {
-            num = num.toFixed(fixed);
+            num = num.toFixed(fixed, 1);
         }
         return this.commaNotation(num);
     };
@@ -359,7 +397,7 @@ module.exports = (db) => {
         }
 
         if (html) {
-            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">EtherDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">EtherDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
         }
         return url;
     }
@@ -379,7 +417,7 @@ module.exports = (db) => {
         }
 
         if (html) {
-            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">ForkDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">ForkDelta <i class="fa fa-external-link" aria-hidden="true"></i></a>';
         }
         return url;
     }
@@ -397,7 +435,7 @@ module.exports = (db) => {
         }
 
         if (html) {
-            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Token store <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Token store <i class="fa fa-external-link" aria-hidden="true"></i></a>';
         }
         return url;
     }
@@ -434,7 +472,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">IDEX</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">IDEX <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">IDEX <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -461,7 +499,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">DDEX</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">DDEX' + urlAddition + '<i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">DDEX' + urlAddition + '<i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -485,7 +523,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">Binance</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Binance <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Binance <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -506,7 +544,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">RadarRelay</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">RadarRelay <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">RadarRelay <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -527,7 +565,7 @@ module.exports = (db) => {
             if (url == '') {
                 url = '<span class="label ' + labelClass + '">Kyber</span>';
             } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank">Kyber <i class="fa fa-external-link" aria-hidden="true"></i></a>';
+                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Kyber <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;
@@ -578,7 +616,7 @@ module.exports = (db) => {
                 }
             }
         }
-        return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
+        return '<a target="_blank" rel="noopener noreferrer" href="' + url + '">' + displayText + ' </a>';
     };
 
     utility.tokenLink = function (addr, html, short, erc721Id = undefined) {
@@ -594,73 +632,33 @@ module.exports = (db) => {
         else {
             displayText = db.addressName(addr, !short);
         }
-        return '<a target="_blank" href="' + url + '">' + displayText + ' </a>';
+        return '<a target="_blank" rel="noopener noreferrer" href="' + url + '">' + displayText + ' </a>';
     };
 
-    utility.call = function call(web3In, contract, address, functionName, args, callback) {
-        function proxy(retries) {
-            const web3 = new Web3();
-            const data = contract[functionName].getData.apply(null, args);
-            let url = `https://api.etherscan.io/api`;
-            let postContents = {
-                module: 'proxy',
-                action: 'eth_Call',
-                to: address,
-                data: data,
-            }
-            if (db.config.etherscanAPIKey) { postContents.apiKey = db.config.etherscanAPIKey };
-            utility.postURL(url, postContents, (err, body) => {
-                if (!err && body) {
-                    try {
-                        const result = body;//JSON.parse(body);
-                        const functionAbi = contract.abi.find(element => element.name === functionName);
-                        const solidityFunction = new SolidityFunction(web3.Eth, functionAbi, address);
-                        const resultUnpacked = solidityFunction.unpackOutput(result.result);
-                        callback(undefined, resultUnpacked);
-                    } catch (errJson) {
-                        if (retries > 0) {
-                            setTimeout(() => {
-                                proxy(retries - 1);
-                            }, 5000);
-                        } else {
-                            callback(err, undefined);
-                        }
-                    }
-                } else {
-                    callback(err, undefined);
-                }
-            });
-        }
+    utility.getBatchedBalances = function (contract, functionName, args, callback) {
 
-        if (web3In && web3In.currentProvider) {
-            try {
-                const data = contract[functionName].getData.apply(null, args);
-                web3In.eth.call({ to: address, data }, (err, result) => {
-                    if (!err) {
-                        const functionAbi = contract.abi.find(element => element.name === functionName);
-                        const solidityFunction = new SolidityFunction(web3In.Eth, functionAbi, address);
-                        try {
-                            const resultUnpacked = solidityFunction.unpackOutput(result);
-                            callback(undefined, resultUnpacked);
-                        } catch (errJson) {
-                            proxy(0);
-                        }
-                    } else {
-                        proxy(1);
-                    }
-                });
-            } catch (err) {
-                proxy(1);
-            }
-        } else {
-            proxy(0);
+        try {
+            contract.functions[functionName](...args).then(result => {
+                let numberArray = result[0];
+                numberArray = numberArray.map(x => utility.toBigNumber(x));
+                callback(undefined, numberArray);
+            }, e => {
+                let a = 4;
+                callback(e, undefined);
+            });
+        } catch (e) {
+            let b = 5;
         }
     };
 
     //get etherdelta history logs from INFURA
     //inclusive for start and end
     // can handle ranges of 5k-10k blocks
-    utility.getTradeLogs = function getTradeLogs(web3In, contractAddress, topics, startblock, endblock, rpcID, callback) {
+
+    //https://infura.io/docs/ethereum/json-rpc/eth-getLogs
+    // max 10000 results
+    // max 10 sec load
+    utility.getTradeLogs = function getTradeLogs(contractAddress, topics, startblock, endblock, rpcID, callback) {
         if (!Array.isArray(topics)) {
             topics = [topics];
         }
@@ -694,11 +692,12 @@ module.exports = (db) => {
                 url: db.config.infuraURL,
                 data: '{"jsonrpc":"2.0","method":"eth_getLogs","params":' + filterObj + ' ,"id":' + rpcID + '}',
                 dataType: 'json',
-                timeout: 55000, // 55 sec timeout (these requests can be slooooow)
+                timeout: 11, // 11 sec timeout
             }).done((result) => {
                 if (result && result.jsonrpc) {
                     // success {"jsonrpc":"2.0","id":7,"result":[]}
                     // fail {"jsonrpc":"2.0","id":92,"error":{"code":-32005,"message":"query returned more than 1000 results"}}
+                    //"error": {"code": -32005,"message": "query timeout exceeded"}
 
                     if (result.result && Array.isArray(result.result)) {
                         callback(result.result, range);
@@ -732,37 +731,55 @@ module.exports = (db) => {
         }
     };
 
-    utility.txReceipt = function txReceipt(web3In, txHash, callback, index) {
-        if (web3In && web3In.currentProvider) {
-            web3In.eth.getTransactionReceipt(txHash, (err, result) => {
-                if (!err && result && result.blockNumber) {
-                    callback(undefined, result, index);
-                } else {
-                    proxy();
-                }
-            });
-        } else {
-            proxy();
-        }
 
-        function proxy() {
-            let url = `https://api.etherscan.io/api?module=proxy&action=eth_GetTransactionReceipt&txhash=${txHash}`;
-            if (db.config.etherscanAPIKey) url += `&apikey=${db.config.etherscanAPIKey}`;
-            utility.getURL(url, (err, body) => {
-                if (!err && body) {
-                    const result = body;//JSON.parse(body);
-                    callback(undefined, result.result, index);
-                } else {
-                    callback(err, undefined, index);
-                }
-            });
-        }
+    utility.txReceipt = function txReceipt(txHash, callback) {
+        db.provider.getTransactionReceipt(txHash).then(result => {
+            if (result && result.blockNumber) {
+                result.cumulativeGasUsed = utility.toBigNumber(result.cumulativeGasUsed);
+                result.gasUsed = utility.toBigNumber(result.gasUsed);
+                callback(undefined, result);
+            } else {
+                // tx is not mined yet, or has been dropped
+                callback("empty receipt", undefined);
+            }
+        }, e => {
+            callback(e, undefined);
+        });
     };
 
-    utility.loadContract = function loadContract(web3In, abi, address, callback) {
+    utility.getTransaction = function (txHash, callback) {
+        db.provider.getTransaction(txHash).then(result => {
+            if (result) {
+                result.gasPrice = utility.toBigNumber(result.gasPrice);
+                result.gasLimit = utility.toBigNumber(result.gasLimit);
+                result.value = utility.toBigNumber(result.value);
+                if (result.data) {
+                    result.input = result.data;
+                } else if (result.input) {
+                    result.data = result.input;
+                }
+
+                callback(undefined, result);
+            } else {
+                //not mined & not pending??
+                callback("tx not found", undefined);
+            }
+        }, e => {
+            callback(e, undefined);
+        });
+    }
+
+    utility.loadContract = function loadContract(abi, address, callback) {
         if (abi && abi.length > 0) {
-            let contract = web3In.eth.contract(abi);
-            contract = contract.at(address);
+            let contract = undefined;
+            try {
+                contract = new Ethers.Contract(address, abi, db.provider);
+                if (!contract) {
+                    throw "fail";
+                }
+            } catch (e) {
+                callback('Ethers failed to load contract ', undefined);
+            }
             callback(undefined, contract);
         } else {
             callback('no abi ', undefined);
@@ -770,56 +787,21 @@ module.exports = (db) => {
     };
 
 
-    utility.getBlockDate = function getBlockDate(web3In, decBlocknr, callback) {
-        if (web3In && web3In.currentProvider) {
-            web3In.eth.getBlock(decBlocknr, (err, result) => {
-                if (!err && result && result.timestamp) {
-                    callback(undefined, result.timestamp, decBlocknr);
-                } else {
-                    proxy();
-                }
-            });
-        } else {
-            proxy();
-        }
-
-        function proxy() {
-            var url = 'https://api.etherscan.io/api?module=block&action=getblockreward&blockno=' + decBlocknr + '&apikey=' + db.config.etherscanAPIKey;
-            utility.getURL(url, (err, res) => {
-                if (!err && res && res.status == "1" && res.result && res.result.timeStamp) {
-                    callback(undefined, res.result.timeStamp, res.result.blockNumber);
-                } else {
-                    callback('failed to get date', undefined, decBlocknr);
-                }
-            });
-        }
+    utility.getBlockDate = function getBlockDate(decBlocknr, callback) {
+        db.provider.getBlock(decBlocknr).then(block => {
+            let time = block.timestamp || block.timeStamp;
+            callback(undefined, time, decBlocknr);
+        }, e => {
+            callback('failed to get date', undefined, decBlocknr);
+        });
     };
 
-    utility.blockNumber = function blockNumber(web3In, callback) {
-        if (web3In && web3In.currentProvider) {
-            web3In.eth.getBlockNumber((err, result) => {
-                if (!err) {
-                    callback(undefined, Number(result));
-                } else {
-                    proxy();
-                }
-            });
-        } else {
-            proxy();
-        }
-
-        function proxy() {
-            let url = `https://api.etherscan.io/api?module=proxy&action=eth_BlockNumber`;
-            if (db.config.etherscanAPIKey) url += `&apikey=${db.config.etherscanAPIKey}`;
-            utility.getURL(url, (err, body) => {
-                if (!err && body) {
-                    const result = body;//JSON.parse(body);
-                    callback(undefined, Number(utility.hexToDec(result.result)));
-                } else {
-                    callback(err, undefined);
-                }
-            });
-        }
+    utility.blockNumber = function blockNumber(callback) {
+        db.provider.getBlockNumber().then(number => {
+            callback(undefined, number);
+        }, e => {
+            callback(err, undefined);
+        });
     };
 
     utility.decToHex = function decToHex(dec, lengthIn) {
@@ -827,7 +809,7 @@ module.exports = (db) => {
         if (!length) length = 32;
         if (dec < 0) {
             // return convertBase((Math.pow(2, length) + decStr).toString(), 10, 16);
-            return (new BigNumber(2)).pow(length).add(new BigNumber(dec)).toString(16);
+            return (this.toBigNumber(2)).pow(length).add(this.toBigNumber(dec)).toString(16);
         }
         let result = null;
         try {
@@ -838,7 +820,7 @@ module.exports = (db) => {
         if (result) {
             return result;
         }
-        return (new BigNumber(dec)).toString(16);
+        return (this.toBigNumber(dec)).toString(16);
     };
 
     utility.hexToDec = function hexToDec(hexStrIn, length) {
@@ -985,7 +967,7 @@ module.exports = (db) => {
         } catch (e) {
             return d;
         }
-    }
+    };
 
 
     utility.formatDateT = function (d, short) {
@@ -1018,57 +1000,67 @@ module.exports = (db) => {
     // Check for an address from a web3 browser/addon like Metamask
     utility.getWeb3Address = function (allowPopup, callback) {
 
-        if (window && (typeof window.ethereum !== 'undefined'
-            || typeof window.web3 !== 'undefined')
-        ) {
+        if (location.protocol !== "https:" && location.protocol !== "http:") {
+            console.log('Metamask needs page to be hosted.');
+            return;
+        }
+        //modern web3 wallet, window.ethereum, requiring user unlock
+        if (typeof window.ethereum !== "undefined") {
+            window.ethereum.on('accountsChanged', onAccountChange);
 
-            // Web3 browser user detected.
-            const provider = window['ethereum'] || window.web3.currentProvider
-            var localWeb3 = new Web3(provider);
-
-            // already detected an account, listen for changes
-            if (window.ethereum && localWeb3.eth.accounts.length > 0) {
-                window.ethereum.on('accountsChanged', onAccountChange);
-            }
-
-            //legacy & privacy mode disabled, will expose account in web3
-            if (localWeb3.eth.accounts.length > 0) {
-                callback(localWeb3.eth.accounts[0].toLowerCase());
+            // adress is already exposed, soon deprecated?
+            if (window.ethereum.selectedAddress && utility.isAddress(window.ethereum.selectedAddress)) {
+                callback(window.ethereum.selectedAddress.toLowerCase());
                 return;
             }
-            // privacy mode: need to ask to enable access
-            else if (allowPopup && window.ethereum) {
+            else if (allowPopup) {
+                // request permission to access wallet
                 ethereum.enable()
                     .then(function (accounts) {
-                        window.ethereum.on('accountsChanged', onAccountChange);
-                        if (accounts.length > 0) {
-                            callback(accounts[0].toLowerCase());
-                            return;
+                        if (accounts && typeof accounts !== "undefined" && accounts.length > 0) {
+                            callback(accounts[0], toLowerCase());
                         } else {
                             callback('');
-                            return;
                         }
-                    })
-                    .catch(function (reason) {
-                        console.log('injected web3 enable failed');
+                    }, function (error) {
+                        if (error && ((error.code == 4001) ||
+                            (typeof error == "string" && error.indexOf("denied") >= 0) ||
+                            (error.message && error.message.indexOf("denied") >= 0))
+                        ) {
+                            console.log('rejected ethereum connection');
+                        } else {
+                            console.log('ethereum connection failed');
+                        }
                         callback('');
-                        return;
                     });
             } else {
                 callback('');
-                return;
             }
+        } else if (window && typeof window.web3 !== 'undefined') { //legacy metamask style with no privacy (window.web3, no window.ethereum)
+            try {
+                let web3Provider = new Ethers.providers.Web3Provider(window.web3.currentProvider);
+                web3Provider.getSigner().getAddress().then(addr => {
+                    callback(addr.toLowerCase());
+                }, _ => {
+                    throw "web3 detect failed";
+                });
+            } catch (e) {
+                console.log('web3 wallet detect exception');
+                callback('');
+            }
+        } else {
+            callback('');
         }
 
         function onAccountChange(accounts) {
-            let addr = '';
-            if (accounts.length > 0) {
-                addr = accounts[0].toLowerCase();
-            }
-            if (addr !== metamaskAddr) { // metamaskaddr defined in html
-                callback(accounts[0].toLowerCase(), true);
+            if (accounts && accounts.length > 0) {
+                let addr = accounts[0].toLowerCase();
+                if (metamaskAddr && addr !== metamaskAddr) { // metamaskaddr defined in html
+                    callback(addr, true);
+                }
             }
         }
     };
+
     return utility;
 };

@@ -16,27 +16,27 @@
   <link href="css/combinedStyles.css" rel="stylesheet">
 
   <!-- JS  jquery -->
-  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/lib/jquery-3.2.1.min.js"></script>
 
   <!-- JS  datatables -->
-  <script src="js/jquery.dataTables.fixed.min.js"></script>
+  <script src="js/lib/jquery.dataTables.fixed.min.js"></script>
 
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
-  <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
+  <script src="js/lib/bootstrap.adminlte.blockies.min.js" defer></script>
 
   <!-- JS  Token discover / loading -->
-  <script src="backupTokens.js"></script>
-  <script src="loadTokens.js"></script>
+  <script src="js/backupTokens.js"></script>
+  <script src="js/loadTokens.js"></script>
 
   <!-- JS  Main functionality -->
-  <!--  config excluded from bundle -->
-  <script src="configBundle.js"></script>
-  <script src="bundle.min.js"></script>
+  <script src="js/build/bundle.config.min.js"></script>
+  <script src="js/build/bundle.modules.min.js"></script>
+  <script src="js/build/bundle.min.js"></script>
   <script>
     var exchanges = ['0x Protocol v1', '0x Protocol v2', '0x Protocol v3'];
   </script>
-  <script src="user.js"></script>
-  <script src="history.js"></script>
+  <script src="js/user.js"></script>
+  <script src="js/history.js"></script>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -244,13 +244,13 @@
         </li>
         <li class="header">Links</li>
         <li>
-          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank">
+          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-github"></i>
             <span>GitHub</span>
           </a>
         </li>
         <li>
-          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank">
+          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-link"></i>
             <span>Smart contract</span>
           </a>
@@ -352,13 +352,13 @@
                   <div class="col-md-7 noPad" style="overflow:hidden;">
                     <h4>Info</h4>
                     Supports ERC20 and ERC721 trades from any 0x relayer. <br> Contracts 
-                    <a href="https://etherscan.io/address/0x12459c951127e0c374ff9105dda097662a027093" target="_blank">V1: 0x12459..</a>, <a
-                      href="https://etherscan.io/address/0x4f833a24e1f95d70f028921e27040ca56e09ab0b" target="_blank">V2: 0x4f833..</a>, 
-					  <a href="https://etherscan.io/address/0x080bf510fcbf18b91105470639e9561022937712" target="_blank">V2.1: 0x080bf..</a> and 
-					  <a href="https://etherscan.io/address/0x61935cbdd02287b511119ddb11aeb42f1593b7ef" target="_blank">V3: 0x61935..</a>
+                    <a href="https://etherscan.io/address/0x12459c951127e0c374ff9105dda097662a027093" target="_blank" rel="noopener noreferrer">V1: 0x12459..</a>, <a
+                      href="https://etherscan.io/address/0x4f833a24e1f95d70f028921e27040ca56e09ab0b" target="_blank" rel="noopener noreferrer">V2: 0x4f833..</a>, 
+					  <a href="https://etherscan.io/address/0x080bf510fcbf18b91105470639e9561022937712" target="_blank" rel="noopener noreferrer">V2.1: 0x080bf..</a> and 
+					  <a href="https://etherscan.io/address/0x61935cbdd02287b511119ddb11aeb42f1593b7ef" target="_blank" rel="noopener noreferrer">V3: 0x61935..</a>
 					  
                     <br>
-					Check the full exchange and 0x relayer support list <a href="https://github.com/DeltaBalances/DeltaBalances.github.io/blob/master/README.md" target="_blank">here</a>.
+					Check the full exchange and 0x relayer support list <a href="https://github.com/DeltaBalances/DeltaBalances.github.io/blob/master/README.md" target="_blank" rel="noopener noreferrer">here</a>.
                     <br><br>
 
                     <span class="visible-xs">
@@ -459,13 +459,13 @@
       </div>
       <!-- Default to the left -->
       <p> Powered by
-        <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
-        <a target="_blank" href="https://infura.io/">Infura</a>
+        <a target="_blank" rel="noopener noreferrer" href="https://etherscan.io/">Etherscan</a> and
+        <a target="_blank" rel="noopener noreferrer" href="https://infura.io/">Infura</a>
         <br> Contact:
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
-        <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+        <a target="_blank" rel="noopener noreferrer" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
+        <a target="_blank" rel="noopener noreferrer" href="https://reddit.com/u/deltabalances">Reddit</a>
         <br> Buy me a beer:
-        <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
+        <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank" rel="noopener noreferrer">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
       </p>
     </footer>
 

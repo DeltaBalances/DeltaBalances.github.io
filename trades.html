@@ -16,28 +16,28 @@
   <link href="css/combinedStyles.css" rel="stylesheet">
 
   <!-- JS  jquery -->
-  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/lib/jquery-3.2.1.min.js"></script>
 
   <!-- JS  datatables -->
-  <script src="js/jquery.dataTables.fixed.min.js"></script>
+  <script src="js/lib/jquery.dataTables.fixed.min.js"></script>
 
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
-  <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
-  <script src="js/bootstrap-select.min.js"></script>
+  <script src="js/lib/bootstrap.adminlte.blockies.min.js" defer></script>
+  <script src="js/lib/bootstrap-select.min.js"></script>
 
   <!-- JS  Token discover / loading -->
-  <script src="backupTokens.js"></script>
-  <script src="loadTokens.js"></script>
+  <script src="js/backupTokens.js"></script>
+  <script src="js/loadTokens.js"></script>
 
   <!-- JS  Main functionality -->
-  <!--  config excluded from bundle -->
-  <script src="configBundle.js"></script>
-  <script src="bundle.min.js"></script>
+  <script src="js/build/bundle.config.min.js"></script>
+  <script src="js/build/bundle.modules.min.js"></script>
+  <script src="js/build/bundle.min.js"></script>
   <script>
     var exchanges = ['EtherDelta', '0x Protocol v3'];
   </script>
-  <script src="user.js"></script>
-  <script src="history.js"></script>
+  <script src="js/user.js"></script>
+  <script src="js/history.js"></script>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -248,13 +248,13 @@
         </li>
         <li class="header">Links</li>
         <li>
-          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank">
+          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-github"></i>
             <span>GitHub</span>
           </a>
         </li>
         <li>
-          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank">
+          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-link"></i>
             <span>Smart contract</span>
           </a>
@@ -312,7 +312,7 @@
                       <option data-icon="icon-zrx" data-subtext="(Any Relayer: RadarRelay, DDEX 2018, Paradex, etc.)">0x Protocol v1</option>
                       <option data-icon="icon-zrx" data-subtext="Starting Sept 2018">0x Protocol v2</option>
 					  <option data-icon="icon-zrx" data-subtext="Starting Nov 2019">0x Protocol v3</option>
-                      <option data-icon="icon-tokenstore">Token store</option>
+                      <option data-icon="icon-tokenstore" data-subtext="(Discontinued)">Token store</option>
 					  <option data-icon="icon-link" data-subtext="(<strike>v1.0</strike> v1.1 From March 2019)">DDEX Hydro</option>
                       <!--<option data-icon="icon-link" data-subtext="(Hydro - From Dec 2018)">DDEX</option>-->
                       <option data-icon="icon-oasis" data-subtext="Eth2Dai, <strike>OasisDirect</strike>">OasisDex</option>
@@ -385,7 +385,7 @@
                   <div class="col-md-7 noPad" style="overflow:hidden;">
                     <h4>Info</h4>
                     ERC20 and ERC721 trades on decentralized exchanges.<br>
-					Check exchange and 0x relayer support <a href="https://github.com/DeltaBalances/DeltaBalances.github.io/blob/master/README.md" target="_blank">here</a>.
+					Check exchange and 0x relayer support <a href="https://github.com/DeltaBalances/DeltaBalances.github.io/blob/master/README.md" target="_blank" rel="noopener noreferrer">here</a>.
                     <br><br>  For a faster experience, select as few exchanges as possible. <br> 
                     <span class="visible-xs">
                       <strong>Mobile data Warning</strong>, 1 month of block data can reach 50MB in downloads.
@@ -481,7 +481,7 @@
 				  Try the <b>Recent Transactions</b> page for a faster but possibly incomplete history.<br><br>
 				
                   Trade History supports most of the popular decentralized exchanges. <br>
-				  Check the full exchange and 0x relayer support list <a href="https://github.com/DeltaBalances/DeltaBalances.github.io/blob/master/README.md" target="_blank">here</a>.
+				  Check the full exchange and 0x relayer support list <a href="https://github.com/DeltaBalances/DeltaBalances.github.io/blob/master/README.md" target="_blank" rel="noopener noreferrer">here</a>.
 				  <br><br>
 				  DDEX is supported up to Dec 2018 (0x v1) and from March 2019 (DDEX Hydro 1.1), Hydro 1.0 is <strong>not yet</strong> supported.<br>
 				  IDEX and Bancor trade history is not supported.
@@ -516,22 +516,22 @@
       <!-- Default to the left -->
       <div class="col-sm-12 col-md-6">
         <p> Powered by
-          <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
-          <a target="_blank" href="https://infura.io/">Infura</a>
+          <a target="_blank" rel="noopener noreferrer" href="https://etherscan.io/">Etherscan</a> and
+          <a target="_blank" rel="noopener noreferrer" href="https://infura.io/">Infura</a>
           <br> Contact:
-          <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
-          <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+          <a target="_blank" rel="noopener noreferrer" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
+          <a target="_blank" rel="noopener noreferrer" href="https://reddit.com/u/deltabalances">Reddit</a>
           <br>
           <br> Buy me a beer:
           <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B"
-            target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
+            target="_blank" rel="noopener noreferrer">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
         </p>
       </div>
       <div class="col-sm-12 col-md-6">
         Use a referral:
         <ul style="list-style-type:none">
-          <li><a target="_blank" href="https://brave.com/del333">Get Brave Browser</a> </li>
-          <li><a target="_blank" href="https://www.binance.com/?ref=10985752">Trade on Binance</a></li>
+          <li><a target="_blank" rel="noopener noreferrer" href="https://brave.com/del333">Get Brave Browser</a> </li>
+          <li><a target="_blank" rel="noopener noreferrer" href="https://www.binance.com/?ref=10985752">Trade on Binance</a></li>
         </ul>
       </div>
     </footer>
@@ -569,7 +569,7 @@
               </a>
             </li>
             <li id="walletInfo" class="hidden">
-              <a id="etherscan" href="#" target="_blank" class="menu-info control-sidebar-subheading">
+              <a id="etherscan" href="#" target="_blank" rel="noopener noreferrer" class="menu-info control-sidebar-subheading">
                 Etherscan
                 <i class="fa fa-link pull-right"></i>
               </a>

@@ -34,7 +34,7 @@ var unknownTokenCache = [];
 
     // last update time for exchange token lists, default to the past
     let exchangeUpdates = {
-       // forkdelta: 0,
+        // forkdelta: 0,
         idex: 0,
         ddex: 0,
         radar: 0,
@@ -64,16 +64,16 @@ var unknownTokenCache = [];
 
 
     // CORS issue on new domain
-   /* getTokens('https://cors.io/?https://forkdelta.app/config/main.json', 'ForkDelta', function (json) {
-        if (json && json.tokens) {
-            let tokens = json.tokens;
-            tokens.map(x => { x.address = x.addr.toLowerCase() });
-            return tokens;
-        } else {
-            return [];
-        }
-    });
-    */
+    /* getTokens('https://cors.io/?https://forkdelta.app/config/main.json', 'ForkDelta', function (json) {
+         if (json && json.tokens) {
+             let tokens = json.tokens;
+             tokens.map(x => { x.address = x.addr.toLowerCase() });
+             return tokens;
+         } else {
+             return [];
+         }
+     });
+     */
 
 
     getTokens("https://api.idex.market/returnCurrencies", 'IDEX', function (data) {

@@ -10,8 +10,6 @@ var pageType = 'balance';
     var initiated = false;
     var autoStart = false;
 
-    var web3Index = 0;  //last used web3 instance
-
     var requestID = 0;
 
     // loading states
@@ -331,11 +329,11 @@ var pageType = 'balance';
         }
 
         if (env == 'xs' || env == 'sm') {
-           /* if ($('#tokensetting-body').is(":visible")) {
-                $('#collapseTokenSettings').click();
-            } else if ($('#setting-body').is(":visible")) {
-                $('#collapseSettings').click();
-            } */
+            /* if ($('#tokensetting-body').is(":visible")) {
+                 $('#collapseTokenSettings').click();
+             } else if ($('#setting-body').is(":visible")) {
+                 $('#collapseSettings').click();
+             } */
         } else {
             if (!$('#tokensetting-body').is(":visible")) {
                 $('#collapseTokenSettings').click();
@@ -1182,28 +1180,16 @@ var pageType = 'balance';
             var success = false;
             var totalTries = 0;
 
-            //get balances from 2 web3 sources at once, use the fastest response
             // web3 provider (infura, myetherapi, mycryptoapi) or etherscan
-            makeCall(exchangeKey, functionName, arguments, 0);
             makeCall(exchangeKey, functionName, arguments, 0);
 
             function makeCall(exName, funcName, args, retried) {
-
-                if (web3Index < _delta.web3s.length) {
-                    web3Provider = _delta.web3s[web3Index];
-                    web3Index++;
-                } else {
-                    web3Provider = undefined;
-                    web3Index = 0;
-                }
                 if (success || requestID > rqid)
                     return;
 
 
-                _util.call(
-                    web3Provider,
+                _util.getBatchedBalances(
                     _delta.contractDeltaBalance,
-                    _delta.config.DeltaBalanceAddr,
                     funcName,
                     args,
                     (err, result) => {
@@ -1409,9 +1395,9 @@ var pageType = 'balance';
             return;
         }
 
-        let sumETH = _delta.web3.toBigNumber(0);
-        let sumWETH = _delta.web3.toBigNumber(0);
-        let sumToken = _delta.web3.toBigNumber(0);
+        let sumETH = _util.toBigNumber(0);
+        let sumWETH = _util.toBigNumber(0);
+        let sumToken = _util.toBigNumber(0);
 
         for (let i = 0; i < keys.length; i++) {
             if (exchanges[keys[i]].enabled)
@@ -1432,10 +1418,10 @@ var pageType = 'balance';
             let bal = balances[token.addr];
 
             if (bal) {
-                bal['Est. ETH'] = _delta.web3.toBigNumber(0);
+                bal['Est. ETH'] = _util.toBigNumber(0);
                 bal['USD'] = '';
                 bal['EUR'] = '';
-                bal.Total = _delta.web3.toBigNumber(0);
+                bal.Total = _util.toBigNumber(0);
                 for (let i = 0; i < keys.length; i++) {
                     if (exchanges[keys[i]].enabled && (exchanges[keys[i]].loaded + exchanges[keys[i]].failed >= tokenCount)) {
                         if (bal[keys[i]])
@@ -1486,7 +1472,7 @@ var pageType = 'balance';
 
                     if (bal.Total) {
                         // calculate estimate if not (wrapped) ETH
-                        var val = _delta.web3.toBigNumber(0);
+                        var val = _util.toBigNumber(0);
 
                         if (useAsk) {
                             if (bal.Ask) {
@@ -1516,34 +1502,43 @@ var pageType = 'balance';
 
         if (allDone) {
 
-            for (let i = 0; i < result.length; i++) {
-                if (result[i]['Est. ETH'] !== '') {
-                    if (showFiat == 1) {
-                        result[i]['USD'] = _util.commaNotation(result[i]['Est. ETH'].times(etherPriceUSD).toFixed(2));
-                    } else if (showFiat == 2) {
-                        result[i]['EUR'] = _util.commaNotation(result[i]['Est. ETH'].times(etherPriceEUR).toFixed(2));
+
+            // set ETH values for the totals overview, including tooltips with unrounded values.
+            $('#ethbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(sumETH) + '">' + sumETH.toFixed(fixedDecimals, 1) + ' ETH</span>');
+            $('#wethbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(sumWETH) + '">' + sumWETH.toFixed(fixedDecimals, 1) + ' ETH</span>');
+            $('#tokenbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(sumToken) + '">' + sumToken.toFixed(fixedDecimals, 1) + ' ETH</span>');
+            let totalSumETH = sumETH.plus(sumToken).plus(sumWETH);
+            $('#totalbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(totalSumETH) + '">' + totalSumETH.toFixed(fixedDecimals, 1) + ' ETH</span>');
+
+
+            let fiatSymbol = " $";
+            let fiatPrice = 0;
+            let fiatIndex = 'USD'
+            if (showFiat == 1) {
+                fiatPrice = etherPriceUSD;
+            } else if (showFiat == 2) {
+                fiatPrice = etherPriceEUR;
+                fiatSymbol = " €";
+                fiatIndex = 'EUR';
+            }
+
+            // calculate and add USD / EUR prices, if required
+            if (showFiat > 0) {
+
+                for (let i = 0; i < result.length; i++) {
+                    if (result[i]['Est. ETH'] !== '') {
+                        result[i][fiatIndex] = _util.commaNotation(result[i]['Est. ETH'].times(fiatPrice).toFixed(2, 1));
                     }
                 }
+
+                // set fiat prices in totals overview
+                $('#ethbalancePrice').html(fiatSymbol + _util.commaNotation((sumETH.times(fiatPrice)).toFixed(2, 1)));
+                $('#wethbalancePrice').html(fiatSymbol + _util.commaNotation((sumWETH.times(fiatPrice)).toFixed(2, 1)));
+                $('#tokenbalancePrice').html(fiatSymbol + _util.commaNotation((sumToken.times(fiatPrice)).toFixed(2, 1)));
+                $('#totalbalancePrice').html(fiatSymbol + _util.commaNotation((totalSumETH.times(fiatPrice)).toFixed(2, 1)));
             }
+
             lastResult = result;
-
-            $('#ethbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(sumETH) + '">' + sumETH.toFixed(fixedDecimals) + ' ETH</span>');
-            $('#wethbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(sumWETH) + '">' + sumWETH.toFixed(fixedDecimals) + ' ETH</span>');
-            $('#tokenbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(sumToken) + '">' + sumToken.toFixed(fixedDecimals) + ' ETH</span>');
-            let totalSumETH = sumETH.plus(sumToken).plus(sumWETH);
-            $('#totalbalance').html('<span data-toggle="tooltip" title="' + _util.exportNotation(totalSumETH) + '">' + totalSumETH.toFixed(fixedDecimals) + ' ETH</span>');
-
-            if (showFiat == 1) {
-                $('#ethbalancePrice').html(" $" + _util.commaNotation((sumETH.times(etherPriceUSD)).toFixed(2)));
-                $('#wethbalancePrice').html(" $" + _util.commaNotation((sumWETH.times(etherPriceUSD)).toFixed(2)));
-                $('#tokenbalancePrice').html(" $" + _util.commaNotation((sumToken.times(etherPriceUSD)).toFixed(2)));
-                $('#totalbalancePrice').html(" $" + _util.commaNotation((totalSumETH.times(etherPriceUSD)).toFixed(2)));
-            } else if (showFiat == 2) {
-                $('#ethbalancePrice').html(" €" + _util.commaNotation((sumETH.times(etherPriceEUR)).toFixed(2)));
-                $('#wethbalancePrice').html(" €" + _util.commaNotation((sumWETH.times(etherPriceEUR)).toFixed(2)));
-                $('#tokenbalancePrice').html(" €" + _util.commaNotation((sumToken.times(etherPriceEUR)).toFixed(2)));
-                $('#totalbalancePrice').html(" €" + _util.commaNotation((totalSumETH.times(etherPriceEUR)).toFixed(2)));
-            }
 
             $('#downloadBalances').html('');
             downloadBalances();
@@ -1721,8 +1716,14 @@ var pageType = 'balance';
             let sortColumn = 'Est. ETH';
             let sortIndex = Math.max(0, tableHeaders.findIndex((x) => x.title == sortColumn));
 
+            // determine which exchange columns need to be hidden
             let hiddenList = tableHeaders.map(x => x.title).filter(x => !balanceHeaders[x]);
             hiddenList = hiddenList.map(head => tableHeaders.findIndex((x) => x.title == head));
+
+            let numberList = tableHeaders.map(x => x.title).filter(x => exchanges[x] || x == "Total" || x == "Est. ETH");
+            numberList = numberList.map(head => tableHeaders.findIndex((x) => x.title == head));
+
+            let priceIndices = ["Bid", "Ask"].map(head => tableHeaders.findIndex((x) => x.title == head));
 
             balanceTable = $('#resultTable').DataTable({
                 "paging": false,
@@ -1746,6 +1747,23 @@ var pageType = 'balance';
                     // column 0 default sort (when selected) ascending, others default descending
                     { asSorting: ["asc", "desc"], aTargets: [0] },
                     { asSorting: ["desc", "asc"], aTargets: ['_all'] },
+                    {
+                        aTargets: numberList, "mRender": function (data, type, full) {
+                            if (type == 'display' && data && data != "-") {
+                                return '<span data-toggle="tooltip" title="' + data + '">' + _util.displayNotation(data, fixedDecimals) + '</span>';
+                            }
+                            return data;
+                        }
+                    },
+                    {
+                        aTargets: priceIndices, "mRender": function (data, type, row) {
+                            if (type == 'display' && data && data != "-") {
+                                return '<span data-toggle="tooltip" title="' + data + '">' + _util.displayNotation(data, fixedDecimals + 2) + '</span>';
+                            }
+                            return data;
+                        }
+
+                    }
                     //    { sClass: "dt-body-left", aTargets: [0]},
                     //    { sClass: "dt-body-right", aTargets: ['_all'] },
                 ],
@@ -1861,27 +1879,22 @@ var pageType = 'balance';
     function buildTableRows(myList, headers) {
         let resultTable = [];
 
-        for (var i = 0; i < myList.length; i++) {
+        for (let i = 0; i < myList.length; i++) {
 
             if (!tokenSelection.unlisted.show && myList[i].Unlisted)
                 continue;
-            var row$ = $('<tr/>');
+            let row$ = $('<tr/>');
 
-            for (var colIndex = 0; colIndex < headers.length; colIndex++) {
-                var cellValue = myList[i][headers[colIndex].title];
+            for (let colIndex = 0; colIndex < headers.length; colIndex++) {
+                let cellValue = myList[i][headers[colIndex].title];
                 if (!cellValue && cellValue !== 0) cellValue = "";
-                var head = headers[colIndex].title;
+                let head = headers[colIndex].title;
 
                 if (head == 'Total' || exchanges[head] || head == 'Bid' || head == 'Ask' || head == 'Est. ETH') {
                     if (cellValue || cellValue === 0) {
-                        var dec = fixedDecimals;
-                        if (head == 'Bid' || head == 'Ask') {
-                            dec += 2;
-                        }
-                        let accurate = _util.exportNotation(cellValue);
-                        var num = '<span data-toggle="tooltip" title="' + accurate + '">' + _util.displayNotation(cellValue, dec) + '</span>';
-                        //add hidden raw value to fix sorting 0.00000025 vs 0.0000002 
-                        row$.append($('<td data-sort="' + accurate + '" />').html(num));
+                        // use full number string without exponential values
+                        let num = _util.exportNotation(cellValue);
+                        row$.append($('<td/>').html(num));
                     } else {
                         if (cellValue === "" && (head == 'Bid' || head == 'Ask')) {
                             cellValue = '-';
@@ -1894,21 +1907,12 @@ var pageType = 'balance';
                     if (head == 'EUR') {
                         prefix = '€';
                     }
-                    var num = '<span style="color:gray">' + prefix + cellValue + '</span>';
-                    let sort = cellValue;
-                    if (sort == "") {
-                        sort = -1;
-                    }
-                    if (myList[i]['Est. ETH'] || myList[i]['Est. ETH'] === 0) {
-                        let rawNum = myList[i]['Est. ETH'];
-                        if (rawNum && rawNum != "") {
-                            sort = _util.exportNotation(rawNum);
-                        }
-                    }
-                    //add hidden number for sorting
+                    let num = '<span style="color:gray">' + prefix + cellValue + '</span>';
                     row$.append($('<td/>').html(num));
                 }
                 else if (head == 'Name') {
+                    //token.name -> symbol
+                    //token.name2 -> name
                     let token = _delta.uniqueTokens[myList[i].Address];
                     if (token) {
                         let popover = _delta.makeTokenPopover(token);
@@ -1920,6 +1924,7 @@ var pageType = 'balance';
                         if (token.name) {
                             name = token.name.toLowerCase();
                         }
+                        //sort a token by symbol, allow search to see the full name
                         row$.append($('<td data-sort="' + name + '" data-search="' + search + '"/>').html(popover));
                     } else {
                         row$.append($('<td data-sort=" "/>').html(""));

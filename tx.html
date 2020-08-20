@@ -16,20 +16,21 @@
   <link href="css/combinedStyles.css" rel="stylesheet">
 
   <!-- JS  jquery + tablesorter -->
-  <script src="js/jquery.tablesorter.combined.min.js"></script>
+  <script src="js/lib/jquery.tablesorter.combined.min.js"></script>
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
-  <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
+  <script src="js/lib/bootstrap.adminlte.blockies.min.js" defer></script>
 
   <!-- JS  Token discover / loading -->
-  <script src="backupTokens.js"></script>
-  <script src="loadTokens.js"></script>
+  <script src="js/backupTokens.js"></script>
+  <script src="js/loadTokens.js"></script>
 
   <!-- JS  Main functionality -->
-  <!--  config excluded from bundle -->
-  <script src="configBundle.js"></script>
-  <script src="bundle.min.js"></script>
-  <script src="user.js"></script>
-  <script src="tx.js"></script>
+  <script src="js/build/bundle.config.min.js"></script>
+  <script src="js/build/bundle.modules.min.js"></script>
+  <script src="js/build/bundle.min.js"></script>
+
+  <script src="js/user.js"></script>
+  <script src="js/tx.js"></script>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -236,13 +237,13 @@
         </li>
         <li class="header">Links</li>
         <li>
-          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank">
+          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-github"></i>
             <span>GitHub</span>
           </a>
         </li>
         <li>
-          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank">
+          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-link"></i>
             <span>Smart contract</span>
           </a>
@@ -408,38 +409,38 @@
                   Transaction Info supports:
                   <ul>
                     <li>Deposit style exchanges:
-                      <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
-                      <a href="https://forkdelta.app" target="_blank">ForkDelta</a>),
-                      <a href="https://token.store" target="_blank">Token Store</a>,
-                      <a href="https://www.idex.market" target="_blank">IDEX</a>,
-                      <a href="https://www.enclaves.io" target="_blank">EnclavesDex</a>,
-                      <a href="https://www.ethen.market" target="_blank">ETHEN</a>,
-                      <a href="https://www.singularx.com" target="_blank">SingularX</a>,
-                      <a href="https://www.etherc.io" target="_blank">EtherC</a> and
-                      <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>.
+                      <a href="https://etherdelta.com" target="_blank" rel="noopener noreferrer">EtherDelta</a> (
+                      <a href="https://forkdelta.app" target="_blank" rel="noopener noreferrer">ForkDelta</a>),
+                      <a href="https://token.store" target="_blank" rel="noopener noreferrer">Token Store</a>,
+                      <a href="https://www.idex.market" target="_blank" rel="noopener noreferrer">IDEX</a>,
+                      <a href="https://www.enclaves.io" target="_blank" rel="noopener noreferrer">EnclavesDex</a>,
+                      <a href="https://www.ethen.market" target="_blank" rel="noopener noreferrer">ETHEN</a>,
+                      <a href="https://www.singularx.com" target="_blank" rel="noopener noreferrer">SingularX</a>,
+                      <a href="https://www.etherc.io" target="_blank" rel="noopener noreferrer">EtherC</a> and
+                      <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank" rel="noopener noreferrer">Decentrex</a>.
                     </li>
                     <li> 0x (V1 & V2) relayers:
-                      <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>,
-                      <a href="https://ddex.io" target="_blank">DDEX (v1)</a>,
-                      <a href="https://paradex.io/" target="_blank">Paradex</a>,
-                      <a href="https://ercdex.com/" target="_blank">ERC dEX</a>,
-                      <a href="https://openrelay.xyz/" target="_blank">OpenRelay</a>,
-                      <a href="https://sharkrelay.com" target="_blank">Shark Relay</a>,
-                      <a href="https://tokenjar.io" target="_blank">Token Jar</a>,
-                      <a href="https://idtexchange.com" target="_blank">IDT</a>,
-                      <a href="https://bamboorelay.com" target="_blank">BambooRelay</a>,
-                      <a href="https://tokenlon.token.im/tokenlon" target="_blank">Tokenlon</a>,
+                      <a href="https://radarrelay.com/" target="_blank" rel="noopener noreferrer">RadarRelay</a>,
+                      <a href="https://ddex.io" target="_blank" rel="noopener noreferrer">DDEX (v1)</a>,
+                      <a href="https://paradex.io/" target="_blank" rel="noopener noreferrer">Paradex</a>,
+                      <a href="https://ercdex.com/" target="_blank" rel="noopener noreferrer">ERC dEX</a>,
+                      <a href="https://openrelay.xyz/" target="_blank" rel="noopener noreferrer">OpenRelay</a>,
+                      <a href="https://sharkrelay.com" target="_blank" rel="noopener noreferrer">Shark Relay</a>,
+                      <a href="https://tokenjar.io" target="_blank" rel="noopener noreferrer">Token Jar</a>,
+                      <a href="https://idtexchange.com" target="_blank" rel="noopener noreferrer">IDT</a>,
+                      <a href="https://bamboorelay.com" target="_blank" rel="noopener noreferrer">BambooRelay</a>,
+                      <a href="https://tokenlon.token.im/tokenlon" target="_blank" rel="noopener noreferrer">Tokenlon</a>,
                       and more.
                     </li>
                     <li> Other exchanges:
-                      <a href="https://airswap.io" target="_blank">AirSwap</a>,
-                      <a href="https://kyber.network" target="_blank">Kyber Network</a>,
-                      <a href="https://oasisdex.com" target="_blank">OasisDex</a>,
-                      <a href="https://oasis.direct" target="_blank">OasisDirect</a>,
-                      <a href="https://www.bancor.network" target="_blank">Bancor</a>,
-                      <a href="https://ddex.io" target="_blank">DDEX hydro</a>,
-                      <a href="https://www.ethex.market" target="_blank">ETHEX</a> and
-                      <a href="https://www.easytrade.io" target="_blank">EasyTrade</a>.
+                      <a href="https://airswap.io" target="_blank" rel="noopener noreferrer">AirSwap</a>,
+                      <a href="https://kyber.network" target="_blank" rel="noopener noreferrer">Kyber Network</a>,
+                      <a href="https://oasisdex.com" target="_blank" rel="noopener noreferrer">OasisDex</a>,
+                      <a href="https://oasis.direct" target="_blank" rel="noopener noreferrer">OasisDirect</a>,
+                      <a href="https://www.bancor.network" target="_blank" rel="noopener noreferrer">Bancor</a>,
+                      <a href="https://ddex.io" target="_blank" rel="noopener noreferrer">DDEX hydro</a>,
+                      <a href="https://www.ethex.market" target="_blank" rel="noopener noreferrer">ETHEX</a> and
+                      <a href="https://www.easytrade.io" target="_blank" rel="noopener noreferrer">EasyTrade</a>.
                     </li>
                     <li>Erc20 Approvals & Transfers</li>
 					<li>Erc721 Approvals & Transfers</li>
@@ -465,22 +466,22 @@
       <!-- Default to the left -->
       <div class="col-sm-12 col-md-6">
         <p> Powered by
-          <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
-          <a target="_blank" href="https://infura.io/">Infura</a>
+          <a target="_blank" rel="noopener noreferrer" href="https://etherscan.io/">Etherscan</a> and
+          <a target="_blank" rel="noopener noreferrer" href="https://infura.io/">Infura</a>
           <br> Contact:
-          <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
-          <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+          <a target="_blank" rel="noopener noreferrer" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
+          <a target="_blank" rel="noopener noreferrer" href="https://reddit.com/u/deltabalances">Reddit</a>
           <br>
           <br> Buy me a beer:
           <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B"
-            target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
+            target="_blank" rel="noopener noreferrer">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
         </p>
       </div>
       <div class="col-sm-12 col-md-6">
         Use a referral:
         <ul style="list-style-type:none">
-          <li><a target="_blank" href="https://brave.com/del333">Get Brave Browser</a> </li>
-          <li><a target="_blank" href="https://www.binance.com/?ref=10985752">Trade on Binance</a></li>
+          <li><a target="_blank" rel="noopener noreferrer" href="https://brave.com/del333">Get Brave Browser</a> </li>
+          <li><a target="_blank" rel="noopener noreferrer" href="https://www.binance.com/?ref=10985752">Trade on Binance</a></li>
         </ul>
       </div>
     </footer>
@@ -516,7 +517,7 @@
               </a>
             </li>
             <li id="walletInfo" class="hidden">
-              <a id="etherscan" href="#" target="_blank" class="menu-info control-sidebar-subheading">
+              <a id="etherscan" href="#" target="_blank" rel="noopener noreferrer" class="menu-info control-sidebar-subheading">
                 Etherscan
                 <i class="fa fa-link pull-right"></i>
               </a>

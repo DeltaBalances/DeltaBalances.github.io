@@ -11,8 +11,6 @@ var pageType = 'allowance';
     var initiated = false;
     var autoStart = false;
 
-    var web3Index = 0;  //last used web3 instance
-
     var requestID = 0;
 
     // loading states
@@ -785,26 +783,16 @@ var pageType = 'allowance';
             var success = false;
             var totalTries = 0;
 
-            //get allowances from 2 web3 sources at once, use the fastest response
             // web3 provider (infura, myetherapi, mycryptoapi) or etherscan
-            makeCall(mode, functionName, arguments, 0);
             makeCall(mode, functionName, arguments, 0);
 
             function makeCall(exName, funcName, args, retried) {
 
-                if (web3Index < _delta.web3s.length) {
-                    web3Provider = _delta.web3s[web3Index];
-                    web3Index++;
-                } else {
-                    web3Provider = undefined;
-                    web3Index = 0;
-                }
                 if (completed || requestID > rqid)
                     return;
 
 
-                _util.call(
-                    web3Provider,
+                _util.getBatchedBalances(
                     _delta.contractDeltaBalance,
                     _delta.config.DeltaBalanceAddr,
                     funcName,
@@ -997,7 +985,7 @@ var pageType = 'allowance';
             let bal = allowances[token.addr];
 
             if (bal) {
-                bal.Total = _delta.web3.toBigNumber(0);
+                bal.Total = _util.toBigNumber(0);
                 for (let i = 0; i < keys.length; i++) {
                     if (exchanges[keys[i]].enabled && exchanges[keys[i]].loaded >= tokenCount) {
                         if (bal[keys[i]])

@@ -16,29 +16,30 @@
   <link href="css/combinedStyles.css" rel="stylesheet">
 
   <!-- JS  jquery -->
-  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/lib/jquery-3.2.1.min.js"></script>
 
   <!-- JS  datatables -->
-  <script src="js/jquery.dataTables.fixed.min.js"></script>
+  <script src="js/lib/jquery.dataTables.fixed.min.js"></script>
 
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
-  <script src="js/bootstrap.adminlte.blockies.min.js"></script>
-  <script src="js/bootstrap-toggle.min.js"></script>
-  <script src="js/bootstrap-select.min.js"></script>
+  <script src="js/lib/bootstrap.adminlte.blockies.min.js"></script>
+  <script src="js/lib/bootstrap-toggle.min.js"></script>
+  <script src="js/lib/bootstrap-select.min.js"></script>
 
   <!-- JS socketIO  for exchange prices -->
-  <script src="js/socket.io.js" defer></script>
+  <script src="js/lib/socket.io.js" defer></script>
 
   <!-- JS  Token discover / loading -->
-  <script src="backupTokens.js"></script>
-  <script src="loadTokens.js"></script>
+  <script src="js/backupTokens.js"></script>
+  <script src="js/loadTokens.js"></script>
 
   <!-- JS  Main functionality -->
-  <!--  config excluded from bundle -->
-  <script src="configBundle.js"></script>
-  <script src="bundle.min.js"></script>
-  <script src="user.js"></script>
-  <script src="balances.js"></script>
+  <script src="js/build/bundle.config.min.js"></script>
+  <script src="js/build/bundle.modules.min.js"></script>
+  <script src="js/build/bundle.min.js"></script>
+  
+  <script src="js/user.js"></script>
+  <script src="js/balances.js"></script>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -251,13 +252,13 @@
         </li>
         <li class="header">Links</li>
         <li>
-          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank">
+          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-github"></i>
             <span>GitHub</span>
           </a>
         </li>
         <li>
-          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank">
+          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-link"></i>
             <span>Smart contract</span>
           </a>
@@ -434,7 +435,7 @@
                       data-size="mini">
                   </label>
                   Not listed <i class="fa fa-info" data-toggle="tooltip"
-                    title="Might trade unlisted on ForkDelta or TokenStore"></i>
+                    title="Might trade unlisted on ForkDelta or Uniswap"></i>
                   <br>
                   <label class="togglebox checkbox-inline">
                     <input type="checkbox" id="showOld" data-toggle="toggle" data-style="fast" data-width="100"
@@ -491,7 +492,6 @@
                 <optgroup label="Active">
                   <option data-icon="icon-etherdelta" data-subtext="ForkDelta">EtherDelta</option>
                   <option data-icon="icon-idex">IDEX</option>
-                  <option data-icon="icon-tokenstore">Token store</option>
                   <option data-icon="icon-switcheo">Switcheo v2</option>
                   <option data-icon="icon-enclaves">Joyso</option>
                   <!-- <option>Ethen</option>-->
@@ -502,6 +502,7 @@
                   <option data-icon="icon-enclaves">Bitcratic</option>
                 </optgroup>
                 <optgroup label="Legacy">
+				  <option data-icon="icon-tokenstore" data-subtext="(Discontinued, to withdraw use: ts-out.github.io )">Token store</option>
                   <option data-icon="icon-switcheo" data-subtext="(Discontinued 10-2019)">Switcheo</option>
                   <option data-icon="icon-enclaves" data-subtext="(Discontinued)">Enclaves</option>
                   <option data-icon="icon-enclaves" data-subtext="(Discontinued)">DEXY</option>
@@ -573,20 +574,20 @@
               <div class="box-body">
                 <div class="col-md-12 noPadM">
                   Check deposited tokens in:
-                  <a href="https://etherdelta.com" target="_blank">EtherDelta</a>
-                  (<a href="https://forkdelta.app" target="_blank">ForkDelta</a>),
-                  <a href="https://token.store" target="_blank">Token Store</a>,
-                  <a href="https://www.idex.market" target="_blank">IDEX</a>,
-                  <a href="https://switcheo.exchange" target="_blank">Switcheo</a>,
-                  <a href="https://joyso.io" target="_blank">Joyso</a>,
-				  <a href="https://dex.blue" target="_blank">dex.blue</a>,
-                  <a href="https://www.singularx.com" target="_blank">SingularX</a>,
-                  <a href="https://www.etherc.io" target="_blank">EtherC</a>,
-				  <a href="https://www.bitcratic.com" target="_blank">Bitcratic</a>,
-				  <a href="https://www.enclaves.io" target="_blank">EnclavesDex</a>,
-                  <a href="https://app.dexy.exchange" target="_blank">DEXY</a> and
+                  <a href="https://etherdelta.com" target="_blank" rel="noopener noreferrer">EtherDelta</a>
+                  (<a href="https://forkdelta.app" target="_blank" rel="noopener noreferrer">ForkDelta</a>),
+                  <a href="https://token.store" target="_blank" rel="noopener noreferrer">Token Store</a>,
+                  <a href="https://www.idex.market" target="_blank" rel="noopener noreferrer">IDEX</a>,
+                  <a href="https://switcheo.exchange" target="_blank" rel="noopener noreferrer">Switcheo</a>,
+                  <a href="https://joyso.io" target="_blank" rel="noopener noreferrer">Joyso</a>,
+				  <a href="https://dex.blue" target="_blank" rel="noopener noreferrer">dex.blue</a>,
+                  <a href="https://www.singularx.com" target="_blank" rel="noopener noreferrer">SingularX</a>,
+                  <a href="https://www.etherc.io" target="_blank" rel="noopener noreferrer">EtherC</a>,
+				  <a href="https://www.bitcratic.com" target="_blank" rel="noopener noreferrer">Bitcratic</a>,
+				  <a href="https://www.enclaves.io" target="_blank" rel="noopener noreferrer">EnclavesDex</a>,
+                  <a href="https://app.dexy.exchange" target="_blank" rel="noopener noreferrer">DEXY</a> and
                   <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md"
-                    target="_blank">Decentrex</a>.
+                    target="_blank" rel="noopener noreferrer">Decentrex</a>.
                   <br> Other supported decentralized exchanges do not use a deposit system.
                   <br>
                   <br> Price estimates come from the ForkDelta, IDEX, Kyber and TokenStore APIs.
@@ -611,22 +612,22 @@
       <!-- Default to the left -->
       <div class="col-sm-12 col-md-6">
         <p> Powered by
-          <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
-          <a target="_blank" href="https://infura.io/">Infura</a>
+          <a target="_blank" rel="noopener noreferrer" href="https://etherscan.io/">Etherscan</a> and
+          <a target="_blank" rel="noopener noreferrer" href="https://infura.io/">Infura</a>
           <br> Contact:
-          <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
-          <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+          <a target="_blank" rel="noopener noreferrer" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
+          <a target="_blank" rel="noopener noreferrer" href="https://reddit.com/u/deltabalances">Reddit</a>
           <br>
           <br> Buy me a beer:
           <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B"
-            target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
+            target="_blank" rel="noopener noreferrer">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
         </p>
       </div>
       <div class="col-sm-12 col-md-6">
         Use a referral:
         <ul style="list-style-type:none">
-          <li><a target="_blank" href="https://brave.com/del333">Get Brave Browser</a> </li>
-          <li><a target="_blank" href="https://www.binance.com/?ref=10985752">Trade on Binance</a></li>
+          <li><a target="_blank" rel="noopener noreferrer" href="https://brave.com/del333">Get Brave Browser</a> </li>
+          <li><a target="_blank" rel="noopener noreferrer" href="https://www.binance.com/?ref=10985752">Trade on Binance</a></li>
         </ul>
       </div>
     </footer>

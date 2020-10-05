@@ -1038,9 +1038,9 @@ var pageType = 'recent';
 									} else if (unpacked.name === 'cancelOrdersUpTo') {
 										trans = createOutputTransaction('Cancel All', '', '', '', '', tx.hash, tx.timeStamp, true, '', tx.isError === '0', obj.exchange);
 									}
-									else if (unpacked.name === 'trade' || unpacked.name === 'order' || unpacked.name === 'fill' || unpacked.name === 'tradeEtherDelta' || unpacked.name === 'instantTrade' || unpacked.name === 'tradeWithHint') {
+									else if (unpacked.name === 'trade' || unpacked.name === 'order' || unpacked.name === 'fill' || unpacked.name === 'tradeEtherDelta' || unpacked.name === 'instantTrade' || unpacked.name === 'tradeWithHint' || unpacked.name === 'tradeWithHintAndFee') {
 
-										if (unpacked.name === 'tradeWithHint' || (unpacked.name === 'trade' && unpacked.params.length === 7)) {
+										if (unpacked.name === 'tradeWithHint' || unpacked.name === 'tradeWithHintAndFee' || (unpacked.name === 'trade' && unpacked.params.length === 7)) {
 											//kyber only
 											if (obj.type == 'Buy up to') {
 												trans = createOutputTransaction(obj.type, obj.token, undefined, obj.base, obj.baseAmount, tx.hash, tx.timeStamp, obj.unlisted, obj.maxPrice, tx.isError === '0', exchange);
@@ -1557,7 +1557,7 @@ var pageType = 'recent';
 
 						// we parsed a different token the second time   (etherscan regular tx input vs erc20 event )
 						// see if we can refine details by combining info from 2 sources
-						else if (oldTrans.Token.addr !== transs.Token.addr || transs.Type !== oldTrans.Type) {
+						else if (oldTrans.Token && (oldTrans.Token.addr !== transs.Token.addr) || transs.Type !== oldTrans.Type) {
 
 							//get exchange or wallet name
 							let exchange = 'unknown ';

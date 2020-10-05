@@ -1650,7 +1650,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 }
             }
             //kyber trade input
-            else if ((unpacked.name === 'trade' && unpacked.params.length == 7) || unpacked.name == 'tradeWithHint') {
+            else if ((unpacked.name === 'trade' && unpacked.params.length == 7) || unpacked.name == 'tradeWithHint' || unpacked.name == 'tradeWithHintAndFee') {
                 /* trade(
                      ERC20 src,
                      uint srcAmount,
@@ -1662,6 +1662,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                  ) */
                 //tradeWithHint(address src,uint256 srcAmount,address dest,address destAddress,uint256 maxDestAmount,uint256 minConversionRate,address walletId,bytes hint )
                 //tradeWithHint(address trader,address src,uint256 srcAmount,address dest,address destAddress,uint256 maxDestAmount,uint256 minConversionRate,address walletId,bytes hint )
+                // tradeWithHintAndFee(address trader, address src, uint256 srcAmount, address dest, address destAddress, uint256 maxDestAmount, uint256 minConversionRate, address platformWallet, uint256 platformFeeBps, bytes hint)"
 
                 let maker = '';
                 let iOffset = 0;

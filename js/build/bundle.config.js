@@ -79,6 +79,7 @@ module.exports = {
   /* api related */
   etherscanAPIKey: 'CY1M8MIE5IJ87GKNGYF98PGQFIHVQ99V13',
   infuraKey: '87ee3513fad045acb1522ef7a30bd652',
+  alchemyKey: 'ozV51x-gVqsq09qRjj7FQ-Y1sGJee62t',
    // infura project for ethereum logs (history)
   infuraURL: 'https://mainnet.infura.io/v3/a7ca261d0f724bac976dfdb263cb3866', 
   localNode: 'http://localhost:8545',
@@ -352,7 +353,11 @@ module.exports = {
     "function tradeWithHint(address trader, address src, uint256 srcAmount, address dest, address destAddress, uint256 maxDestAmount, uint256 minConversionRate, address walletId, bytes hint) payable returns (uint256)",
     "event KyberTrade(address indexed trader, address src, address dest, uint256 srcAmount, uint256 dstAmount, address destAddress, uint256 ethWeiValue, address reserve1, address reserve2, bytes hint)"
   ],
-
+  Kyber4: [
+    "function tradeWithHintAndFee(address trader, address src, uint256 srcAmount, address dest, address destAddress, uint256 maxDestAmount, uint256 minConversionRate, address platformWallet, uint256 platformFeeBps, bytes hint)",
+    "function tradeWithHintAndFee(address src, uint256 srcAmount, address dest, address destAddress, uint256 maxDestAmount, uint256 minConversionRate, address platformWallet, uint256 platformFeeBps, bytes hint)",
+    //"event KyberTrade(address indexed src, address indexed dest, uint256 ethWeiValue, uint256 networkFeeWei, uint256 customPlatformFeeWei, bytes32[] t2eIds, bytes32[] e2tIds, uint256[] t2eSrcAmounts, uint256[] e2tSrcAmounts, uint256[] t2eRates, uint256[] e2tRates)",
+  ],
   BancorQuick: [
     "function convertForPrioritized(address[] _path, uint256 _amount, uint256 _minReturn, address _for, uint256 _block, uint256 _nonce, uint8 _v, bytes32 _r, bytes32 _s) payable returns (uint256)",
     "function claimAndConvertFor(address[] _path, uint256 _amount, uint256 _minReturn, address _for) returns (uint256)",
@@ -849,6 +854,7 @@ module.exports = {
     '0x37c4bcaba4bcf3a605414236b8b108f160eb45a6': 'LocalCoin Dex 2',
     '0x8d1c1571367a148e92d6ac83494b1bdf3b497d07': 'LocalCoin Dex 3',
 
+    '0x090d4613473dee047c3f2706764f49e0821d256e': 'UNI Airdrop',
     // saturn network aidrop
     '0x25f17d6cb23cc85bfa6c5e9b8f1d5226f5927cbc': 'Airdrop',
     //disperse.app multi token transfer
@@ -4887,6 +4893,8 @@ module.exports = {
     { m: "May 2020", blockFrom: 9976964, blockTo: 10176690 },
     { m: "Jun 2020", blockFrom: 10176690, blockTo: 10370274 },
     { m: "Jul 2020", blockFrom: 10370274, blockTo: 10570485 },
+    { m: "Aug 2020", blockFrom: 10570485, blockTo: 10771925 },
+    { m: "Sep 2020", blockFrom: 10771925, blockTo: 10966874 },
   ],
   // history settings per exchange
   history: {

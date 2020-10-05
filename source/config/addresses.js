@@ -247,6 +247,7 @@ module.exports = {
     '0x37c4bcaba4bcf3a605414236b8b108f160eb45a6': 'LocalCoin Dex 2',
     '0x8d1c1571367a148e92d6ac83494b1bdf3b497d07': 'LocalCoin Dex 3',
 
+    '0x090d4613473dee047c3f2706764f49e0821d256e': 'UNI Airdrop',
     // saturn network aidrop
     '0x25f17d6cb23cc85bfa6c5e9b8f1d5226f5927cbc': 'Airdrop',
     //disperse.app multi token transfer

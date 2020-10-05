@@ -265,7 +265,11 @@ module.exports = {
     "function tradeWithHint(address trader, address src, uint256 srcAmount, address dest, address destAddress, uint256 maxDestAmount, uint256 minConversionRate, address walletId, bytes hint) payable returns (uint256)",
     "event KyberTrade(address indexed trader, address src, address dest, uint256 srcAmount, uint256 dstAmount, address destAddress, uint256 ethWeiValue, address reserve1, address reserve2, bytes hint)"
   ],
-
+  Kyber4: [
+    "function tradeWithHintAndFee(address trader, address src, uint256 srcAmount, address dest, address destAddress, uint256 maxDestAmount, uint256 minConversionRate, address platformWallet, uint256 platformFeeBps, bytes hint)",
+    "function tradeWithHintAndFee(address src, uint256 srcAmount, address dest, address destAddress, uint256 maxDestAmount, uint256 minConversionRate, address platformWallet, uint256 platformFeeBps, bytes hint)",
+    //"event KyberTrade(address indexed src, address indexed dest, uint256 ethWeiValue, uint256 networkFeeWei, uint256 customPlatformFeeWei, bytes32[] t2eIds, bytes32[] e2tIds, uint256[] t2eSrcAmounts, uint256[] e2tSrcAmounts, uint256[] t2eRates, uint256[] e2tRates)",
+  ],
   BancorQuick: [
     "function convertForPrioritized(address[] _path, uint256 _amount, uint256 _minReturn, address _for, uint256 _block, uint256 _nonce, uint8 _v, bytes32 _r, bytes32 _s) payable returns (uint256)",
     "function claimAndConvertFor(address[] _path, uint256 _amount, uint256 _minReturn, address _for) returns (uint256)",

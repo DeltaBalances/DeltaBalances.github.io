@@ -16,6 +16,7 @@ function DeltaBalances() {
     this.connection = undefined;
     this.secondsPerBlock = 14;
     this.provider = Ethers.getDefaultProvider('homestead', {
+        alchemy: config.alchemyKey,
         etherscan: config.etherscanAPIKey,
         infura: config.infuraKey,
         quorum: 1

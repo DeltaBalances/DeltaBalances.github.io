@@ -132,7 +132,7 @@ function _decodeMethod(data) {
     let decoded = undefined;
 
     try {
-      decoded = abiCoder.decode(params, '0x' + data.slice(10));
+      decoded = abiCoder.decode(params, '0x' + data.slice(10), true); //true for loose decoding
       //turn ethers arrayish object into array
       {
         delete decoded['__length__'];
@@ -320,7 +320,7 @@ function _decodeLogs(logs) {
       );
       let decodedData = undefined;
       try {
-        decodedData = abiCoder.decode(dataTypes, logData);
+        decodedData = abiCoder.decode(dataTypes, logData, true);  //true for loose decoding
       } catch (e) {
         // backup attempt with legacy ethers v4 decoder, parses some data that v5 errors on.
         decodedData = abiCoder2.decode(dataTypes, logData);
@@ -409,6 +409,7 @@ function DeltaBalances() {
     this.connection = undefined;
     this.secondsPerBlock = 14;
     this.provider = Ethers.getDefaultProvider('homestead', {
+        alchemy: config.alchemyKey,
         etherscan: config.etherscanAPIKey,
         infura: config.infuraKey,
         quorum: 1

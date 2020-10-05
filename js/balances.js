@@ -837,7 +837,6 @@ var pageType = 'balance';
             IDEX: { attempts: 0, done: false, failed: false, prices: [] },
             Kyber: { attempts: 0, done: false, failed: false, prices: [] },
             Radar: { attempts: 0, done: false, failed: false, prices: [] },
-            DDEX: { attempts: 0, done: false, failed: false, prices: [] },
         };
 
         exchangePrices.complete = false;
@@ -913,52 +912,6 @@ var pageType = 'balance';
                     if (tokenPrice) {
                         prices[tokenPrice.addr] = tokenPrice;
                     }
-                }
-            });
-            return prices;
-        });
-
-        priceRequest('DDEX', 'https://api.ddex.io/v3/markets/tickers', (result) => {
-            if (result.desc != "success" || !result.data) {
-                return;
-            }
-            result = result.data.tickers;
-            result = result.map(x => {
-                if (x.marketId.indexOf('-WETH') > 0) {
-                    let name = x.marketId.replace('-WETH', '');
-                    const matchingTokens = _delta.config.balanceTokens.filter(
-                        x => x.DDEX && x.DDEX === name);
-                    if (matchingTokens.length > 0) {
-                        x.tokenAddr = matchingTokens[0].addr.toLowerCase();
-                    }
-                }
-                return x;
-            });
-            result = result.filter(x => x.tokenAddr);
-            let prices = {};
-            result.map((tok) => {
-                if (tok.tokenAddr) {
-                    let tokenPrice = {
-                        addr: tok.tokenAddr,
-                        bid: undefined,
-                        ask: undefined,
-                        volumeETH: 0,
-                        //change24h: x.percentChange,
-                    };
-                    if (tok.bid) {
-                        tokenPrice.bid = Number(tok.bid);
-                    }
-                    if (tok.ask) {
-                        tokenPrice.ask = Number(tok.ask);
-                    }
-                    if (tok.volume && (tok.bid || tok.ask)) {
-                        if (tok.bid) {
-                            tokenPrice.volumeETH = Number(tok.volume) * Number(tok.bid);
-                        } else {
-                            tokenPrice.volumeETH = Number(tok.volume) * Number(tok.ask);
-                        }
-                    }
-                    prices[tokenPrice.addr] = tokenPrice;
                 }
             });
             return prices;
@@ -1445,7 +1398,7 @@ var pageType = 'balance';
                     //get bid/ask prices for this token
 
                     // set prices in this order, later in the list is assumed to be more accurate 
-                    let keyOrder = ['DDEX', 'ForkDelta', 'Radar', 'IDEX', 'Kyber'];
+                    let keyOrder = ['ForkDelta', 'Radar', 'IDEX', 'Kyber'];
                     //price obj for this token {forkdelta: {bid, ask}, idex:{bid,ask}}
                     let tokenPrices = exchangePrices.prices[token.addr];
 

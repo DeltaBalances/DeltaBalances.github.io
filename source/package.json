@@ -6,7 +6,7 @@
   "private": true,
   "dependencies": {
     "bignumber.js": "5.0.0",
-    "ethers": "^5.0.8",
+    "ethers": "^5.0.15",
     "ethersLegacy": "npm:ethers@4.0.47"
   },
   "scripts": {
@@ -19,7 +19,7 @@
   "devDependencies": {
     "browser-pack-flat": "^3.4.2",
     "browser-resolve": "^1.11.3",
-    "browserify": "^16.5.1",
+    "browserify": "^16.5.2",
     "common-shakeify": "^0.6.2",
     "terser": "^4.8.0",
     "uglifyify": "^5.0.2",

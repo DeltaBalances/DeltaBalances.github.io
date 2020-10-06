@@ -59,6 +59,7 @@ module.exports = {
       showExchange: false,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: false, // do maker trades give an erc20 transfer event
     },
     Decentrex: {
       contract: 'Decentrex',
@@ -71,6 +72,7 @@ module.exports = {
       showExchange: false,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: false,
     },
     'Token store': {
       contract: 'TokenStore',
@@ -83,6 +85,7 @@ module.exports = {
       showExchange: false,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: false,
     },
     '0x Protocol v1': {
       contract: '0x',
@@ -95,6 +98,7 @@ module.exports = {
       showExchange: true,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: true,
     },
     Ethfinex: { //0x v1 clone
         contract: 'Ethfinex',
@@ -107,6 +111,7 @@ module.exports = {
         showExchange: true,
         hideFees: false,
         hideOpponent: false,
+        makerTransfer: true,
       },
     '0x Protocol v2': {
       contract: ['0x2','0x2.1'],
@@ -119,6 +124,7 @@ module.exports = {
       showExchange: true,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: true,
     },
     '0x Protocol v3': {
       contract: '0x3',
@@ -131,6 +137,7 @@ module.exports = {
       showExchange: true,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: true,
     },
     OasisDex: {
       contract: ['OasisDex', 'OasisDex2','OasisDex3','OasisDex4', 'OasisDexOld', 'OasisDexOld2'],
@@ -144,6 +151,7 @@ module.exports = {
       showExchange: false,
       hideFees: true,
       hideOpponent: false,
+      makerTransfer: true,
     },
     AirSwap: {
       contract: 'AirSwap',
@@ -156,6 +164,7 @@ module.exports = {
       showExchange: false,
       hideFees: true,
       hideOpponent: false,
+      makerTransfer: false,
     },
     Kyber: {
       contract: ['Kyber', 'Kyber2Proxy'], //kyber v2-3 emit events on the proxy
@@ -169,6 +178,7 @@ module.exports = {
       showExchange: false,
       hideFees: true,
       hideOpponent: true,
+      makerTransfer: false,
     },
     Enclaves: {
       contract: 'Enclaves',
@@ -181,6 +191,7 @@ module.exports = {
       showExchange: false,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: false,
     },
     ETHEN: {
       contract: 'Ethen',
@@ -196,6 +207,7 @@ module.exports = {
       showExchange: false,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: false,
     },
     ETHEX: {
       contract: 'Ethex',
@@ -211,6 +223,7 @@ module.exports = {
       showExchange: false,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: true,
     },
     EasyTrade: {
       contract: ['EasyTrade', 'EasyTrade2'],
@@ -228,6 +241,7 @@ module.exports = {
       showExchange: false,
       hideFees: true,
       hideOpponent: true,
+      makerTransfer: false,
     },
     SingularX: {
       contract: 'Singularx',
@@ -240,6 +254,7 @@ module.exports = {
       showExchange: false,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: false,
     },
     EtherC: {
       contract: 'EtherC',
@@ -252,6 +267,7 @@ module.exports = {
       showExchange: false,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: false,
     },
     'DDEX Hydro': { // hydro 1.1 supported, 1.0 not yet (comments)
       contract: 'DDEX2', // 'DDEX',
@@ -264,6 +280,7 @@ module.exports = {
       showExchange: false,
       hideFees: false,
       hideOpponent: false,
+      makerTransfer: true,
     },
   },
 };

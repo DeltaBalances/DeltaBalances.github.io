@@ -110,8 +110,6 @@ var pageType = 'history';
 
 	function init() {
 
-
-
 		getBlockStorage(); // get cached block dates
 
 		// borrow some ED code for compatibility
@@ -326,6 +324,7 @@ var pageType = 'history';
 				showExchange: false,
 				hideFees: true,
 				hideOpponent: true,
+				makerTransfer: false,
 			};
 
 			if (exchanges.length > 1) {
@@ -350,8 +349,6 @@ var pageType = 'history';
 								currentConfig[topic].push(exchangeConfig[topic]);
 							}
 						}
-
-
 					});
 
 					if (!exchangeConfig.hideFees) {
@@ -362,6 +359,9 @@ var pageType = 'history';
 					}
 					if (!exchangeConfig.userIndexed) {
 						currentConfig.userIndexed = false;
+					}
+					if (exchangeConfig.makerTransfer) {
+						currentConfig.makerTransfer = true;
 					}
 				}
 			});
@@ -654,6 +654,9 @@ var pageType = 'history';
 
 
 	function getTransactions(rqid) {
+		//use the etherscan txlist to preload some blockNumber->date conversions
+		getEtherscanTxDates(startblock, endblock, publicAddr);
+
 
 		var topics = [];
 		if (typeMode == 0) { // Trades
@@ -857,7 +860,7 @@ var pageType = 'history';
 
 			runningDates = true;
 
-			const maxDateRequests = 10;
+			const maxDateRequests = 5;
 			let activeDateRequests = 0;
 			let loadedDates = 0;
 			let lastLoadUsed = 0;
@@ -899,19 +902,21 @@ var pageType = 'history';
 
 			function getBlockDate(block) {
 				if (activeDateRequests < maxDateRequests) {
-					activeDateRequests++;
 
-					pendingBlockDates[block] = true;
-					// try getting block date 
-					_util.getBlockDate(block, (err, unixtimestamp, nr) => {
-						if (err) {
-							console.log(err);
-							receiveDates(err, unixtimestamp, block);
-						} else {
+					if (!blockDates[block]) { //ensure it isn't loaded by another source yet
+						activeDateRequests++;
+						pendingBlockDates[block] = true;
+						// try getting block date 
+						_util.getBlockDate(block, (err, unixtimestamp, nr) => {
 							activeDateRequests--;
+							if (err) {
+								console.log(err);
+							}
 							receiveDates(err, unixtimestamp, nr);
-						}
-					});
+						});
+					} else {
+						receiveDates(undefined, undefined, block);
+					}
 				}
 			}
 
@@ -1145,6 +1150,58 @@ var pageType = 'history';
 			if (blockDates[trades[i].Block]) {
 				trades[i].Date = blockDates[trades[i].Block];
 			}
+		}
+	}
+
+	//get a list of sent transactions in the block range, which includes the date matching their block number
+	// helps to reduce the amount of getBlockNumber calls
+	function getEtherscanTxDates(fromBlock, toBlock, addr) {
+		let from = fromBlock;
+		let to = toBlock;
+
+		//narrow the from->to blockrange if they are already known
+		while (blockDates[from] && from < to) {
+			from++;
+		}
+		while (blockDates[to] && from < to) {
+			to--;
+		}
+
+
+		let txListUrl = 'https://api.etherscan.io/api?module=account&action=txlist&address=';
+		let tokenListUrl = 'https://api.etherscan.io/api?module=account&action=tokentx&address=';
+
+		getEtherscanTx(txListUrl, 'txlist');
+		// also get incoming token transfers from maker trades
+		if (historyConfig.makerTransfer) {
+			getEtherscanTx(tokenListUrl, 'tokenList');
+		}
+
+		function getEtherscanTx(baseUrl, name) {
+			$.getJSON(baseUrl + addr + '&startblock=' + from + '&endblock=' + to + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey).done((result) => {
+				let newDates = 0;
+				if (result && result.status === '1' && result.result) {
+					result.result.forEach((tx) => {
+						if (tx && tx.blockNumber && tx.timeStamp) {
+							let block = tx.blockNumber;
+							if (!blockDates[block]) {
+								blockDates[block] = _util.toDateTime(tx.timeStamp);
+								newDates++;
+							}
+							if (needBlockDates[block]) {
+								needBlockDates[block] = false;
+							}
+						}
+					});
+				}
+				console.log('Loaded ' + newDates + ' blockDates from etherscan ' + name);
+				if (newDates > 0) {
+					setBlockStorage();
+				}
+			}).fail((result) => {
+				// ignore a failure, this is only a speedup anyway
+				console.log('failed to load etherscan ' + name);
+			});
 		}
 	}
 

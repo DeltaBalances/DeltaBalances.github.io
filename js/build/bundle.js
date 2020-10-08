@@ -411,11 +411,20 @@ function DeltaBalances() {
 
     // create the providers used in the ethers.js defaultProvider
     let providers = [
-        new Ethers.providers.EtherscanProvider("homestead", config.etherscanAPIKey),
         new Ethers.providers.InfuraProvider("homestead", config.infuraKey),
         new Ethers.providers.AlchemyProvider("homestead", config.alchemyKey),
         new Ethers.providers.CloudflareProvider(),
     ];
+    try {
+        //temp fix to disbale EtherscanProvider on pages where it tends to fail
+        let path = window.location.href.toLocaleLowerCase();
+        if (path.indexOf('tx') >= 0 || path.indexOf('recent') >= 0 || path.indexOf('trades') >= 0 || path.indexOf('history') >= 0) {
+            providers.push(new Ethers.providers.EtherscanProvider("homestead", config.etherscanAPIKey));
+        } else {
+            console.log('disabled EtherscanProvider');
+        }
+    } catch (_) { }
+
     // possibly create some more providers based on public urls
     try {
         config.jsonRpcUrls.forEach(url => {

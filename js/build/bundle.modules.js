@@ -16,7 +16,7 @@ const Ethers = {
   },
   Contract: require('@ethersproject/contracts/lib/index.js').Contract,
   getDefaultProvider: require('@ethersproject/providers/lib/index.js').getDefaultProvider,
-  //providers: require('@ethersproject/providers/lib/index.js'),
+  providers: require('@ethersproject/providers/lib/index.js'),
   
   
   legacy: {

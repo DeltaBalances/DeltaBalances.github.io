@@ -80,6 +80,10 @@ module.exports = {
   etherscanAPIKey: 'CY1M8MIE5IJ87GKNGYF98PGQFIHVQ99V13',
   infuraKey: '87ee3513fad045acb1522ef7a30bd652',
   alchemyKey: 'ozV51x-gVqsq09qRjj7FQ-Y1sGJee62t',
+  jsonRpcUrls: [ //public rpc providers by url
+    "https://api.mycryptoapi.com/eth",
+    "https://main-rpc.linkpool.io"
+  ],
    // infura project for ethereum logs (history)
   infuraURL: 'https://mainnet.infura.io/v3/a7ca261d0f724bac976dfdb263cb3866', 
   localNode: 'http://localhost:8545',

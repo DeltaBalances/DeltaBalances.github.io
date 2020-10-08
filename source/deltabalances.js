@@ -15,12 +15,33 @@ function DeltaBalances() {
     this.uniqueTokens = {};
     this.connection = undefined;
     this.secondsPerBlock = 14;
-    this.provider = Ethers.getDefaultProvider('homestead', {
-        alchemy: config.alchemyKey,
-        etherscan: config.etherscanAPIKey,
-        infura: config.infuraKey,
-        quorum: 1
+
+    // create the providers used in the ethers.js defaultProvider
+    let providers = [
+        new Ethers.providers.EtherscanProvider("homestead", config.etherscanAPIKey),
+        new Ethers.providers.InfuraProvider("homestead", config.infuraKey),
+        new Ethers.providers.AlchemyProvider("homestead", config.alchemyKey),
+        new Ethers.providers.CloudflareProvider(),
+    ];
+    // possibly create some more providers based on public urls
+    try {
+        config.jsonRpcUrls.forEach(url => {
+            let prov = new Ethers.providers.StaticJsonRpcProvider(url, "homestead");
+            if (prov) {
+                providers.push(prov);
+            }
+        });
+    } catch (_) { }
+
+    //filter out any undefined providers and turn them into providerConfig
+    providers = providers.filter(p => p && Ethers.providers.Provider.isProvider(p));
+    let providerConfigs = providers.map(p => {
+        return { provider: p, weight: 1, stallTimeout: 2000, priority: 1 };
     });
+
+    //create a fallbackprovider using the above providers
+    this.provider = new Ethers.providers.FallbackProvider(providerConfigs, 1);
+
     this.contractDeltaBalance = undefined;
     this.socket = null;
     this.socketConnected = false;

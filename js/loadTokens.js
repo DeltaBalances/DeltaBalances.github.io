@@ -76,12 +76,11 @@ var unknownTokenCache = [];
      */
 
 
-    getTokens("https://api.idex.market/returnCurrencies", 'IDEX', function (data) {
-        if (data) {
+    getTokens("https://api.idex.io/v1/assets", 'IDEX', function (data) {
+        if (data && Array.isArray(data)) {
             let tokens = [];
-            Object.keys(data).forEach(function (key) {
-                let token = data[key];
-                tokens.push({ symbol: key, decimals: token.decimals, address: token.address.trim().toLowerCase(), name: token.name });
+            data.forEach(function (token) {
+                tokens.push({ symbol: token.symbol, decimals: token.assetDecimals, address: token.contractAddress.trim().toLowerCase(), name: token.name });
             });
             return tokens;
         } else {
@@ -140,16 +139,6 @@ var unknownTokenCache = [];
         }
         return tokens;
     }); */
-
-    /*
-    getTokens('https://v1-1.api.token.store/ticker', 'TokenStore', function (jsonData) {
-        if (jsonData) {
-            let tokens = Object.values(jsonData);
-            return tokens.map(tok => { return { symbol: tok.symbol, address: tok.tokenAddr.toLowerCase(), decimals: -1 } });
-        } else {
-            return [];
-        }
-    });*/
 
 
 

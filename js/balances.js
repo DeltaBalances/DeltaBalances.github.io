@@ -846,19 +846,25 @@ var pageType = 'balance';
         exchangePrices.totalRequests = Object.keys(requestLog).length;
         exchangePrices.prices = {};
 
-        priceRequest('IDEX', 'https://api.idex.market/returnTicker', (result) => {
-            let keys = Object.keys(result);
-            keys.map((key) => {
-                if (key.indexOf('ETH_') == 0) {
-                    let name = key.replace('ETH_', '');
+        priceRequest('IDEX', 'https://api.idex.io/v1/tickers', (result) => {
+            let prices = {};
+            if(!Array.isArray(result)) {
+                return prices;
+            }
+
+            result = result.map((priceObj) => {
+                //match ticker  "xxx-ETH" to IDEX symbols
+                if (priceObj.market.indexOf('-ETH') >= 0) {
+                    let name = priceObj.market.replace('-ETH', '');
                     const matchingTokens = _delta.config.balanceTokens.filter(
                         x => x.IDEX && x.IDEX === name && !x.blockIDEX);
                     if (matchingTokens.length > 0) {
-                        result[key].tokenAddr = matchingTokens[0].addr.toLowerCase();
+                        priceObj.tokenAddr = matchingTokens[0].addr.toLowerCase();
                     }
                 }
+                return priceObj;
             });
-            let prices = {};
+            
             Object.values(result).map((x) => {
                 if (x.tokenAddr) {
                     let tok = {
@@ -868,20 +874,16 @@ var pageType = 'balance';
                         volumeETH: 0,
                         //change24h: x.percentChange,
                     };
-                    if (x.highestBid !== "N/A") {
-                        tok.bid = Number(x.highestBid);
+                    if (x.bid && x.bid !== "null") {
+                        tok.bid = Number(x.bid);
                     }
-                    if (x.lowestAsk !== "N/A") {
-                        tok.ask = Number(x.lowestAsk);
+                    if (x.ask && x.ask !== "null") {
+                        tok.ask = Number(x.ask);
                     }
-                    if (x.baseVolume !== "N/A") {
+                    if (x.baseVolume && x.baseVolume !== "null") {
                         tok.volumeETH = Number(x.baseVolume)
                     }
 
-                    //2.5 is 2.5% not fractional like 0.025
-                    /* if (x.percentChange !== "N/A") {
-                         tok.change24h = Number(x.percentChange);
-                     }*/
                     prices[tok.addr] = tok;
                 }
             });

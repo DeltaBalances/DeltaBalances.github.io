@@ -519,7 +519,7 @@ var pageType = 'recent';
 		normalTransactions();
 		internalTransactions();
 		tokenTransactions();
-		idexTrades();
+		transLoaded++;//idexTrades();
 
 
 

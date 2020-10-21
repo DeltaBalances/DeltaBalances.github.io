@@ -6,7 +6,8 @@ module.exports = {
     EtherDelta4: { addr: '0x2136bbba2edca21afdddee838fff19ea70d10f03', name: 'EtherDelta-OLD', supportedDex: true },
     EtherDelta5: { addr: '0xc6b330df38d6ef288c953f1f2835723531073ce2', name: 'EtherDelta-OLD', supportedDex: true },
     TokenStore: { addr: '0x1ce7ae555139c5ef5a57cc8d814a867ee6ee33d8', name: 'Token Store', supportedDex: true },
-    Idex: { addr: '0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208', name: 'IDEX', supportedDex: true },
+    Idex: { addr: '0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208', name: 'IDEX v1', supportedDex: true },
+    Idex2: { addr: '0xa36972e347e538e6c7afb9f44fb10dda7bba9ba2', name: 'IDEX 2.0', supportedDex: false },
     Decentrex: { addr: '0xbf29685856fae1e228878dfb35b280c0adcc3b05', name: 'Decentrex', supportedDex: true },
     //0x protocol v1
     '0x': { addr: '0x12459c951127e0c374ff9105dda097662a027093', name: '0x Exchange', supportedDex: true },

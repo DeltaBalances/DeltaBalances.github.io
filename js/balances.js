@@ -53,7 +53,8 @@ var pageType = 'balance';
     }
 
     addExchange('EtherDelta', _delta.config.exchangeContracts.EtherDelta.addr);
-    addExchange('IDEX', _delta.config.exchangeContracts.Idex.addr);
+    addExchange('IDEX v1', _delta.config.exchangeContracts.Idex.addr);
+    addExchange('IDEX v2', _delta.config.exchangeContracts.Idex2.addr, "0x13cfda2c", true);//"13cfda2c": "loadBalanceInAssetUnitsByAddress(address wallet,address assetAddress)"
     addExchange('Token store', _delta.config.exchangeContracts.TokenStore.addr);
     addExchange('Switcheo', _delta.config.exchangeContracts.Switcheo.addr, "0xc23f001f", true);
     addExchange('Switcheo v2', _delta.config.exchangeContracts.Switcheo2.addr, "0xc23f001f", true);
@@ -1620,7 +1621,9 @@ var pageType = 'balance';
                 try {
                     enabledExchanges = JSON.parse(enabledExchanges);
                     Object.keys(exchanges).forEach(function (key) {
-                        exchanges[key].enabled = enabledExchanges[key];
+                        if (enabledExchanges[key]) {
+                            exchanges[key].enabled = true;
+                        }
                     });
                 } catch (e) { }
             }

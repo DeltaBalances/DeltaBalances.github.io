@@ -46,6 +46,7 @@ Supported Decentralized exchanges for each website feature.
 | [ETHEX †](https://ethex.market)|-|Yes|Yes|Yes|
 | [ForkDelta](https://forkDelta.app)| Yes| Yes| Yes| Yes | 
 | [IDEX v1](https://idex.market)| Yes |Yes |Yes| No |
+| [IDEX v2](https://idex.io)| Yes |Not yet |Not yet| No |
 | [Joyso](https://joyso.io)|Yes| Not yet| Not yet | No|
 | [Kyber Network v1](https://kyber.network) |-|Yes|Yes| Yes | Yes|
 | [Oasis](https://oasis.app/trade/) [OasisDex †](https://oasisdex.com)|-|Yes| Yes | Yes|

@@ -700,7 +700,7 @@ var pageType = 'balance';
         $('#totalbalancePrice').html('');
     }
 
-    function getBalances(appendExchange, updateTokens) {
+    function getBalances(appendExchange, updateTokens) { //append = load additional exchange, updateTokens = load only new tokens, keep old results
         if (!publicAddr)
             return;
 
@@ -729,6 +729,7 @@ var pageType = 'balance';
         tokenCount = activeTokens.length;
         activeTokensChanged = false;
 
+        // check if token selection has changed sinse last time
         if (!appendExchange && !updateTokens) {
             balances = {};
             resetExLoadingState();
@@ -764,21 +765,120 @@ var pageType = 'balance';
             balanceTable.clear();
             for (let i = 0; i < tableHeaders.length; i++) {
                 let enabled = balanceHeaders[tableHeaders[i].title];
-                let column = balanceTable.column(i).visible(enabled);
+                balanceTable.column(i).visible(enabled);
             }
             //balanceTable.columns.adjust().fixedColumns().relayout().draw();
             balanceTable.draw();
         }
 
+        let maxPerRequest = 400;   // don't make eth_call requests too large
+        let requestsCache = [];
         Object.keys(exchanges).forEach(function (key) {
             if (exchanges[key].enabled && exchanges[key].loaded < tokenCount) {
-                getAllBalances(rqid, key, updateTokens);
-                madeRequests = true;
+
+                // select which tokens to be requested
+                let tokensToLoad = activeTokens;
+                if (updateTokens) { //avoid loading things we already know
+                    let alreadyLoaded = exchanges[key].loadedTokens;
+                    tokensToLoad = tokensToLoad.filter(t => !alreadyLoaded[t.addr]);
+                }
+
+                tokensToLoad = tokensToLoad.map((x) => { return x.addr; });
+                //split in separate requests to match maxPerRequest
+                for (let i = 0; i < tokensToLoad.length; i += maxPerRequest) {
+                    requestsCache.push({
+                        exchange: key,
+                        tokens: tokensToLoad.slice(i, i + maxPerRequest),
+                        attempts: 0,
+                        rqid: rqid,
+                    });
+                }
             }
         });
+
+        handleRequestPool(requestsCache, rqid);
     }
 
 
+    // perform a set of requests for token balances, in a throttled manner
+    function handleRequestPool(requestsCache, rqid) {
+        const maxRequests = 6;
+        let activeRequests = 0;
+        const retryAmount = 0; // ethers fallbackProvider will already retry requests, this rettries if that fails (and amount >0) 
+
+        let requestsPool = requestsCache;
+
+        //start the initial set of requests
+        for (let i = 0; i < maxRequests; i++) {
+            if (requestsPool.length > 0) {
+                setTimeout(executeRequest, i * 5); // start requests with a tiny delay  (0, 5, 10ms etc.)
+            }
+        }
+
+        function executeRequest() {
+            if (running && activeRequests < maxRequests && requestsPool && requestsPool.length > 0) {
+                let reqObj = requestsPool.pop();
+                activeRequests++;
+                getBatchedBalances(reqObj, balanceResponse);
+            }
+        }
+
+        //the respone handler for a returning balance request
+        function balanceResponse(requestObj) {
+            if (requestID > requestObj.rqid) {
+                return;
+            }
+            activeRequests--;
+
+            if (requestObj.balances && requestObj.balances.length > 0) {
+                updateBalances(requestObj);
+            } else {
+                balanceError(requestObj);
+            }
+
+            executeRequest();
+        }
+
+        function updateBalances(requestObj) {
+            let exName = requestObj.exchange;
+            if (exchanges[exName].enabled) {
+                for (let i = 0; i < requestObj.tokens.length; i++) {
+                    let token = _delta.uniqueTokens[requestObj.tokens[i]];
+
+                    if (token && balances[token.addr]) {
+                        // For IDEX2 use a different unit conversion if it uses pip units
+                        if (exchanges[exName].selector == "0xdbb36535") {
+                            balances[token.addr][exName] = _util.idexPipToToken(requestObj.balances[i], token);
+                        } else {
+                            balances[token.addr][exName] = _util.weiToToken(requestObj.balances[i], token);
+                        }
+                        exchanges[exName].loaded++;
+                        exchanges[exName].loadedTokens[token.addr] = true;
+                    } else {
+                        console.log('unknown token in balance response');
+                    }
+                }
+                finishedBalanceRequest();
+            }
+        }
+
+        function balanceError(requestObject) {
+            if (requestObject.attempts > retryAmount) { //if we retried too much, show an error
+                showError('Failed to load all ' + requestObject.exchange + ' balances, try again later');
+                exchanges[requestObject.exchange].failed += requestObject.tokens.length;
+                finishedBalanceRequest();
+                console.log("Aborting retries, Balance request failed");
+            }
+            else if (requestObject.attempts <= retryAmount) {
+                //request failure, try it again
+                console.log("Balance request failed, retry");
+                requestsPool.push(requestObject);
+            }
+        }
+    }
+
+
+    //create an empty template for a token balance object
     function initBalance(tokenObj) {
         let obj = {
             Name: tokenObj.name,
@@ -826,6 +926,8 @@ var pageType = 'balance';
         }
     }
 
+    //https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=" + [address] + "&vs_currencies=eth"
+
     function getPrices(rqid) {
 
         // don't load prices if they all succeeded and are still recent (15sec)
@@ -849,7 +951,7 @@ var pageType = 'balance';
 
         priceRequest('IDEX', 'https://api.idex.io/v1/tickers', (result) => {
             let prices = {};
-            if(!Array.isArray(result)) {
+            if (!Array.isArray(result)) {
                 return prices;
             }
 
@@ -865,7 +967,7 @@ var pageType = 'balance';
                 }
                 return priceObj;
             });
-            
+
             Object.values(result).map((x) => {
                 if (x.tokenAddr) {
                     let tok = {
@@ -1078,11 +1180,10 @@ var pageType = 'balance';
                 }
             }
 
-
-            exchangePrices.complete = pricesDone;
             exchangePrices.successRequests = pricesSuccess;
             exchangePrices.completeRequests = pricesCompleted;
             exchangePrices.totalRequests = keys.length;
+            exchangePrices.complete = pricesDone || pricesCompleted >= exchangePrices.completeRequests;
 
             if (running) {
                 if (dataChanged || pricesDone) {
@@ -1095,130 +1196,50 @@ var pageType = 'balance';
         }
     }
 
+    // send a request to an ethereum node to get an array of (deposited) token balances
+    function getBatchedBalances(requestObj, callback) {
 
-    var maxPerRequest = 500;   // don't make the web3 requests too large
+        if (requestID > requestObj.rqid)
+            return;
 
-    function getAllBalances(rqid, exchangeKey, updateBalances) {
+        let exchangeKey = requestObj.exchange;
+        let tokens = requestObj.tokens;
 
-        // select which tokens to be requested
-        var tokens2 = activeTokens;
-
-        if (updateBalances) { //avoid loading things we already know
-            let alreadyLoaded = exchanges[exchangeKey].loadedTokens;
-            tokens2 = tokens2.filter(t => !alreadyLoaded[t.addr]);
+        //create eth_call function & arguments
+        let functionName = 'depositedBalances';
+        let arguments = [exchanges[exchangeKey].contract, publicAddr, tokens];
+        if (exchangeKey == 'Wallet') {
+            functionName = 'tokenBalances';
+            arguments = [publicAddr, tokens];
+        }
+        // exchanges using a different function
+        else if (exchanges[exchangeKey].selector) {
+            functionName = 'depositedBalancesGeneric';
+            arguments = [exchanges[exchangeKey].contract, exchanges[exchangeKey].selector, publicAddr, tokens, exchanges[exchangeKey].userFirst];
         }
 
-        tokens2 = tokens2.map((x) => { return x.addr; });
+        requestObj.attempts = requestObj.attempts + 1;
 
-        //split in separate requests to match maxPerRequest
-        for (let i = 0; i < tokens2.length; i += maxPerRequest) {
-            allBalances(i, i + maxPerRequest, tokens2);
-        }
+        try {
+            _util.getBatchedBalances(_delta.contractDeltaBalance, functionName, arguments, (err, result) => {
 
-        // make the call to get balances for a (sub)section of tokens
-        function allBalances(startIndex, endIndex, tokens3, splits = 0) {
+                const returnedBalances = result;
+                if (!err && returnedBalances && returnedBalances.length == tokens.length) {
+                    requestObj.balances = returnedBalances;
+                    callback(requestObj);
+                }
+                else //returned with bad response
+                {
+                    // todo  separate (!err && result.length == 0) ?
 
-            var tokens = tokens3.slice(startIndex, endIndex);
-
-            var functionName = 'depositedBalances';
-            var arguments = [exchanges[exchangeKey].contract, publicAddr, tokens];
-            if (exchangeKey == 'Wallet') {
-                functionName = 'tokenBalances';
-                arguments = [publicAddr, tokens];
-            }
-            // exchanges using a different function
-            else if (exchanges[exchangeKey].selector) {
-                functionName = 'depositedBalancesGeneric';
-                arguments = [exchanges[exchangeKey].contract, exchanges[exchangeKey].selector, publicAddr, tokens, exchanges[exchangeKey].userFirst];
-            }
-
-            var completed = 0;
-            var success = false;
-            var totalTries = 0;
-
-            // web3 provider (infura, myetherapi, mycryptoapi) or etherscan
-            makeCall(exchangeKey, functionName, arguments, 0);
-
-            function makeCall(exName, funcName, args, retried) {
-                if (success || requestID > rqid)
-                    return;
-
-
-                _util.getBatchedBalances(
-                    _delta.contractDeltaBalance,
-                    funcName,
-                    args,
-                    (err, result) => {
-                        if (success || requestID > rqid)
-                            return;
-                        completed++;
-
-                        const returnedBalances = result;
-
-                        if (!err && returnedBalances && returnedBalances.length == tokens.length) {
-
-                            if (!success) {
-                                success = true;
-                            }
-                            if (funcName == 'tokenBalances' || funcName.indexOf('depositedBalances') > -1) {
-                                if (exchanges[exName].enabled) {
-
-                                    for (let i = 0; i < tokens.length; i++) {
-                                        let token = _delta.uniqueTokens[tokens[i]];
-
-                                        if (token && balances[token.addr]) {
-                                            balances[token.addr][exName] = _util.weiToToken(returnedBalances[i], token);
-                                            exchanges[exName].loaded++;
-                                            exchanges[exName].loadedTokens[token.addr] = true;
-                                        } else {
-                                            console.log('received unrequested token balance');
-                                        }
-                                    }
-                                    // if (exchanges[exName].loaded + exchanges[exName].failed >= tokenCount)
-                                    finishedBalanceRequest();
-                                }
-                            } else {
-                                console.log('unexpected funcName');
-                            }
-                        }
-                        else if (!success && completed >= 2) // both requests returned with bad response
-                        {
-                            const retryAmount = 2;
-                            if (totalTries >= retryAmount) { //if we retried too much, show an error
-                                if (funcName == 'tokenBalances') {
-                                    showError('Failed to load all Wallet balances after 3 tries, try again later');
-                                    exchanges[exName].failed += tokens.length;
-                                    finishedBalanceRequest();
-                                }
-                                else if (funcName == 'depositedBalances') {
-                                    showError('Failed to load all ' + exName + ' balances after 3 tries, try again later');
-                                    exchanges[exName].failed += tokens.length;
-                                    finishedBalanceRequest();
-                                }
-                                console.log("Aborting retries, Balance request failed");
-                            }
-                            else if (retried < retryAmount) //retry up to 3 times per request
-                            {
-
-                                if (!err && result.length == 0 && tokens.length >= 2 && splits < 10) {
-                                    // we got a response of length 0, possible revert from ethereum call
-                                    // split tokens and try those again
-                                    let splits2 = splits++;
-                                    allBalances(0, (tokens.length / 2), tokens, splits2);
-                                    allBalances((tokens.length / 2), tokens.length, tokens, splits2);
-                                    console.log("Split balance request of " + tokens.length + " tokens");
-                                } else {
-                                    //request failure, try it again
-                                    totalTries++;
-                                    makeCall(exName, funcName, args, retried + 1);
-                                    console.log("Balance request failed, retry");
-                                }
-                                return;
-                            }
-                        }
-                    }
-                );
-            }
+                    requestObj.balances = undefined;
+                    callback(requestObj);
+                }
+            });
+        } catch (e) {
+            console.log(JSON.stringify(e));
+            //make sure the callback returns in any possible case
+            callback(requestObj);
         }
     }
 
@@ -1269,12 +1290,16 @@ var pageType = 'balance';
             let progressString2 = '<span style="white-space:normal">Prices <span style="white-space:nowrap"class="text-';
             if (!exchangePrices.complete) {
                 if (running) {
-                    progressString2 += 'red"> Loading ' + exchangePrices.completeRequests + "/" + exchangePrices.totalRequests;
+                    progressString2 += 'red"> Loading ' + exchangePrices.successRequests + "/" + exchangePrices.totalRequests;
                 } else {
                     progressString2 += 'green"> No';
                 }
             } else {
-                progressString2 += 'green"> ' + exchangePrices.successRequests + "/" + exchangePrices.totalRequests + " sources";
+                let color = 'green';
+                if (exchangePrices.successRequests == 0) {
+                    color = 'red';
+                }
+                progressString2 += color + '"> ' + exchangePrices.successRequests + "/" + exchangePrices.totalRequests + " sources";
             }
             progressString2 += '</span></span>';
             loadingState['Prices'] = progressString2;

@@ -7561,7 +7561,7 @@ module.exports = (db) => {
         db.provider.getBlockNumber().then(number => {
             callback(undefined, number);
         }, e => {
-            callback(err, undefined);
+            callback(e, undefined);
         });
     };
 

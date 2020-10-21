@@ -28,6 +28,16 @@ module.exports = (db) => {
         return this.toBigNumber(wei).div(divisor);
     }
 
+    // IDEX pip (rounded to 8 decimals) to token decimals
+    utility.idexPipToToken = function (pip, token) {
+        if (token.decimals <= 8) {
+            return this.weiToToken(pip, { decimals: 8 });
+        } else {
+            let factor = Math.pow(10, token.decimals - 8);
+            return this.weiToToken(new BigNumber(pip).times(factor), token);
+        }
+    }
+
     utility.isAddress = function (addr) {
         if (addr && addr.length == 42) {
             try {
@@ -186,6 +196,7 @@ module.exports = (db) => {
             let addr = exchangeAddress.toLowerCase();
 
             return (addr == db.config.exchangeContracts.Idex.addr)
+                || (addr == db.config.exchangeContracts.Idex2.addr)
                 || (addr == db.config.exchangeContracts.Switcheo.addr)
                 || (addr == db.config.exchangeContracts.Switcheo2.addr)
                 || (addr == db.config.exchangeContracts.Joyso.addr)

@@ -198,6 +198,19 @@ module.exports = {
     "function withdraw(address token, uint256 amount) returns (bool success)",
     "event Order(address tokenBuy, uint256 amountBuy, address tokenSell, uint256 amountSell, uint256 expires, uint256 nonce, address user, uint8 v, bytes32 r, bytes32 s)"
   ],
+  Idex2: [ //partial
+    "function depositEther() payable",
+    "function depositTokenByAddress(address tokenAddress, uint256 quantityInAssetUnits)",
+    "function depositTokenBySymbol(string calldata assetSymbol, uint256 quantityInAssetUnits)",
+    "function withdrawExit(address assetAddress)",
+    "function withdraw(tuple(uint8 withdrawalType, uint128 nonce, address walletAddress, string assetSymbol, address assetAddress, uint64 quantityInPips, uint64 gasFeeInPips, bool autoDispatchEnabled, bytes walletSignature) withdrawal)",
+    "function invalidateOrderNonce(uint128 nonce)",
+    "event Deposited(uint64 index, address indexed wallet, address indexed assetAddress, string indexed assetSymbolIndex, string assetSymbol, uint64 quantityInPips, uint64 newExchangeBalanceInPips, uint256 newExchangeBalanceInAssetUnits)",
+    "event WalletExitWithdrawn(address indexed wallet, address indexed assetAddress, string assetSymbol, uint64 quantityInPips, uint64 newExchangeBalanceInPips, uint256 newExchangeBalanceInAssetUnits)",
+    "event Withdrawn(address indexed wallet, address indexed assetAddress, string assetSymbol, uint64 quantityInPips, uint64 newExchangeBalanceInPips, uint256 newExchangeBalanceInAssetUnits)",
+    //"event TradeExecuted(address buyWallet, address sellWallet, indexed string baseAssetSymbolIndex, indexed string quoteAssetSymbolIndex, string baseAssetSymbol, string quoteAssetSymbol, uint64 baseQuantityInPips, uint64 quoteQuantityInPips, uint64 tradePriceInPips, bytes32 buyOrderHash, bytes32 sellOrderHash)",
+    "event OrderNonceInvalidated(address indexed wallet, uint128 nonce, uint128 timestampInMs, uint256 effectiveBlockNumber)",
+  ],
   '0x': [
     "function fillOrdersUpTo(address[5][] orderAddresses, uint256[6][] orderValues, uint256 fillTakerTokenAmount, bool shouldThrowOnInsufficientBalanceOrAllowance, uint8[] v, bytes32[] r, bytes32[] s) returns (uint256)",
     "function cancelOrder(address[5] orderAddresses, uint256[6] orderValues, uint256 cancelTakerTokenAmount) returns (uint256)",
@@ -461,7 +474,6 @@ module.exports = {
     "function trade(uint256[] _nums, address[] _addrs, bytes32[] _rss)",
     "function withdrawEther(uint256 _amount)",
     "function cancel(uint8 _order, address _token, uint256 _nonce, uint256 _price, uint256 _amount, uint256 _expire, uint256 _v, bytes32 _r, bytes32 _s)",
-    "function depositEther() payable",
     "event DepositEther(address user, uint256 amount, uint256 total)",
     "event WithdrawEther(address user, uint256 amount, uint256 total)",
     "event DepositToken(address user, address token, uint256 amount, uint256 total)",
@@ -705,6 +717,7 @@ module.exports = {
   admins: {
     '0xceceaa8edc0830c7cec497e33bb3a3c28dd55a32': 'IDEX Admin',
     '0xa7a7899d944fe658c4b0a1803bab2f490bd3849e': 'IDEX Admin',
+    '0x5ca1e490ec572e23a63bf5a6946f09ad677b439b': 'IDEX Admin',
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX Admin', //0x v1
     '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX Admin', // Hydro ex
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex Admin',
@@ -4529,7 +4542,7 @@ module.exports = {
     EtherDelta5: { addr: '0xc6b330df38d6ef288c953f1f2835723531073ce2', name: 'EtherDelta-OLD', supportedDex: true },
     TokenStore: { addr: '0x1ce7ae555139c5ef5a57cc8d814a867ee6ee33d8', name: 'Token Store', supportedDex: true },
     Idex: { addr: '0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208', name: 'IDEX v1', supportedDex: true },
-    Idex2: { addr: '0xa36972e347e538e6c7afb9f44fb10dda7bba9ba2', name: 'IDEX 2.0', supportedDex: false },
+    Idex2: { addr: '0xa36972e347e538e6c7afb9f44fb10dda7bba9ba2', name: 'IDEX 2.0', supportedDex: true },
     Decentrex: { addr: '0xbf29685856fae1e228878dfb35b280c0adcc3b05', name: 'Decentrex', supportedDex: true },
     //0x protocol v1
     '0x': { addr: '0x12459c951127e0c374ff9105dda097662a027093', name: '0x Exchange', supportedDex: true },

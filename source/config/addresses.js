@@ -94,6 +94,7 @@ module.exports = {
   admins: {
     '0xceceaa8edc0830c7cec497e33bb3a3c28dd55a32': 'IDEX Admin',
     '0xa7a7899d944fe658c4b0a1803bab2f490bd3849e': 'IDEX Admin',
+    '0x5ca1e490ec572e23a63bf5a6946f09ad677b439b': 'IDEX Admin',
     '0xe269e891a2ec8585a378882ffa531141205e92e9': 'DDEX Admin', //0x v1
     '0x49497a4d914ae91d34ce80030fe620687bf333fd': 'DDEX Admin', // Hydro ex
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex Admin',

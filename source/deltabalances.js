@@ -615,7 +615,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
             // exchange deposit/withdraw ETH (etherdelta, idex deposit, tokenstore, ethen, switcheo deposit) 
             // wrap  0x ETH->WETH, wrap ethfinex lockTokens. (un)wrapping
             else if ((unpacked.name === 'deposit' && (unpacked.params.length == 0 || unpacked.params[0].name !== 'token'))
-                || (unpacked.name === 'withdraw' && unpacked.params[0].name !== 'token' && unpacked.params.length < 9)
+                || (unpacked.name === 'withdraw' && unpacked.params[0].name !== 'token' && unpacked.params.length < 9 && unpacked.params[0].name !== 'withdrawal')
                 || unpacked.name === 'withdrawEther' || unpacked.name === 'depositEther') {
                 var type = '';
                 var note = '';
@@ -734,6 +734,7 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                 || (unpacked.name === 'withdraw' && unpacked.params.length == 2 && unpacked.params[0].name === 'token')
                 || (unpacked.name === 'deposit' && unpacked.params.length == 2 && unpacked.params[0].name === 'token')
                 || unpacked.name == 'multiSigWithdrawal'
+                || unpacked.name == 'depositTokenByAddress'
             ) {
                 let token = undefined;
                 let valueIndex = 1;
@@ -3085,6 +3086,58 @@ DeltaBalances.prototype.processUnpackedInput = function (tx, unpacked) {
                     };
                 }
             }
+            //idex 2.0 adminWithdraw
+            else if (unpacked.name === 'withdraw' && unpacked.params[0].name == 'withdrawal') {
+                // [0][2] wallet
+                //[0][4] tokenaddress
+                //[0][5] amountPip
+                //[0][6] feePip
+                let token = this.setToken(unpacked.params[0].value[4].value);
+                if (token && token.addr) {
+                    let rawAmountPip = unpacked.params[0].value[5].value;
+                    let feePip = unpacked.params[0].value[6].value;
+
+                    let amount = utility.idexPipToToken(rawAmountPip, token);
+                    let fee = utility.idexPipToToken(feePip, token);
+
+                    let type = '';
+                    let note = '';
+
+                    if (token.addr !== this.config.ethAddr) {
+                        type = 'Token Withdraw';
+                        note = utility.addressLink(unpacked.params[0].value[2].value, true, true) + ' requested IDEX to withdraw tokens';
+                    } else {
+                        type = 'Withdraw';
+                        note = utility.addressLink(unpacked.params[0].value[2].value, true, true) + ' requested IDEX to withdraw ETH';
+                    }
+
+                    let exchange = this.getExchangeName(txTo, '');
+
+                    return {
+                        'type': type,
+                        'exchange': exchange,
+                        'note': note,
+                        'token': token,
+                        'amount': amount,
+                        'to': unpacked.params[0].value[2].value.toLowerCase(),
+                        'unlisted': token.unlisted,
+                        'fee': fee,
+                        'feeToken': token,
+                    };
+                }
+            }
+            // IDEX 2.0 cancel
+            else if (unpacked.name == "invalidateOrderNonce") {
+                let exchange = this.getExchangeName(txTo, '');
+                return {
+                    'type': 'Cancel up to',
+                    'exchange': exchange,
+                    'note': 'Cancels all open IDEX orders up to a certain date',
+                    'tokens': 'All',
+                    'maker': tx.from,
+                    'orderNonce': unpacked.params[0].value,
+                };
+            }
             //ethex.market taker trade
             else if (unpacked.name == 'takeBuyOrder' || unpacked.name == 'takeSellOrder') {
                 let maker = unpacked.params[unpacked.params.length - 1].value.toLowerCase();
@@ -3671,6 +3724,7 @@ DeltaBalances.prototype.addressFromAssetData = function addressFromAssetData(dat
 }
 
 //trade from IDEX api for in recent trades page
+// TODO fix for IDEX 2.0 API
 DeltaBalances.prototype.parseRecentIdexTrade = function (key, obj, userAddress) {
 
     /*
@@ -5042,25 +5096,71 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                     'unlisted': token.unlisted,
                 };
             }
-            //ETH deposit/withdraw  etherdelta/decentrex, idex, enclaves 
+            // ETH/erc20 deposit/withdraw  etherdelta/decentrex, idex, enclaves 
             else if (unpacked.events.length >= 4 && (unpacked.name == 'Deposit' || unpacked.name == 'Withdraw')) {
 
-                var type = unpacked.name;
-                var token = this.setToken(unpacked.events[0].value);
-                var user = unpacked.events[1].value;
-                var rawAmount = unpacked.events[2].value;
-                var rawBalance = unpacked.events[3].value;
+                let type = unpacked.name;
+                let token = this.setToken(unpacked.events[0].value);
+                let user = unpacked.events[1].value;
+                let rawAmount = unpacked.events[2].value;
+                let rawBalance = unpacked.events[3].value;
                 let exchange = this.getExchangeName(unpacked.address, '');
+                let note = '';
 
                 if (token && token.addr) {
-                    var amount = utility.weiToToken(rawAmount, token);
-                    var balance = utility.weiToToken(rawBalance, token);
+                    let amount = utility.weiToToken(rawAmount, token);
+                    let balance = utility.weiToToken(rawBalance, token);
                     if (unpacked.name === 'Withdraw') {
                         note = 'Withdrawn from the ';
                     }
                     else {
                         note = 'Deposited into the ';
                     }
+                    if (exchange) {
+                        note += exchange + 'contract';
+                    } else {
+                        note += 'exchange contract';
+                    }
+
+                    if (token.addr !== this.config.ethAddr)
+                        type = 'Token ' + type;
+                    return {
+                        'type': type,
+                        'exchange': exchange,
+                        'note': note,
+                        'token': token,
+                        'amount': amount,
+                        'balance': balance,
+                        'unlisted': token.unlisted,
+                    };
+                }
+            }
+            // ETH/erc20 deposit/withdraw  IDEX2.0
+            else if (unpacked.name == 'Deposited' || unpacked.name == 'Withdrawn' || unpacked.name == 'WalletExitWithdrawn') {
+
+                let type = "Deposit";
+                let exchange = this.getExchangeName(unpacked.address, '');
+                let rawAmountPip = undefined; //idex rounded to 8 decimal pip units
+                let rawBalance = undefined;
+                let token = undefined;
+                let note = '';
+                if (unpacked.name.indexOf("With") >= 0) {
+                    type = "Withdraw";
+                    rawAmountPip = unpacked.events[3].value;
+                    rawBalance = unpacked.events[5].value;
+                    token = this.setToken(unpacked.events[1].value);
+                    note = 'Withdrawn from the ';
+                } else {
+                    rawAmountPip = unpacked.events[5].value;
+                    rawBalance = unpacked.events[7].value;
+                    token = this.setToken(unpacked.events[2].value);
+                    note = 'Deposited into the ';
+                }
+
+                if (token && token.addr) {
+                    let amount = utility.idexPipToToken(rawAmountPip, token);
+                    let balance = utility.weiToToken(rawBalance, token);
+
                     if (exchange) {
                         note += exchange + 'contract';
                     } else {
@@ -5499,6 +5599,22 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                         'relayer': relayer
                     };
                 }
+            }
+            // IDEX 2.0 cancel event
+            else if (unpacked.name == "OrderNonceInvalidated") {
+                //(address indexed wallet, uint128 nonce, uint128 timestampInMs, uint256 effectiveBlockNumber)
+                let maker = unpacked.events[0].value.toLowerCase();
+                let upTo = utility.formatDate(new Date(unpacked.events[2].value), false, true);
+                let exchange = this.getExchangeName(unpacked.address, '');
+
+                return {
+                    'type': 'Cancel up to',
+                    'exchange': exchange,
+                    'tokens': 'All',
+                    'note': 'Cancelled all IDEX orders placed up to a certain moment',
+                    'date': upTo,
+                    'blockNumber': unpacked.events[3].value
+                };
             }
             // oasis maker
             else if (unpacked.name == 'LogKill' || unpacked.name == 'LogMake') {

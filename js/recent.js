@@ -995,7 +995,7 @@ var pageType = 'recent';
 											trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, false, '', tx.isError === '0', exchange);
 										}
 									}
-									else if (unpacked.name === 'depositToken' || unpacked.name === 'withdrawToken' || unpacked.name === 'depositBoth') {
+									else if (unpacked.name === 'depositToken' || unpacked.name === 'depositTokenByAddress' || unpacked.name == 'depositTokenBySymbol' || unpacked.name === 'withdrawToken' || unpacked.name === 'depositBoth') {
 										obj.type = obj.type.replace('Token ', '');
 										if (unpacked.name !== 'depositBoth') {
 											trans = createOutputTransaction(obj.type, obj.token, obj.amount, '', '', tx.hash, tx.timeStamp, obj.unlisted, '', tx.isError === '0', exchange);

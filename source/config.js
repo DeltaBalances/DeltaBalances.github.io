@@ -81,8 +81,9 @@ module.exports = {
   alchemyKey: 'ozV51x-gVqsq09qRjj7FQ-Y1sGJee62t',
   jsonRpcUrls: [ //public rpc providers by url
     "https://api.mycryptoapi.com/eth",
-    "https://main-rpc.linkpool.io"
+    //"https://main-rpc.linkpool.io"
   ],
+  providerTimeout: 3000, // 3 sec
    // infura project for ethereum logs (history)
   infuraURL: 'https://mainnet.infura.io/v3/a7ca261d0f724bac976dfdb263cb3866', 
   localNode: 'http://localhost:8545',

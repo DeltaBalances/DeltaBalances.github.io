@@ -416,7 +416,7 @@ function DeltaBalances() {
         new Ethers.providers.CloudflareProvider(),
     ];
     try {
-        //temp fix to disbale EtherscanProvider on pages where it tends to fail
+        //temp fix to disable EtherscanProvider on pages where it tends to fail
         let path = window.location.href.toLocaleLowerCase();
         if (path.indexOf('tx') >= 0 || path.indexOf('recent') >= 0 || path.indexOf('trades') >= 0 || path.indexOf('history') >= 0) {
             providers.push(new Ethers.providers.EtherscanProvider("homestead", config.etherscanAPIKey));
@@ -438,7 +438,7 @@ function DeltaBalances() {
     //filter out any undefined providers and turn them into providerConfig
     providers = providers.filter(p => p && Ethers.providers.Provider.isProvider(p));
     let providerConfigs = providers.map(p => {
-        return { provider: p, weight: 1, stallTimeout: 2000, priority: 1 };
+        return { provider: p, weight: 1, stallTimeout: config.providerTimeout, priority: 1 };
     });
 
     //create a fallbackprovider using the above providers

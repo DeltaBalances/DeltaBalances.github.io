@@ -62,6 +62,7 @@ module.exports = {
     "0xa5004c8b2d64ad08a80d33ad000820d63aa2ccc9": 'Udex',
     "0x68a17b587caf4f9329f0e372e3a78d23a46de6b5": '1inch',
     "0x4d37f28d2db99e8d35a6c725a5f1749a085850a3": '1inch',
+    "0x9883a8b0f58b662d60847db992e66591e2ede106": '1inch',
     "0x1af29de80f743be444aa195e2cae38ee9bc74c4c": "OC2 Dex",
     "0x879047421625b87b5895ef1ac0d9dbd241805aa3": "OC2 Dex",
     "0x584860fe460a16cd11e6fdebb2e77146d1835be8": "MerchCoins",
@@ -70,7 +71,7 @@ module.exports = {
     "0x10aa8c82e3656170baae80d189b8b7dcea6865c9": "SwitchDex",
     "0x86003b044f70dac0abc80ac8957305b6370893ed": "Matcha.xyz",
 
-
+    //TODO Metamask & defisaver affiliate via 0x API
 
     // non zrx
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex', //0x clone contract

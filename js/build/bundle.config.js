@@ -686,6 +686,7 @@ module.exports = {
     "0xa5004c8b2d64ad08a80d33ad000820d63aa2ccc9": 'Udex',
     "0x68a17b587caf4f9329f0e372e3a78d23a46de6b5": '1inch',
     "0x4d37f28d2db99e8d35a6c725a5f1749a085850a3": '1inch',
+    "0x9883a8b0f58b662d60847db992e66591e2ede106": '1inch',
     "0x1af29de80f743be444aa195e2cae38ee9bc74c4c": "OC2 Dex",
     "0x879047421625b87b5895ef1ac0d9dbd241805aa3": "OC2 Dex",
     "0x584860fe460a16cd11e6fdebb2e77146d1835be8": "MerchCoins",
@@ -694,7 +695,7 @@ module.exports = {
     "0x10aa8c82e3656170baae80d189b8b7dcea6865c9": "SwitchDex",
     "0x86003b044f70dac0abc80ac8957305b6370893ed": "Matcha.xyz",
 
-
+    //TODO Metamask & defisaver affiliate via 0x API
 
     // non zrx
     '0x61b9898c9b60a159fc91ae8026563cd226b7a0c1': 'Ethfinex', //0x clone contract
@@ -4576,14 +4577,14 @@ module.exports = {
     DDEX2: { addr: '0xe2a0bfe759e2a4444442da5064ec549616fff101', name: 'DDEX Hydro 1.1', supportedDex: true },
     DDEXproxy: { addr: '0x74622073a4821dbfd046e9aa2ccf691341a076e1', name: 'DDEX Hydro', supportedDex: false },
 
-    'OpenSea': { addr:'0x7be8076f4ea4a4ad08075c2508e481d6c946d12b', name: 'OpenSea', supportedDex: false },
+    'OpenSea': { addr: '0x7be8076f4ea4a4ad08075c2508e481d6c946d12b', name: 'OpenSea', supportedDex: false },
 
     // ethfinex v1, 0x v1 clone
     Ethfinex: { addr: '0xdcdb42c9a256690bd153a7b409751adfc8dd5851', name: 'Ethfinex', supportedDex: true },
     EthfinexProxy: { addr: '0x7e03d2b8edc3585ecd8a5807661fff0830a0b603', name: 'Ethfinex Proxy', supportedDex: true },
     EthfinexOtc: { addr: '0xbaea5bc6568dcb1f1c5aa24223a47333a6b3a8f5', name: 'Ethfinex OTC', supportedDex: false },
     EthfinexOtc2: { addr: '0x93dc6a333a99c0ede1cd346ccf079ea8451013db', name: 'Ethfinex OTC', supportedDex: false },
-    EthfinexOtc3: { addr: '0xd924bdd6fa7fd3d0eb1337853a814a4263dcbfe8', name: 'DiversiFi OTC', supportedDex: false }, 
+    EthfinexOtc3: { addr: '0xd924bdd6fa7fd3d0eb1337853a814a4263dcbfe8', name: 'DiversiFi OTC', supportedDex: false },
 
     OasisDex: { addr: '0x14fbca95be7e99c15cc2996c6c9d841e54b79425', name: 'OasisDex', supportedDex: true },
     OasisDex2: { addr: '0xb7ac09c2c0217b07d7c103029b4918a2c401eecb', name: 'OasisDex', supportedDex: true },
@@ -4599,7 +4600,7 @@ module.exports = {
     //0x279594b6843014376a422ebb26a6eab7a30e36f0 Oasisdirect only 2 txs
 
     AirSwap: { addr: '0x8fd3121013a07c57f0d69646e86e7a4880b467b7', name: 'AirSwap', supportedDex: true },
-    AirSwapTrader : { addr: '0x9af9c0cf3cd15e0afe63930fbf20941c89f3ff98', name: 'AirSwap OTC', supportedDex: false},
+    AirSwapTrader: { addr: '0x9af9c0cf3cd15e0afe63930fbf20941c89f3ff98', name: 'AirSwap OTC', supportedDex: false },
     AirSwap2: { addr: '0x54d2690e97e477a4b33f40d6e4afdd4832c07c57', name: 'AirSwap', supportedDex: false },
     AirSwap3: { addr: '0x4572f2554421bd64bef1c22c8a81840e8d496bea', name: 'AirSwap', supportedDex: false },
     Kyber: { addr: '0x964f35fae36d75b1e72770e244f6595b68508cf5', name: 'Kyber Network', supportedDex: true }, // contract disabled?
@@ -4627,7 +4628,7 @@ module.exports = {
     These use too many unique contracts to list here.
     They are detected by function input and emitted events 
     */
-    
+
 
 
     Enclaves: { addr: '0xbf45f4280cfbe7c2d2515a7d984b8c71c15e82b7', name: 'EnclavesDex', supportedDex: true },
@@ -4643,7 +4644,7 @@ module.exports = {
     EasyTrade2: { addr: '0x0c577fbf29f8797d9d29a33de59001b872a1d4dc', name: 'EasyTrade', supportedDex: true },
     //tokenstore instant
     InstantTrade: { addr: '0xe17dbb844ba602e189889d941d1297184ce63664', name: 'TS InstantTrade', supportedDex: true },
-    InstantTrade2: { addr: '0xdc36cbe88efd1b4ef5cdcdbe74f0b28cd1e23d12', name: 'TS InstantTrade', supportedDex: true }, 
+    InstantTrade2: { addr: '0xdc36cbe88efd1b4ef5cdcdbe74f0b28cd1e23d12', name: 'TS InstantTrade', supportedDex: true },
     InstantTrade3: { addr: '0xbad7653bc486c44fbeafa23fded6b3f3112d321c', name: 'TS InstantTrade', supportedDex: true },
 
 
@@ -4658,14 +4659,21 @@ module.exports = {
     TotleProxy2: { addr: '0x74758acfce059f503a7e6b0fc2c8737600f9f2c4', name: 'Totle', supportedDex: false },
     TotleProxy3: { addr: '0xad5aa494bcd729b8ea728f581aade049c4ec4e9d', name: 'Totle', supportedDex: false },
     Totle6: { addr: '0x77208a6000691e440026bed1b178ef4661d37426', name: 'Totle', supportedDex: false },
-    ParaSwap3: { addr: '0xf92c1ad75005e6436b4ee84e88cb23ed8a290988', name: 'ParaSwap v3', supportedDex: false },
+    Totle7: { addr: '0x7113dd99c79aff93d54cfa4b2885576535a132de', name: 'Totle', supportedDex: false },
+    Totle8: { addr: '0x3179e4cd7ff08eb14397e1c402d0de44e1523f2e', name: 'Totle', supportedDex: false },
+    Totle9: { addr: '0x3b21d6d25e7f036c8277efe9a7ebf17ca12fe4f6', name: 'Totle', supportedDex: false },
+    Totle10: { addr: '0xc755af998e8c50d6df1779ce3d7e4084a17b4c56', name: 'Totle', supportedDex: false },
     DexAG: { addr: '0xd3bed3a8e3e6b24b740ead108ba776e0ad298588', name: 'DEX.AG v1', supportedDex: false },
     DexAG2: { addr: '0x932348df588923ba3f1fd50593b22c4e2a287919', name: 'DEX.AG v2', supportedDex: false },
     DexAG3: { addr: '0xa540fb50288cc31639305b1675c70763c334953b', name: 'DEX.AG v3', supportedDex: false },
     DexAGProxy: { addr: '0x745daa146934b27e3f0b6bff1a6e36b9b90fb131', name: 'DEX.AG', supportedDex: false },
+    MEWSwap: { addr: '0x01e176828454368f60898f04025dce3bcfe76ab5', name: "MEW", supportedDex: false }, //MyEtherWallet dex.ag implementations
+    MEWSwap2: { addr: '0xba30a255a23fc6e864f1195eaccedf1eeac9a64c', name: "MEW", supportedDex: false },
+    MEWSwap3: { addr: '0xb76c291871b92a7c9e020b2511a3402a3bf0499d', name: "MEW", supportedDex: false },
+    MetaSwap: { addr: '0x881d40237659c251811cec9c364ef91dc08d300c', name: 'MetaMask', supportedDex: false },
+
     Oneinch: { addr: '0x11111254369792b2Ca5d084aB5eEA397cA8fa48B', name: '1inch', supportedDex: false },
     Oneinch2: { addr: '0x111111254b08ceeee8ad6ca827de9952d2a46781', name: '1inch', supportedDex: false },
-    
     //onesplit aggregated swap
     OneSplit1: { addr: '0x111112549cfedf7822eb11fbd8fd485d8a10f93f', name: '1Split', supportedDex: false },
     OneSplit2: { addr: '0x0000000f8ef4be2b7aed6724e893c1b674b9682d', name: '1Split', supportedDex: false },
@@ -4674,11 +4682,31 @@ module.exports = {
     OneSplit5: { addr: '0x0000000006adbd7c01bc0738cdbfc3932600ad63', name: '1Split', supportedDex: false },
     OneSplit6: { addr: '0xe4c577bdec9ce0f6c54f2f82aed5b1913b71ae2f', name: '1Split', supportedDex: false },
     //1split unknown
-   /* 0x00000000016697fa9a9c8e2889e28d3d9816a078
-    0x52dd74d511753b464867d831f78dfcbf05d255d7
-    0xee6f35e91bc558a2bd360eff094026e017327a16
-    0xe00b75a94b444de64b308aa3d7a08b99d1ea1fb4
-    0xb2137a03446065c412888fd8c24358f65e96bce7*/
+    /* 0x00000000016697fa9a9c8e2889e28d3d9816a078
+     0x52dd74d511753b464867d831f78dfcbf05d255d7
+     0xee6f35e91bc558a2bd360eff094026e017327a16
+     0xe00b75a94b444de64b308aa3d7a08b99d1ea1fb4
+     0xb2137a03446065c412888fd8c24358f65e96bce7
+ 
+     0x0000000053D411bEcDb4A82D8603eDC6d8B8b3Bc
+     0x50fda034c0ce7a8f7efdaebda7aa7ca21cc1267e
+     0x0a236b41add0073df05eac5fc8505ad745c7859d
+     0x2ad672fda8a042c4c78c411bf9d4f1b320aa915a
+     0xc586bef4a0992c495cf22e1aeee4e446cecdee0e
+     0xdff2aa5689fcbc7f479d8c84ac857563798436dd */
+
+    //eidoo uniswap proxies
+    EidooProx1: { addr: '0xa7327e2f824ca49c95390d288aae54c671c67333', name: 'Eidoo', supportedDex: false },
+    EidooProx2: { addr: '0x35596efadd677a83ca34f2b361a42704dabe7b91', name: 'Eidoo', supportedDex: false },
+    EidooProx3: { addr: '0xe5b96c7c723460174826038408fc772ea4f4c182', name: 'Eidoo', supportedDex: false },
+    //Furucombo uniswap proxies
+    Furu1: { addr: '0x52f9eea36f57d86a0f051419fd11e4a256359c8f', name: 'Furucombo', supportedDex: false },
+    Furu2: { addr: '0x710b80571db3792fbf4df7763efa6548c25a1635', name: 'Furucombo', supportedDex: false },
+    Furu3: { addr: '0x9cc76b94c005d7ce45623ce5707a5f19dc513662', name: 'Furucombo', supportedDex: false },
+    Furu4: { addr: '0x57805e5a227937bac2b0fdacaa30413ddac6b8e1', name: 'Furucombo', supportedDex: false },
+    //opyn uniswap proxy?
+    Opyn: { addr: '0x5778f2824a114f6115dc74d432685d3336216017', name: 'Opyn', supportedDex: false },
+    Opyn2: { addr: '0x39246c4f3f6592c974ebc44f80ba6dc69b817c71', name: 'Opyn', supportedDex: false },
 
 
     /* small ED/FD clones, not in balance & history pages yet, input/events should parse */
@@ -4709,18 +4737,18 @@ module.exports = {
     Bitcratic2: { addr: '0x3c020e014069df790d4f4e63fd297ba4e1c8e51f', name: 'Bitcratic', supportedDex: true },
     Swatx: { addr: '0x513c07e83237124e08672be4c8d481246d6f03f2', name: 'SWATX', supportedDex: true },
     Swatx2: { addr: '0xa674dce2a28251af521656219cb7ce71d0846642', name: 'SWATX', supportedDex: true },
-    CryptloDex: { addr: '0xcf5d889e2336d0f35f6121718f6c25e0650d4b25', name: 'CryptloDex', supportedDex: true},
+    CryptloDex: { addr: '0xcf5d889e2336d0f35f6121718f6c25e0650d4b25', name: 'CryptloDex', supportedDex: true },
     UnknownED: { addr: '0x4d55f76ce2dbbae7b48661bef9bd144ce0c9091b', name: 'Unknown', supportedDex: true },
     Afrodex: { addr: '0xe8fff15bb5e14095bfdfa8bb85d83cc900c23c56', name: 'Afrodex', supportedDex: true },
     EDex: { addr: '0x4fbcfa90ac5a1f7f70b7ecc6dc1589bbe6904b02', name: 'EDex', supportedDex: true },
     EDex2: { addr: '0x301487766dcf283592b11b5988e5c4e4630dfbe5', name: 'EDex', supportedDex: true },
-    AlgoDEX: { addr: '0x4bc78f6619991b029b867b6d88d39c196332aba3', name: 'AlgoDEX', supportedDex: true }, 
-    Decentrex2: { addr: '0x5e9a063dbc650944bdc824bd1c3b3196a5f1f582', name: 'Decentrex?', supportedDex: true }, 
-    GaintDex: { addr: '0x0d5eae179709e92b3bff65731158e8291c49eafb', name: 'GaintDex', supportedDex: true }, 
-    TokenLab: { addr: '0xb078c6c920bd68d3cdc9ab9e544b5bf0f45ead4e', name: 'TokenLab', supportedDex: true }, 
-    BeanDex: { addr: '0xfa1c8488517e678cf87635371da135279b8e3501', name: 'BeanDex', supportedDex: true }, 
-    Cryptex: { addr: '0x98ca85c59dee34dbc26667eac04f13e39f5f765a', name: 'Cryptex', supportedDex: true }, 
-    Pex: { addr: '0xcc152ba543a3942a07e488a29702ca1cb40ea7e6', name: 'PEX', supportedDex: false }, 
+    AlgoDEX: { addr: '0x4bc78f6619991b029b867b6d88d39c196332aba3', name: 'AlgoDEX', supportedDex: true },
+    Decentrex2: { addr: '0x5e9a063dbc650944bdc824bd1c3b3196a5f1f582', name: 'Decentrex?', supportedDex: true },
+    GaintDex: { addr: '0x0d5eae179709e92b3bff65731158e8291c49eafb', name: 'GaintDex', supportedDex: true },
+    TokenLab: { addr: '0xb078c6c920bd68d3cdc9ab9e544b5bf0f45ead4e', name: 'TokenLab', supportedDex: true },
+    BeanDex: { addr: '0xfa1c8488517e678cf87635371da135279b8e3501', name: 'BeanDex', supportedDex: true },
+    Cryptex: { addr: '0x98ca85c59dee34dbc26667eac04f13e39f5f765a', name: 'Cryptex', supportedDex: true },
+    Pex: { addr: '0xcc152ba543a3942a07e488a29702ca1cb40ea7e6', name: 'PEX', supportedDex: false },
     // ed clone 0x3115b83af820875cc1128f987eda32150f056d71
 
 
@@ -4752,7 +4780,7 @@ module.exports = {
     Dubiex: { addr: '0x7c21d723af0f4594d4f8821aa16bc27c8ea6cec7', name: 'DUBIex', supportedDex: false },
     Radex: { addr: '0x9462eeb9124c99731cc7617348b3937a8f00b11f', name: 'Radex', supportedDex: false },
     Joyso: { addr: '0x04f062809b244e37e7fdc21d9409469c989c2342', name: 'Joyso', supportedDex: false },
-    DexTop1:  { addr: '0xdd7283ea985a030c66e85ed63e9dde4f5eab56d5', name: 'DEx.top v1', supportedDex: false },
+    DexTop1: { addr: '0xdd7283ea985a030c66e85ed63e9dde4f5eab56d5', name: 'DEx.top v1', supportedDex: false },
     DexTop2: { addr: '0x7600977eb9effa627d6bd0da2e5be35e11566341', name: 'DEx.top v2', supportedDex: false },
     BitEye: { addr: '0x39fbd1140cd1fc298f00c3ea64b3591de94c67e7', name: 'BitEye', supportedDex: false },
     BitEye2: { addr: '0x9e2f2dd1e3641f389673f89dc316bb00b01cd83a', name: 'BitEye', supportedDex: false },
@@ -4794,8 +4822,12 @@ module.exports = {
     ERCOTC: { addr: '0x2b3a44a25e62943f5bc2b44b27e6d7734dd14427', name: 'ERCOTC', supportedDex: false },
     DEXIO: { addr: '0xababb61a9f837aad53ed4320221737fc6e9dc84b', name: 'Dex.io', supportedDex: false },
     Uniswapex: { addr: '0xbd2a43799b83d9d0ff56b85d4c140bce3d1d1c6c', name: 'UniswapEx', supportedDex: false },
-    ParaSwap1: { addr: '0x6b158039b9678b7452f311deb12dd08c579dad26', name: 'ParaSwap v1', supportedDex: false },
-    ParaSwap2: { addr: '0x72338b82800400f5488eca2b5a37270ba3b7a111', name: 'ParaSwap v2', supportedDex: false },
+    ParaSwapv1: { addr: '0x6b158039b9678b7452f311deb12dd08c579dad26', name: 'ParaSwap v1', supportedDex: false },
+    ParaSwapv2: { addr: '0x72338b82800400f5488eca2b5a37270ba3b7a111', name: 'ParaSwap v2', supportedDex: false },
+    ParaSwap1: { addr: '0x86969d29f5fd327e1009ba66072be22db6017cc6', name: 'ParaSwap', supportedDex: false },
+    ParaSwap2: { addr: '0xf92c1ad75005e6436b4ee84e88cb23ed8a290988', name: 'ParaSwap', supportedDex: false },
+    ParaSwap3: { addr: '0x9509665d015bfe3c77aa5ad6ca20c8afa1d98989', name: 'ParaSwap', supportedDex: false },
+
     Kulap1: { addr: '0xcee7eea7e58434997a59049f7da4d0ad46f1f141', name: 'KulapDex', supportedDex: false },
     Kulap2: { addr: '0x3f7a7fe9b5304042d179deadf2521ea12d97a5c7', name: 'KulapDex', supportedDex: false },
     TrexDex: { addr: '0x2fca5f257895b8bcede0c0d06141b718ec9a3041', name: 'TrexDex', supportedDex: false },
@@ -4836,7 +4868,7 @@ module.exports = {
 
     // kernel? 0x740f8b58f5562c8379f2a8c2230c9be5c03ac3fc
     // nuo network https://github.com/NuoNetwork/contracts-v2
-    
+
     //slowtrade 0x851b7f3ab81bd8df354f0d7640efcd7288553419 ??
     //slowtrade 0x039fb002d21c1c5eeb400612aef3d64d49eb0d94 ??
 

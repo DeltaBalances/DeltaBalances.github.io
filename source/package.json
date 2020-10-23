@@ -6,7 +6,7 @@
   "private": true,
   "dependencies": {
     "bignumber.js": "5.0.0",
-    "ethers": "^5.0.15",
+    "ethers": "^5.0.19",
     "ethersLegacy": "npm:ethers@4.0.47"
   },
   "scripts": {

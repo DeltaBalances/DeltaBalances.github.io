@@ -805,7 +805,7 @@ var pageType = 'balance';
     function handleRequestPool(requestsCache, rqid) {
         const maxRequests = 6;
         let activeRequests = 0;
-        const retryAmount = 0; // ethers fallbackProvider will already retry requests, this rettries if that fails (and amount >0) 
+        const retryAmount = 2; // ethers fallbackProvider will already retry requests, this is if the solidity call reverts for a pecific provider 
 
         let requestsPool = requestsCache;
 
@@ -833,8 +833,11 @@ var pageType = 'balance';
 
             if (requestObj.balances && requestObj.balances.length > 0) {
                 updateBalances(requestObj);
-            } else {
+            } else if (requestObj.empty) {
                 balanceError(requestObj);
+            } else {
+                // don't retry if the connection failed, including the ethers fallback attempt
+                balanceError(requestObj, false);
             }
 
             executeRequest();
@@ -863,17 +866,17 @@ var pageType = 'balance';
             }
         }
 
-        function balanceError(requestObject) {
-            if (requestObject.attempts > retryAmount) { //if we retried too much, show an error
+        function balanceError(requestObject, allowRetry = true) {
+            if (requestObject.attempts <= retryAmount && allowRetry) {
+                //request failure, try it again
+                console.log("Balance request failed, retry");
+                requestsPool.push(requestObject);
+            }
+            else { //if we retried too much, show an error
                 showError('Failed to load all ' + requestObject.exchange + ' balances, try again later');
                 exchanges[requestObject.exchange].failed += requestObject.tokens.length;
                 finishedBalanceRequest();
                 console.log("Aborting retries, Balance request failed");
-            }
-            else if (requestObject.attempts <= retryAmount) {
-                //request failure, try it again
-                console.log("Balance request failed, retry");
-                requestsPool.push(requestObject);
             }
         }
     }
@@ -1229,10 +1232,13 @@ var pageType = 'balance';
                     requestObj.balances = returnedBalances;
                     callback(requestObj);
                 }
-                else //returned with bad response
-                {
-                    // todo  separate (!err && result.length == 0) ?
-
+                else if (!err && (!returnedBalances || returnedBalances.length == 0)) {
+                    // no error in request (ethers will not fallback) but response is empty  ("0x")
+                    requestObj.balances = undefined;
+                    requestObj.empty = true;
+                    callback(requestObj);
+                }
+                else { // request failed
                     requestObj.balances = undefined;
                     callback(requestObj);
                 }

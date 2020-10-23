@@ -654,11 +654,15 @@ module.exports = (db) => {
                 numberArray = numberArray.map(x => utility.toBigNumber(x));
                 callback(undefined, numberArray);
             }, e => {
-                let a = 4;
-                callback(e, undefined);
+                // request returned successfully, but response was "0x". Might not occur if provider quorum > 1
+                if (e && e.code && e.code == "CALL_EXCEPTION") {
+                    callback(undefined, []);
+                } else {
+                    callback(e, undefined);
+                }
             });
         } catch (e) {
-            let b = 5;
+            callback(e, undefined);
         }
     };
 

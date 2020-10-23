@@ -7522,11 +7522,14 @@ module.exports = (db) => {
                 numberArray = numberArray.map(x => utility.toBigNumber(x));
                 callback(undefined, numberArray);
             }, e => {
-                let a = 4;
-                callback(e, undefined);
+                if (e && e.code && e.code == "CALL_EXCEPTION") {
+                    callback(undefined, []);
+                } else {
+                    callback(e, undefined);
+                }
             });
         } catch (e) {
-            let b = 5;
+            callback(e, undefined);
         }
     };
 

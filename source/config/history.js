@@ -45,6 +45,9 @@ module.exports = {
     { m: "Jul 2020", blockFrom: 10370274, blockTo: 10570485 },
     { m: "Aug 2020", blockFrom: 10570485, blockTo: 10771925 },
     { m: "Sep 2020", blockFrom: 10771925, blockTo: 10966874 },
+	{ m: "Oct 2020", blockFrom: 10966874, blockTo: 11167817 },
+	{ m: "Nov 2020", blockFrom: 11167817, blockTo: 11363270 },
+	{ m: "Dec 2020", blockFrom: 11363270, blockTo: 11565019 },
   ],
   // history settings per exchange
   history: {

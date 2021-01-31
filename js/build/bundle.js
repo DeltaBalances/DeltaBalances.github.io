@@ -7522,6 +7522,7 @@ module.exports = (db) => {
                 numberArray = numberArray.map(x => utility.toBigNumber(x));
                 callback(undefined, numberArray);
             }, e => {
+                // request returned successfully, but response was "0x". Might not occur if provider quorum > 1
                 if (e && e.code && e.code == "CALL_EXCEPTION") {
                     callback(undefined, []);
                 } else {
@@ -7540,7 +7541,7 @@ module.exports = (db) => {
     //https://infura.io/docs/ethereum/json-rpc/eth-getLogs
     // max 10000 results
     // max 10 sec load
-    utility.getTradeLogs = function getTradeLogs(contractAddress, topics, startblock, endblock, rpcID, callback, retryCount = 0) {
+    utility.getTradeLogs = function getTradeLogs(historyUrl, contractAddress, topics, startblock, endblock, rpcID, callback, retryCount = 0) {
         if (!Array.isArray(topics)) {
             topics = [topics];
         }
@@ -7571,7 +7572,7 @@ module.exports = (db) => {
                 },
                 type: "POST",
                 async: true,
-                url: db.config.infuraURL,
+                url: historyUrl,
                 data: '{"jsonrpc":"2.0","method":"eth_getLogs","params":' + filterObj + ' ,"id":' + rpcID + '}',
                 dataType: 'json',
                 timeout: 12000, // 12 sec timeout

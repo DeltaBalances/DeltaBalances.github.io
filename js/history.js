@@ -27,6 +27,7 @@ var pageType = 'history';
 	var typeMode = 0;  // 0 trades, 1, deposit/withdraw, 2 all
 
 	// settings
+	var apiIndex = 0;
 	var decimals = false;
 	var fixedDecimals = 3;
 
@@ -386,6 +387,8 @@ var pageType = 'history';
 			minBlock = historyConfig.minBlock;
 		}
 
+		fillAPISelect();
+
 		try {
 			let dropdownVal = [];
 			exchanges.forEach(function (name) {
@@ -558,6 +561,14 @@ var pageType = 'history';
 		checkBlockInput();
 	}
 
+	function checkApiInput() {
+		let val = Number($('#apiSelect').val());
+
+		if (val < 0) val = 0;
+		if (val > _delta.config.historyUrls.length) val = _delta.config.historyUrls.length -1;
+
+		apiIndex = val;
+	}
 
 	function checkMonthInput() {
 		let val = Number($('#monthSelect').val());
@@ -693,7 +704,9 @@ var pageType = 'history';
 
 		var start = startblock;
 		var end = endblock;
-		const max = 2500; // max number of blocks in the range of 1 request
+		let apiConfig = _delta.config.historyUrls[apiIndex];
+
+		const max = apiConfig.maxRequestRange; // max number of blocks in the range of 1 request
 
 		let totalBlocks = end - start + 1; //block 5-10 (inclusive) gives you 6 blocks
 
@@ -720,7 +733,7 @@ var pageType = 'history';
 		var rpcId = 6;
 
 		var activeRequests = 0;
-		const maxRequests = 10; //max number of concurrent get_logs request
+		const maxRequests = apiConfig.concurrent; //max number of concurrent get_logs request
 		var activeStart = start;
 		var failedRanges = []; //failed, planning to retry
 
@@ -758,7 +771,7 @@ var pageType = 'history';
 			}
 
 			function getLogsInRange(startNum, endNum, rpcID, retryCount = 0) {
-				_util.getTradeLogs(contractAddr, topics, startNum, endNum, rpcID, receiveLogs, retryCount);
+				_util.getTradeLogs(apiConfig.url, contractAddr, topics, startNum, endNum, rpcID, receiveLogs, retryCount);
 			}
 		}
 
@@ -1609,6 +1622,22 @@ var pageType = 'history';
 		}
 	}
 
+	function fillAPISelect() {
+		$('#apiSelect').empty();
+		var select = document.getElementById("apiSelect");
+
+		//Create array of options to be added
+		var array = _delta.config.historyUrls;
+
+		//Create and append the options
+		for (var i = 0; i < array.length; i++) {
+			var option = document.createElement("option");
+			option.value = i;
+			option.text = array[i].name;
+			select.appendChild(option);
+		}
+		select.selectedIndex = apiIndex;
+	}
 
 	function fillMonthSelect() {
 		$('#monthSelect').empty();

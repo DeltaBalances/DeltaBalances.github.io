@@ -943,7 +943,6 @@ var pageType = 'balance';
             ForkDelta: { attempts: 0, done: false, failed: false, prices: [] },
             IDEX: { attempts: 0, done: false, failed: false, prices: [] },
             Kyber: { attempts: 0, done: false, failed: false, prices: [] },
-            Radar: { attempts: 0, done: false, failed: false, prices: [] },
         };
 
         exchangePrices.complete = false;
@@ -992,35 +991,6 @@ var pageType = 'balance';
                     }
 
                     prices[tok.addr] = tok;
-                }
-            });
-            return prices;
-        });
-
-        priceRequest('Radar', 'https://api.radarrelay.com/v3/markets?include=base,ticker,stats', (result) => {
-            let prices = {};
-            result.map((pair) => {
-                if (pair && pair.ticker && pair.stats) {
-                    let tokenPrice = undefined;
-                    if (_util.isWrappedETH(pair.quoteTokenAddress)) { // zrx/WETH
-                        tokenPrice = {
-                            addr: pair.baseTokenAddress.toLowerCase(),
-                            bid: Number(pair.ticker.bestBid),
-                            ask: Number(pair.ticker.bestAsk),
-                            volumeETH: Number(pair.stats.volume24Hour),
-                        };
-                    } else if (_util.isWrappedETH(pair.baseTokenAddress)) { // WETH / DAI
-                        // not a standard ETH pair like DAI or WBTC
-                        tokenPrice = {
-                            addr: pair.quoteTokenAddress.toLowerCase(),
-                            bid: 1 / Number(pair.ticker.bestBid),
-                            ask: 1 / Number(pair.ticker.bestAsk),
-                            volumeETH: Number(pair.stats.volume24Hour) * (1 / Number(pair.ticker.bestBid)),
-                        };
-                    }
-                    if (tokenPrice) {
-                        prices[tokenPrice.addr] = tokenPrice;
-                    }
                 }
             });
             return prices;
@@ -1433,7 +1403,7 @@ var pageType = 'balance';
                     //get bid/ask prices for this token
 
                     // set prices in this order, later in the list is assumed to be more accurate 
-                    let keyOrder = ['ForkDelta', 'Radar', 'IDEX', 'Kyber'];
+                    let keyOrder = ['ForkDelta', 'IDEX', 'Kyber'];
                     //price obj for this token {forkdelta: {bid, ask}, idex:{bid,ask}}
                     let tokenPrices = exchangePrices.prices[token.addr];
 

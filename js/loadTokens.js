@@ -1,5 +1,5 @@
 /* Load lists of (erc20) tokens from exchanges and cache, to update and append the list of known tokens in backupTokens.js 
-   Globalsare used in deltabalances.js initTokens()
+   Globals are used in deltabalances.js initTokens()
 */
 
 // List of tokens per exchange
@@ -94,15 +94,6 @@ var unknownTokenCache = [];
             let tokens = jsonData.data.tokens;
             tokens.map((x) => { delete x.id; x.address = x.address.toLowerCase() });
             return tokens;
-        } else {
-            return [];
-        }
-    });
-
-    getTokens('https://api.radarrelay.com/v3/tokens', 'Radar', function (jsonData) {
-        if (jsonData && jsonData.length > 0) {
-            jsonData = jsonData.filter((x) => { return x.active; });
-            return jsonData.map((x) => { return { symbol: x.symbol, address: x.address.toLowerCase(), decimals: x.decimals, name: x.name } });
         } else {
             return [];
         }

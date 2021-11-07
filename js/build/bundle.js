@@ -671,7 +671,6 @@ DeltaBalances.prototype.initTokens = function () {
     loadCachedTokens('ForkDelta');
     loadCachedTokens('DDEX');
     loadCachedTokens('IDEX');
-    loadCachedTokens('Radar');
     loadCachedTokens('Kyber');
     loadCachedTokens('OneInch');
 
@@ -6808,8 +6807,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
                             + '</td><td>' + utility.idexURL(token, true)
                             + '</td></tr><tr><td>' + utility.oneInchUrl(token, true)
                             + '</td><td>' + utility.ddexURL(token, true)
-                            + '</td></tr><tr><td>' + utility.radarURL(token, true)
-                            + '</td><td>' + utility.kyberURL(token, true)
+                            + '</td></tr><tr><td>' + utility.kyberURL(token, true)
                             + '</td></tr></table>';
 
                         contents += 'Legacy decentralized: <br><table class="popoverTable"><tr><td>'

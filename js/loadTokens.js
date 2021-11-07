@@ -108,10 +108,10 @@ var unknownTokenCache = [];
         }
     });
 
-    getTokens('https://api.1inch.exchange/v1.1/tokens', "OneInch", function (jsonData) {
+    getTokens('https://api.1inch.exchange/v3.0/1/tokens', "OneInch", function (jsonData) {
         let tokens = [];
-        if (jsonData) {
-            tokens = Object.values(jsonData);
+        if (jsonData && jsonData.tokens) {
+            tokens = Object.values(jsonData.tokens);
             tokens = tokens.map(tok => { return { symbol: tok.symbol, address: tok.address.toLowerCase(), decimals: Number(tok.decimals), name: tok.name }; });
         }
         return tokens;

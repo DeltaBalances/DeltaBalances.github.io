@@ -6812,7 +6812,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
 
                         contents += 'Legacy decentralized: <br><table class="popoverTable"><tr><td>'
                             + utility.etherDeltaURL(token, true)
-                            + '</td><td>' + utility.tokenStoreURL(token, true) + '</td></tr>';
+                            + '</td></tr>';
                     }
                 } else if (token.addr == this.config.ethAddr) {
                     contents = "Ether (not a token)<br> Decimals: 18";
@@ -7299,24 +7299,6 @@ module.exports = (db) => {
         return url;
     }
 
-    utility.tokenStoreURL = function (tokenObj, html) {
-        var url = "https://token.store/trade/";
-        var labelClass = "label-warning";
-        if (tokenObj) {
-            if (tokenObj.TokenStore) {
-                labelClass = 'label-primary';
-            }
-            url += tokenObj.addr;
-        } else {
-            url = '';
-        }
-
-        if (html) {
-            url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Token store <i class="fa fa-external-link" aria-hidden="true"></i></a>';
-        }
-        return url;
-    }
-
     utility.oneInchUrl = function (tokenObj, html) {
         let url = '';
 
@@ -7401,27 +7383,6 @@ module.exports = (db) => {
                 url = '<span class="label ' + labelClass + '">Binance</span>';
             } else {
                 url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">Binance <i class="fa fa-external-link" aria-hidden="true"></i></a>';
-            }
-        }
-        return url;
-    }
-
-    utility.radarURL = function (tokenObj, html) {
-        var url = "https://app.radarrelay.com/";
-        var labelClass = "label-primary";
-
-        if (tokenObj && tokenObj.Radar) {
-            url += tokenObj.Radar + '/WETH';
-        } else {
-            labelClass = 'label-default';
-            url = '';
-        }
-
-        if (html) {
-            if (url == '') {
-                url = '<span class="label ' + labelClass + '">RadarRelay</span>';
-            } else {
-                url = '<a class="label ' + labelClass + '" href="' + url + '" target="_blank" rel="noopener noreferrer">RadarRelay <i class="fa fa-external-link" aria-hidden="true"></i></a>';
             }
         }
         return url;

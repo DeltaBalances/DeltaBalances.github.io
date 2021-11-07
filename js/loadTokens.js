@@ -7,7 +7,6 @@ var exchangeTokens = {
     //forkdelta: [],  // new domain CORS protection
     idex: [],
     ddex: [],
-    radar: [],
     kyber: [],
     oneinch: [],
 };
@@ -37,7 +36,6 @@ var unknownTokenCache = [];
         // forkdelta: 0,
         idex: 0,
         ddex: 0,
-        radar: 0,
         kyber: 0,
         oneinch: 0,
     };

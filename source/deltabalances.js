@@ -6419,7 +6419,7 @@ DeltaBalances.prototype.makeTokenPopover = function (token) {
 
                         contents += 'Legacy decentralized: <br><table class="popoverTable"><tr><td>'
                             + utility.etherDeltaURL(token, true)
-                            + '</td><td>' + utility.tokenStoreURL(token, true) + '</td></tr>';
+                            + '</td></tr>';
                     }
                 } else if (token.addr == this.config.ethAddr) {
                     contents = "Ether (not a token)<br> Decimals: 18";

@@ -51,13 +51,13 @@ module.exports = {
     { m: "Jan 2021", blockFrom: 11565019, blockTo: 11766939 },
     { m: "Feb 2021", blockFrom: 11766939, blockTo: 11948960 },
     { m: "Mar 2021", blockFrom: 11948960, blockTo: 12150511 },
-	{ m: "Apr 2021", blockFrom: 12150511, blockTo: 12344945 },
-	{ m: "May 2021", blockFrom: 12344945, blockTo: 12545219 },
-	{ m: "Jun 2021", blockFrom: 12545219, blockTo: 12738509 },
-	{ m: "Jul 2021", blockFrom: 12738509, blockTo: 12936340 },
-	{ m: "Aug 2021", blockFrom: 12936340, blockTo: 13136427 },
-	{ m: "Sep 2021", blockFrom: 13136427, blockTo: 13330090 },
-	{ m: "Oct 2021", blockFrom: 13330090, blockTo: 13527859 },
+    { m: "Apr 2021", blockFrom: 12150511, blockTo: 12344945 },
+    { m: "May 2021", blockFrom: 12344945, blockTo: 12545219 },
+    { m: "Jun 2021", blockFrom: 12545219, blockTo: 12738509 },
+    { m: "Jul 2021", blockFrom: 12738509, blockTo: 12936340 },
+    { m: "Aug 2021", blockFrom: 12936340, blockTo: 13136427 },
+    { m: "Sep 2021", blockFrom: 13136427, blockTo: 13330090 },
+    { m: "Oct 2021", blockFrom: 13330090, blockTo: 13527859 },
   ],
   // history settings per exchange
   history: {
@@ -153,7 +153,7 @@ module.exports = {
       makerTransfer: true,
     },
     OasisDex: {
-      contract: ['OasisDex', 'OasisDex2','OasisDex3','OasisDex4', 'OasisDexOld', 'OasisDexOld2'],
+      contract: ['OasisDex', 'OasisDex2','OasisDex3','OasisDex4','OasisDex5', 'OasisDexOld', 'OasisDexOld2'],
       minBlock: 3435757, //4262057, //4751582,
       tradeTopic: '0x3383e3357c77fd2e3a4b30deea81179bc70a795d053d14d5b7f2f01d0fd4596f', // LogTake
       withdrawTopic: undefined,

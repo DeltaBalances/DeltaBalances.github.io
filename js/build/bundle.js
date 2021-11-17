@@ -6611,7 +6611,7 @@ DeltaBalances.prototype.processUnpackedEvent = function (unpacked, myAddresses, 
                 }
             }
             // dex.blue trade events
-            else if (unpacked.name == 'LogTrade' || unpacked.name == 'LogSwap') {
+            else if ((unpacked.name == 'LogTrade' && unpacked.events[0].name === "makerAsset") || unpacked.name == 'LogSwap') {
                 //LogTrade(address makerAsset, uint256 makerAmount, address takerAsset, uint256 takerAmount);
                 //LogSwap(address soldAsset, uint256 soldAmount, address boughtAsset, uint256 boughtAmount);
                 let makerToken = this.setToken(unpacked.events[0].value);

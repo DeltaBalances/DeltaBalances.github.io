@@ -4594,6 +4594,7 @@ module.exports = {
     OasisDex2: { addr: '0xb7ac09c2c0217b07d7c103029b4918a2c401eecb', name: 'OasisDex', supportedDex: true },
     OasisDex3: { addr: '0x39755357759ce0d7f32dc8dc45414cca409ae24e', name: 'Oasis (Eth2Dai)', supportedDex: true },
     OasisDex4: { addr: '0x794e6e91555438afc3ccf1c5076a74f42133d08d', name: 'OasisDex', supportedDex: true },
+    OasisDex5: { addr: '0x5e3e0548935a83ad29fb2a9153d331dc6d49020f', name: 'OasisDex', supportedDex: true },
     OasisDexOld: { addr: '0x3aa927a97594c3ab7d7bf0d47c71c3877d1de4a1', name: 'OasisDex (OLD)', supportedDex: true },
     OasisDexOld2: { addr: '0x83ce340889c15a3b4d38cfcd1fc93e5d8497691f', name: 'OasisDex (OLD2)', supportedDex: true },
     OasisDexOld3: { addr: '0xa1b5eedc73a978d181d1ea322ba20f0474bb2a25', name: 'OasisDex (OLD3)', supportedDex: false },
@@ -4956,13 +4957,13 @@ module.exports = {
     { m: "Jan 2021", blockFrom: 11565019, blockTo: 11766939 },
     { m: "Feb 2021", blockFrom: 11766939, blockTo: 11948960 },
     { m: "Mar 2021", blockFrom: 11948960, blockTo: 12150511 },
-	{ m: "Apr 2021", blockFrom: 12150511, blockTo: 12344945 },
-	{ m: "May 2021", blockFrom: 12344945, blockTo: 12545219 },
-	{ m: "Jun 2021", blockFrom: 12545219, blockTo: 12738509 },
-	{ m: "Jul 2021", blockFrom: 12738509, blockTo: 12936340 },
-	{ m: "Aug 2021", blockFrom: 12936340, blockTo: 13136427 },
-	{ m: "Sep 2021", blockFrom: 13136427, blockTo: 13330090 },
-	{ m: "Oct 2021", blockFrom: 13330090, blockTo: 13527859 },
+    { m: "Apr 2021", blockFrom: 12150511, blockTo: 12344945 },
+    { m: "May 2021", blockFrom: 12344945, blockTo: 12545219 },
+    { m: "Jun 2021", blockFrom: 12545219, blockTo: 12738509 },
+    { m: "Jul 2021", blockFrom: 12738509, blockTo: 12936340 },
+    { m: "Aug 2021", blockFrom: 12936340, blockTo: 13136427 },
+    { m: "Sep 2021", blockFrom: 13136427, blockTo: 13330090 },
+    { m: "Oct 2021", blockFrom: 13330090, blockTo: 13527859 },
   ],
   // history settings per exchange
   history: {
@@ -5058,7 +5059,7 @@ module.exports = {
       makerTransfer: true,
     },
     OasisDex: {
-      contract: ['OasisDex', 'OasisDex2','OasisDex3','OasisDex4', 'OasisDexOld', 'OasisDexOld2'],
+      contract: ['OasisDex', 'OasisDex2','OasisDex3','OasisDex4','OasisDex5', 'OasisDexOld', 'OasisDexOld2'],
       minBlock: 3435757, //4262057, //4751582,
       tradeTopic: '0x3383e3357c77fd2e3a4b30deea81179bc70a795d053d14d5b7f2f01d0fd4596f', // LogTake
       withdrawTopic: undefined,

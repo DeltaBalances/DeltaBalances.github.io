@@ -21,7 +21,7 @@
     "browser-resolve": "^1.11.3",
     "browserify": "^16.5.2",
     "common-shakeify": "^0.6.2",
-    "terser": "^4.8.0",
+    "terser": "^4.8.1",
     "uglifyify": "^5.0.2",
     "unassertify": "^2.1.1"
   }

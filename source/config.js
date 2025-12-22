@@ -86,9 +86,9 @@ module.exports = {
   providerTimeout: 3000, // 3 sec
    // separate API keys for ethereum logs (history)
   historyUrls: [
-    {name:"Infura.io - Fastest", url:'https://mainnet.infura.io/v3/a7ca261d0f724bac976dfdb263cb3866', maxRequestRange: 2500, concurrent: 3},
-    {name:"Rivet.cloud - Alternative", url:'https://46c031f417ef4e4c81483a1e077c0ca2.eth.rpc.rivet.cloud/', maxRequestRange: 4000, concurrent: 3},
-    {name:"Localhost:8545 - Advanced users", url:'http://localhost:8545', maxRequestRange: 2500, concurrent: 5}
+    {name:"Infura.io - Fastest", url:'https://mainnet.infura.io/v3/a7ca261d0f724bac976dfdb263cb3866', maxRequestRange: 1500, concurrent: 3},
+    {name:"Rivet.cloud - Alternative", url:'https://46c031f417ef4e4c81483a1e077c0ca2.eth.rpc.rivet.cloud/', maxRequestRange: 1500, concurrent: 3},
+    {name:"Localhost:8545 - Advanced users", url:'http://localhost:8545', maxRequestRange: 1500, concurrent: 5}
   ],
   localNode: 'http://localhost:8545',
   socketURL: 'https://api.forkdelta.com', //forkdelta order/price api

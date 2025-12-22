@@ -6736,15 +6736,14 @@ var url_json_rpc_provider_1 = require("./url-json-rpc-provider");
 // This key was provided to ethers.js by Alchemy to be used by the
 // default provider, but it is recommended that for your own
 // production environments, that you acquire your own API key at:
-//   https://dashboard.alchemyapi.io
+//   https://dashboard.alchemy.com
 var defaultApiKey = "_gg7wSSi0KMBsdKnGVfHDueq6xMB9EkC";
 var AlchemyWebSocketProvider = /** @class */ (function (_super) {
     __extends(AlchemyWebSocketProvider, _super);
     function AlchemyWebSocketProvider(network, apiKey) {
         var _this = this;
         var provider = new AlchemyProvider(network, apiKey);
-        var url = provider.connection.url.replace(/^http/i, "ws")
-            .replace(".alchemyapi.", ".ws.alchemyapi.");
+        var url = provider.connection.url.replace(/^http/i, "ws");
         _this = _super.call(this, url, provider.network) || this;
         properties_1.defineReadOnly(_this, "apiKey", provider.apiKey);
         return _this;
@@ -6776,19 +6775,19 @@ var AlchemyProvider = /** @class */ (function (_super) {
         var host = null;
         switch (network.name) {
             case "homestead":
-                host = "eth-mainnet.alchemyapi.io/v2/";
+                host = "eth-mainnet.g.alchemy.com/v2/";
                 break;
             case "ropsten":
-                host = "eth-ropsten.alchemyapi.io/v2/";
+                host = "eth-ropsten.g.alchemy.com/v2/";
                 break;
             case "rinkeby":
-                host = "eth-rinkeby.alchemyapi.io/v2/";
+                host = "eth-rinkeby.g.alchemy.com/v2/";
                 break;
             case "goerli":
-                host = "eth-goerli.alchemyapi.io/v2/";
+                host = "eth-goerli.g.alchemy.com/v2/";
                 break;
             case "kovan":
-                host = "eth-kovan.alchemyapi.io/v2/";
+                host = "eth-kovan.g.alchemy.com/v2/";
                 break;
             default:
                 logger.throwArgumentError("unsupported network", "network", arguments[0]);

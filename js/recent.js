@@ -525,7 +525,7 @@ var pageType = 'recent';
 
 		//get a list of recent outgoing tx from etherscan
 		function normalTransactions() {
-			$.getJSON('https://api.etherscan.io/api?module=account&action=txlist&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey).done((result) => {
+			$.getJSON('https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlist&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey).done((result) => {
 				if (requestID > rqid)
 					return;
 				if (result && result.status === '1')
@@ -549,7 +549,7 @@ var pageType = 'recent';
 
 
 		function tokenTransactions() {
-			$.getJSON('https://api.etherscan.io/api?module=account&action=tokentx&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey).done((result) => {
+			$.getJSON('https://api.etherscan.io/v2/api?chainid=1&module=account&action=tokentx&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey).done((result) => {
 				if (requestID > rqid)
 					return;
 				if (result && result.status === '1')
@@ -574,7 +574,7 @@ var pageType = 'recent';
 
 		function internalTransactions() {
 			// internal ether transactions (withdraw)
-			$.getJSON('https://api.etherscan.io/api?module=account&action=txlistinternal&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey).done((result2) => {
+			$.getJSON('https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlistinternal&address=' + publicAddr + '&startblock=' + startblock + '&endblock=' + endblock + '&sort=desc&apikey=' + _delta.config.etherscanAPIKey).done((result2) => {
 				if (requestID > rqid)
 					return;
 				if (result2 && result2.status === '1')

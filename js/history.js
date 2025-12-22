@@ -1058,7 +1058,7 @@ var pageType = 'history';
 						unpacked.name != 'Sell' &&
 						unpacked.name != 'FillBuyOrder' &&
 						unpacked.name != 'FillSellOrder' &&
-                        unpacked.name != 'Match'
+						unpacked.name != 'Match'
 					)
 				) {
 					continue;
@@ -1181,8 +1181,8 @@ var pageType = 'history';
 		}
 
 
-		let txListUrl = 'https://api.etherscan.io/api?module=account&action=txlist&address=';
-		let tokenListUrl = 'https://api.etherscan.io/api?module=account&action=tokentx&address=';
+		let txListUrl = 'https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlist&address=';
+		let tokenListUrl = 'https://api.etherscan.io/v2/api?chainid=1&module=account&action=tokentx&address=';
 
 		getEtherscanTx(txListUrl, 'txlist');
 		// also get incoming token transfers from maker trades

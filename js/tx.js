@@ -360,7 +360,7 @@ var pageType = 'tx';
 		}
 
 		function getTxStatus() {
-			_util.getURL('https://api.etherscan.io/api?module=transaction&action=getstatus&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (err, result) => {
+			_util.getURL('https://api.etherscan.io/v2/api?chainid=1&module=transaction&action=getstatus&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (err, result) => {
 
 				if (!err && result) {
 					if (result && result.status === '1')
@@ -374,7 +374,7 @@ var pageType = 'tx';
 		}
 
 		function getInternal() {
-			_util.getURL('https://api.etherscan.io/api?module=account&action=txlistinternal&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (err, result) => {
+			_util.getURL('https://api.etherscan.io/v2/api?chainid=1&module=account&action=txlistinternal&txhash=' + transactionHash + '&apikey=' + _delta.config.etherscanAPIKey, (err, result) => {
 				if (!isPending) {
 					if (!err && result) {
 						if (result && result.status === '1')

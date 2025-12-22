@@ -80,7 +80,7 @@ module.exports = {
   infuraKey: '87ee3513fad045acb1522ef7a30bd652',
   alchemyKey: 'ozV51x-gVqsq09qRjj7FQ-Y1sGJee62t',
   jsonRpcUrls: [ //public rpc providers by url
-    "https://api.mycryptoapi.com/eth",
+    //"https://api.mycryptoapi.com/eth",
     //"https://main-rpc.linkpool.io"
   ],
   providerTimeout: 3000, // 3 sec

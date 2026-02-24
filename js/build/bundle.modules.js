@@ -8853,7 +8853,7 @@ var EtherscanProvider = /** @class */ (function (_super) {
         var baseUrl = null;
         switch (name) {
             case "homestead":
-                baseUrl = "https://api.etherscan.io";
+                baseUrl = "https://api.etherscan.io/v2";
                 break;
             case "ropsten":
                 baseUrl = "https://api-ropsten.etherscan.io";
@@ -8891,7 +8891,7 @@ var EtherscanProvider = /** @class */ (function (_super) {
                         url = this.baseUrl + "/api";
                         apiKey = "";
                         if (this.apiKey) {
-                            apiKey += "&apikey=" + this.apiKey;
+                            apiKey += "&chainid=1&apikey=" + this.apiKey;
                         }
                         get = function (url, payload, procFunc) { return __awaiter(_this, void 0, void 0, function () {
                             var connection, payloadStr, result;
@@ -8953,26 +8953,26 @@ var EtherscanProvider = /** @class */ (function (_super) {
                         }
                         return [3 /*break*/, 28];
                     case 1:
-                        url += "?module=proxy&action=eth_blockNumber" + apiKey;
+                        url += "?chainid=1&module=proxy&action=eth_blockNumber" + apiKey;
                         return [2 /*return*/, get(url, null)];
                     case 2:
-                        url += "?module=proxy&action=eth_gasPrice" + apiKey;
+                        url += "?chainid=1&module=proxy&action=eth_gasPrice" + apiKey;
                         return [2 /*return*/, get(url, null)];
                     case 3:
                         // Returns base-10 result
-                        url += "?module=account&action=balance&address=" + params.address;
+                        url += "?chainid=1&module=account&action=balance&address=" + params.address;
                         url += "&tag=" + params.blockTag + apiKey;
                         return [2 /*return*/, get(url, null, getResult)];
                     case 4:
-                        url += "?module=proxy&action=eth_getTransactionCount&address=" + params.address;
+                        url += "?chainid=1&module=proxy&action=eth_getTransactionCount&address=" + params.address;
                         url += "&tag=" + params.blockTag + apiKey;
                         return [2 /*return*/, get(url, null)];
                     case 5:
-                        url += "?module=proxy&action=eth_getCode&address=" + params.address;
+                        url += "?chainid=1&module=proxy&action=eth_getCode&address=" + params.address;
                         url += "&tag=" + params.blockTag + apiKey;
                         return [2 /*return*/, get(url, null)];
                     case 6:
-                        url += "?module=proxy&action=eth_getStorageAt&address=" + params.address;
+                        url += "?chainid=1&module=proxy&action=eth_getStorageAt&address=" + params.address;
                         url += "&position=" + params.position;
                         url += "&tag=" + params.blockTag + apiKey;
                         return [2 /*return*/, get(url, null)];
@@ -8986,7 +8986,7 @@ var EtherscanProvider = /** @class */ (function (_super) {
                         })];
                     case 8:
                         if (params.blockTag) {
-                            url += "?module=proxy&action=eth_getBlockByNumber&tag=" + params.blockTag;
+                            url += "?chainid=1&module=proxy&action=eth_getBlockByNumber&tag=" + params.blockTag;
                             if (params.includeTransactions) {
                                 url += "&boolean=true";
                             }
@@ -8998,11 +8998,11 @@ var EtherscanProvider = /** @class */ (function (_super) {
                         }
                         throw new Error("getBlock by blockHash not implemented");
                     case 9:
-                        url += "?module=proxy&action=eth_getTransactionByHash&txhash=" + params.transactionHash;
+                        url += "?chainid=1&module=proxy&action=eth_getTransactionByHash&txhash=" + params.transactionHash;
                         url += apiKey;
                         return [2 /*return*/, get(url, null)];
                     case 10:
-                        url += "?module=proxy&action=eth_getTransactionReceipt&txhash=" + params.transactionHash;
+                        url += "?chainid=1&module=proxy&action=eth_getTransactionReceipt&txhash=" + params.transactionHash;
                         url += apiKey;
                         return [2 /*return*/, get(url, null)];
                     case 11:
@@ -9035,7 +9035,7 @@ var EtherscanProvider = /** @class */ (function (_super) {
                         error_2 = _c.sent();
                         return [2 /*return*/, checkError("estimateGas", error_2, params.transaction)];
                     case 19:
-                        url += "?module=logs&action=getLogs";
+                        url += "?chainid=1&module=logs&action=getLogs";
                         if (params.filter.fromBlock) {
                             url += "&fromBlock=" + checkLogTag(params.filter.fromBlock);
                         }
@@ -9090,7 +9090,7 @@ var EtherscanProvider = /** @class */ (function (_super) {
                         if (this.network.name !== "homestead") {
                             return [2 /*return*/, 0.0];
                         }
-                        url += "?module=stats&action=ethprice";
+                        url += "?chainid=1&module=stats&action=ethprice";
                         url += apiKey;
                         _b = parseFloat;
                         return [4 /*yield*/, get(url, null, getResult)];
@@ -9116,7 +9116,7 @@ var EtherscanProvider = /** @class */ (function (_super) {
             endBlock = 99999999;
         }
         return this.resolveName(addressOrName).then(function (address) {
-            url += "/api?module=account&action=txlist&address=" + address;
+            url += "/api?chainid=1&module=account&action=txlist&address=" + address;
             url += "&startblock=" + startBlock;
             url += "&endblock=" + endBlock;
             url += "&sort=asc" + apiKey;

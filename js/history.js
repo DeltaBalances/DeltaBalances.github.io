@@ -652,10 +652,13 @@ var pageType = 'history';
 		$('#days').val(days);
 	}
 
-	function setBlockProgress(loaded = 0, max = 0, aborted = 0) {
-		let progressString = 'Loaded ' + (loaded + aborted) + '/' + max + ' blocks';
+	function setBlockProgress(loaded = 0, max = 0, aborted = 0, dates = false) {
+		let progressString = 'Loaded ' + (loaded + aborted) + '/' + max + ' blocks.';
 		if (aborted && aborted > 0) {
-			progressString += ', <span style="color:red">' + aborted + ' blocks failed </span>';
+			progressString += ', <span style="color:red">' + aborted + ' blocks failed.</span>';
+		}
+		if (dates) {
+			progressString += "<span> Loading missing dates...";
 		}
 		$('#blockProgress').html(progressString);
 	}
@@ -739,7 +742,9 @@ var pageType = 'history';
 
 		// repeat func until it returns false
 		for (var i = 0; i < maxRequests; i++) {
-			getBatchedLogs();
+			setTimeout(function() {
+                getBatchedLogs();
+            }, i * 400);
 		}
 
 		function getBatchedLogs() {
@@ -779,9 +784,11 @@ var pageType = 'history';
 
 			activeRequests--;
 			let abortRetries = false;
+			let extraDelay = 0;
 
 			//check if the request failed to return logs
 			if (rangeObj && (!logs || rangeObj.error)) {
+				extraDelay = 1000;
 				if (rangeObj.retries >= 3) {
 					abortRetries = true;
 					console.log('range (' + rangeObj.count + ') ' + rangeObj.start + ' ' + rangeObj.end + ' failed, abort retries');
@@ -817,7 +824,11 @@ var pageType = 'history';
 			}
 
 			// start the next request now that one has returned
-			getBatchedLogs();
+			setTimeout(function() {
+                getBatchedLogs();
+            }, 600 + extraDelay);
+
+			
 
 			if (rqid <= requestID && rangeObj) { //valid request
 
@@ -827,16 +838,11 @@ var pageType = 'history';
 					if (logs.length > 0) {
 						var tradesInResult = parseOutput(logs);
 
-						//get tx times
-						let unknownCount = 0;
+
 						for (var i = 0; i < tradesInResult.length; i++) {
 							if (!blockDates[tradesInResult[i].Block] && !needBlockDates[tradesInResult[i].Block]) {
 								needBlockDates[tradesInResult[i].Block] = true;
-								unknownCount++;
 							}
-						}
-						if (unknownCount > 0) {
-							loadBlockDates();
 						}
 						tradeLogResult = tradeLogResult.concat(tradesInResult);
 					}
@@ -853,9 +859,15 @@ var pageType = 'history';
 		}
 
 		function done() {
-			setBlockProgress(downloadedBlocks, totalBlocks, abortedBlocks);
-			if (loadedLogs < reqAmount) {
+			setBlockProgress(downloadedBlocks, totalBlocks, abortedBlocks, runningDates);
+			if (loadedLogs < reqAmount || runningDates) {
 				makeTable(tradeLogResult);
+				return;
+			}
+			let blocksToLoad = Object.keys(needBlockDates).filter((b) => { return !blockDates[b] });
+			if (blocksToLoad.length > 0) {
+				console.log("loading missing dates");
+				loadBlockDates();
 				return;
 			}
 
@@ -873,7 +885,7 @@ var pageType = 'history';
 
 			runningDates = true;
 
-			const maxDateRequests = 5;
+			const maxDateRequests = 3;
 			let activeDateRequests = 0;
 			let loadedDates = 0;
 			let lastLoadUsed = 0;
@@ -884,10 +896,13 @@ var pageType = 'history';
 			let tempCount = Math.min(maxDateRequests, blocksToLoad.length);
 			if (tempCount > 0) {
 				for (let i = 0; i < tempCount; i++) {
-					startNewRequest();
+					setTimeout(function() {
+						startNewRequest();
+					}, i * 300);
 				}
 			} else {
 				runningDates = false;
+				done();
 				return;
 			}
 
@@ -942,7 +957,9 @@ var pageType = 'history';
 				}
 
 				if (activeDateRequests < maxDateRequests) {
-					startNewRequest();
+					setTimeout(function() {
+					    startNewRequest();
+					}, 300);
 				}
 			}
 		}

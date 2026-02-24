@@ -87,8 +87,8 @@ module.exports = {
   providerTimeout: 3000, // 3 sec
    // separate API keys for ethereum logs (history)
   historyUrls: [
-    {name:"Infura.io", url:'https://mainnet.infura.io/v3/a7ca261d0f724bac976dfdb263cb3866', maxRequestRange: 1500, concurrent: 3},
-    {name:"Localhost:8545 - Advanced users", url:'http://localhost:8545', maxRequestRange: 1500, concurrent: 5}
+    {name:"Infura.io", url:'https://mainnet.infura.io/v3/a7ca261d0f724bac976dfdb263cb3866', maxRequestRange: 2000, concurrent: 2},
+    {name:"Localhost:8545 - Advanced users", url:'http://localhost:8545', maxRequestRange: 2000, concurrent: 5}
   ],
   localNode: 'http://localhost:8545',
   socketURL: 'https://api.forkdelta.com', //forkdelta order/price api

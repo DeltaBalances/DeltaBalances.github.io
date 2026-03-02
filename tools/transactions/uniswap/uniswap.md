@@ -6,6 +6,11 @@
 ###### ethToTokenSwap Output (+refund)
 `https://etherscan.io/tx/0xd6506c73637b452eddb756b7a6ff7801fac632aada35551b830e31b3a2fdb3b7`
 
+###### ethtotoken transfer input
+`0x2499b3420caf46343d9d6ecb9453dc348fd7c292fc26ed0256610be616d228c6`
+
+###### ethtotoken transfer output (+refund?)
+`0xfd29c19c1f43a6ad157b600b707447c5618d49d0bf8fa05886ea4c5b4742a6c9`
 
 
 ###### tokenToEthSwap input
@@ -17,6 +22,10 @@
 ###### tokenToEth Transfer input
 `https://etherscan.io/tx/0xf7b35fedf265f6970359111e39166328ea3137c54e68730232cef198a345d847`
 
+###### tokenToEth transfer output
+`https://etherscan.io/tx/0x62cd1b6ebe820364cd31a0badf1dab0eda1701358539a8ba30b6254116d8f933`
+
+
 
 
 ###### tokenToTokenSwap Input
@@ -24,6 +33,17 @@
 
 ###### tokenToToken swap output
 `https://etherscan.io/tx/0x313f22bbbc8b41c31a910724b448c56e38135c470bf3cc1ef419193490d7ddaa`
+
+###### tokenToToken transfer output
+`https://etherscan.io/tx/0x199a3648b600267a764b2e4169cd8bd35b2c87faa914d61afddff07be1744625`
+
+###### tokenToToken transfer input
+`https://etherscan.io/tx/0x52c349a11b4da8a64b3c548c60330a5696cf962553ced4a9eae219802a33bb81`
+
+
+
+###### tokenToExchangeSwap output
+`https://etherscan.io/tx/0x18b8fb48293e40030966a5b98b43c2a577ea40176ce69fa20cb872bce0b05392`
 
 
 ###### addLiquidity

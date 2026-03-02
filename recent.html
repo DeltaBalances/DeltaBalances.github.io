@@ -6,9 +6,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="View recent decentralized exchange transactions.">
   <meta content="width=device-width, initial-scale=1" name="viewport">
+  <link rel="icon" type="image/png" sizes="64x64" href="./favicon-64x64.png?1">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
-  <link rel="icon" type="image/png" sizes="64x64" href="./favicon-64x64.png?1">
 
   <title>Delta Balances - Recent TX</title>
 
@@ -16,29 +16,30 @@
   <link href="css/combinedStyles.css" rel="stylesheet">
 
   <!-- JS  jquery -->
-  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/lib/jquery-3.2.1.min.js"></script>
 
   <!-- JS  datatables -->
-  <script src="js/jquery.dataTables.fixed.min.js"></script>
+  <script src="js/lib/jquery.dataTables.fixed.min.js"></script>
 
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
-  <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
+  <script src="js/lib/bootstrap.adminlte.blockies.min.js"></script>
 
-  <script src="js/bootstrap-select.min.js"></script>
+  <script src="js/lib/bootstrap-select.min.js"></script>
 
   <!-- JS socketIO  for exchange prices -->
-  <script src="js/socket.io.js" defer></script>
+  <script src="js/lib/socket.io.js" defer></script>
 
   <!-- JS  Token discover / loading -->
-  <script src="backupTokens.js"></script>
-  <script src="loadTokens.js"></script>
+  <script src="js/backupTokens.js"></script>
+  <script src="js/loadTokens.js"></script>
 
   <!-- JS  Main functionality -->
-  <!--  config excluded from bundle -->
-  <script src="configBundle.js"></script>
-  <script src="bundle.min.js"></script>
-  <script src="user.js"></script>
-  <script src="recent.js"></script>
+  <script src="js/build/bundle.config.min.js"></script>
+  <script src="js/build/bundle.modules.min.js"></script>
+  <script src="js/build/bundle.min.js"></script>
+
+  <script src="js/user.js"></script>
+  <script src="js/recent.js"></script>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -69,7 +70,8 @@
       </a>
 
       <!-- mobile only logo -->
-      <ul class="visible-xs nav navbar-nav pull-left navbar-logo" style="margin-left:0px; margin-top:5px;font-size:20px; height:30px; line-height:30px;">
+      <ul class="visible-xs nav navbar-nav pull-left navbar-logo"
+        style="margin-left:0px; margin-top:5px;font-size:20px; height:30px; line-height:30px;">
         <li class="">
           <a href="index.html" class="dropdown">
             <span class="homeLink1">Delta</span>
@@ -82,8 +84,11 @@
       <ul class="nav  navbar-nav pull-left customWidth1" style=" border: none;">
         <li class="navbar-form" style="width:100%; padding:0px;  ">
           <div class="input-group" style="width:100%;">
-            <input type="text" id="address" class="form-control custom" placeholder="Ethereum address, transaction hash">
+            <input type="text" id="address" class="form-control custom"
+              placeholder="Ethereum address, transaction hash">
             <span class="input-group-btn">
+              <input type="image" title="Import from web3" id="web3button" class="btn" onClick="requestMetamask(true)"
+                src="css/images/metamask.png" />
               <button id="refreshButton" onClick="myClick()" class="btn btn-flat">
                 <i id="refreshButtonSearch" class="fa fa-search" aria-hidden="true"></i>
                 <i id="refreshButtonLoading" style="display:none" class="fa fa-refresh fa-spin" aria-hidden="true"></i>
@@ -98,7 +103,8 @@
           <!-- Menu Toggle Button -->
           <a href="#" id="userToggle" class="hidden dropdown-toggle" data-toggle="control-sidebar">
             <!-- The user image in the navbar-->
-            <i id="userImage" class="user-image bg-red" style="width:32px; height:32px;"></i>
+            <i id="userImage" class="user-image bg-red" style="width:32px; height:32px;"><img class="mini-metamask"
+                src="css/images/metamask.png" alt="metamask logo"></i>
             <!-- hidden-xs hides the username on small devices so only the image appears. -->
             <span id="currentAddr2" class="hidden-xs">0x......</span>
           </a>
@@ -115,7 +121,8 @@
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
-  <div class="alert alert-warning alert-top alert-dismissible" onclick="hideHint()" style="display:none;" role="alert" id='hint'>
+  <div class="alert alert-warning alert-top alert-dismissible" onclick="hideHint()" style="display:none;" role="alert"
+    id='hint'>
     <strong>Hint</strong>
     <span id="hinttext"></span>
     <button type="button" class="close" aria-label="Close">
@@ -245,13 +252,13 @@
         </li>
         <li class="header">Links</li>
         <li>
-          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank">
+          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-github"></i>
             <span>GitHub</span>
           </a>
         </li>
         <li>
-          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank">
+          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-link"></i>
             <span>Smart contract</span>
           </a>
@@ -278,35 +285,26 @@
 
         <div class="row">
 
-          <div class="col-md-12 col-lg-10 s-fullwidth">
+          <div class="col-md-9 col-lg-7 s-fullwidth">
 
             <div class="box box-default">
               <!-- /.box-header -->
               <div class="box-body">
-                <div class="col-md-9 noPadM" style="overflow:hidden;">
+                <div class="col-md-12 noPadM" style="overflow:hidden;">
                   <div style="white-space:nowrap; overflow:hidden; padding-top:10px; ">
-                    <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
+                    <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;">
+                    </div>
                     <div class="hidden-xs" style="padding-left: 3%; float:left;">
                       <p style="line-height:50px;display: inline-block;"> </p>
                     </div>
                     <div style="float:left; white-space:nowrap;">
-                      <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;" id="addr">Enter your public address </p>
+                      <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;"
+                        id="addr">Enter your public address </p>
                     </div>
                   </div>
                 </div>
 
-                <div class="col-md-3 noPadM">
-                  <ul class="list-unstyled" style="padding-top:5px">
-                    <li>
-                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
-                      <label for="decimals">Show more decimals</label>
-                    </li>
-                    <li>
-                      <label>Transactions from last
-                        <input type="number" id="days" onchange="validateDays(this.value)" value="5" min="1" max="999" step="1"> days</label>
-                    </li>
-                  </ul>
-                </div>
+
 
               </div>
               <!-- /.box-body -->
@@ -314,6 +312,36 @@
             <!-- /.box -->
           </div>
 
+          <div class="col-md-3 col-lg-3 s-fullwidth padM-side">
+
+            <div class="box box-default">
+              <!-- /.box-header -->
+              <div class="box-body">
+                <h4 class="hidden-md hidden-lg"> Date Range </h4>
+                <form id="blockSelector" style="padding: 5px 5px;">
+                  <ul class="list-unstyled">
+                    <li>
+                      <input type="radio" id="r0" name="dayBlocks" value="0" onchange="setDaySelector()" checked>
+                      <label for="r0"> <span class="hidden-md hidden-lg">The last </span>
+                        <input class="form-control" style="width:75px; height:25px;" type="number" id="days"
+                          style="text-align: center;height:85%;" onchange="validateDays()" value="5" min="1" max="999"
+                          step="1"> days</label>
+                    </li>
+                    <li>
+                      <input type="radio" id="r1" name="dayBlocks" value="1" onchange="setMonthSelector()">
+                      <label style="display:inline-block;" for="r1"> <span class="hidden-md hidden-lg">Month: </span>
+                        <select style="display:inline-block; width:auto;height:25px; padding-top:2px;"
+                          class="form-control" id="monthSelect" onChange="checkMonthInput()" disabled></select>
+                      </label>
+                    </li>
+                  </ul>
+
+                </form>
+              </div>
+              <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+          </div>
 
 
           <div class="col-md-12 col-lg-10 s-fullwidth">
@@ -322,7 +350,8 @@
               <div class="box-body noPadTop">
                 <div class="col-md-9 noPadM" style="overflow:hidden;">
                   <h2>Recent Transactions
-                    <button id='loadingTransactions2' onclick="getTrans()" class="fa fa-refresh" style="display:none;"></button>
+                    <button id='loadingTransactions2' onclick="getTrans()" class="fa fa-refresh"
+                      style="display:none;"></button>
                   </h2>
                   <p>Recent transactions from etherscan, filtered to show decentralized exchanges.</p>
                 </div>
@@ -330,7 +359,8 @@
 
                   Show transaction types:
                   <div class="form-group">
-                    <select id="typesDropdown" data-width="100%" data-none-selected-text="Select transaction types" class="selectpicker" multiple>
+                    <select id="typesDropdown" data-width="100%" data-none-selected-text="Select transaction types"
+                      class="selectpicker" multiple>
                       <optgroup>
                         <option data-subtext=" ">Taker trade</option>
                         <option data-subtext="(no deposit DEX like EtherDelta, Token Store)">Maker trade</option>
@@ -343,8 +373,8 @@
                       <optgroup>
                         <option>Deposit</option>
                         <option>Withdraw</option>
-                        <option>Wrap ETH</option>
-                        <option>Unwrap ETH</option>
+                        <option>Wrap Token</option>
+                        <option>Unwrap Token</option>
                       </optgroup>
                     </select>
                   </div>
@@ -355,6 +385,12 @@
                     <thead></thead>
                     <tbody></tbody>
                   </table>
+                </div>
+                <br>
+                <br>
+                <div class="col-md-12 noPad">
+                  <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
+                  <label for="decimals" style="font-weight:normal;">Show more decimals</label>
                 </div>
                 <!--
                 <div class="col-md-4 noPadM">
@@ -381,46 +417,48 @@
               <!-- /.box-header -->
               <div class="box-body">
                 <div class="col-md-12 noPadM">
+				Maker trades
+                  <strong>do not</strong> show for most deposit style exchanges, see the <b>Trade History</b> instead.
+				  <br><br>
                   Recent Transactions supports:
                   <br>
                   <ul>
                     <li>Deposit style exchanges:
-                      <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
-                      <a href="https://forkdelta.app" target="_blank">ForkDelta</a>),
-                      <a href="https://idex.market" target="_blank">IDEX</a>,
-                      <a href="https://token.store" target="_blank">Token Store</a>,
-                      <a href="https://www.enclaves.io" target="_blank">EnclavesDex</a>,
-                      <a href="https://www.ethen.market" target="_blank">ETHEN</a>,
-                      <a href="https://www.singularx.com" target="_blank">SingularX</a>,
-                      <a href="https://www.etherc.io" target="_blank">EtherC</a> and
-                      <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>.
+                      <a href="https://etherdelta.com" target="_blank" rel="noopener noreferrer">EtherDelta</a> (
+                      <a href="https://forkdelta.app" target="_blank" rel="noopener noreferrer">ForkDelta</a>),
+                      <a href="https://idex.market" target="_blank" rel="noopener noreferrer">IDEX</a>,
+                      <a href="https://token.store" target="_blank" rel="noopener noreferrer">Token Store</a>,
+                      <a href="https://www.enclaves.io" target="_blank" rel="noopener noreferrer">EnclavesDex</a>,
+                      <a href="https://www.ethen.market" target="_blank" rel="noopener noreferrer">ETHEN</a>,
+                      <a href="https://www.singularx.com" target="_blank" rel="noopener noreferrer">SingularX</a>,
+                      <a href="https://www.etherc.io" target="_blank" rel="noopener noreferrer">EtherC</a> and
+                      <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md"
+                        target="_blank" rel="noopener noreferrer">Decentrex</a>.
                     </li>
                     <li> 0x (V1 & V2) relayers:
-                      <a href="https://radarrelay.com/" target="_blank">RadarRelay</a>,
-                      <a href="https://ddex.io" target="_blank">DDEX (v1)</a>,
-                      <a href="https://paradex.io/" target="_blank">Paradex</a>,
-                      <a href="https://ercdex.com/" target="_blank">ERC dEX</a>,
-                      <a href="https://openrelay.xyz/" target="_blank">OpenRelay</a>,
-                      <a href="https://sharkrelay.com" target="_blank">Shark Relay</a>,
-                      <a href="https://tokenjar.io" target="_blank">Token Jar</a>,
-                      <a href="https://idtexchange.com" target="_blank">IDT</a>,
-                      <a href="https://bamboorelay.com" target="_blank">BambooRelay</a>,
-                      <a href="https://tokenlon.token.im/tokenlon" target="_blank">Tokenlon</a>,
+                      <a href="https://radarrelay.com/" target="_blank" rel="noopener noreferrer">RadarRelay</a>,
+                      <a href="https://ddex.io" target="_blank" rel="noopener noreferrer">DDEX (v1)</a>,
+                      <a href="https://paradex.io/" target="_blank" rel="noopener noreferrer">Paradex</a>,
+                      <a href="https://ercdex.com/" target="_blank" rel="noopener noreferrer">ERC dEX</a>,
+                      <a href="https://openrelay.xyz/" target="_blank" rel="noopener noreferrer">OpenRelay</a>,
+                      <a href="https://sharkrelay.com" target="_blank" rel="noopener noreferrer">Shark Relay</a>,
+                      <a href="https://tokenjar.io" target="_blank" rel="noopener noreferrer">Token Jar</a>,
+                      <a href="https://idtexchange.com" target="_blank" rel="noopener noreferrer">IDT</a>,
+                      <a href="https://bamboorelay.com" target="_blank" rel="noopener noreferrer">BambooRelay</a>,
+                      <a href="https://tokenlon.token.im/tokenlon" target="_blank" rel="noopener noreferrer">Tokenlon</a>,
                       and more.
                     </li>
                     <li> Other exchanges:
-                      <a href="https://airswap.io" target="_blank">AirSwap</a>,
-                      <a href="https://kyber.network" target="_blank">Kyber Network</a>,
-                      <a href="https://oasisdex.com" target="_blank">OasisDex</a>,
-                      <a href="https://oasis.direct" target="_blank">OasisDirect</a>,
-                      <a href="https://www.bancor.network" target="_blank">Bancor</a>,
-                      <a href="https://ddex.io" target="_blank">DDEX hydro</a>,
-                      <a href="https://www.ethex.market" target="_blank">ETHEX</a> and
-                      <a href="https://www.easytrade.io" target="_blank">EasyTrade</a>.
+                      <a href="https://airswap.io" target="_blank" rel="noopener noreferrer">AirSwap</a>,
+                      <a href="https://kyber.network" target="_blank" rel="noopener noreferrer">Kyber Network</a>,
+                      <a href="https://oasisdex.com" target="_blank" rel="noopener noreferrer">OasisDex</a>,
+                      <a href="https://oasis.direct" target="_blank" rel="noopener noreferrer">OasisDirect</a>,
+                      <a href="https://www.bancor.network" target="_blank" rel="noopener noreferrer">Bancor</a>,
+                      <a href="https://ddex.io" target="_blank" rel="noopener noreferrer">DDEX hydro</a>,
+                      <a href="https://www.ethex.market" target="_blank" rel="noopener noreferrer">ETHEX</a> and
+                      <a href="https://www.easytrade.io" target="_blank" rel="noopener noreferrer">EasyTrade</a>.
                     </li>
                   </ul>
-                  Maker trades
-                  <strong>do not</strong> show for most deposit style exchanges, see the trade history instead.
                   <br> IDEX trades are retrieved from the IDEX API instead of etherscan.
                 </div>
               </div>
@@ -440,15 +478,24 @@
       <div class="pull-right hidden-xs">
       </div>
       <!-- Default to the left -->
-      <p> Powered by
-        <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
-        <a target="_blank" href="https://infura.io/">Infura</a>
-        <br> Contact:
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
-        <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
-        <br> Buy me a beer:
-        <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
-      </p>
+      <div class="col-sm-12 col-md-6">
+        <p> Recent tx is powered by
+          <a target="_blank" rel="noopener noreferrer" href="https://etherscan.io/">Etherscan</a>.
+          <br> Contact:
+          <a target="_blank" rel="noopener noreferrer" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
+          <a target="_blank" rel="noopener noreferrer" href="https://reddit.com/u/deltabalances">Reddit</a>
+          <br>
+          <br> Buy me a beer:
+          <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B"
+            target="_blank" rel="noopener noreferrer">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
+        </p>
+      </div>
+      <div class="col-sm-12 col-md-6">
+        Use a referral:
+        <ul style="list-style-type:none">
+          <li><a target="_blank" rel="noopener noreferrer" href="https://www.binance.com/?ref=10985752">Trade on Binance</a></li>
+        </ul>
+      </div>
     </footer>
 
     <!-- Control Sidebar -->
@@ -511,15 +558,24 @@
               </li>
             </ul>
           </div>
-          <div id="metamaskSection" class="hidden">
-            <h3 class="control-sidebar-heading">Detected Address</h3>
+          <div id="metamaskSection">
+            <h3 class="control-sidebar-heading">Web3 browser</h3>
             <ul class="control-sidebar-menu">
-              <li>
+              <li id="metamask-inactive" class="hidden">
                 <a onclick="loadMetamask()" href="#">
                   <i id="metamaskImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
                   <div class="menu-info">
                     <h4 id="metamaskAddress" class="control-sidebar-subheading">0x12345678</h4>
-                    <p>Metamask</p>
+                    <p>Web3 import</p>
+                  </div>
+                </a>
+              </li>
+              <li class="metamask-import">
+                <a onclick="requestMetamask(true)" href="#">
+                  <i id="metamask-logo-sidebar" class="menu-icon"></i>
+                  <div class="menu-info">
+                    <h4 class="control-sidebar-subheading">Import account</h4>
+                    <p> Injected Web3</p>
                   </div>
                 </a>
               </li>

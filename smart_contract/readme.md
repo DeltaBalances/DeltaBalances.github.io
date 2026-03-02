@@ -1,6 +1,7 @@
 Contract `deltabalances.sol` is located in `./test`
 Deployed on mainnet at [0x40a38911e470fc088beeb1a9480c2d69c847bcec](https://etherscan.io/address/0x40a38911e470fc088beeb1a9480c2d69c847bcec)
 
+Last tested with `ganache-cli@6.9.1` and  `truffle@5.1.31`.
 
 # Testing with Truffle
 

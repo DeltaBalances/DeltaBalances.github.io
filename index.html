@@ -6,9 +6,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="View ERC20 token balances and decentralized exchange trading history.">
   <meta content="width=device-width, initial-scale=1" name="viewport">
+  <link rel="icon" type="image/png" sizes="64x64" href="./favicon-64x64.png?1">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
-  <link rel="icon" type="image/png" sizes="64x64" href="./favicon-64x64.png?1">
 
   <title>Delta Balances - Balances</title>
 
@@ -16,29 +16,30 @@
   <link href="css/combinedStyles.css" rel="stylesheet">
 
   <!-- JS  jquery -->
-  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/lib/jquery-3.2.1.min.js"></script>
 
   <!-- JS  datatables -->
-  <script src="js/jquery.dataTables.fixed.min.js"></script>
+  <script src="js/lib/jquery.dataTables.fixed.min.js"></script>
 
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
-  <script src="js/bootstrap.adminlte.blockies.min.js"></script>
-  <script src="js/bootstrap-toggle.min.js"></script>
-  <script src="js/bootstrap-select.min.js"></script>
+  <script src="js/lib/bootstrap.adminlte.blockies.min.js"></script>
+  <script src="js/lib/bootstrap-toggle.min.js"></script>
+  <script src="js/lib/bootstrap-select.min.js"></script>
 
   <!-- JS socketIO  for exchange prices -->
-  <script src="js/socket.io.js" defer></script>
+  <script src="js/lib/socket.io.js" defer></script>
 
   <!-- JS  Token discover / loading -->
-  <script src="backupTokens.js"></script>
-  <script src="loadTokens.js"></script>
+  <script src="js/backupTokens.js"></script>
+  <script src="js/loadTokens.js"></script>
 
   <!-- JS  Main functionality -->
-  <!--  config excluded from bundle -->
-  <script src="configBundle.js"></script>
-  <script src="bundle.min.js"></script>
-  <script src="user.js"></script>
-  <script src="balances.js"></script>
+  <script src="js/build/bundle.config.min.js"></script>
+  <script src="js/build/bundle.modules.min.js"></script>
+  <script src="js/build/bundle.min.js"></script>
+  
+  <script src="js/user.js"></script>
+  <script src="js/balances.js"></script>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -69,7 +70,8 @@
       </a>
 
       <!-- mobile only logo -->
-      <ul class="visible-xs nav navbar-nav pull-left navbar-logo" style="margin-left:0px; margin-top:5px;font-size:20px; height:30px; line-height:30px;">
+      <ul class="visible-xs nav navbar-nav pull-left navbar-logo"
+        style="margin-left:0px; margin-top:5px;font-size:20px; height:30px; line-height:30px;">
         <li class="">
           <a href="index.html" class="dropdown">
             <span class="homeLink1">Delta</span>
@@ -82,8 +84,11 @@
       <ul class="nav  navbar-nav pull-left customWidth1" style=" border: none;">
         <li class="navbar-form" style="width:100%; padding:0px;  ">
           <div class="input-group" style="width:100%;">
-            <input type="text" id="address" class="form-control custom" placeholder="Ethereum address, transaction hash">
+            <input type="text" id="address" class="form-control custom"
+              placeholder="Ethereum address, transaction hash">
             <span class="input-group-btn">
+              <input type="image" title="Import from web3" id="web3button" class="btn" onClick="requestMetamask(true)"
+                src="css/images/metamask.png" />
               <button id="refreshButton" onClick="myClick()" class="btn btn-flat">
                 <i id="refreshButtonSearch" class="fa fa-search" aria-hidden="true"></i>
                 <i id="refreshButtonLoading" style="display:none" class="fa fa-refresh fa-spin" aria-hidden="true"></i>
@@ -98,7 +103,8 @@
           <!-- Menu Toggle Button -->
           <a href="#" id="userToggle" class="hidden dropdown-toggle" data-toggle="control-sidebar">
             <!-- The user image in the navbar-->
-            <i id="userImage" class="user-image bg-red" style="width:32px; height:32px;"></i>
+            <i id="userImage" class="user-image bg-red" style="width:32px; height:32px;"><img class="mini-metamask"
+                src="css/images/metamask.png" alt="metamask logo"></i>
             <!-- hidden-xs hides the username on small devices so only the image appears. -->
             <span id="currentAddr2" class="hidden-xs">0x......</span>
           </a>
@@ -115,7 +121,8 @@
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
-  <div class="alert alert-warning alert-top alert-dismissible" onclick="hideHint()" style="display:none;" role="alert" id='hint'>
+  <div class="alert alert-warning alert-top alert-dismissible" onclick="hideHint()" style="display:none;" role="alert"
+    id='hint'>
     <strong>Hint</strong>
     <span id="hinttext"></span>
     <button type="button" class="close" aria-label="Close">
@@ -245,13 +252,13 @@
         </li>
         <li class="header">Links</li>
         <li>
-          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank">
+          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-github"></i>
             <span>GitHub</span>
           </a>
         </li>
         <li>
-          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank">
+          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-link"></i>
             <span>Smart contract</span>
           </a>
@@ -287,14 +294,16 @@
               <!-- /.box-header -->
               <div class="box-body noPadTop">
                 <div class="col-md-12 noPadM">
-                  <h2>Wallet overview</h2>
+                  <h2>Total Balances</h2>
                   <div style="white-space:nowrap; overflow:hidden;">
-                    <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;"></div>
+                    <div id="addrIcon" class="hidden-xs" style="float:left; display: inline-block; padding-left: 1%;">
+                    </div>
                     <div class="hidden-xs" style="padding-left: 3%; float:left;">
                       <p style="line-height:64px;display: inline-block;"> </p>
                     </div>
                     <div style="float:left; white-space:nowrap;">
-                      <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;" id="addr">Enter your public address </p>
+                      <p style="line-height:64px; white-space:nowrap; font-size:21px; font-weight:normal; display: inline-block;"
+                        id="addr">Enter or import your address </p>
                     </div>
                   </div>
                   <table class="table table-sm" cellspacing="0" cellpadding="0" id="overviewTable">
@@ -338,57 +347,129 @@
             </div>
           </div>
 
-          <div class="col-sm-12 col-md-4 col-lg-3 s-fullwidth">
-            <div id="settingbox" class="box box-default bottom10M">
+          <div id="accordion" class="col-sm-12 col-md-4 col-lg-3 s-fullwidth padM-side">
+            <div id="settingbox" class="panel box box-default bottom10M">
               <!-- /.box-header -->
-              <div class="box-header noPadTop">
+              <div class="box-header padM-side">
                 <div class="col-md-12 noPadM">
-                  <h3>Settings</h3>
+                  <h3 style="margin-top:10px;">Settings</h3>
                 </div>
-                <div class="box-tools pull-right">
-                  <button id="collapseSettings" type="button" class="btn btn-box-tool" data-widget="collapse">
-                    <i id="settingToggleIcon" class="fa fa-minus"></i>
-                  </button>
+                <div class="box-tools pull-right noPad">
 
+                  <a id="collapseSettings" data-toggle="collapse" data-parent="#accordion" href="#setting-body">
+                    <button type="button" class="accordionBtn btn btn-box-tool">
+                      <i id="settingToggleIcon" class="fa fa-plus"></i>
+                    </button>
+                  </a>
                 </div>
               </div>
-              <div id="setting-body" class="box-body noPadTop">
+              <div id="setting-body" class=" panel-collapse collapse box-body noPadTop">
+                <div class="col-xs-12 col-sm-6 col-md-12 noPadM bottom10M">
+
+                  <div class="col-xs-5 col-md-5 padM-side">
+                    Total Value: <br>
+                    <span id="fiatPrice" class="text75"></span>
+                  </div>
+                  <div class="col-xs-7 col-md-7 padM-side">
+                    <select id="fiatSelect" onchange="selectFiat()" data-width="125px" class="selectpicker">
+                      <option value="0">ETH</option>
+                      <option value="1" selected>ETH & USD</option>
+                      <option value="2">ETH & EUR</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-12 noPadM bottom10M">
+                  <div class="col-xs-5 col-md-5 padM-side">
+                    Price estimate:
+                  </div>
+                  <div class="col-xs-7 col-md-7 padM-side">
+                    <select id="priceSelect" onchange="selectPrice()" data-width="125px" class="selectpicker">
+                      <option value="0" selected>Highest Bid</option>
+                      <option value="1">Lowest Ask</option>
+                    </select>
+                  </div>
+
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-12 noPadM">
+                  <div class="col-xs-12 padM-side">
+                    <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
+                    <label style="font-weight:normal;" for="decimals">Show more decimals</label>
+                  </div>
+                </div>
+              </div>
+              <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+            <div id="tokensettingbox" class="panel box box-default bottom10M">
+              <!-- /.box-header -->
+              <div class="box-header padM-side">
                 <div class="col-md-12 noPadM">
-                  <ul class="list-unstyled">
-                    <li>
+                  <h3 style="display: inline-block;margin-top:10px;">Tokens</h3>
+                  <span style="margin-left:35px" id="tokencount"></span>
+                </div>
+                <div class="box-tools pull-right noPad">
 
-                    <li>
-                      <div class="form-group" style="float:left;Padding-right: 45px;">
-                        Total Value:
-                        <br>
-                        <select id="fiatSelect" onchange="selectFiat()" data-width="125px" class="selectpicker">
-                          <option value="0">ETH</option>
-                          <option value="1" selected>ETH & USD</option>
-                          <option value="2">ETH & EUR</option>
-                        </select>
-                      </div>
-                      <div class="form-group" style="float:left;">
-                        Price estimate:
-                        <br>
-                        <select id="priceSelect" onchange="selectPrice()" data-width="125px" class="selectpicker">
-                          <option value="0" selected>Highest Bid</option>
-                          <option value="1">Lowest Ask</option>
-                        </select>
-                      </div>
-                    </li>
-                    <li class="hidden">
-                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkZero()" id="zero">
-                      <label for="zero">Hide zero balances</label>
-                    </li>
-                    <li>
-                      <div style="clear:both;"></div>
-                      <br>
-                      <input class="checkbox checkbox-info" type="checkbox" onclick="checkDecimal()" id="decimals">
-                      <label for="decimals">Show more decimals</label>
-                    </li>
+                  <a id="collapseTokenSettings" data-toggle="collapse" data-parent="#accordion"
+                    href="#tokensetting-body">
+                    <button type="button" class="accordionBtn btn btn-box-tool"><i id="tokensettingToggleIcon"
+                        class="fa fa-plus"></i>
+                    </button>
+                  </a>
+                </div>
+              </div>
+              <div id="tokensetting-body" class="panel-collapse collapse box-body noPadTop">
 
-                  </ul>
+                <div class="col-xs-12 col-sm-6 col-md-12 noPad">
+                  <label class="togglebox checkbox-inline">
+                    <input type="checkbox" id="showListed" checked data-toggle="toggle" data-style="fast"
+                      data-width="100" data-on="Load listed" data-off="Hide listed" data-onstyle="primary"
+                      data-offstyle="default" data-size="mini">
+                  </label>
+                  Listed on DEX <i class="fa fa-info" data-toggle="tooltip"
+                    title="Listed on ForkDelta, IDEX, DDEX, Kyber, 1inch"></i>
+                  <br>
 
+                  <label class="togglebox checkbox-inline">
+                    <input type="checkbox" id="showUnlisted" data-toggle="toggle" data-style="fast" data-width="100"
+                      data-on="Load unlisted" data-off="Hide unlisted" data-onstyle="warning" data-offstyle="default"
+                      data-size="mini">
+                  </label>
+                  Not listed <i class="fa fa-info" data-toggle="tooltip"
+                    title="Might trade unlisted on ForkDelta or Uniswap"></i>
+                  <br>
+                  <label class="togglebox checkbox-inline">
+                    <input type="checkbox" id="showOld" data-toggle="toggle" data-style="fast" data-width="100"
+                      data-on="Load old" data-off="Hide old" data-onstyle="danger" data-offstyle="default"
+                      data-size="mini">
+                  </label>
+                  Locked / Swap <i class="fa fa-info" data-toggle="tooltip"
+                    title="No longer transferable or mainnet swap"></i>
+                  <br>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-12 noPad">
+                  <label class="togglebox checkbox-inline">
+                    <input type="checkbox" id="showSpam" data-toggle="toggle" data-style="fast" data-width="100"
+                      data-on="Load spam" data-off="Hide spam" data-onstyle="danger" data-offstyle="default"
+                      data-size="mini">
+                  </label>
+                  Spam tokens <i class="fa fa-info" data-toggle="tooltip" title="Random airdrops, scams and spam"></i>
+                  <br>
+
+                  <label class="togglebox checkbox-inline">
+                    <input type="checkbox" id="showInactive" data-toggle="toggle" data-style="fast" data-width="100"
+                      data-on="Load inactive" data-off="Hide inactive" data-onstyle="danger" data-offstyle="default"
+                      data-size="mini">
+                  </label>
+                  No recent users <i class="fa fa-info" data-toggle="tooltip" title="Transfers in last 365 days"></i>
+                  <br>
+
+                  <label class="togglebox checkbox-inline">
+                    <input type="checkbox" id="showBlocked" data-toggle="toggle" data-style="fast" data-width="100"
+                      data-on="Load unused" data-off="Hide unused" data-onstyle="danger" data-offstyle="default"
+                      data-size="mini">
+                  </label>
+                  Few holders <i class="fa fa-info" data-toggle="tooltip" title="Less than roughly 150 holders"></i>
+                  <br>
                 </div>
               </div>
               <!-- /.box-body -->
@@ -397,7 +478,7 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-12 col-lg-10">
+          <div class="col-md-12 col-lg-8">
             <h4> Load deposited DEX balances: </h4>
           </div>
 
@@ -405,18 +486,33 @@
           <div class="col-sm-12 col-md-8 col-lg-7 noPadM">
 
             <div class="form-group">
-              <select id="exchangeDropdown" data-width="100%" data-none-selected-text="Click to select one or more exchange(s)" class="selectpicker" multiple>
-                <option data-icon="icon-etherdelta" data-subtext="ForkDelta">EtherDelta</option>
-                <option data-icon="icon-idex">IDEX</option>
-                <option data-icon="icon-tokenstore">Token store</option>
-                <option data-icon="icon-switcheo">Switcheo</option>
-                <option data-icon="icon-enclaves">Joyso</option>
-                <option data-icon="icon-enclaves">Enclaves</option>
-                <!-- <option>Ethen</option>-->
-                <option data-icon="icon-enclaves">SingularX</option>
-                <option data-icon="icon-enclaves">EtherC</option>
-                <option data-icon="icon-enclaves" data-subtext="(Discontinued)">DEXY</option>
-                <option data-icon="icon-decentrex" data-subtext="(Discontinued)">Decentrex</option>
+              <select id="exchangeDropdown" class="selectpicker" data-width="100%"
+                data-none-selected-text="Click to select one or more exchange(s)" data-container=".wrapper"
+                data-max-options="4" multiple>
+                <optgroup label="Active">
+                  <option data-icon="icon-etherdelta" data-subtext="ForkDelta">EtherDelta</option>
+                  <option data-icon="icon-idex">IDEX v2</option>
+                  <option data-icon="icon-switcheo">Switcheo v2</option>
+                  <option data-icon="icon-enclaves">Joyso</option>
+                  <option data-icon="icon-enclaves">SingularX</option>
+                  <option data-icon="icon-enclaves">dex.blue</option>
+                  <option data-icon="icon-enclaves">EtherC</option>
+                  <option data-icon="icon-enclaves">SwitchDex</option>
+                  <option data-icon="icon-enclaves">Bitcratic</option>
+                </optgroup>
+                <optgroup label="Legacy">
+				  <option data-icon="icon-idex">IDEX v1</option>
+				  <option data-icon="icon-tokenstore" data-subtext="(Discontinued, to withdraw use: ts-out.github.io )">Token store</option>
+                  <option data-icon="icon-switcheo" data-subtext="(Discontinued 10-2019)">Switcheo</option>
+                  <option data-icon="icon-enclaves" data-subtext="(Discontinued)">Enclaves</option>
+                  <option data-icon="icon-enclaves" data-subtext="(Discontinued)">DEXY</option>
+                  <option data-icon="icon-decentrex" data-subtext="(Discontinued)">Decentrex</option>
+				  <option data-icon="icon-enclaves" data-subtext="(website offline)">ETHEN</option>
+                  <option data-icon="icon-etherdelta" data-subtext="October 2016">EtherDelta-old</option>
+                  <option data-icon="icon-etherdelta" data-subtext="August 2016">EtherDelta-old2</option>
+                  <option data-icon="icon-etherdelta" data-subtext="August 2016">EtherDelta-old3</option>
+                  <option data-icon="icon-etherdelta" data-subtext="Juli 2016">EtherDelta-old4</option>
+                </optgroup>
               </select>
             </div>
 
@@ -429,21 +525,25 @@
               <div class="box-body noPadTop">
                 <div class="col-md-12 noPadM">
                   <h2>Balances
-                    <button id='loadingBalances' onclick="getBalances()" class="fa fa-refresh" style="display:none;"></button>
+                    <button id='loadingBalances' onclick="getBalances()" class="fa fa-refresh"
+                      style="display:none;"></button>
                     <!-- <span class="pull-right" style="display:inline-block; vertical-align: middle;font-weight: 400; font-size: 0.5em;">
                       <input style="width:110px;" id="tablesearcher" class="search form-control" data-column="0" type="search" placeholder="filter tokens">
                     </span>
                     -->
                   </h2>
-                  <table class="table" id="balanceProgress" style="float:left; padding-bottom:5px;">
+
+                </div>
+                <!--<div style="margin-top:30px;" class="col-xs-6 col-sm-8 noPad">
+				<span id="refreshText" class="text-red" style="display:hidden;margin-top:100px;">Outdated, click <i class="fa fa-refresh"></i> to refresh.</span>
+				</div> -->
+                <div class="col-md-12 noPadM">
+                  <table class="table" id="balanceProgress" style="float:left;">
                     <thead></thead>
                     <tbody></tbody>
                   </table>
                 </div>
-
                 <div class="col-md-12 noPad">
-
-
                   <table class="table table-striped" id="resultTable" style="width:100%">
                     <thead></thead>
                     <tbody></tbody>
@@ -451,13 +551,16 @@
                   <br>
                 </div>
                 <div class="col-md-12 noPadM">
-
-                  <span id="downloadBalances"></span>
-                  <p> Price estimates come from the ForkDelta & IDEX orderbooks</p>
-                  <span class="label label-primary">Name</span> Listed on one or more
-                  <span class="hidden-xs">supported</span> exchanges.
+                  More tokens? Expand the token selection at the top<span class="hidden-xs"> right</span>.<br>
+                  <span id="downloadBalances"></span> <br>
                   <br>
-                  <span class="label label-warning">Name</span> Not listed, trades by address only.
+                  <div class="col-md-6 noPad">
+                    <span class="label label-primary">Name</span> Listed on one or more <span
+                      class="hidden-xs">supported</span> exchanges.
+                  </div>
+                  <div class="col-md-5 noPad">
+                    <span class="label label-warning">Name</span> Not listed, trades by address only.
+                  </div>
                 </div>
               </div>
               <!-- /.box-body -->
@@ -472,21 +575,23 @@
               <div class="box-body">
                 <div class="col-md-12 noPadM">
                   Check deposited tokens in:
-                  <a href="https://etherdelta.com" target="_blank">EtherDelta</a> (
-                  <a href="https://forkdelta.app" target="_blank">ForkDelta</a>),
-                  <a href="https://token.store" target="_blank">Token Store</a>,
-                  <a href="https://www.idex.market" target="_blank">IDEX</a>,
-                  <a href="https://switcheo.exchange" target="_blank">Switcheo</a>,
-                  <a href="https://joyso.io" target="_blank">Joyso</a>,
-                  <a href="https://www.enclaves.io" target="_blank">EnclavesDex</a>,
-                  <a href="https://www.singularx.com" target="_blank">SingularX</a>,
-                  <a href="https://www.etherc.io" target="_blank">EtherC</a>,
-                  <a href="https://app.dexy.exchange" target="_blank">DEXY</a> and
-                  <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md" target="_blank">Decentrex</a>.
-                  <br>Wallet balances include tokens traded on: 0x Relayers,
-                  <a href="https://airswap.io" target="_blank">AirSwap</a>,
-                  <a href="https://kyber.network" target="_blank">Kyber Network</a> and
-                  <a href="https://www.bancor.network" target="_blank">Bancor</a>.
+                  <a href="https://etherdelta.com" target="_blank" rel="noopener noreferrer">EtherDelta</a>
+                  (<a href="https://forkdelta.app" target="_blank" rel="noopener noreferrer">ForkDelta</a>),
+                  <a href="https://token.store" target="_blank" rel="noopener noreferrer">Token Store</a>,
+                  <a href="https://www.idex.market" target="_blank" rel="noopener noreferrer">IDEX</a>,
+                  <a href="https://switcheo.exchange" target="_blank" rel="noopener noreferrer">Switcheo</a>,
+                  <a href="https://joyso.io" target="_blank" rel="noopener noreferrer">Joyso</a>,
+				  <a href="https://dex.blue" target="_blank" rel="noopener noreferrer">dex.blue</a>,
+                  <a href="https://www.singularx.com" target="_blank" rel="noopener noreferrer">SingularX</a>,
+                  <a href="https://www.etherc.io" target="_blank" rel="noopener noreferrer">EtherC</a>,
+				  <a href="https://www.bitcratic.com" target="_blank" rel="noopener noreferrer">Bitcratic</a>,
+				  <a href="https://www.enclaves.io" target="_blank" rel="noopener noreferrer">EnclavesDex</a>,
+                  <a href="https://app.dexy.exchange" target="_blank" rel="noopener noreferrer">DEXY</a> and
+                  <a href="https://github.com/decentrex/decentrex.github.io/blob/master/index.md"
+                    target="_blank" rel="noopener noreferrer">Decentrex</a>.
+                  <br> Other supported decentralized exchanges do not use a deposit system.
+                  <br>
+                  <br> Price estimates come from the ForkDelta, IDEX, Kyber and TokenStore APIs.
                 </div>
                 <!-- /.box-body -->
               </div>
@@ -505,15 +610,27 @@
       <!-- To the right -->
       <div class="pull-right hidden-xs">
       </div>
-      <p> Powered by
-        <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
-        <a target="_blank" href="https://infura.io/">Infura</a>
-        <br> Contact:
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
-        <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
-        <br> Buy me a beer:
-        <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
-      </p>
+      <!-- Default to the left -->
+      <div class="col-sm-12 col-md-6">
+        <p> Balances are powered by
+          <a target="_blank" rel="noopener noreferrer" href="https://etherscan.io/">Etherscan</a>, 
+          <a target="_blank" rel="noopener noreferrer" href="https://infura.io/">Infura</a> and
+		  <a target="_blank" rel="noopener noreferrer" href="https://www.alchemy.com/">Alchemy</a>
+          <br> Contact:
+          <a target="_blank" rel="noopener noreferrer" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
+          <a target="_blank" rel="noopener noreferrer" href="https://reddit.com/u/deltabalances">Reddit</a>
+          <br>
+          <br> Buy me a beer:
+          <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B"
+            target="_blank" rel="noopener noreferrer">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
+        </p>
+      </div>
+      <div class="col-sm-12 col-md-6">
+        Use a referral:
+        <ul style="list-style-type:none">
+          <li><a target="_blank" rel="noopener noreferrer" href="https://www.binance.com/?ref=10985752">Trade on Binance</a></li>
+        </ul>
+      </div>
     </footer>
 
     <!-- Control Sidebar -->
@@ -576,15 +693,24 @@
               </li>
             </ul>
           </div>
-          <div id="metamaskSection" class="hidden">
-            <h3 class="control-sidebar-heading">Detected Address</h3>
+          <div id="metamaskSection">
+            <h3 class="control-sidebar-heading">Web3 browser</h3>
             <ul class="control-sidebar-menu">
-              <li>
+              <li id="metamask-inactive" class="hidden">
                 <a onclick="loadMetamask()" href="#">
                   <i id="metamaskImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
                   <div class="menu-info">
                     <h4 id="metamaskAddress" class="control-sidebar-subheading">0x12345678</h4>
-                    <p>Metamask</p>
+                    <p>Web3 import</p>
+                  </div>
+                </a>
+              </li>
+              <li class="metamask-import">
+                <a onclick="requestMetamask(true)" href="#">
+                  <i id="metamask-logo-sidebar" class="menu-icon"></i>
+                  <div class="menu-info">
+                    <h4 class="control-sidebar-subheading">Import account</h4>
+                    <p> Injected Web3</p>
                   </div>
                 </a>
               </li>

@@ -6,9 +6,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="View and export Kyber Network trade history.">
   <meta content="width=device-width, initial-scale=1" name="viewport">
+  <link rel="icon" type="image/png" sizes="64x64" href="./favicon-64x64.png?1">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?1">
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?1">
-  <link rel="icon" type="image/png" sizes="64x64" href="./favicon-64x64.png?1">
 
   <title>Delta Balances - Kyber Network</title>
 
@@ -16,27 +16,27 @@
   <link href="css/combinedStyles.css" rel="stylesheet">
 
   <!-- JS  jquery -->
-  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/lib/jquery-3.2.1.min.js"></script>
 
   <!-- JS  datatables -->
-  <script src="js/jquery.dataTables.fixed.min.js"></script>
+  <script src="js/lib/jquery.dataTables.fixed.min.js"></script>
 
   <!-- JS  Bootstrap + adminLTE (menu theme) + blockies ethereum -->
-  <script src="js/bootstrap.adminlte.blockies.min.js" defer></script>
+  <script src="js/lib/bootstrap.adminlte.blockies.min.js" defer></script>
 
   <!-- JS  Token discover / loading -->
-  <script src="backupTokens.js"></script>
-  <script src="loadTokens.js"></script>
+  <script src="js/backupTokens.js"></script>
+  <script src="js/loadTokens.js"></script>
 
   <!-- JS  Main functionality -->
-  <!--  config excluded from bundle -->
-  <script src="configBundle.js"></script>
-  <script src="bundle.min.js"></script>
+  <script src="js/build/bundle.config.min.js"></script>
+  <script src="js/build/bundle.modules.min.js"></script>
+  <script src="js/build/bundle.min.js"></script>
   <script>
     var exchanges = ['Kyber'];
   </script>
-  <script src="user.js"></script>
-  <script src="history.js"></script>
+  <script src="js/user.js"></script>
+  <script src="js/history.js"></script>
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -82,6 +82,7 @@
           <div class="input-group" style="width:100%;">
             <input type="text" id="address" class="form-control custom" placeholder="Ethereum address, transaction hash">
             <span class="input-group-btn">
+			<input type="image" title="Import from web3" id="web3button" class="btn" onClick="requestMetamask(true)" src="css/images/metamask.png"/>
               <button id="refreshButton" onClick="myClick()" class="btn btn-flat">
                 <i id="refreshButtonSearch" class="fa fa-search" aria-hidden="true"></i>
                 <i id="refreshButtonLoading" style="display:none" class="fa fa-refresh fa-spin" aria-hidden="true"></i>
@@ -96,7 +97,7 @@
           <!-- Menu Toggle Button -->
           <a href="#" id="userToggle" class="hidden dropdown-toggle" data-toggle="control-sidebar">
             <!-- The user image in the navbar-->
-            <i id="userImage" class="user-image bg-red" style="width:32px; height:32px;"></i>
+            <i id="userImage" class="user-image bg-red" style="width:32px; height:32px;"><img class="mini-metamask" src="css/images/metamask.png" alt="metamask logo"></i>
             <!-- hidden-xs hides the username on small devices so only the image appears. -->
             <span id="currentAddr2" class="hidden-xs">0x......</span>
           </a>
@@ -243,13 +244,13 @@
         </li>
         <li class="header">Links</li>
         <li>
-          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank">
+          <a href="https://github.com/DeltaBalances/DeltaBalances.github.io" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-github"></i>
             <span>GitHub</span>
           </a>
         </li>
         <li>
-          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank">
+          <a href="https://etherscan.io/address/0xbf320b8336b131e0270295c15478d91741f9fc11#code" target="_blank" rel="noopener noreferrer">
             <i class="fa fa-link"></i>
             <span>Smart contract</span>
           </a>
@@ -296,6 +297,10 @@
                   </ul>
                   <br>
                 </div>
+				<div class="col-md-12 col-lg-8 noPadM">
+				  <h4>Data source</h4>
+					<select style="width:auto; height:30px;" class="form-control" id="apiSelect" onChange="checkApiInput()"></select>
+				</div>
                 <div class="col-md-12 noPadM">
                   <div class="col-md-5 noPad" style="overflow:hidden;">
                     <h4 class="hidden">Operation types</h4>
@@ -351,9 +356,13 @@
                   <div class="col-md-7 noPad" style="overflow:hidden;">
                     <h4>Info</h4>
                     History for
-                    <a href="https://kyber.network/" target="_blank">Kyber Network</a> at contract
-                    <a href="https://etherscan.io/address/0x964f35fae36d75b1e72770e244f6595b68508cf5" target="_blank">0x964f3..</a> and
-                    <a href="https://etherscan.io/address/0x818e6fecd516ecc3849daf6845e3ec868087b755" target="_blank">0x818e6..</a>.
+                    <a href="https://kyber.network/" target="_blank" rel="noopener noreferrer">Kyber Network</a> at contract
+                    <a href="https://etherscan.io/address/0x964f35fae36d75b1e72770e244f6595b68508cf5" target="_blank" rel="noopener noreferrer">0x964f3..</a>,
+					<a href="https://etherscan.io/address/0x91a502c678605fbce581eae053319747482276b9" target="_blank" rel="noopener noreferrer">0x91a50..</a>,
+					<a href="https://etherscan.io/address/0x9ae49c0d7f8f9ef4b864e004fe86ac8294e20950" target="_blank" rel="noopener noreferrer">0x9ae49..</a>,
+					<a href="https://etherscan.io/address/0x65bf64ff5f51272f729bdcd7acfb00677ced86cd" target="_blank" rel="noopener noreferrer">0x65bf6..</a> and 
+					<a href="https://etherscan.io/address/0x818e6fecd516ecc3849daf6845e3ec868087b755" target="_blank" rel="noopener noreferrer">0x818e6..</a>.
+					
                     <br>
                     <br>
 
@@ -367,7 +376,7 @@
                     <br>
                     <br> History starts at block 
                     <span id="minBlockLink"></span>.
-                    <br> Kyber has no trade fees.
+                    <br> Any trade fees on Kyber are integrated in the price.
 
                   </div>
                   <div class="col-md-12 noPad">
@@ -431,17 +440,9 @@
                   <br>
                   <br>
                 </div>
-                <div class="col-md-6 noPadM">
-                  <span class="label label-info">Taker</span> Clicked an existing order.
-                  <br>
+                <div class="col-md-12 noPadM">
+                  <span class="label label-info">Taker</span> Traded an existing order. 
                   <span class="label label-default">Maker</span> Made a new order.
-                  <br>
-                </div>
-                <div class="col-md-6 noPadM">
-                  <span class="label label-success">Buy</span> Traded ETH for Tokens.
-                  <br>
-                  <span class="label label-danger">Sell</span> Traded Tokens for ETH.
-                  <br>
                 </div>
               </div>
               <!-- /.box-body -->
@@ -460,14 +461,14 @@
       <div class="pull-right hidden-xs">
       </div>
       <!-- Default to the left -->
-      <p> Powered by
-        <a target="_blank" href="https://etherscan.io/">Etherscan</a> and
-        <a target="_blank" href="https://infura.io/">Infura</a>
+      <p> History is powered by
+        <a target="_blank" rel="noopener noreferrer" href="https://etherscan.io/">Etherscan</a> and 
+        <a target="_blank" rel="noopener noreferrer" href="https://infura.io/">Infura</a>.
         <br> Contact:
-        <a target="_blank" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
-        <a target="_blank" href="https://reddit.com/u/deltabalances">Reddit</a>
+        <a target="_blank" rel="noopener noreferrer" href="https://github.com/DeltaBalances/DeltaBalances.github.io">GitHub</a> or
+        <a target="_blank" rel="noopener noreferrer" href="https://reddit.com/u/deltabalances">Reddit</a>
         <br> Buy me a beer:
-        <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
+        <a href="https://etherscan.io/address/0xf6E914D07d12636759868a61E52973d17ED7111B" target="_blank" rel="noopener noreferrer">0xf6E914D07d12636759868a61E52973d17ED7111B</a>
       </p>
     </footer>
 
@@ -533,15 +534,24 @@
               </li>
             </ul>
           </div>
-          <div id="metamaskSection" class="hidden">
-            <h3 class="control-sidebar-heading">Detected Address</h3>
+          <div id="metamaskSection">
+            <h3 class="control-sidebar-heading">Web3 browser</h3>
             <ul class="control-sidebar-menu">
-              <li>
+              <li id="metamask-inactive" class="hidden">
                 <a onclick="loadMetamask()" href="#">
                   <i id="metamaskImage" class="menu-icon bg-red" style="width:32px; height:32px;"></i>
                   <div class="menu-info">
                     <h4 id="metamaskAddress" class="control-sidebar-subheading">0x12345678</h4>
-                    <p>Metamask</p>
+                    <p>Web3 import</p>
+                  </div>
+                </a>
+              </li>
+			  <li class="metamask-import">
+                <a onclick="requestMetamask(true)" href="#">
+                  <i id="metamask-logo-sidebar" class="menu-icon" ></i>
+                  <div class="menu-info">
+                    <h4 class="control-sidebar-subheading">Import account</h4>
+					<p> Injected Web3</p>
                   </div>
                 </a>
               </li>
